@@ -1,0 +1,278 @@
+* {
+    margin: 0;
+    /* Đặt lề cho tất cả các phần tử bằng 0 */
+    bottom: 0;
+    /* Đặt khoảng cách phía dưới bằng 0 */
+    box-sizing: border-box;
+    /* Đảm bảo padding và border không làm thay đổi kích thước phần tử */
+    font-family: Arial, Helvetica, sans-serif;
+    /* Đặt font mặc định cho toàn bộ trang */
+}
+
+ul {
+    list-style: none;
+    /* Xóa dấu chấm đầu dòng của danh sách */
+}
+
+a {
+    text-decoration: none;
+    /* Xóa gạch chân mặc định của liên kết */
+}
+
+.container {
+    max-width: 1200px;
+    /* Đặt chiều rộng tối đa cho container là 1200px */
+    margin: auto;
+    /* Căn giữa container */
+}
+
+/* herder */
+
+
+
+
+
+/* ------------------------------------------NAV------------------------------------------------------- */
+/* Đặt CSS cho thanh điều hướng chính */
+#main-nav {
+    background-color: #223665;
+}
+
+.nav-list {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.nav-item a,
+.nav-item {
+    color: white;
+    font-size: 15px;
+}
+
+.nav-item.brand-name a {
+    color: #EA3B3F;
+}
+
+.nav-item.search-bar {
+    position: relative;
+}
+
+.nav-search {
+    height: 30px;
+    width: 100%;
+    border-radius: 5px;
+    border: none;
+    padding-right: 30px;
+    padding-left: 6px;
+    outline: none;
+}
+
+.search-icon {
+    position: absolute;
+    font-size: 15px;
+    right: 12px;
+    color: #333;
+    line-height: 30px;
+    cursor: pointer;
+    top: 0;
+}
+
+.cart-btn {
+    height: 30px;
+    padding: 0 12px;
+    cursor: pointer;
+    background-color: transparent;
+    border: 1px solid wheat;
+    border-radius: 5px;
+    color: #f1f1f1;
+}
+
+.cart-icon {
+    margin-right: 6px;
+}
+
+.cart-btn:hover {
+    background-color: rgb(77, 12, 229);
+}
+
+
+/* ----------------------------------------------------------------Filter---------------------------------------------------- */
+.carousel-item img {
+    width: 100%;
+    /* Đặt chiều rộng của hình ảnh bằng 100% để phù hợp với carousel */
+    height: 250px;
+    /* Đặt chiều cao cố định cho hình ảnh */
+    object-fit: cover;
+    /* Đảm bảo hình ảnh bao phủ toàn bộ vùng carousel mà không bị biến dạng */
+}
+
+
+/* Đặt toàn bộ kiểu cho list-group */
+.list-group {
+    max-width: 100%;
+    margin: 20px auto;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background-color: #f9f9f9;
+}
+
+/* Tiêu đề của danh sách */
+.list-group h5.list-group-item {
+    background-color: #223665;
+    color: white;
+    font-weight: bold;
+    text-align: center;
+    border-bottom: 2px solid #ddd;
+    border-radius: 8px 8px 0 0;
+    margin: 0;
+    padding: 10px 15px;
+}
+
+/* Các mục danh sách */
+.list-group-item {
+    padding: 10px 15px;
+    color: #333;
+    text-decoration: none;
+    border-bottom: 1px solid #ddd;
+    transition: background-color 0.3s ease;
+}
+
+/* Khi di chuột qua mục danh sách */
+.list-group-item:hover {
+    background-color: #f1f1f1;
+    color: red;
+}
+
+/* Đặt phong cách cho các mục được chọn (giả sử có class active) */
+.list-group-item.active {
+    background-color: #223665;
+    color: white;
+    font-weight: bold;
+}
+
+/*----------------------------------------------------Product----------------------------------------- */
+
+/* Tùy chỉnh cho thẻ sản phẩm (card) */
+.card {
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    overflow: hidden;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* Hiệu ứng khi di chuột qua sản phẩm */
+.card:hover {
+    transform: scale(1.05);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* Hình ảnh sản phẩm */
+.card-img-top {
+    width: 100%;
+    height: auto;
+    object-fit: cover;
+}
+
+/* Tiêu đề sản phẩm */
+.card-title {
+    font-size: 16px;
+    font-weight: bold;
+    margin-bottom: 10px;
+    color: #333;
+}
+
+/* Giá sản phẩm */
+.card-text {
+    font-size: 14px;
+    color: #ff5722;
+    font-weight: bold;
+}
+
+/* Nút mua hàng */
+.btn-primary {
+    background-color: #007bff;
+    border-color: #007bff;
+    color: #fff;
+    width: 100%;
+    padding: 8px;
+    border-radius: 20px;
+    transition: background-color 0.3s ease;
+}
+
+/* Hiệu ứng khi di chuột qua nút mua ngay */
+.btn-primary:hover {
+    background-color: #0056b3;
+}
+
+/* Nút "Hết Hàng" */
+.btn-secondary {
+    background-color: #6c757d;
+    border-color: #6c757d;
+    color: #fff;
+    width: 100%;
+    padding: 8px;
+    border-radius: 20px;
+}
+
+/* Định dạng chung */
+.card-body {
+    text-align: center;
+    padding: 15px;
+}
+
+/* Thêm khoảng cách giữa các cột sản phẩm */
+.col-md-3 {
+    margin-bottom: 30px;
+}
+
+/*--------------------------------Footer---------------------------------------*/
+.footer {
+    background-color: black;
+    /* Màu nền của footer */
+    color: white;
+    padding: 20px 0;
+}
+
+.footer-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    width: 90%;
+    margin: 0 auto;
+}
+
+.footer-container h4 {
+    margin-bottom: 15px;
+}
+
+.footer-container ul {
+    list-style-type: none;
+    padding: 0;
+    margin-bottom: 20px;
+}
+
+.footer-container li {
+    margin-bottom: 10px;
+}
+
+.footer-social-icons {
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+    margin-bottom: 20px;
+}
+
+.footer-social-icons img {
+    width: 30px;
+    height: 30px;
+}
+
+.footer-bottom {
+    background-color: #223665;
+    /* Màu của phần dưới */
+    padding: 5px 5px;
+    text-align: center;
+    color: white;
+}
