@@ -1,6 +1,7 @@
 package shop.config;
 
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
 import shop.domain.Role;
@@ -8,6 +9,7 @@ import shop.domain.RoleName;
 import shop.repository.RoleRepository;
 
 @Component
+@Order(1)
 public class RoleDataInitializer implements CommandLineRunner {
 
     private final RoleRepository roleRepository;
