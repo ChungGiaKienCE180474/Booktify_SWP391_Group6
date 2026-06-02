@@ -81,7 +81,7 @@ private UserService userService;
                                                                 "/js/**", "/images/**", "/forgotpassword",
                                                                 "/authentication/**")
                                                 .permitAll()
-                                                .requestMatchers("/changepass").authenticated()
+                                                .requestMatchers("/changepass", "/profile").authenticated()
                                                 .anyRequest().authenticated())
                                 .sessionManagement(sessionManagement -> sessionManagement
                                                 .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
