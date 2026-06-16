@@ -16,9 +16,9 @@
             <i class="fa-solid fa-list"></i>
             Categories
         </a>
-        <a href="#" class="admin-sidebar__item">
+        <a href="/admin/books" class="admin-sidebar__item ${fn:contains(pageContext.request.requestURI, '/admin/books') ? 'active' : ''}">
             <i class="fa-solid fa-book"></i>
-            Products
+            Books / Products
         </a>
         <a href="#" class="admin-sidebar__item">
             <i class="fa-solid fa-users"></i>

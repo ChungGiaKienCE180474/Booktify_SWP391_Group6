@@ -34,9 +34,13 @@
                     <span>Active categories</span>
                     <strong>${activeCategories}</strong>
                 </article>
-                <article class="admin-card admin-card--muted">
-                    <span>Roles</span>
-                    <strong>Guest / Customer / Staff / Admin</strong>
+                <article class="admin-card">
+                    <span>Total books</span>
+                    <strong>${totalBooks}</strong>
+                </article>
+                <article class="admin-card">
+                    <span>Active books</span>
+                    <strong>${activeBooks}</strong>
                 </article>
             </div>
 
@@ -45,6 +49,8 @@
                 <div class="admin-actions">
                     <a href="/admin/categories/create" class="admin-action">Create category</a>
                     <a href="/admin/categories" class="admin-action admin-action--secondary">Browse categories</a>
+                    <a href="/admin/books/create" class="admin-action">Create book</a>
+                    <a href="/admin/books" class="admin-action admin-action--secondary">Browse books</a>
                 </div>
             </div>
         </section>

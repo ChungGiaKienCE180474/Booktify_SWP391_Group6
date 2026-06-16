@@ -9,6 +9,8 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import jakarta.validation.Valid;
 import shop.domain.Category;
@@ -26,8 +28,9 @@ public class CategoryController {
     }
 
     @GetMapping
-    public String list(Model model) {
-        model.addAttribute("categories", categoryService.getAllCategories());
+    public String list(@RequestParam(required = false) String q, Model model) {
+        model.addAttribute("categories", categoryService.searchCategories(q));
+        model.addAttribute("q", q);
         return "admin/category/list";
     }
 
@@ -39,19 +42,18 @@ public class CategoryController {
     }
 
     @PostMapping
-    public String create(@ModelAttribute("category") @Valid Category category, BindingResult bindingResult,
-            Model model) {
+    public String create(@ModelAttribute("category") @Valid Category category,
+            BindingResult bindingResult, Model model, RedirectAttributes redirectAttributes) {
         if (categoryService.existsByNameIgnoreCase(category.getName())) {
             bindingResult.rejectValue("name", "category.exists", "Category name already exists");
         }
-
         if (bindingResult.hasErrors()) {
             model.addAttribute("formMode", "create");
             return "admin/category/form";
         }
-
         categoryService.saveCategory(category);
-        return "redirect:/admin/categories?created";
+        redirectAttributes.addFlashAttribute("successMessage", "Category created successfully.");
+        return "redirect:/admin/categories";
     }
 
     @GetMapping("/{id}/edit")
@@ -64,31 +66,40 @@ public class CategoryController {
     }
 
     @PostMapping("/{id}")
-    public String update(@PathVariable Long id, @ModelAttribute("category") @Valid Category category,
-            BindingResult bindingResult, Model model) {
-        Category existingCategory = categoryService.getCategoryById(id)
+    public String update(@PathVariable Long id,
+            @ModelAttribute("category") @Valid Category category,
+            BindingResult bindingResult, Model model, RedirectAttributes redirectAttributes) {
+        Category existing = categoryService.getCategoryById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Category not found"));
 
-        if (!existingCategory.getName().equalsIgnoreCase(category.getName())
+        if (!existing.getName().equalsIgnoreCase(category.getName())
                 && categoryService.existsByNameIgnoreCase(category.getName())) {
             bindingResult.rejectValue("name", "category.exists", "Category name already exists");
         }
-
         if (bindingResult.hasErrors()) {
             model.addAttribute("formMode", "edit");
             return "admin/category/form";
         }
 
-        existingCategory.setName(category.getName());
-        existingCategory.setDescription(category.getDescription());
-        existingCategory.setActive(category.isActive());
-        categoryService.saveCategory(existingCategory);
-        return "redirect:/admin/categories?updated";
+        existing.setName(category.getName());
+        existing.setDescription(category.getDescription());
+        existing.setActive(category.isActive());
+        categoryService.saveCategory(existing);
+        redirectAttributes.addFlashAttribute("successMessage", "Category updated successfully.");
+        return "redirect:/admin/categories";
     }
 
     @PostMapping("/{id}/delete")
-    public String delete(@PathVariable Long id) {
-        categoryService.deleteCategory(id);
-        return "redirect:/admin/categories?deleted";
+    public String delete(@PathVariable Long id, RedirectAttributes redirectAttributes) {
+        try {
+            categoryService.deleteCategory(id);
+            redirectAttributes.addFlashAttribute("successMessage", "Category deleted successfully.");
+        } catch (IllegalStateException e) {
+            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage",
+                    "An unexpected error occurred while deleting the category.");
+        }
+        return "redirect:/admin/categories";
     }
 }
