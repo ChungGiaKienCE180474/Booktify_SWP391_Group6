@@ -4,21 +4,33 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import shop.domain.Category;
+import shop.repository.BookRepository;
 import shop.repository.CategoryRepository;
 
 @Service
 public class CategoryService {
 
     private final CategoryRepository categoryRepository;
+    private final BookRepository bookRepository;
 
-    public CategoryService(CategoryRepository categoryRepository) {
+    public CategoryService(CategoryRepository categoryRepository, BookRepository bookRepository) {
         this.categoryRepository = categoryRepository;
+        this.bookRepository = bookRepository;
     }
 
     public List<Category> getAllCategories() {
-        return categoryRepository.findAllByOrderByIdDesc();
+        return categoryRepository.findAllByOrderByIdAsc();
+    }
+
+    public List<Category> searchCategories(String q) {
+        if (!StringUtils.hasText(q)) {
+            return getAllCategories();
+        }
+        return categoryRepository
+                .findByNameContainingIgnoreCaseOrDescriptionContainingIgnoreCaseOrderByIdAsc(q, q);
     }
 
     public Optional<Category> getCategoryById(Long id) {
@@ -30,6 +42,10 @@ public class CategoryService {
     }
 
     public void deleteCategory(Long id) {
+        if (bookRepository.existsByCategoryId(id)) {
+            throw new IllegalStateException(
+                    "Cannot delete this category because it still contains books.");
+        }
         categoryRepository.deleteById(id);
     }
 

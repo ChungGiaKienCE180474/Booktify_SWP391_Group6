@@ -1,125 +1,226 @@
-﻿<%@page contentType="text/html" pageEncoding="UTF-8" %>
+<%@page contentType="text/html" pageEncoding="UTF-8" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <!DOCTYPE html>
-<html lang="en">
-
+<html lang="vi">
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="Booktify - Shop books online and explore the world of knowledge" />
+    <meta name="description" content="Booktify — Nhà sách trực tuyến hàng đầu Việt Nam" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" />
     <link rel="stylesheet" href="/css/header.css" />
     <link rel="stylesheet" href="/css/footer.css" />
     <link rel="stylesheet" href="/css/homepage.css" />
-    <title>Booktify - Home</title>
+    <title>Booktify — Nhà sách trực tuyến</title>
 </head>
-
 <body class="home-page">
-
     <jsp:include page="/WEB-INF/view/layout/header.jsp" />
 
     <main class="main-content">
 
-        <section class="hero">
-            <div class="hero-inner">
-                <div class="hero-text">
-                    <h1>Explore the World of Books with Booktify</h1>
-                    <p>Thousands of titles from literature and business to self-help — fast delivery, great prices, and a simple shopping experience.</p>
-                    <div class="hero-actions">
-                        <c:choose>
-                            <c:when test="${not empty username}">
-                                <a href="#" class="btn-hero btn-hero-primary">Browse Books</a>
-                            </c:when>
-                            <c:otherwise>
-                                <a href="/register" class="btn-hero btn-hero-primary">Get Started</a>
-                                <a href="/login" class="btn-hero btn-hero-secondary">Sign In</a>
-                            </c:otherwise>
-                        </c:choose>
+        <%-- ═══ BANNER ═══ --%>
+        <section class="banner">
+            <div class="banner-inner">
+                <div class="banner-text">
+                    <div class="banner-badge">
+                        <i class="fa-solid fa-star"></i> Nhà sách trực tuyến hàng đầu
+                    </div>
+                    <h1 class="banner-title">Khám phá thế giới tri thức qua từng trang sách</h1>
+                    <p class="banner-sub">Hàng nghìn đầu sách đa thể loại — văn học, kinh doanh, khoa học, kỹ năng sống và hơn thế nữa. Giao hàng nhanh, giá tốt nhất.</p>
+                    <div class="banner-actions">
+                        <a href="/books" class="btn-banner btn-banner-primary">
+                            <i class="fa-solid fa-book-open"></i> Mua sách ngay
+                        </a>
+                        <c:if test="${empty sessionScope.username}">
+                            <a href="/register" class="btn-banner btn-banner-outline">
+                                <i class="fa-solid fa-user-plus"></i> Đăng ký miễn phí
+                            </a>
+                        </c:if>
                     </div>
                 </div>
-                <div class="hero-visual">
-                    <div class="hero-books">
-                        <div class="book-card-visual">
-                            <i class="fa-solid fa-book"></i>
-                            <span>Literature</span>
+                <div class="banner-visual">
+                    <div class="banner-books">
+                        <div class="banner-book-tile">
+                            <i class="fa-solid fa-feather-pointed"></i>
+                            <span>Văn học</span>
                         </div>
-                        <div class="book-card-visual">
+                        <div class="banner-book-tile">
                             <i class="fa-solid fa-chart-line"></i>
-                            <span>Business</span>
+                            <span>Kinh doanh</span>
                         </div>
-                        <div class="book-card-visual">
-                            <i class="fa-solid fa-child"></i>
-                            <span>Children</span>
+                        <div class="banner-book-tile">
+                            <i class="fa-solid fa-flask"></i>
+                            <span>Khoa học</span>
                         </div>
                     </div>
                 </div>
             </div>
         </section>
 
-        <section class="section">
-            <div class="section-header">
-                <h2>Featured Categories</h2>
-                <p>Choose your favorite genre</p>
+        <%-- ═══ DANH MỤC NỔI BẬT ═══ --%>
+        <c:if test="${not empty categories}">
+        <div class="section" style="padding-bottom:.5rem;">
+            <div class="sec-head">
+                <div class="sec-head__left">
+                    <div class="sec-head__icon"><i class="fa-solid fa-layer-group"></i></div>
+                    <h2 class="sec-head__title">Danh mục nổi bật</h2>
+                </div>
+                <a href="/books" class="sec-head__link">Xem tất cả <i class="fa-solid fa-chevron-right"></i></a>
             </div>
-            <div class="category-grid">
-                <a href="#" class="category-card">
-                    <i class="fa-solid fa-feather-pointed"></i>
-                    <h3>Literature</h3>
-                </a>
-                <a href="#" class="category-card">
-                    <i class="fa-solid fa-briefcase"></i>
-                    <h3>Business</h3>
-                </a>
-                <a href="#" class="category-card">
-                    <i class="fa-solid fa-children"></i>
-                    <h3>Children</h3>
-                </a>
-                <a href="#" class="category-card">
-                    <i class="fa-solid fa-lightbulb"></i>
-                    <h3>Self-Help</h3>
-                </a>
-                <a href="#" class="category-card">
-                    <i class="fa-solid fa-flask"></i>
-                    <h3>Science</h3>
-                </a>
-                <a href="#" class="category-card">
-                    <i class="fa-solid fa-language"></i>
-                    <h3>Languages</h3>
-                </a>
+            <div class="cat-grid">
+                <c:forEach items="${categories}" var="cat">
+                    <c:if test="${cat.active}">
+                        <a href="/books?categoryId=${cat.id}" class="cat-card">
+                            <div class="cat-card__icon"><i class="fa-solid fa-book-open"></i></div>
+                            <span class="cat-card__name">${cat.name}</span>
+                        </a>
+                    </c:if>
+                </c:forEach>
             </div>
-        </section>
+        </div>
+        </c:if>
 
-        <section class="section" style="padding-top: 0;">
-            <div class="section-header">
-                <h2>Why Choose Booktify?</h2>
-                <p>A trusted online book shopping experience</p>
+        <%-- ═══ SÁCH BÁN CHẠY ═══ --%>
+        <c:if test="${not empty featuredBooks}">
+        <div class="section">
+            <div class="sec-head">
+                <div class="sec-head__left">
+                    <div class="sec-head__icon" style="background:var(--accent-red,#E53935);">
+                        <i class="fa-solid fa-fire"></i>
+                    </div>
+                    <h2 class="sec-head__title" style="color:var(--accent-red,#E53935);">Sách bán chạy</h2>
+                </div>
+                <a href="/books" class="sec-head__link">Xem tất cả <i class="fa-solid fa-chevron-right"></i></a>
             </div>
-            <div class="features-grid">
-                <article class="feature-card">
-                    <div class="feature-icon"><i class="fa-solid fa-truck-fast"></i></div>
-                    <h3>Fast Delivery</h3>
-                    <p>Orders are processed and shipped quickly nationwide.</p>
-                </article>
-                <article class="feature-card">
-                    <div class="feature-icon"><i class="fa-solid fa-shield-halved"></i></div>
-                    <h3>Secure Payments</h3>
-                    <p>Your information is protected with convenient payment options.</p>
-                </article>
-                <article class="feature-card">
-                    <div class="feature-icon"><i class="fa-solid fa-rotate-left"></i></div>
-                    <h3>Easy Returns</h3>
-                    <p>Flexible return policy if books do not match the description.</p>
-                </article>
+            <div class="book-grid">
+                <c:forEach items="${featuredBooks}" var="book" end="9">
+                    <a href="/books/${book.id}" class="book-card">
+                        <div class="book-card__thumb">
+                            <c:choose>
+                                <c:when test="${not empty book.imageUrl}">
+                                    <img src="${book.imageUrl}" alt="${book.title}" />
+                                </c:when>
+                                <c:otherwise>
+                                    <div class="book-card__no-img">
+                                        <i class="fa-solid fa-book"></i>
+                                        <span>No cover</span>
+                                    </div>
+                                </c:otherwise>
+                            </c:choose>
+                            <c:if test="${not empty book.category}">
+                                <span class="book-card__badge book-card__badge--cat">${book.category.name}</span>
+                            </c:if>
+                        </div>
+                        <div class="book-card__body">
+                            <div class="book-card__title">${book.title}</div>
+                            <div class="book-card__author">${book.author}</div>
+                            <div class="book-card__footer">
+                                <span class="book-card__price">${book.price}</span>
+                                <span class="book-card__detail-btn">Chi tiết</span>
+                            </div>
+                        </div>
+                    </a>
+                </c:forEach>
+            </div>
+        </div>
+        </c:if>
+
+        <%-- ═══ SÁCH MỚI ═══ (same list, different heading + offset) --%>
+        <c:if test="${not empty featuredBooks}">
+        <div class="section" style="padding-top:0;">
+            <div class="sec-head">
+                <div class="sec-head__left">
+                    <div class="sec-head__icon" style="background:var(--accent-warm,#F57C00);">
+                        <i class="fa-solid fa-bolt"></i>
+                    </div>
+                    <h2 class="sec-head__title" style="color:var(--accent-warm,#F57C00);">Sách mới nhất</h2>
+                </div>
+                <a href="/books" class="sec-head__link">Xem tất cả <i class="fa-solid fa-chevron-right"></i></a>
+            </div>
+            <div class="book-grid">
+                <c:forEach items="${featuredBooks}" var="book" begin="0" end="4">
+                    <a href="/books/${book.id}" class="book-card">
+                        <div class="book-card__thumb">
+                            <c:choose>
+                                <c:when test="${not empty book.imageUrl}">
+                                    <img src="${book.imageUrl}" alt="${book.title}" />
+                                </c:when>
+                                <c:otherwise>
+                                    <div class="book-card__no-img">
+                                        <i class="fa-solid fa-book"></i>
+                                        <span>No cover</span>
+                                    </div>
+                                </c:otherwise>
+                            </c:choose>
+                            <span class="book-card__badge" style="background:var(--accent-warm,#F57C00);">MỚI</span>
+                        </div>
+                        <div class="book-card__body">
+                            <c:if test="${not empty book.category}">
+                                <div class="book-card__cat">${book.category.name}</div>
+                            </c:if>
+                            <div class="book-card__title">${book.title}</div>
+                            <div class="book-card__author">${book.author}</div>
+                            <div class="book-card__footer">
+                                <span class="book-card__price">${book.price}</span>
+                                <span class="book-card__detail-btn">Chi tiết</span>
+                            </div>
+                        </div>
+                    </a>
+                </c:forEach>
+            </div>
+        </div>
+        </c:if>
+
+        <%-- ═══ TẠI SAO CHỌN BOOKTIFY ═══ --%>
+        <div class="section" style="padding-top:0;">
+            <div class="sec-head" style="margin-bottom:1.5rem;">
+                <div class="sec-head__left">
+                    <div class="sec-head__icon"><i class="fa-solid fa-shield-halved"></i></div>
+                    <h2 class="sec-head__title">Tại sao chọn Booktify?</h2>
+                </div>
+            </div>
+            <div class="why-grid">
+                <div class="why-card">
+                    <div class="why-card__icon"><i class="fa-solid fa-truck-fast"></i></div>
+                    <div class="why-card__text">
+                        <h4>Giao hàng nhanh</h4>
+                        <p>Đơn hàng được xử lý và giao đến tay bạn nhanh chóng trên toàn quốc.</p>
+                    </div>
+                </div>
+                <div class="why-card">
+                    <div class="why-card__icon"><i class="fa-solid fa-shield-halved"></i></div>
+                    <div class="why-card__text">
+                        <h4>Thanh toán an toàn</h4>
+                        <p>Thông tin được bảo mật bằng mã hóa tiêu chuẩn ngành.</p>
+                    </div>
+                </div>
+                <div class="why-card">
+                    <div class="why-card__icon"><i class="fa-solid fa-rotate-left"></i></div>
+                    <div class="why-card__text">
+                        <h4>Đổi trả dễ dàng</h4>
+                        <p>Chính sách hoàn trả linh hoạt nếu sách không đúng mô tả.</p>
+                    </div>
+                </div>
+                <div class="why-card">
+                    <div class="why-card__icon"><i class="fa-solid fa-headset"></i></div>
+                    <div class="why-card__text">
+                        <h4>Hỗ trợ 24/7</h4>
+                        <p>Đội ngũ chăm sóc khách hàng luôn sẵn sàng hỗ trợ bạn.</p>
+                    </div>
+                </div>
             </div>
 
-            <c:if test="${empty username}">
-                <div class="cta-banner">
-                    <h2>Join Booktify Today</h2>
-                    <p>Create an account to unlock deals and track your orders with ease.</p>
-                    <a href="/register" class="btn-hero btn-hero-primary">Sign Up for Free</a>
+            <c:if test="${empty sessionScope.username}">
+                <div class="cta-strip" style="margin-top:2rem;">
+                    <div class="cta-strip__text">
+                        <h3>Tham gia Booktify ngay hôm nay</h3>
+                        <p>Tạo tài khoản miễn phí để theo dõi đơn hàng và nhận ưu đãi đặc biệt.</p>
+                    </div>
+                    <a href="/register" class="cta-strip__btn">
+                        <i class="fa-solid fa-user-plus"></i> Đăng ký miễn phí
+                    </a>
                 </div>
             </c:if>
-        </section>
+        </div>
 
     </main>
 
@@ -131,5 +232,4 @@
         });
     </script>
 </body>
-
 </html>
