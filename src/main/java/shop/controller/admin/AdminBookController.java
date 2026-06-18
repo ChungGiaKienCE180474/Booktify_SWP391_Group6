@@ -54,15 +54,17 @@ public class AdminBookController {
         if (StringUtils.hasText(book.getIsbn()) && bookService.existsByIsbnIgnoreCase(book.getIsbn())) {
             bindingResult.rejectValue("isbn", "book.isbn.exists", "ISBN already exists");
         }
-        if (bindingResult.hasErrors()) {
+        boolean categoryMissing = (categoryId == null);
+        if (categoryMissing) {
+            model.addAttribute("categoryError", "Please select a category before saving the book.");
+        }
+        if (bindingResult.hasErrors() || categoryMissing) {
             model.addAttribute("categories", categoryService.getAllCategories());
             model.addAttribute("formMode", "create");
             return "admin/book/form";
         }
 
-        if (categoryId != null) {
-            categoryService.getCategoryById(categoryId).ifPresent(book::setCategory);
-        }
+        categoryService.getCategoryById(categoryId).ifPresent(book::setCategory);
         if (!StringUtils.hasText(book.getIsbn())) {
             book.setIsbn(null);
         }
@@ -96,7 +98,11 @@ public class AdminBookController {
         if (isbnChanged && bookService.existsByIsbnIgnoreCase(book.getIsbn())) {
             bindingResult.rejectValue("isbn", "book.isbn.exists", "ISBN already exists");
         }
-        if (bindingResult.hasErrors()) {
+        boolean categoryMissing = (categoryId == null);
+        if (categoryMissing) {
+            model.addAttribute("categoryError", "Please select a category before saving the book.");
+        }
+        if (bindingResult.hasErrors() || categoryMissing) {
             model.addAttribute("categories", categoryService.getAllCategories());
             model.addAttribute("formMode", "edit");
             return "admin/book/form";
@@ -110,9 +116,7 @@ public class AdminBookController {
         existing.setStockQuantity(book.getStockQuantity());
         existing.setImageUrl(book.getImageUrl());
         existing.setActive(book.isActive());
-        existing.setCategory(categoryId != null
-                ? categoryService.getCategoryById(categoryId).orElse(null)
-                : null);
+        existing.setCategory(categoryService.getCategoryById(categoryId).orElse(null));
 
         bookService.saveBook(existing);
         redirectAttributes.addFlashAttribute("successMessage", "Book updated successfully.");

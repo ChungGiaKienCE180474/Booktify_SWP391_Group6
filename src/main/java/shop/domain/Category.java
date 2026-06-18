@@ -1,6 +1,7 @@
 package shop.domain;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -93,6 +94,10 @@ public class Category {
 
     public LocalDateTime getUpdatedAt() {
         return updatedAt;
+    }
+
+    public String getUpdatedAtString() {
+        return updatedAt == null ? "" : updatedAt.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"));
     }
 
     public void setUpdatedAt(LocalDateTime updatedAt) {

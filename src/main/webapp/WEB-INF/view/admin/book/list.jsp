@@ -1,6 +1,5 @@
 <%@ page contentType="text/html" pageEncoding="UTF-8" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
-<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -8,7 +7,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" />
     <link rel="stylesheet" href="/css/admin-dashboard.css" />
-    <title>Book Management</title>
+    <title>Books — Booktify Admin</title>
+    <style>
+        .cat-badge {
+            display:inline-flex; align-items:center; gap:4px;
+            background:#EFF6FF; border:1px solid #BFDBFE;
+            color:#2563EB; padding:3px 10px; border-radius:999px;
+            font-size:.72rem; font-weight:700;
+        }
+        .isbn-tag {
+            font-size:.72rem; color:#9CA3AF; margin-top:2px;
+        }
+    </style>
 </head>
 <body class="admin-shell">
     <jsp:include page="/WEB-INF/view/layout/admin/sidebar.jsp" />
@@ -17,76 +27,96 @@
         <jsp:include page="/WEB-INF/view/layout/admin/header.jsp" />
 
         <section class="admin-content">
+
+            <%-- Page Header --%>
             <div class="admin-toolbar">
                 <div>
-                    <p class="admin-kicker">CRUD book</p>
+                    <p class="admin-kicker"><i class="fa-solid fa-book"></i> Book Management</p>
                     <h2>Books</h2>
                 </div>
-                <a href="/admin/books/create" class="admin-button" style="cursor:pointer;">
-                    <i class="fa-solid fa-plus"></i> New book
+                <a href="/admin/books/create" class="admin-button">
+                    <i class="fa-solid fa-plus"></i> New Book
                 </a>
             </div>
 
-            <%-- Search bar --%>
-            <div class="admin-panel" style="padding:16px 24px;">
+            <%-- Search --%>
+            <div class="admin-panel" style="padding:14px 22px;">
                 <form method="get" action="/admin/books" class="admin-search-form">
-                    <input type="text" name="q" value="<c:out value='${q}'/>"
-                           placeholder="Search by title, author, ISBN or category…"
-                           class="admin-input" style="max-width:420px;" />
-                    <button type="submit" class="admin-button" style="cursor:pointer;">
+                    <div style="position:relative;flex:1;max-width:440px;">
+                        <i class="fa-solid fa-magnifying-glass"
+                           style="position:absolute;left:13px;top:50%;transform:translateY(-50%);color:#9CA3AF;font-size:.82rem;pointer-events:none;"></i>
+                        <input type="text" name="q" value="<c:out value='${q}'/>"
+                               placeholder="Search by title, author, ISBN or category…"
+                               class="admin-input" style="padding-left:38px;" />
+                    </div>
+                    <button type="submit" class="admin-button">
                         <i class="fa-solid fa-magnifying-glass"></i> Search
                     </button>
                     <c:if test="${not empty q}">
-                        <a href="/admin/books" class="admin-button admin-button--ghost" style="cursor:pointer;">Clear</a>
+                        <a href="/admin/books" class="admin-button admin-button--ghost">
+                            <i class="fa-solid fa-xmark"></i> Clear
+                        </a>
                     </c:if>
                 </form>
             </div>
 
+            <%-- Table --%>
             <div class="admin-table-wrap">
                 <table class="admin-table">
                     <thead>
                         <tr>
-                            <th>#</th>
-                            <th>Title</th>
+                            <th style="width:48px;">#</th>
+                            <th>Title / ISBN</th>
                             <th>Author</th>
-                            <th>ISBN</th>
                             <th>Category</th>
                             <th>Price</th>
                             <th>Stock</th>
                             <th>Status</th>
                             <th>Updated</th>
-                            <th>Actions</th>
+                            <th style="width:116px;">Actions</th>
                         </tr>
                     </thead>
                     <tbody>
                         <c:forEach items="${books}" var="book" varStatus="vs">
-                            <%-- FIX 1: store all data-* on the button; no raw EL inside JS strings --%>
                             <tr>
-                                <td>${vs.index + 1}</td>
-                                <%-- FIX 4: escape HTML to prevent XSS --%>
-                                <td><c:out value="${book.title}"/></td>
-                                <td><c:out value="${book.author}"/></td>
-                                <td><c:out value="${book.isbn}" default="—"/></td>
+                                <td style="color:#9CA3AF;font-weight:600;">${vs.index + 1}</td>
+                                <td>
+                                    <div style="font-weight:600;color:#111827;">
+                                        <c:out value="${book.title}"/>
+                                    </div>
+                                    <c:if test="${not empty book.isbn}">
+                                        <div class="isbn-tag">ISBN: <c:out value="${book.isbn}"/></div>
+                                    </c:if>
+                                </td>
+                                <td style="color:#374151;"><c:out value="${book.author}"/></td>
                                 <td>
                                     <c:choose>
-                                        <c:when test="${not empty book.category}"><c:out value="${book.category.name}"/></c:when>
-                                        <c:otherwise>—</c:otherwise>
+                                        <c:when test="${not empty book.category}">
+                                            <span class="cat-badge">
+                                                <i class="fa-solid fa-tag" style="font-size:.6rem;"></i>
+                                                <c:out value="${book.category.name}"/>
+                                            </span>
+                                        </c:when>
+                                        <c:otherwise><span style="color:#9CA3AF;">—</span></c:otherwise>
                                     </c:choose>
                                 </td>
-                                <td><c:out value="${book.price}"/></td>
-                                <td>${book.stockQuantity}</td>
+                                <td style="font-weight:700;color:#111827;">
+                                    <c:out value="${book.price}"/>
+                                </td>
+                                <td style="color:#374151;">${book.stockQuantity}</td>
                                 <td>
                                     <span class="status-pill ${book.active ? 'status-pill--on' : 'status-pill--off'}">
+                                        <i class="fa-solid ${book.active ? 'fa-circle-check' : 'fa-circle-xmark'}"
+                                           style="font-size:.6rem;"></i>
                                         ${book.active ? 'Active' : 'Inactive'}
                                     </span>
                                 </td>
-                                <%-- FIX 3: format LocalDateTime as yyyy-MM-dd HH:mm --%>
-                                <td>
+                                <td style="font-size:.8rem;color:#6B7280;">
                                     <c:out value="${book.updatedAtString}" default="—"/>
                                 </td>
                                 <td class="admin-table__actions">
-                                    <%-- FIX 1: use data-* attributes instead of inline JS string args --%>
-                                    <button type="button" class="icon-link js-view-book" style="cursor:pointer;"
+                                    <%-- View --%>
+                                    <button type="button" class="icon-link js-view-book" title="View details"
                                             data-title="<c:out value='${book.title}'/>"
                                             data-author="<c:out value='${book.author}'/>"
                                             data-isbn="<c:out value='${book.isbn}'/>"
@@ -99,37 +129,68 @@
                                         <i class="fa-solid fa-eye"></i>
                                     </button>
                                     <%-- Edit --%>
-                                    <a href="/admin/books/${book.id}/edit" class="icon-link" style="cursor:pointer;">
+                                    <a href="/admin/books/${book.id}/edit" class="icon-link icon-link--edit" title="Edit">
                                         <i class="fa-solid fa-pen"></i>
                                     </a>
                                     <%-- Delete --%>
-                                    <form action="/admin/books/${book.id}/delete" method="post" class="inline-form"
-                                          onsubmit="return confirm('Deactivate this book?');">
-                                        <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}" />
-                                        <button type="submit" class="icon-link icon-link--danger" style="cursor:pointer;">
-                                            <i class="fa-solid fa-trash"></i>
-                                        </button>
-                                    </form>
+                                    <button type="button" class="icon-link icon-link--danger" title="Delete"
+                                            onclick="openDeleteModal('/admin/books/${book.id}/delete','Are you sure you want to delete this book?')">
+                                        <i class="fa-solid fa-trash"></i>
+                                    </button>
                                 </td>
                             </tr>
                         </c:forEach>
                         <c:if test="${empty books}">
-                            <tr><td colspan="10" style="text-align:center;color:var(--admin-muted);padding:2rem;">
-                                No books found.
-                            </td></tr>
+                            <tr>
+                                <td colspan="9" style="text-align:center;padding:56px 20px;color:#9CA3AF;">
+                                    <i class="fa-solid fa-book-open"
+                                       style="font-size:2.2rem;display:block;margin-bottom:10px;opacity:.3;"></i>
+                                    No books found.
+                                </td>
+                            </tr>
                         </c:if>
                     </tbody>
                 </table>
             </div>
+
         </section>
     </main>
+
+    <%-- Delete Confirmation Modal --%>
+    <div id="deleteModal" class="modal-overlay" style="display:none;">
+        <div class="modal-box" style="max-width:420px;" onclick="event.stopPropagation()">
+            <div class="modal-header">
+                <h3>
+                    <i class="fa-solid fa-circle-exclamation" style="color:#EF4444;"></i>
+                    Confirm Delete
+                </h3>
+            </div>
+            <div class="modal-body" style="display:block;">
+                <p id="deleteModalMsg" style="margin:0;font-size:.9rem;color:#374151;line-height:1.65;"></p>
+                <p style="margin:10px 0 0;font-size:.8rem;color:#9CA3AF;">
+                    This action cannot be undone.
+                </p>
+            </div>
+            <div class="modal-footer">
+                <button onclick="closeDeleteModal()" class="admin-button admin-button--ghost">
+                    <i class="fa-solid fa-xmark"></i> Cancel
+                </button>
+                <form id="deleteForm" method="post" style="display:inline;">
+                    <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}" />
+                    <button type="submit" class="admin-button admin-button--danger">
+                        <i class="fa-solid fa-trash"></i> Delete
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
 
     <%-- View Detail Modal --%>
     <div id="bookModal" class="modal-overlay" style="display:none;" onclick="closeModal('bookModal')">
         <div class="modal-box" onclick="event.stopPropagation()">
             <div class="modal-header">
-                <h3><i class="fa-solid fa-book"></i> Book Details</h3>
-                <button class="modal-close" onclick="closeModal('bookModal')" style="cursor:pointer;">
+                <h3><i class="fa-solid fa-book" style="color:#2563EB;"></i> Book Details</h3>
+                <button class="modal-close" onclick="closeModal('bookModal')">
                     <i class="fa-solid fa-xmark"></i>
                 </button>
             </div>
@@ -142,12 +203,12 @@
                 <div class="modal-row"><span class="modal-label">Stock</span><span id="mBStock" class="modal-value"></span></div>
                 <div class="modal-row"><span class="modal-label">Status</span><span id="mBStatus" class="modal-value"></span></div>
                 <div class="modal-row"><span class="modal-label">Description</span><span id="mBDesc" class="modal-value"></span></div>
-                <div class="modal-row"><span class="modal-label">Last updated</span><span id="mBUpdated" class="modal-value"></span></div>
+                <div class="modal-row"><span class="modal-label">Updated</span><span id="mBUpdated" class="modal-value"></span></div>
             </div>
         </div>
     </div>
 
-    <%-- Toast container --%>
+    <%-- Toast --%>
     <div id="toastContainer" class="toast-container"></div>
     <c:if test="${not empty successMessage}">
         <div id="toastSuccessMessage" style="display:none;"><c:out value="${successMessage}"/></div>
@@ -157,28 +218,27 @@
     </c:if>
 
     <script>
-        // ── Toast ──
-        function showToast(message, type) {
+        function showToast(msg, type) {
             var tc = document.getElementById('toastContainer');
             var t = document.createElement('div');
             t.className = 'toast toast--' + type;
-            t.innerHTML = '<i class="fa-solid ' + (type === 'success' ? 'fa-circle-check' : 'fa-circle-exclamation') + '"></i> ' + message;
+            t.innerHTML = '<i class="fa-solid ' + (type==='success' ? 'fa-circle-check' : 'fa-circle-exclamation') + '"></i> ' + msg;
             tc.appendChild(t);
-            setTimeout(function() { t.classList.add('toast--show'); }, 10);
-            setTimeout(function() { t.classList.remove('toast--show'); setTimeout(function(){ t.remove(); }, 400); }, 3500);
+            setTimeout(function(){ t.classList.add('toast--show'); }, 10);
+            setTimeout(function(){ t.classList.remove('toast--show'); setTimeout(function(){ t.remove(); }, 320); }, 3500);
         }
+        var s = document.getElementById('toastSuccessMessage');
+        if (s) showToast(s.textContent.trim(), 'success');
+        var e = document.getElementById('toastErrorMessage');
+        if (e) showToast(e.textContent.trim(), 'error');
 
-        // FIX 2: trigger toast for flash messages from hidden DOM nodes
-        var successToastEl = document.getElementById('toastSuccessMessage');
-        if (successToastEl) {
-            showToast(successToastEl.textContent.trim(), 'success');
+        function openDeleteModal(action, msg) {
+            document.getElementById('deleteModalMsg').textContent = msg;
+            document.getElementById('deleteForm').action = action;
+            document.getElementById('deleteModal').style.display = 'flex';
         }
-        var errorToastEl = document.getElementById('toastErrorMessage');
-        if (errorToastEl) {
-            showToast(errorToastEl.textContent.trim(), 'error');
-        }
+        function closeDeleteModal() { document.getElementById('deleteModal').style.display = 'none'; }
 
-        // FIX 1: read data-* attributes — safe against any special chars
         document.querySelectorAll('.js-view-book').forEach(function(btn) {
             btn.addEventListener('click', function() {
                 var d = this.dataset;
@@ -192,19 +252,14 @@
                     ? '<span class="status-pill status-pill--on">Active</span>'
                     : '<span class="status-pill status-pill--off">Inactive</span>';
                 document.getElementById('mBDesc').textContent     = d.desc     || '—';
-                document.getElementById('mBUpdated').textContent  = d.updated || '—';
+                document.getElementById('mBUpdated').textContent  = d.updated  || '—';
                 document.getElementById('bookModal').style.display = 'flex';
             });
         });
 
-        // ── Modal close ──
-        function closeModal(id) {
-            document.getElementById(id).style.display = 'none';
-        }
+        function closeModal(id) { document.getElementById(id).style.display = 'none'; }
         document.addEventListener('keydown', function(e) {
-            if (e.key === 'Escape') {
-                document.querySelectorAll('.modal-overlay').forEach(function(m) { m.style.display = 'none'; });
-            }
+            if (e.key === 'Escape') document.querySelectorAll('.modal-overlay').forEach(function(m){ m.style.display='none'; });
         });
     </script>
 </body>
