@@ -517,7 +517,7 @@ button,
 /* ── Toast ── */
 .toast-container {
     position: fixed;
-    bottom: 28px;
+    top: 28px;
     right: 28px;
     display: flex;
     flex-direction: column;
@@ -536,7 +536,7 @@ button,
     box-shadow: 0 8px 32px rgba(0,0,0,.35);
     border: 1px solid transparent;
     opacity: 0;
-    transform: translateY(12px);
+    transform: translateY(-12px);
     transition: opacity .3s ease, transform .3s ease;
     max-width: 340px;
 }

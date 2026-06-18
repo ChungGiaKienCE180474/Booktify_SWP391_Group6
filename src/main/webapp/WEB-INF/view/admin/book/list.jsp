@@ -103,13 +103,10 @@
                                         <i class="fa-solid fa-pen"></i>
                                     </a>
                                     <%-- Delete --%>
-                                    <form action="/admin/books/${book.id}/delete" method="post" class="inline-form"
-                                          onsubmit="return confirm('Deactivate this book?');">
-                                        <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}" />
-                                        <button type="submit" class="icon-link icon-link--danger" style="cursor:pointer;">
-                                            <i class="fa-solid fa-trash"></i>
-                                        </button>
-                                    </form>
+                                    <button type="button" class="icon-link icon-link--danger" style="cursor:pointer;"
+                                            onclick="openDeleteModal('/admin/books/${book.id}/delete', 'Are you sure you want to delete this book?')">
+                                        <i class="fa-solid fa-trash"></i>
+                                    </button>
                                 </td>
                             </tr>
                         </c:forEach>
@@ -123,6 +120,27 @@
             </div>
         </section>
     </main>
+
+    <%-- Delete Confirmation Modal --%>
+    <div id="deleteModal" class="modal-overlay" style="display:none;">
+        <div class="modal-box" style="max-width:420px;" onclick="event.stopPropagation()">
+            <div class="modal-header">
+                <h3><i class="fa-solid fa-triangle-exclamation" style="color:#ef4444;"></i> Confirm Delete</h3>
+            </div>
+            <div class="modal-body">
+                <p id="deleteModalMsg" style="margin:0;font-size:0.95rem;"></p>
+            </div>
+            <div style="display:flex;justify-content:flex-end;gap:12px;padding:16px 24px;border-top:1px solid var(--admin-border,#e5e7eb);">
+                <button onclick="closeDeleteModal()" class="admin-button admin-button--ghost" style="cursor:pointer;">Cancel</button>
+                <form id="deleteForm" method="post" style="display:inline;">
+                    <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}" />
+                    <button type="submit" class="admin-button" style="background:#ef4444;border-color:#ef4444;cursor:pointer;">
+                        <i class="fa-solid fa-trash"></i> Delete
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
 
     <%-- View Detail Modal --%>
     <div id="bookModal" class="modal-overlay" style="display:none;" onclick="closeModal('bookModal')">
@@ -196,6 +214,16 @@
                 document.getElementById('bookModal').style.display = 'flex';
             });
         });
+
+        // ── Delete modal ──
+        function openDeleteModal(action, message) {
+            document.getElementById('deleteModalMsg').textContent = message;
+            document.getElementById('deleteForm').action = action;
+            document.getElementById('deleteModal').style.display = 'flex';
+        }
+        function closeDeleteModal() {
+            document.getElementById('deleteModal').style.display = 'none';
+        }
 
         // ── Modal close ──
         function closeModal(id) {

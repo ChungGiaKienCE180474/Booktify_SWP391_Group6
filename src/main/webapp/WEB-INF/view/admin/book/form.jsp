@@ -55,16 +55,22 @@
                     </div>
 
                     <div class="admin-field">
-                        <label>Category</label>
-                        <select name="categoryId" class="admin-input">
-                            <option value="">— None —</option>
+                        <label>Category <span style="color:#ef4444;">*</span></label>
+                        <select name="categoryId" id="categoryId" class="admin-input" required>
+                            <option value="">— Select a category —</option>
                             <c:forEach items="${categories}" var="cat">
                                 <option value="${cat.id}"
                                     <c:if test="${not empty book.category and book.category.id == cat.id}">selected</c:if>>
-                                    ${cat.name}
+                                    <c:out value="${cat.name}"/>
                                 </option>
                             </c:forEach>
                         </select>
+                        <c:if test="${not empty categoryError}">
+                            <span class="admin-error" id="categoryErrorMsg"><c:out value="${categoryError}"/></span>
+                        </c:if>
+                        <c:if test="${empty categoryError}">
+                            <span class="admin-error" id="categoryErrorMsg" style="display:none;">Please select a category before saving the book.</span>
+                        </c:if>
                     </div>
 
                     <div class="admin-field">
@@ -99,11 +105,36 @@
                     </div>
 
                     <div class="admin-form__actions">
-                        <button type="submit" class="admin-button">Save</button>
+                        <button type="submit" class="admin-button" id="saveBtn">Save</button>
                     </div>
                 </form:form>
             </div>
         </section>
     </main>
+
+    <script>
+        document.getElementById('saveBtn').closest('form').addEventListener('submit', function(e) {
+            var catSelect = document.getElementById('categoryId');
+            var errorMsg = document.getElementById('categoryErrorMsg');
+            if (catSelect && !catSelect.value) {
+                e.preventDefault();
+                errorMsg.style.display = 'block';
+                catSelect.focus();
+                catSelect.style.borderColor = '#ef4444';
+            } else if (errorMsg) {
+                errorMsg.style.display = 'none';
+            }
+        });
+        var catSelect = document.getElementById('categoryId');
+        if (catSelect) {
+            catSelect.addEventListener('change', function() {
+                var errorMsg = document.getElementById('categoryErrorMsg');
+                if (this.value) {
+                    if (errorMsg) errorMsg.style.display = 'none';
+                    this.style.borderColor = '';
+                }
+            });
+        }
+    </script>
 </body>
 </html>

@@ -29,7 +29,7 @@
             <%-- Search bar --%>
             <div class="admin-panel" style="padding:16px 24px;">
                 <form method="get" action="/admin/categories" class="admin-search-form">
-                    <input type="text" name="q" value="${q}" placeholder="Search by name or description…"
+                    <input type="text" name="q" value="<c:out value='${q}'/>" placeholder="Search by name or description…"
                            class="admin-input" style="max-width:400px;" />
                     <button type="submit" class="admin-button" style="cursor:pointer;">
                         <i class="fa-solid fa-magnifying-glass"></i> Search
@@ -56,18 +56,21 @@
                         <c:forEach items="${categories}" var="category" varStatus="vs">
                             <tr>
                                 <td>${vs.index + 1}</td>
-                                <td>${category.name}</td>
-                                <td>${category.description}</td>
+                                <td><c:out value="${category.name}"/></td>
+                                <td><c:out value="${category.description}"/></td>
                                 <td>
                                     <span class="status-pill ${category.active ? 'status-pill--on' : 'status-pill--off'}">
                                         ${category.active ? 'Active' : 'Inactive'}
                                     </span>
                                 </td>
-                                <td>${category.updatedAt}</td>
+                                <td><c:out value="${category.updatedAtString}" default="—"/></td>
                                 <td class="admin-table__actions">
                                     <%-- View --%>
-                                    <button type="button" class="icon-link" style="cursor:pointer;"
-                                            onclick="openCategoryModal(${category.id}, '${category.name}', '${category.description}', '${category.active}', '${category.updatedAt}')">
+                                    <button type="button" class="icon-link js-view-category" style="cursor:pointer;"
+                                            data-name="<c:out value='${category.name}'/>"
+                                            data-desc="<c:out value='${category.description}'/>"
+                                            data-active="${category.active}"
+                                            data-updated="<c:out value='${category.updatedAtString}'/>">
                                         <i class="fa-solid fa-eye"></i>
                                     </button>
                                     <%-- Edit --%>
@@ -75,13 +78,10 @@
                                         <i class="fa-solid fa-pen"></i>
                                     </a>
                                     <%-- Delete --%>
-                                    <form action="/admin/categories/${category.id}/delete" method="post" class="inline-form"
-                                          onsubmit="return confirm('Delete this category?');">
-                                        <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}" />
-                                        <button type="submit" class="icon-link icon-link--danger" style="cursor:pointer;">
-                                            <i class="fa-solid fa-trash"></i>
-                                        </button>
-                                    </form>
+                                    <button type="button" class="icon-link icon-link--danger" style="cursor:pointer;"
+                                            onclick="openDeleteModal('/admin/categories/${category.id}/delete', 'Are you sure you want to delete this category?')">
+                                        <i class="fa-solid fa-trash"></i>
+                                    </button>
                                 </td>
                             </tr>
                         </c:forEach>
@@ -95,6 +95,27 @@
             </div>
         </section>
     </main>
+
+    <%-- Delete Confirmation Modal --%>
+    <div id="deleteModal" class="modal-overlay" style="display:none;">
+        <div class="modal-box" style="max-width:420px;" onclick="event.stopPropagation()">
+            <div class="modal-header">
+                <h3><i class="fa-solid fa-triangle-exclamation" style="color:#ef4444;"></i> Confirm Delete</h3>
+            </div>
+            <div class="modal-body">
+                <p id="deleteModalMsg" style="margin:0;font-size:0.95rem;"></p>
+            </div>
+            <div style="display:flex;justify-content:flex-end;gap:12px;padding:16px 24px;border-top:1px solid var(--admin-border,#e5e7eb);">
+                <button onclick="closeDeleteModal()" class="admin-button admin-button--ghost" style="cursor:pointer;">Cancel</button>
+                <form id="deleteForm" method="post" style="display:inline;">
+                    <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}" />
+                    <button type="submit" class="admin-button" style="background:#ef4444;border-color:#ef4444;cursor:pointer;">
+                        <i class="fa-solid fa-trash"></i> Delete
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
 
     <%-- View Detail Modal --%>
     <div id="categoryModal" class="modal-overlay" style="display:none;" onclick="closeModal('categoryModal')">
@@ -116,6 +137,12 @@
 
     <%-- Toast container --%>
     <div id="toastContainer" class="toast-container"></div>
+    <c:if test="${not empty successMessage}">
+        <div id="toastSuccessMessage" style="display:none;"><c:out value="${successMessage}"/></div>
+    </c:if>
+    <c:if test="${not empty errorMessage}">
+        <div id="toastErrorMessage" style="display:none;"><c:out value="${errorMessage}"/></div>
+    </c:if>
 
     <script>
         // ── Toast ──
@@ -129,28 +156,42 @@
             setTimeout(function() { t.classList.remove('toast--show'); setTimeout(function(){ t.remove(); }, 400); }, 3500);
         }
 
-        <c:if test="${not empty successMessage}">
-            window.addEventListener('DOMContentLoaded', function() { showToast('${successMessage}', 'success'); });
-        </c:if>
-        <c:if test="${not empty errorMessage}">
-            window.addEventListener('DOMContentLoaded', function() { showToast('${errorMessage}', 'error'); });
-        </c:if>
+        var successToastEl = document.getElementById('toastSuccessMessage');
+        if (successToastEl) { showToast(successToastEl.textContent.trim(), 'success'); }
+        var errorToastEl = document.getElementById('toastErrorMessage');
+        if (errorToastEl) { showToast(errorToastEl.textContent.trim(), 'error'); }
 
-        // ── Modal ──
-        function openCategoryModal(id, name, desc, active, updated) {
-            document.getElementById('mCatName').textContent    = name || '—';
-            document.getElementById('mCatDesc').textContent    = desc || '—';
-            document.getElementById('mCatStatus').innerHTML    = active === 'true'
-                ? '<span class="status-pill status-pill--on">Active</span>'
-                : '<span class="status-pill status-pill--off">Inactive</span>';
-            document.getElementById('mCatUpdated').textContent = updated || '—';
-            document.getElementById('categoryModal').style.display = 'flex';
+        // ── Delete modal ──
+        function openDeleteModal(action, message) {
+            document.getElementById('deleteModalMsg').textContent = message;
+            document.getElementById('deleteForm').action = action;
+            document.getElementById('deleteModal').style.display = 'flex';
         }
+        function closeDeleteModal() {
+            document.getElementById('deleteModal').style.display = 'none';
+        }
+
+        // ── View modal (data-* approach) ──
+        document.querySelectorAll('.js-view-category').forEach(function(btn) {
+            btn.addEventListener('click', function() {
+                var d = this.dataset;
+                document.getElementById('mCatName').textContent    = d.name    || '—';
+                document.getElementById('mCatDesc').textContent    = d.desc    || '—';
+                document.getElementById('mCatStatus').innerHTML    = d.active === 'true'
+                    ? '<span class="status-pill status-pill--on">Active</span>'
+                    : '<span class="status-pill status-pill--off">Inactive</span>';
+                document.getElementById('mCatUpdated').textContent = d.updated || '—';
+                document.getElementById('categoryModal').style.display = 'flex';
+            });
+        });
+
         function closeModal(id) {
             document.getElementById(id).style.display = 'none';
         }
         document.addEventListener('keydown', function(e) {
-            if (e.key === 'Escape') { document.querySelectorAll('.modal-overlay').forEach(function(m){ m.style.display='none'; }); }
+            if (e.key === 'Escape') {
+                document.querySelectorAll('.modal-overlay').forEach(function(m){ m.style.display='none'; });
+            }
         });
     </script>
 </body>
