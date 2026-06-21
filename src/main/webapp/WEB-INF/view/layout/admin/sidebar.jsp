@@ -36,9 +36,15 @@
                 <i class="fa-solid fa-book"></i>
                 Books
             </a>
-            <a href="#" class="admin-sidebar__item">
+            <a href="/admin/customers"
+               class="admin-sidebar__item ${fn:contains(pageContext.request.requestURI, '/admin/customers') ? 'active' : ''}">
                 <i class="fa-solid fa-users"></i>
-                Users
+                Customers
+            </a>
+            <a href="/admin/staff"
+               class="admin-sidebar__item ${fn:contains(pageContext.request.requestURI, '/admin/staff') ? 'active' : ''}">
+                <i class="fa-solid fa-user-tie"></i>
+                Staff
             </a>
         </div>
     </nav>

@@ -35,6 +35,8 @@ public class User {
     private String phone;
     private String avatar;
     private boolean status;
+    private boolean deleted = false;
+    private String staffRole;
 
     @ManyToOne
     @JoinColumn(name = "role_id")
@@ -112,4 +114,18 @@ public class User {
         this.role = role;
     }
 
+    public boolean isDeleted() {
+        return deleted;
+    }
+    public String getStaffRole() {
+        return staffRole;
+    }
+
+    public void setStaffRole(String staffRole) {
+        this.staffRole = staffRole;
+    }
+
+    public void setDeleted(boolean deleted) {
+        this.deleted = deleted;
+    }
 }
