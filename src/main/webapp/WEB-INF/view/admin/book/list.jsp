@@ -101,7 +101,7 @@
                                     </c:choose>
                                 </td>
                                 <td style="font-weight:700;color:#111827;">
-                                    <c:out value="${book.price}"/>
+                                    <c:out value="${book.priceFormatted}"/>
                                 </td>
                                 <td style="color:#374151;">${book.stockQuantity}</td>
                                 <td>
@@ -121,7 +121,7 @@
                                             data-author="<c:out value='${book.author}'/>"
                                             data-isbn="<c:out value='${book.isbn}'/>"
                                             data-category="<c:out value='${not empty book.category ? book.category.name : &quot;&quot;}'/>"
-                                            data-price="<c:out value='${book.price}'/>"
+                                            data-price="<c:out value='${book.priceFormatted}'/>"
                                             data-stock="${book.stockQuantity}"
                                             data-active="${book.active}"
                                             data-desc="<c:out value='${book.description}'/>"

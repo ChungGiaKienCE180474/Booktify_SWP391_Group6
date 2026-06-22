@@ -24,6 +24,8 @@ public interface BookRepository extends JpaRepository<Book, Long> {
 
     boolean existsByCategoryId(Long categoryId);
 
+    boolean existsByGenreId(Long genreId);
+
     @Query("SELECT b FROM Book b LEFT JOIN b.category c WHERE " +
            "LOWER(b.title) LIKE LOWER(CONCAT('%', :q, '%')) OR " +
            "LOWER(b.author) LIKE LOWER(CONCAT('%', :q, '%')) OR " +

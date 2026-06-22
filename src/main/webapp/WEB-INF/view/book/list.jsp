@@ -363,7 +363,7 @@
                                     <div class="product-card__title">${book.title}</div>
                                     <div class="product-card__author">${book.author}</div>
                                     <div class="product-card__footer">
-                                        <span class="product-card__price">${book.price}</span>
+                                        <span class="product-card__price">${book.priceFormatted}</span>
                                         <span class="product-card__link">Chi tiết</span>
                                     </div>
                                 </div>

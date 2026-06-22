@@ -325,7 +325,7 @@
             <p class="detail-info__author">Tác giả: <strong>${book.author}</strong></p>
 
             <div class="detail-price-row">
-                <div class="detail-price">${book.price}</div>
+                <div class="detail-price">${book.priceFormatted}</div>
                 <c:choose>
                     <c:when test="${book.stockQuantity > 0}">
                         <span class="detail-stock detail-stock--in">

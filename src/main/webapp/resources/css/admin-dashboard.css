@@ -957,12 +957,12 @@ select.admin-input option { background: var(--white); color: var(--text); }
 }
 
 /* ══════════════════════════════════════════════════════════════════
-   TOAST  (top-left)
+   TOAST  (top-right)
    ══════════════════════════════════════════════════════════════════ */
 .toast-container {
     position: fixed;
     top: 20px;
-    left: 20px;
+    right: 20px;
     display: flex;
     flex-direction: column;
     gap: 10px;
@@ -980,7 +980,7 @@ select.admin-input option { background: var(--white); color: var(--text); }
     font-weight: 600;
     border: 1px solid transparent;
     opacity: 0;
-    transform: translateX(-16px);
+    transform: translateX(16px);
     transition: opacity .28s ease, transform .28s ease;
     max-width: 320px;
     min-width: 220px;

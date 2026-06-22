@@ -1,8 +1,10 @@
 package shop.domain;
 
 import java.math.BigDecimal;
+import java.text.NumberFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Locale;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -72,6 +74,10 @@ public class Book {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "category_id")
     private Category category;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "genre_id")
+    private Genre genre;
 
     @PrePersist
     void onCreate() {
@@ -173,6 +179,16 @@ public class Book {
         return updatedAt == null ? "" : updatedAt.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"));
     }
 
+    /**
+     * Trả về giá định dạng xxx.xxx.xxx (không có .00), ví dụ: 1.250.000
+     */
+    public String getPriceFormatted() {
+        if (price == null) return "0";
+        // Dùng locale Germany để có dấu . phân cách hàng nghìn
+        NumberFormat nf = NumberFormat.getIntegerInstance(Locale.GERMANY);
+        return nf.format(price.longValue());
+    }
+
     public void setUpdatedAt(LocalDateTime updatedAt) {
         this.updatedAt = updatedAt;
     }
@@ -183,5 +199,13 @@ public class Book {
 
     public void setCategory(Category category) {
         this.category = category;
+    }
+
+    public Genre getGenre() {
+        return genre;
+    }
+
+    public void setGenre(Genre genre) {
+        this.genre = genre;
     }
 }

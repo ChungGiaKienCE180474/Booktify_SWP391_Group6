@@ -31,6 +31,11 @@
                 <i class="fa-solid fa-tag"></i>
                 Categories
             </a>
+            <a href="/admin/genres"
+               class="admin-sidebar__item ${fn:contains(pageContext.request.requestURI, '/admin/genres') ? 'active' : ''}">
+                <i class="fa-solid fa-layer-group"></i>
+                Genres
+            </a>
             <a href="/admin/books"
                class="admin-sidebar__item ${fn:contains(pageContext.request.requestURI, '/admin/books') ? 'active' : ''}">
                 <i class="fa-solid fa-book"></i>
