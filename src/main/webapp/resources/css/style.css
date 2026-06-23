@@ -62,11 +62,25 @@ body::after {
     font-size: 12px;
 }
 
-.container a {
+.container form a {
     color: #333;
     font-size: 13px;
     text-decoration: none;
     margin: 15px 0 10px;
+}
+
+.container form .forgot-link {
+    display: block;
+    text-align: center;
+    margin: 8px 0 4px;
+    color: #333;
+    font-size: 13px;
+    text-decoration: none;
+}
+
+.container form .forgot-link:hover {
+    color: #1D3865;
+    text-decoration: underline;
 }
 
 .container button {

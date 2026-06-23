@@ -1,9 +1,7 @@
 package shop.controller.client;
 
-import java.util.Properties;
 import java.util.Random;
 
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -17,16 +15,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import shop.domain.OTPForm;
 import shop.domain.RoleName;
-import shop.domain.User;
 import shop.domain.dto.RegisterDTO;
+import shop.service.EmailService;
 import shop.service.UserService;
-import jakarta.mail.Message;
 import jakarta.mail.MessagingException;
-import jakarta.mail.PasswordAuthentication;
-import jakarta.mail.Session;
-import jakarta.mail.Transport;
-import jakarta.mail.internet.InternetAddress;
-import jakarta.mail.internet.MimeMessage;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
@@ -34,13 +26,14 @@ import jakarta.validation.Valid;
 @Controller
 public class RegisterController {
     private final UserService userService;
-    private final PasswordEncoder passwordEncoder;
     private final ObjectMapper objectMapper;
+    private final EmailService emailService;
 
-    public RegisterController(UserService userService, PasswordEncoder passwordEncoder, ObjectMapper objectMapper) {
+    public RegisterController(UserService userService, ObjectMapper objectMapper,
+            EmailService emailService) {
         this.userService = userService;
-        this.passwordEncoder = passwordEncoder;
         this.objectMapper = objectMapper;
+        this.emailService = emailService;
     }
 
     @GetMapping("/register")
@@ -84,31 +77,13 @@ public class RegisterController {
         mySession.setAttribute("otp", otpValue);
         mySession.setAttribute("email", email);
 
-        // Thiết lập thuộc tính mail
-        Properties props = new Properties();
-        props.put("mail.smtp.host", "smtp.gmail.com");
-        props.put("mail.smtp.port", "587");
-        props.put("mail.smtp.auth", "true");
-        props.put("mail.smtp.starttls.enable", "true");
-
-        Session session = Session.getInstance(props, new jakarta.mail.Authenticator() {
-            protected PasswordAuthentication getPasswordAuthentication() {
-                return new PasswordAuthentication("khangkien.060603@gmail.com", "vinu qibz jtdl blqg");
-            }
-        });
-
         try {
-            MimeMessage message = new MimeMessage(session);
-            message.setFrom(new InternetAddress("khangkien.060603@gmail.com"));
-            message.addRecipient(Message.RecipientType.TO, new InternetAddress(email));
-            message.setSubject("Register OTP");
-            message.setText("Your OTP is: " + otpValue);
-
-            Transport.send(message);
-            System.out.println("OTP email sent successfully");
-
+            emailService.sendOtpEmail(email, "Register OTP", "Your OTP is: " + otpValue);
         } catch (MessagingException e) {
             e.printStackTrace();
+            mySession.removeAttribute("otp");
+            mySession.removeAttribute("email");
+            mySession.removeAttribute("registerDTO");
             request.setAttribute("message", "Failed to send OTP. Please try again.");
             return "authentication/register";
         }
@@ -147,13 +122,7 @@ public class RegisterController {
         }
 
         if (generatedOtp != null && generatedOtp.equals(otp) && registerDTO != null) {
-            User user = this.userService.registerDTOtoUser(registerDTO);
-            String hashPassword = this.passwordEncoder.encode(registerDTO.getPassword());
-            user.setPassword(hashPassword);
-            user.setRole(this.userService.getRoleByName(RoleName.CUSTOMER));
-            user.setStatus(true);
-
-            this.userService.handleSaveUser(user);
+            this.userService.registerNewUser(registerDTO, RoleName.CUSTOMER);
             session.invalidate();
             return "redirect:/login?registersuccess";
         } else {
