@@ -82,6 +82,7 @@ public class SecurityConfiguration {
                 .permitAll()
                 .requestMatchers("/admin/**").hasRole("ADMIN")
                 .requestMatchers("/changepass", "/profile", "/cart", "/cart/**").authenticated()
+                .requestMatchers("/stationery/**").authenticated()
                 .anyRequest().authenticated())
                 .csrf(csrf -> csrf
                 .ignoringRequestMatchers("/authentication/**", "/register"))
