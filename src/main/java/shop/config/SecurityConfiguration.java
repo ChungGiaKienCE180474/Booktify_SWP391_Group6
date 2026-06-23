@@ -5,9 +5,7 @@ import java.io.IOException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
-import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -29,48 +27,49 @@ import jakarta.servlet.http.HttpServletResponse;
 @EnableMethodSecurity(securedEnabled = true)
 public class SecurityConfiguration {
 
-        @Autowired
-@Lazy
-private UserService userService;
+    @Autowired
+    @Lazy
+    private UserService userService;
 
-        @Bean
-        public PasswordEncoder passwordEncoder() {
-                return new BCryptPasswordEncoder();
-        }
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
+    }
 
-        @Bean
-        public UserDetailsService userDetailsService(UserService userService) {
-                return new CustomUserDetailsService(userService);
-        }
+    @Bean
+    public UserDetailsService userDetailsService(UserService userService) {
+        return new CustomUserDetailsService(userService);
+    }
 
-        @Bean
-        public DaoAuthenticationProvider authProvider(
-                        PasswordEncoder passwordEncoder,
-                        UserDetailsService userDetailsService) {
+    @Bean
+    public DaoAuthenticationProvider authProvider(
+            PasswordEncoder passwordEncoder,
+            UserDetailsService userDetailsService) {
 
-                DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
-                authProvider.setUserDetailsService(userDetailsService);
-                authProvider.setPasswordEncoder(passwordEncoder);
-                authProvider.setHideUserNotFoundExceptions(false);
+        DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
+        authProvider.setUserDetailsService(userDetailsService);
+        authProvider.setPasswordEncoder(passwordEncoder);
+        authProvider.setHideUserNotFoundExceptions(false);
 
-                return authProvider;
-        }
+        return authProvider;
+    }
 
-        @Bean
-        public AuthenticationSuccessHandler customSuccessHandler() {
-                return new CustomSuccessHandler();
-        }
+    @Bean
+    public AuthenticationSuccessHandler customSuccessHandler() {
+        return new CustomSuccessHandler(userService);
+    }
 
-        @Bean
-        public SpringSessionRememberMeServices rememberMeServices() {
-                SpringSessionRememberMeServices rememberMeServices = new SpringSessionRememberMeServices();
-                // optionally customize
-                rememberMeServices.setAlwaysRemember(true);
-                return rememberMeServices;
-        }
+    @Bean
+    public SpringSessionRememberMeServices rememberMeServices() {
+        SpringSessionRememberMeServices rememberMeServices = new SpringSessionRememberMeServices();
+        // optionally customize
+        rememberMeServices.setAlwaysRemember(true);
+        return rememberMeServices;
+    }
 
-        @Bean
-        SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+    @Bean
+    @SuppressWarnings("unused")
+    SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 
                 http
                                 .authorizeHttpRequests(authorize -> authorize
@@ -82,7 +81,6 @@ private UserService userService;
                                                                 "/authentication/**")
                                                 .permitAll()
                                                 .requestMatchers("/changepass", "/profile").authenticated()
-                                                .requestMatchers("/stationery/**").authenticated() 
                                                 .anyRequest().authenticated())
                                 .sessionManagement(sessionManagement -> sessionManagement
                                                 .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
@@ -102,25 +100,29 @@ private UserService userService;
                                 .exceptionHandling(ex -> ex
                                                 .accessDeniedPage("/access-deny"));
 
-                return http.build();
-        }
+        return http.build();
+    }
 
-        // Phương thức xử lý lỗi đăng nhập
-        private void handleLoginFailure(HttpServletRequest request, HttpServletResponse response,
-                        org.springframework.security.core.AuthenticationException exception) throws IOException {
-                String email = request.getParameter("username");
-                User user = userService.getUserByEmail(email);
+    // Phương thức xử lý lỗi đăng nhập
+    private void handleLoginFailure(HttpServletRequest request, HttpServletResponse response,
+            org.springframework.security.core.AuthenticationException exception) throws IOException {
+        String failureMessage = exception != null ? exception.getMessage() : null;
+        String email = request.getParameter("username");
+        User user = userService.getUserByEmail(email);
 
-                if (user != null) {
-                        if (!user.isStatus()) {
-                                // Hiện thông báo tài khoản bị cấm
-                                request.getSession().setAttribute("message", "Tài khoản của bạn đã bị cấm.");
-                                response.sendRedirect("/login?locked"); // Chuyển hướng tới trang đăng nhập
-                        } else {
-                                response.sendRedirect("/login?error"); // Chuyển hướng cho các lỗi khác
-                        }
-                } else {
-                        response.sendRedirect("/login?error"); // Người dùng không tồn tại
-                }
+        if (user != null) {
+            if (!user.isStatus()) {
+                // Hiện thông báo tài khoản bị cấm
+                request.getSession().setAttribute("message", "Tài khoản của bạn đã bị cấm.");
+                response.sendRedirect("/login?locked"); // Chuyển hướng tới trang đăng nhập
+            } else {
+                response.sendRedirect("/login?error"); // Chuyển hướng cho các lỗi khác
+            }
+        } else {
+            if (failureMessage != null && !failureMessage.isBlank()) {
+                request.getSession().setAttribute("message", failureMessage);
+            }
+            response.sendRedirect("/login?error"); // Người dùng không tồn tại
         }
+    }
 }

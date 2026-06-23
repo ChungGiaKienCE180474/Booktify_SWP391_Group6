@@ -1,7 +1,7 @@
 package shop.config;
 
 import java.io.IOException;
-import org.springframework.beans.factory.annotation.Autowired;
+
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.DefaultRedirectStrategy;
 import org.springframework.security.web.RedirectStrategy;
@@ -16,10 +16,18 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 
 public class CustomSuccessHandler implements AuthenticationSuccessHandler {
-    @Autowired
-    private UserService userService;
+
+    private final UserService userService;
+
+    public CustomSuccessHandler(UserService userService) {
+        this.userService = userService;
+    }
 
     protected String determineTargetUrl(final Authentication authentication) {
+        User user = this.userService.getUserByEmail(authentication.getName());
+        if (user != null && user.getRole() != null && "ADMIN".equalsIgnoreCase(user.getRole().getName())) {
+            return "/admin";
+        }
 
         return "/";
     }
@@ -30,10 +38,8 @@ public class CustomSuccessHandler implements AuthenticationSuccessHandler {
             return;
         }
         session.removeAttribute(WebAttributes.AUTHENTICATION_EXCEPTION);
-        // get email
-        String emai = authentication.getName();
-        // query
-        User user = this.userService.getUserByEmail(emai);
+        String email = authentication.getName();
+        User user = this.userService.getUserByEmail(email);
         if (user != null) {
             session.setAttribute("username", user.getEmail());
             session.setAttribute("fullName", user.getFullName());
@@ -48,7 +54,7 @@ public class CustomSuccessHandler implements AuthenticationSuccessHandler {
 
     }
 
-    private RedirectStrategy redirectStrategy = new DefaultRedirectStrategy();
+    private final RedirectStrategy redirectStrategy = new DefaultRedirectStrategy();
 
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
