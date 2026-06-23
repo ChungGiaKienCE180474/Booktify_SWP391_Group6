@@ -82,6 +82,7 @@ private UserService userService;
                                                                 "/authentication/**")
                                                 .permitAll()
                                                 .requestMatchers("/changepass", "/profile").authenticated()
+                                                .requestMatchers("/stationery/**").authenticated() 
                                                 .anyRequest().authenticated())
                                 .sessionManagement(sessionManagement -> sessionManagement
                                                 .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
