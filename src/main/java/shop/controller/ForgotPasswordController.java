@@ -1,100 +1,73 @@
 package shop.controller;
 
-import java.util.Properties;
 import java.util.Random;
 
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.web.WebAttributes;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import shop.domain.OTPForm;
 import shop.domain.ResetPasswordForm;
-import shop.domain.User;
+import shop.service.EmailService;
 import shop.service.UserService;
+import jakarta.mail.MessagingException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
-import jakarta.validation.Valid;
-import jakarta.mail.Message;
-import jakarta.mail.MessagingException;
-import jakarta.mail.PasswordAuthentication;
-import jakarta.mail.Session;
-import jakarta.mail.Transport;
-import jakarta.mail.internet.InternetAddress;
-import jakarta.mail.internet.MimeMessage;
 
 @Controller
 public class ForgotPasswordController {
 
     private final UserService userService;
-    private final PasswordEncoder passwordEncoder;
+    private final EmailService emailService;
 
-    public ForgotPasswordController(UserService userService, PasswordEncoder passwordEncoder) {
+    public ForgotPasswordController(UserService userService, EmailService emailService) {
         this.userService = userService;
-        this.passwordEncoder = passwordEncoder;
+        this.emailService = emailService;
     }
 
     @GetMapping("/forgotpassword")
-    public String getForgotPassword(Model model) {
-        model.addAttribute("newUser", new User());
+    public String getForgotPassword() {
         return "authentication/forgotpassword";
     }
 
     @PostMapping("/authentication/forgotpassword")
-    public String recoverPassword(Model model, @ModelAttribute("newUser") User user, HttpServletRequest request) {
-        boolean checkEmail = this.userService.checkEmailExist(user.getEmail());
-        if (checkEmail) {
-            HttpSession mySession = request.getSession();
+    public String recoverPassword(@RequestParam("email") String email, HttpServletRequest request,
+            RedirectAttributes redirectAttributes) {
+        if (email == null || email.isBlank()) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Vui lòng nhập email.");
+            return "redirect:/forgotpassword";
+        }
 
-            // Generate OTP
-            int otpvalue = new Random().nextInt(1255650);
-            String email = user.getEmail();
-
-            // Set properties for mail session
-            Properties props = new Properties();
-            props.put("mail.smtp.host", "smtp.gmail.com");
-            props.put("mail.smtp.port", "587");
-            props.put("mail.smtp.auth", "true");
-            props.put("mail.smtp.starttls.enable", "true");
-
-            // Use app-specific password (fetch from environment variable)
-
-            Session session = Session.getInstance(props, new jakarta.mail.Authenticator() {
-                protected PasswordAuthentication getPasswordAuthentication() {
-                    return new PasswordAuthentication("khangkien.060603@gmail.com", "vinu qibz jtdl blqg");
-                }
-            });
-
-            try {
-                // Compose the message
-                MimeMessage message = new MimeMessage(session);
-                message.setFrom(new InternetAddress("khangkien.060603@gmail.com"));
-                message.addRecipient(Message.RecipientType.TO, new InternetAddress(email));
-                message.setSubject("Password Recovery OTP");
-                message.setText("Your OTP is: " + otpvalue);
-
-                // Send the message
-                Transport.send(message);
-                System.out.println("Message sent successfully");
-
-            } catch (MessagingException e) {
-                e.printStackTrace();
-                throw new RuntimeException(e);
-            }
-
-            // Store OTP and email in session
-            mySession.setAttribute("otp", otpvalue);
-            mySession.setAttribute("email", email);
-            request.setAttribute("message", "OTP is sent to your email ID");
-            return "redirect:/authentication/enterOTP"; // Change to redirect
-        } else {
-            request.setAttribute("message", "Invalid email address!");
+        boolean checkEmail = this.userService.checkEmailExist(email.trim());
+        if (!checkEmail) {
             return "redirect:/forgotpassword?invalidemail";
         }
+
+        HttpSession mySession = request.getSession();
+
+        int otpvalue = new Random().nextInt(900000) + 100000;
+        String normalizedEmail = email.trim();
+
+        mySession.setAttribute("otp", otpvalue);
+        mySession.setAttribute("email", normalizedEmail);
+
+        try {
+            emailService.sendOtpEmail(normalizedEmail, "Password Recovery OTP",
+                    "Your OTP is: " + otpvalue);
+        } catch (MessagingException e) {
+            e.printStackTrace();
+            mySession.removeAttribute("otp");
+            mySession.removeAttribute("email");
+            redirectAttributes.addFlashAttribute("errorMessage",
+                    "Không gửi được OTP. Vui lòng thử lại sau.");
+            return "redirect:/forgotpassword";
+        }
+
+        return "redirect:/authentication/enterOTP";
     }
 
     @GetMapping("/authentication/enterOTP")
@@ -151,10 +124,8 @@ public class ForgotPasswordController {
         if (password.equals(confPassword)) {
             HttpSession session = request.getSession();
             String email = (String) session.getAttribute("email");
-            String newPassword = this.passwordEncoder.encode(password);
-
             if (email != null) {
-                this.userService.updatePassword(email, newPassword);
+                this.userService.updatePassword(email, password);
                 // Xóa session sau khi đổi mật khẩu thành công
                 session.invalidate();
                 request.setAttribute("message", "Password successfully updated!");

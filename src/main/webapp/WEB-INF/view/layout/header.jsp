@@ -48,9 +48,12 @@
 
         <%-- Right icons --%>
         <div class="header-icons">
-            <%-- Cart (placeholder) --%>
-            <a href="#" class="hdr-icon-btn" title="Giỏ hàng">
+            <%-- Cart --%>
+            <a href="/cart" class="hdr-icon-btn" title="Giỏ hàng" style="position:relative;">
                 <i class="fa-solid fa-cart-shopping"></i>
+                <c:if test="${cartItemCount > 0}">
+                    <span class="hdr-cart-badge">${cartItemCount}</span>
+                </c:if>
                 <span class="hdr-icon-label">Giỏ hàng</span>
             </a>
 

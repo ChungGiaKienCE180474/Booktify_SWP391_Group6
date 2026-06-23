@@ -68,23 +68,26 @@ public class SecurityConfiguration {
     }
 
     @Bean
-    @SuppressWarnings("unused")
-    SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+    SecurityFilterChain filterChain(HttpSecurity http, DaoAuthenticationProvider authProvider) throws Exception {
 
         http
+                .authenticationProvider(authProvider)
                 .authorizeHttpRequests(authorize -> authorize
                 .dispatcherTypeMatchers(DispatcherType.FORWARD, DispatcherType.INCLUDE)
                 .permitAll()
                 .requestMatchers("/", "/login", "/register", "/css/**",
                         "/js/**", "/images/**", "/forgotpassword",
-                        "/authentication/**", "/books", "/books/**", "/client/**")
+                        "/authentication/**", "/books", "/books/**", "/client/**",
+                        "/logout", "/logout/**")
                 .permitAll()
                 .requestMatchers("/admin/**").hasRole("ADMIN")
-                .requestMatchers("/changepass", "/profile").authenticated()
+                .requestMatchers("/changepass", "/profile", "/cart", "/cart/**").authenticated()
                 .anyRequest().authenticated())
+                .csrf(csrf -> csrf
+                .ignoringRequestMatchers("/authentication/**", "/register"))
                 .sessionManagement(sessionManagement -> sessionManagement
                 .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
-                .invalidSessionUrl("/logout?expired")
+                .invalidSessionUrl("/login?expired")
                 .maximumSessions(1)
                 .maxSessionsPreventsLogin(false))
                 .logout(logout -> logout
@@ -99,6 +102,7 @@ public class SecurityConfiguration {
                 .permitAll())
                 .exceptionHandling(ex -> ex
                 .accessDeniedPage("/access-deny"));
+                
 
         return http.build();
     }

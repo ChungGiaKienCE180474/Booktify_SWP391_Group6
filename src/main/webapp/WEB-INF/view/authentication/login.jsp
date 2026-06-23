@@ -56,10 +56,8 @@
                             <input type="password" placeholder="Password" name="password" />
 
                             <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}" />
-                            <a href="/forgotpassword">Forget Your Password?</a>
-
-                            <button>Sign In</button>
-
+                            <a href="/forgotpassword" class="forgot-link">Forget Your Password?</a>
+                            <button type="submit">Sign In</button>
                         </form>
 
 
