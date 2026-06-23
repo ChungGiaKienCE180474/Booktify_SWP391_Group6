@@ -92,6 +92,24 @@ public class UserService {
         }
     }
 
+    public User updateProfile(String email, String fullName, String phone, String address) {
+        User user = getUserByEmail(email);
+        if (user == null) {
+            return null;
+        }
+        user.setFullName(fullName != null ? fullName.trim() : null);
+        user.setPhone(blankToNull(phone));
+        user.setAddress(blankToNull(address));
+        return userRepository.save(user);
+    }
+
+    private String blankToNull(String value) {
+        if (value == null || value.isBlank()) {
+            return null;
+        }
+        return value.trim();
+    }
+
     // ================= CUSTOMER MANAGEMENT =================
 
     private CustomerDTO toCustomerDTO(User user) {

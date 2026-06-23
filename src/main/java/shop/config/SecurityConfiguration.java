@@ -81,7 +81,7 @@ public class SecurityConfiguration {
                         "/logout", "/logout/**")
                 .permitAll()
                 .requestMatchers("/admin/**").hasRole("ADMIN")
-                .requestMatchers("/changepass", "/profile", "/cart", "/cart/**").authenticated()
+                .requestMatchers("/changepass", "/profile", "/profile/**", "/cart", "/cart/**").authenticated()
                 .requestMatchers("/stationery/**").authenticated()
                 .anyRequest().authenticated())
                 .csrf(csrf -> csrf
