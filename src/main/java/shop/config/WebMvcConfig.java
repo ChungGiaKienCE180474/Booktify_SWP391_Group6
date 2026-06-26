@@ -1,5 +1,7 @@
 package shop.config;
 
+import java.nio.file.Paths;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.ViewResolver;
@@ -30,10 +32,41 @@ public class WebMvcConfig implements WebMvcConfigurer {
 
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
-        registry.addResourceHandler("/css/**").addResourceLocations("/resources/css/");
-        registry.addResourceHandler("/js/**").addResourceLocations("/resources/js/");
-        registry.addResourceHandler("/images/**").addResourceLocations("/resources/images/");
-        registry.addResourceHandler("/client/**").addResourceLocations("/resources/client/");
-    }
+        registry.addResourceHandler("/resources/**")
+                .addResourceLocations(
+                        "/resources/",
+                        "file:src/main/webapp/resources/"
+                );
 
+        registry.addResourceHandler("/css/**")
+                .addResourceLocations(
+                        "/resources/css/",
+                        "file:src/main/webapp/resources/css/"
+                );
+
+        registry.addResourceHandler("/js/**")
+                .addResourceLocations(
+                        "/resources/js/",
+                        "file:src/main/webapp/resources/js/"
+                );
+
+        registry.addResourceHandler("/images/**")
+                .addResourceLocations(
+                        "/resources/images/",
+                        "file:src/main/webapp/resources/images/"
+                );
+
+        registry.addResourceHandler("/client/**")
+                .addResourceLocations(
+                        "/resources/client/",
+                        "file:src/main/webapp/resources/client/"
+                );
+
+        String uploadPath = Paths.get(System.getProperty("user.dir"), "uploads")
+                .toUri()
+                .toString();
+
+        registry.addResourceHandler("/uploads/**")
+                .addResourceLocations(uploadPath);
+    }
 }

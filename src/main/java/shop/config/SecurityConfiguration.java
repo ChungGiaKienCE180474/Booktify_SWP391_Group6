@@ -68,27 +68,26 @@ public class SecurityConfiguration {
     }
 
     @Bean
-    SecurityFilterChain filterChain(HttpSecurity http, DaoAuthenticationProvider authProvider) throws Exception {
+    @SuppressWarnings("unused")
+    SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 
         http
-                .authenticationProvider(authProvider)
                 .authorizeHttpRequests(authorize -> authorize
                 .dispatcherTypeMatchers(DispatcherType.FORWARD, DispatcherType.INCLUDE)
                 .permitAll()
                 .requestMatchers("/", "/login", "/register", "/css/**",
-                        "/js/**", "/images/**", "/forgotpassword",
-                        "/authentication/**", "/books", "/books/**", "/client/**",
-                        "/logout", "/logout/**")
+                        "/js/**", "/images/**", "/resources/**", "/uploads/**", "/forgotpassword",
+                        "/authentication/**", "/books", "/books/**", "/client/**")
                 .permitAll()
+                .requestMatchers("/admin").hasRole("ADMIN")
                 .requestMatchers("/admin/**").hasRole("ADMIN")
-                .requestMatchers("/changepass", "/profile", "/profile/**", "/cart", "/cart/**").authenticated()
-                .requestMatchers("/stationery/**").authenticated()
+                .requestMatchers("/staff").hasRole("STAFF")
+                .requestMatchers("/staff/**").hasRole("STAFF")
+                .requestMatchers("/changepass", "/profile").authenticated()
                 .anyRequest().authenticated())
-                .csrf(csrf -> csrf
-                .ignoringRequestMatchers("/authentication/**", "/register"))
                 .sessionManagement(sessionManagement -> sessionManagement
                 .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
-                .invalidSessionUrl("/login?expired")
+                .invalidSessionUrl("/logout?expired")
                 .maximumSessions(1)
                 .maxSessionsPreventsLogin(false))
                 .logout(logout -> logout
@@ -98,12 +97,11 @@ public class SecurityConfiguration {
                 .rememberMeServices(rememberMeServices()))
                 .formLogin(formLogin -> formLogin
                 .loginPage("/login")
-                .failureHandler(this::handleLoginFailure) // Gọi phương thức xử lý lỗi
+                .failureHandler(this::handleLoginFailure)
                 .successHandler(customSuccessHandler())
                 .permitAll())
                 .exceptionHandling(ex -> ex
                 .accessDeniedPage("/access-deny"));
-                
 
         return http.build();
     }
@@ -119,15 +117,15 @@ public class SecurityConfiguration {
             if (!user.isStatus()) {
                 // Hiện thông báo tài khoản bị cấm
                 request.getSession().setAttribute("message", "Tài khoản của bạn đã bị cấm.");
-                response.sendRedirect("/login?locked"); // Chuyển hướng tới trang đăng nhập
+                response.sendRedirect("/login?locked");
             } else {
-                response.sendRedirect("/login?error"); // Chuyển hướng cho các lỗi khác
+                response.sendRedirect("/login?error");
             }
         } else {
             if (failureMessage != null && !failureMessage.isBlank()) {
                 request.getSession().setAttribute("message", failureMessage);
             }
-            response.sendRedirect("/login?error"); // Người dùng không tồn tại
+            response.sendRedirect("/login?error");
         }
     }
 }
