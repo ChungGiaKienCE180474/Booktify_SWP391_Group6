@@ -1,5 +1,9 @@
 package shop.domain;
 
+import java.math.BigDecimal;
+import java.text.NumberFormat;
+import java.util.Locale;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -62,5 +66,12 @@ public class CartItem {
 
     public void setQuantity(int quantity) {
         this.quantity = quantity;
+    }
+
+    /** Subtotal formatted as xxx.xxx (German locale, no decimals) */
+    public String getSubtotalFormatted() {
+        if (book == null || book.getPrice() == null) return "0";
+        BigDecimal subtotal = book.getPrice().multiply(BigDecimal.valueOf(quantity));
+        return NumberFormat.getIntegerInstance(Locale.GERMANY).format(subtotal.longValue());
     }
 }

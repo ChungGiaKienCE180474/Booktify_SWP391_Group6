@@ -195,7 +195,7 @@
         }
         .product-card__author { font-size:.73rem;color:var(--text-muted);margin-bottom:.6rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis; }
         .product-card__footer { display:flex;align-items:center;justify-content:space-between;gap:.5rem;margin-top:auto; }
-        .product-card__price { font-size:1.05rem;font-weight:800;color:var(--accent-warm,#F57C00); }
+        .product-card__price { font-size:1.05rem;font-weight:800;color:var(--accent-warm,#F57C00);white-space:nowrap; }
         .product-card__link {
             display:inline-flex;align-items:center;justify-content:center;
             padding:.35rem .7rem;border-radius:6px;
@@ -363,7 +363,7 @@
                                     <div class="product-card__title">${book.title}</div>
                                     <div class="product-card__author">${book.author}</div>
                                     <div class="product-card__footer">
-                                        <span class="product-card__price">${book.price}</span>
+                                        <span class="product-card__price">${book.priceFormatted} &#8363;</span>
                                         <span class="product-card__link">Chi tiết</span>
                                     </div>
                                 </div>
