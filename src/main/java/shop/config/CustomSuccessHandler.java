@@ -25,8 +25,13 @@ public class CustomSuccessHandler implements AuthenticationSuccessHandler {
 
     protected String determineTargetUrl(final Authentication authentication) {
         User user = this.userService.getUserByEmail(authentication.getName());
+
         if (user != null && user.getRole() != null && "ADMIN".equalsIgnoreCase(user.getRole().getName())) {
             return "/admin";
+        }
+
+        if (user != null && user.getRole() != null && "STAFF".equalsIgnoreCase(user.getRole().getName())) {
+            return "/staff";
         }
 
         return "/";
@@ -37,21 +42,23 @@ public class CustomSuccessHandler implements AuthenticationSuccessHandler {
         if (session == null) {
             return;
         }
+
         session.removeAttribute(WebAttributes.AUTHENTICATION_EXCEPTION);
+
         String email = authentication.getName();
         User user = this.userService.getUserByEmail(email);
+
         if (user != null) {
             session.setAttribute("username", user.getEmail());
             session.setAttribute("fullName", user.getFullName());
             session.setAttribute("avatar", user.getAvatar());
             session.setAttribute("id", user.getId());
             session.setAttribute("email", user.getEmail());
+
             if (user.getRole() != null) {
                 session.setAttribute("role", user.getRole().getName());
             }
-
         }
-
     }
 
     private final RedirectStrategy redirectStrategy = new DefaultRedirectStrategy();
@@ -60,33 +67,23 @@ public class CustomSuccessHandler implements AuthenticationSuccessHandler {
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
             Authentication authentication) throws IOException, ServletException {
 
-        // Get the email from the authentication object
         String email = authentication.getName();
 
-        // Query the user based on the email
         User user = this.userService.getUserByEmail(email);
 
-        // Redirect to /login?locked if the account is disabled
-        if (!user.isStatus()) {
-            // Redirect to login with a parameter indicating the account is locked
+        if (user != null && !user.isStatus()) {
             response.sendRedirect("/login?locked");
             return;
         }
-        // If the account is active, determine the target URL based on the role
+
         String targetUrl = determineTargetUrl(authentication);
 
-        // Check if the response has already been committed
         if (response.isCommitted()) {
             return;
         }
 
-        // Redirect to the target URL
-        redirectStrategy.sendRedirect(request, response, targetUrl);
-
-        // Clear authentication attributes (e.g., exceptions) and set user details in
-        // the session
         clearAuthenticationAttributes(request, authentication);
 
+        redirectStrategy.sendRedirect(request, response, targetUrl);
     }
-
 }

@@ -1,17 +1,18 @@
 package shop.controller;
 
-import shop.domain.PasswordChangeForm;
-import shop.domain.User;
-import shop.service.UserService;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpSession;
-import jakarta.validation.Valid;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
+import jakarta.validation.Valid;
+import shop.domain.PasswordChangeForm;
+import shop.domain.User;
+import shop.service.UserService;
 
 @Controller
 public class ChangePassController {
@@ -25,50 +26,46 @@ public class ChangePassController {
     }
 
     @GetMapping("/changepass")
-    public String showChangePassForm(Model model) {
-        model.addAttribute("passwordChangeForm", new PasswordChangeForm());
-        return "authentication/changepass";
+    public String showChangePassForm() {
+        return "redirect:/profile#password-section";
     }
 
     @PostMapping("/changepass")
     public String changePassword(
             @Valid PasswordChangeForm passwordChangeForm,
             BindingResult bindingResult,
-            Model model,
-            HttpServletRequest request) {
-
-        if (bindingResult.hasErrors()) {
-            model.addAttribute("errorMessage", "All fields are required.");
-            return "authentication/changepass";
-        }
+            HttpServletRequest request,
+            RedirectAttributes redirectAttributes) {
 
         HttpSession session = request.getSession(false);
         String email = session != null ? (String) session.getAttribute("email") : null;
 
-        if (email == null || email.isEmpty()) {
-            model.addAttribute("errorMessage", "Session has expired or user is not logged in.");
-            return "authentication/changepass";
+        if (email == null || email.isBlank()) {
+            return "redirect:/login";
+        }
+
+        if (bindingResult.hasErrors()) {
+            redirectAttributes.addFlashAttribute("passwordErrorMessage", "Vui lòng điền đầy đủ thông tin.");
+            return "redirect:/profile#password-section";
         }
 
         User user = userService.getUserByEmail(email);
         if (user == null) {
-            model.addAttribute("errorMessage", "User not found.");
-            return "authentication/changepass";
+            return "redirect:/login";
         }
 
         if (!passwordEncoder.matches(passwordChangeForm.getCurrentPassword(), user.getPassword())) {
-            model.addAttribute("errorMessage", "Current password is incorrect.");
-            return "authentication/changepass";
+            redirectAttributes.addFlashAttribute("passwordErrorMessage", "Mật khẩu hiện tại không đúng.");
+            return "redirect:/profile#password-section";
         }
 
         if (!passwordChangeForm.getNewPassword().equals(passwordChangeForm.getConfirmPassword())) {
-            model.addAttribute("errorMessage", "New password and confirmation password do not match.");
-            return "authentication/changepass";
+            redirectAttributes.addFlashAttribute("passwordErrorMessage", "Mật khẩu mới và xác nhận không khớp.");
+            return "redirect:/profile#password-section";
         }
 
         userService.updatePassword(user.getEmail(), passwordChangeForm.getNewPassword());
-        model.addAttribute("successMessage", "Password has been successfully changed.");
-
-        return "authentication/changepass";
+        redirectAttributes.addFlashAttribute("passwordSuccessMessage", "Đổi mật khẩu thành công.");
+        return "redirect:/profile#password-section";
     }
 }

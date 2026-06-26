@@ -76,12 +76,14 @@ public class SecurityConfiguration {
                 .dispatcherTypeMatchers(DispatcherType.FORWARD, DispatcherType.INCLUDE)
                 .permitAll()
                 .requestMatchers("/", "/login", "/register", "/css/**",
-                        "/js/**", "/images/**", "/forgotpassword",
+                        "/js/**", "/images/**", "/resources/**", "/uploads/**", "/forgotpassword",
                         "/authentication/**", "/books", "/books/**", "/client/**")
                 .permitAll()
+                .requestMatchers("/admin").hasRole("ADMIN")
                 .requestMatchers("/admin/**").hasRole("ADMIN")
+                .requestMatchers("/staff").hasRole("STAFF")
+                .requestMatchers("/staff/**").hasRole("STAFF")
                 .requestMatchers("/changepass", "/profile").authenticated()
-                .requestMatchers("/stationery/**").authenticated()
                 .anyRequest().authenticated())
                 .sessionManagement(sessionManagement -> sessionManagement
                 .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
@@ -95,7 +97,7 @@ public class SecurityConfiguration {
                 .rememberMeServices(rememberMeServices()))
                 .formLogin(formLogin -> formLogin
                 .loginPage("/login")
-                .failureHandler(this::handleLoginFailure) // Gọi phương thức xử lý lỗi
+                .failureHandler(this::handleLoginFailure)
                 .successHandler(customSuccessHandler())
                 .permitAll())
                 .exceptionHandling(ex -> ex
@@ -115,15 +117,15 @@ public class SecurityConfiguration {
             if (!user.isStatus()) {
                 // Hiện thông báo tài khoản bị cấm
                 request.getSession().setAttribute("message", "Tài khoản của bạn đã bị cấm.");
-                response.sendRedirect("/login?locked"); // Chuyển hướng tới trang đăng nhập
+                response.sendRedirect("/login?locked");
             } else {
-                response.sendRedirect("/login?error"); // Chuyển hướng cho các lỗi khác
+                response.sendRedirect("/login?error");
             }
         } else {
             if (failureMessage != null && !failureMessage.isBlank()) {
                 request.getSession().setAttribute("message", failureMessage);
             }
-            response.sendRedirect("/login?error"); // Người dùng không tồn tại
+            response.sendRedirect("/login?error");
         }
     }
 }
