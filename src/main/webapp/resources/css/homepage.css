@@ -326,6 +326,7 @@ body.home-page {
     font-size: 1.05rem;
     font-weight: 800;
     color: var(--accent-warm, #F57C00);
+    white-space: nowrap;
 }
 .book-card__detail-btn {
     display: inline-flex;

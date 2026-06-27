@@ -1,6 +1,5 @@
 <%@ page contentType="text/html" pageEncoding="UTF-8" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
-<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <!DOCTYPE html>
 <html lang="vi">
 <head>
@@ -80,7 +79,7 @@
                                             </td>
                                             <td>
                                                 <span class="cart-price">
-                                                    <fmt:formatNumber value="${item.book.price}" type="currency" currencySymbol="₫" maxFractionDigits="0" />
+                                                    ${item.book.priceFormatted} &#8363;
                                                 </span>
                                             </td>
                                             <td>
@@ -94,7 +93,7 @@
                                             </td>
                                             <td>
                                                 <span class="cart-price">
-                                                    <fmt:formatNumber value="${item.book.price * item.quantity}" type="currency" currencySymbol="₫" maxFractionDigits="0" />
+                                                    ${item.subtotalFormatted} &#8363;
                                                 </span>
                                             </td>
                                             <td>
@@ -121,7 +120,7 @@
                             <div class="cart-summary-row total">
                                 <span>Tổng tiền</span>
                                 <span>
-                                    <fmt:formatNumber value="${cart.totalAmount}" type="currency" currencySymbol="₫" maxFractionDigits="0" />
+                                    ${cart.totalAmountFormatted} &#8363;
                                 </span>
                             </div>
                             <div class="cart-summary-actions">

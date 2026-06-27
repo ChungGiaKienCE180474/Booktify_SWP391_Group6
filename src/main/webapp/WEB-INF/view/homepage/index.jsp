@@ -114,7 +114,7 @@
                             <div class="book-card__title">${book.title}</div>
                             <div class="book-card__author">${book.author}</div>
                             <div class="book-card__footer">
-                                <span class="book-card__price">${book.price}</span>
+                                <span class="book-card__price">${book.priceFormatted} &#8363;</span>
                                 <span class="book-card__detail-btn">Chi tiết</span>
                             </div>
                         </div>
@@ -160,7 +160,7 @@
                             <div class="book-card__title">${book.title}</div>
                             <div class="book-card__author">${book.author}</div>
                             <div class="book-card__footer">
-                                <span class="book-card__price">${book.price}</span>
+                                <span class="book-card__price">${book.priceFormatted} &#8363;</span>
                                 <span class="book-card__detail-btn">Chi tiết</span>
                             </div>
                         </div>
