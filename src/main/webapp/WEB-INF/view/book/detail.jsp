@@ -125,6 +125,7 @@
             font-size: 2rem;
             font-weight: 800;
             color: var(--accent-warm, #F57C00);
+            white-space: nowrap;
         }
         .detail-stock {
             display: inline-flex;
@@ -285,7 +286,7 @@
         .s-card__body { padding:.65rem .8rem .8rem;flex:1;display:flex;flex-direction:column; }
         .s-card__title { font-size:.85rem;font-weight:700;line-height:1.3;flex:1;color:var(--text);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;margin-bottom:.2rem; }
         .s-card__author { font-size:.72rem;color:var(--text-muted);margin-bottom:.55rem; }
-        .s-card__price { font-size:.95rem;font-weight:800;color:var(--accent-warm,#F57C00); }
+        .s-card__price { font-size:.95rem;font-weight:800;color:var(--accent-warm,#F57C00);white-space:nowrap; }
 
         @media(max-width:768px){
             .detail-wrap { grid-template-columns:1fr;gap:1.5rem; }
@@ -361,7 +362,7 @@
             <p class="detail-info__author">Tác giả: <strong>${book.author}</strong></p>
 
             <div class="detail-price-row">
-                <div class="detail-price">${book.price}</div>
+                <div class="detail-price">${book.priceFormatted} &#8363;</div>
                 <c:choose>
                     <c:when test="${book.stockQuantity > 0}">
                         <span class="detail-stock detail-stock--in">
@@ -462,7 +463,7 @@
                         <div class="s-card__body">
                             <div class="s-card__title">${s.title}</div>
                             <div class="s-card__author">${s.author}</div>
-                            <div class="s-card__price">${s.price}</div>
+                            <div class="s-card__price">${s.priceFormatted} &#8363;</div>
                         </div>
                     </a>
                 </c:forEach>

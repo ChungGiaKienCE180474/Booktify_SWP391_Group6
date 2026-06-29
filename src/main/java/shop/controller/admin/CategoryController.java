@@ -27,10 +27,27 @@ public class CategoryController {
         this.categoryService = categoryService;
     }
 
+    private static final int PAGE_SIZE = 10;
+
     @GetMapping
-    public String list(@RequestParam(required = false) String q, Model model) {
-        model.addAttribute("categories", categoryService.searchCategories(q));
+    public String list(@RequestParam(required = false) String q,
+                       @RequestParam(required = false) String status,
+                       @RequestParam(defaultValue = "0") int page,
+                       Model model) {
+        java.util.List<shop.domain.Category> all = categoryService.searchCategories(q, status);
+        int totalItems = all.size();
+        int totalPages = Math.max(1, (int) Math.ceil((double) totalItems / PAGE_SIZE));
+        page = Math.max(0, Math.min(page, totalPages - 1));
+        int from = page * PAGE_SIZE;
+        int to   = Math.min(from + PAGE_SIZE, totalItems);
+        model.addAttribute("categories", all.subList(from, to));
         model.addAttribute("q", q);
+        model.addAttribute("status", status);
+        model.addAttribute("currentPage", page);
+        model.addAttribute("totalPages", totalPages);
+        model.addAttribute("totalItems", totalItems);
+        model.addAttribute("fromItem", totalItems == 0 ? 0 : from + 1);
+        model.addAttribute("toItem", to);
         return "admin/category/list";
     }
 
@@ -83,22 +100,32 @@ public class CategoryController {
 
         existing.setName(category.getName());
         existing.setDescription(category.getDescription());
-        existing.setActive(category.isActive());
+        // NOTE: active is NOT updated here — use Remove/Restore actions on the list page
         categoryService.saveCategory(existing);
         redirectAttributes.addFlashAttribute("successMessage", "Category updated successfully.");
         return "redirect:/admin/categories";
     }
 
     @PostMapping("/{id}/delete")
-    public String delete(@PathVariable Long id, RedirectAttributes redirectAttributes) {
+    public String remove(@PathVariable Long id, RedirectAttributes redirectAttributes) {
         try {
-            categoryService.deleteCategory(id);
-            redirectAttributes.addFlashAttribute("successMessage", "Category deleted successfully.");
-        } catch (IllegalStateException e) {
-            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+            categoryService.removeCategory(id);
+            redirectAttributes.addFlashAttribute("successMessage", "Category removed successfully.");
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("errorMessage",
-                    "An unexpected error occurred while deleting the category.");
+                    "An unexpected error occurred while removing the category.");
+        }
+        return "redirect:/admin/categories";
+    }
+
+    @PostMapping("/{id}/restore")
+    public String restore(@PathVariable Long id, RedirectAttributes redirectAttributes) {
+        try {
+            categoryService.restoreCategory(id);
+            redirectAttributes.addFlashAttribute("successMessage", "Category restored successfully.");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage",
+                    "An unexpected error occurred while restoring the category.");
         }
         return "redirect:/admin/categories";
     }
