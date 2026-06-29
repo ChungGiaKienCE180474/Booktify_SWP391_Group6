@@ -1,115 +1,76 @@
 ﻿<%@page contentType="text/html" pageEncoding="UTF-8" %>
-    <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
-        <%@taglib uri="http://www.springframework.org/tags/form" prefix="form" %>
-            <!DOCTYPE html>
-            <html>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" />
+    <link rel="stylesheet" href="/css/auth.css" />
+    <title>Booktify — Quên mật khẩu</title>
+</head>
+<body class="auth-page">
+    <div class="auth-shell">
+        <header class="auth-topbar">
+            <a href="/" class="auth-brand">
+                <span class="auth-brand-icon"><i class="fa-solid fa-book-open"></i></span>
+                <span>Booktify</span>
+            </a>
+            <a href="/login" class="auth-back-home">
+                <i class="fa-solid fa-arrow-left"></i> Về đăng nhập
+            </a>
+        </header>
 
-            <head>
-                <meta charset='utf-8'>
-                <meta name='viewport' content='width=device-width, initial-scale=1'>
-                <title>Forgot password</title>
-                <link href='https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css' rel='stylesheet'>
-                <link rel="stylesheet" href="/css/auth-theme.css" />
-                <script type='text/javascript'
-                    src='https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js'></script>
-                <style>
-                    body {
-                        color: #505050;
-                        font-family: "Rubik", Helvetica, Arial, sans-serif;
-                        font-size: 14px;
-                        font-weight: normal;
-                        line-height: 1.5;
-                        text-transform: none
-                    }
-
-                    .forgot {
-                        background-color: #fff;
-                        padding: 12px;
-                        border: 1px solid #dfdfdf
-                    }
-
-                    .padding-bottom-3x {
-                        padding-bottom: 72px !important
-                    }
-
-                    .card-footer {
-                        background-color: #fff
-                    }
-
-                    .btn {
-                        font-size: 13px
-                    }
-
-                    .form-control:focus {
-                        color: #495057;
-                        background-color: #fff;
-                        border-color: #76b7e9;
-                        outline: 0;
-                        box-shadow: 0 0 0 0px #28a745
-                    }
-                </style>
-            </head>
-
-            <body oncontextmenu='return false' class='snippet-body auth-page-bg'>
-                <div class="container padding-bottom-3x mb-2 mt-5">
-                    <img src="/images/logo.jpg" alt="Shop" class="site-logo" />
-                    <div class="row justify-content-center">
-                        <div class="col-lg-8 col-md-10">
-                            <div class="forgot">
-                                <h2>Forgot your password?</h2>
-                                <p>Change your password in three easy steps. This will help you
-                                    to secure your password!</p>
-                                <ol class="list-unstyled">
-                                    <li><span class="text-primary text-medium">1. </span>Enter
-                                        your email address below.</li>
-                                    <li><span class="text-primary text-medium">2. </span>Our
-                                        system will send you an OTP to your email</li>
-                                    <li><span class="text-primary text-medium">3. </span>Enter the OTP on the
-                                        next page</li>
-                                </ol>
-                            </div>
-                            <form:form method="post" action="/authentication/forgotpassword" modelAttribute="newUser"
-                                class="card mt-4" enctype="multipart/form-data">
-
-                                <div class="card-body">
-                                    <div class="form-group">
-
-
-                                        <label for="email-for-pass">Enter your email address</label>
-                                        <c:set var="errorEmail">
-                                            <form:errors path="email" cssClass="invalid-feedback" />
-                                        </c:set>
-                                        <c:if test="${param.invalidemail != null}">
-                                            <div class="my-2" style="color: red;">Email không hợp lệ</div>
-                                        </c:if>
-
-                                        <label class="form-label">Email:</label>
-
-                                        <form:input type="email"
-                                            class="form-control ${not empty errorEmail ? 'is-invalid' : ''}"
-                                            path="email" required="" />
-                                        ${errorEmail}
-
-                                        <small class="form-text text-muted">Enter the registered email
-                                            address . Then we'll
-                                            email a OTP to this address.</small>
-                                    </div>
-
-                                </div>
-                                <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}" />
-                                <div class="card-footer">
-                                    <button type="submit" class="btn btn-primary">Get OTP</button>
-                                    <button class="btn btn-danger"><a href="/login">Back</a></button>
-                                </div>
-                            </form:form>
-                        </div>
-                    </div>
+        <main class="auth-main">
+            <div class="auth-card">
+                <div class="auth-card-header">
+                    <h1>Quên mật khẩu?</h1>
+                    <p>Khôi phục mật khẩu qua email trong 3 bước</p>
                 </div>
-                <script type='text/javascript'
-                    src='https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/js/bootstrap.bundle.min.js'></script>
-                <script type='text/javascript' src=''></script>
-                <script type='text/javascript' src=''></script>
-                <script type='text/Javascript'></script>
-            </body>
 
-            </html>
+                <div class="auth-card-body">
+                    <div class="auth-steps">
+                        <h3><i class="fa-solid fa-list-ol"></i> Hướng dẫn</h3>
+                        <ol>
+                            <li><span>1.</span> Nhập email đã đăng ký bên dưới.</li>
+                            <li><span>2.</span> Hệ thống gửi mã OTP về email của bạn.</li>
+                            <li><span>3.</span> Nhập OTP ở trang tiếp theo để đặt lại mật khẩu.</li>
+                        </ol>
+                    </div>
+
+                    <c:if test="${not empty errorMessage}">
+                        <div class="auth-alert auth-alert-error">
+                            <i class="fa-solid fa-circle-exclamation"></i>
+                            ${errorMessage}
+                        </div>
+                    </c:if>
+                    <c:if test="${param.invalidemail != null}">
+                        <div class="auth-alert auth-alert-error">
+                            <i class="fa-solid fa-circle-exclamation"></i>
+                            Email không hợp lệ hoặc chưa được đăng ký.
+                        </div>
+                    </c:if>
+
+                    <form method="post" action="/authentication/forgotpassword">
+                        <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}" />
+                        <div class="auth-form-group">
+                            <label class="auth-label" for="email-for-pass">Email</label>
+                            <input type="email" id="email-for-pass" name="email" class="auth-input" required
+                                   placeholder="name@example.com" />
+                            <p class="auth-hint">Nhập email đã đăng ký. Chúng tôi sẽ gửi mã OTP tới email này.</p>
+                        </div>
+                        <div class="auth-btn-group">
+                            <button type="submit" class="auth-btn auth-btn-primary">
+                                <i class="fa-solid fa-paper-plane"></i> Gửi OTP
+                            </button>
+                            <a href="/login" class="auth-btn auth-btn-secondary" style="text-align:center;text-decoration:none;">
+                                Quay lại
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </main>
+    </div>
+</body>
+</html>

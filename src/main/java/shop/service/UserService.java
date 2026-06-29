@@ -13,6 +13,7 @@ import shop.domain.Role;
 import shop.domain.RoleName;
 import shop.domain.User;
 import shop.domain.dto.CustomerDTO;
+import shop.domain.dto.ProfileDTO;
 import shop.domain.dto.RegisterDTO;
 import shop.repository.RoleRepository;
 import shop.repository.UserRepository;
@@ -36,13 +37,30 @@ public class UserService {
     public User registerDTOtoUser(RegisterDTO registerDTO) {
         User user = new User();
         user.setFullName(registerDTO.getFirstName() + " " + registerDTO.getLastName());
-        user.setEmail(registerDTO.getEmail());
-        user.setPassword(registerDTO.getPassword());
+        user.setEmail(normalizeEmail(registerDTO.getEmail()));
         return user;
     }
 
-    public User handleSaveUser(User user) {
+    public User registerNewUser(RegisterDTO registerDTO, RoleName roleName) {
+        User user = registerDTOtoUser(registerDTO);
+        user.setPassword(passwordEncoder.encode(registerDTO.getPassword()));
+        user.setRole(getRoleByName(roleName));
+        user.setStatus(true);
         return userRepository.save(user);
+    }
+
+    public User handleSaveUser(User user) {
+        if (user.getEmail() != null) {
+            user.setEmail(normalizeEmail(user.getEmail()));
+        }
+        return userRepository.save(user);
+    }
+
+    public String normalizeEmail(String email) {
+        if (email == null) {
+            return null;
+        }
+        return email.trim().toLowerCase();
     }
 
     public Role getRoleByName(String name) {
@@ -54,20 +72,66 @@ public class UserService {
     }
 
     public boolean checkEmailExist(String email) {
-        return userRepository.existsByEmail(email);
+        if (email == null || email.isBlank()) {
+            return false;
+        }
+        return userRepository.existsByEmailIgnoreCase(normalizeEmail(email));
     }
 
     public User getUserByEmail(String email) {
-        return userRepository.findByEmail(email);
+        if (email == null || email.isBlank()) {
+            return null;
+        }
+        return userRepository.findByEmailIgnoreCase(normalizeEmail(email));
     }
 
-    public void updatePassword(String email, String newPassword) {
-        User user = userRepository.findByEmail(email);
+    public ProfileDTO getProfileDTOByEmail(String email) {
+        User user = getUserByEmail(email);
+        return user != null ? toProfileDTO(user) : null;
+    }
 
+    public ProfileDTO toProfileDTO(User user) {
+        if (user == null) {
+            return null;
+        }
+        ProfileDTO dto = new ProfileDTO();
+        dto.setId(user.getId());
+        dto.setEmail(user.getEmail());
+        dto.setFullName(user.getFullName());
+        dto.setPhone(user.getPhone());
+        dto.setAddress(user.getAddress());
+        dto.setAvatar(user.getAvatar());
+        dto.setStatus(user.isStatus());
+        if (user.getRole() != null) {
+            dto.setRoleName(user.getRole().getName());
+        }
+        return dto;
+    }
+
+    public void updatePassword(String email, String plainPassword) {
+        User user = getUserByEmail(email);
         if (user != null) {
-            user.setPassword(passwordEncoder.encode(newPassword));
+            user.setPassword(passwordEncoder.encode(plainPassword));
             userRepository.save(user);
         }
+    }
+
+    public User updateProfile(String email, String fullName, String phone, String address) {
+        User user = getUserByEmail(email);
+        if (user == null) {
+            return null;
+        }
+        user.setFullName(fullName != null ? fullName.trim() : null);
+        user.setPhone(blankToNull(phone));
+        user.setAddress(blankToNull(address));
+        return userRepository.save(user);
+    }
+
+    private String blankToNull(String value) {
+        if (value == null || value.isBlank()) {
+            return null;
+        }
+        return value.trim();
     }
 
     // ================= CUSTOMER MANAGEMENT =================

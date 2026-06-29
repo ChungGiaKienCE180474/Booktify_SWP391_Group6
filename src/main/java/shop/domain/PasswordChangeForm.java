@@ -1,17 +1,31 @@
 package shop.domain;
 
 import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 
 public class PasswordChangeForm {
+
+    @NotNull(message = "Vui lòng nhập mã OTP")
+    private Integer otp;
 
     @NotEmpty(message = "Current password is required")
     private String currentPassword;
 
     @NotEmpty(message = "New password is required")
+    @Size(min = 3, message = "Mật khẩu mới phải có tối thiểu 3 ký tự")
     private String newPassword;
 
     @NotEmpty(message = "Confirm password is required")
     private String confirmPassword;
+
+    public Integer getOtp() {
+        return otp;
+    }
+
+    public void setOtp(Integer otp) {
+        this.otp = otp;
+    }
 
     public String getCurrentPassword() {
         return currentPassword;

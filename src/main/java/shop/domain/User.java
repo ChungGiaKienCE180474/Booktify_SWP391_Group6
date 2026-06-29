@@ -1,5 +1,6 @@
 package shop.domain;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -35,7 +36,11 @@ public class User {
     private String phone;
     private String avatar;
     private boolean status;
+
+    @Column(nullable = false)
     private boolean deleted = false;
+
+    @Column(name = "staff_role")
     private String staffRole;
 
     @ManyToOne

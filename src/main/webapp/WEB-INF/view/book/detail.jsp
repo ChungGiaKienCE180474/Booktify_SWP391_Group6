@@ -144,6 +144,27 @@
             gap: .75rem;
             margin-bottom: 1.75rem;
             flex-wrap: wrap;
+            align-items: flex-end;
+        }
+        .detail-cart-form {
+            display: flex;
+            flex-wrap: wrap;
+            gap: .75rem;
+            align-items: flex-end;
+            flex: 1;
+        }
+        .detail-qty-label {
+            font-size: .8rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            display: block;
+            margin-bottom: .25rem;
+        }
+        .detail-qty-input {
+            width: 80px;
+            padding: .65rem .75rem;
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
         }
         .btn-detail-primary {
             flex: 1;
@@ -290,6 +311,21 @@
         <span>${book.title}</span>
     </nav>
 
+    <c:if test="${not empty successMessage}">
+        <div style="max-width:1200px;margin:0 auto;padding:0 1.5rem;">
+            <div style="background:#dcfce7;color:#166534;padding:.75rem 1rem;border-radius:8px;margin-bottom:.5rem;">
+                ${successMessage}
+            </div>
+        </div>
+    </c:if>
+    <c:if test="${not empty errorMessage}">
+        <div style="max-width:1200px;margin:0 auto;padding:0 1.5rem;">
+            <div style="background:#fee2e2;color:#991b1b;padding:.75rem 1rem;border-radius:8px;margin-bottom:.5rem;">
+                ${errorMessage}
+            </div>
+        </div>
+    </c:if>
+
     <%-- Detail --%>
     <div class="detail-wrap">
 
@@ -342,11 +378,37 @@
 
             <%-- Action buttons --%>
             <div class="detail-actions">
-                <a href="#" class="btn-detail-primary">
-                    <i class="fa-solid fa-cart-shopping"></i> Thêm vào giỏ hàng
-                </a>
-                <a href="#" class="btn-detail-secondary">
-                    <i class="fa-solid fa-bolt"></i> Mua ngay
+                <c:choose>
+                    <c:when test="${book.active and book.stockQuantity > 0}">
+                        <c:choose>
+                            <c:when test="${not empty sessionScope.username}">
+                                <form action="/cart/add" method="post" class="detail-cart-form">
+                                    <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}" />
+                                    <input type="hidden" name="bookId" value="${book.id}" />
+                                    <input type="hidden" name="redirect" value="/books/${book.id}" />
+                                    <label class="detail-qty-label" for="cartQty">Số lượng</label>
+                                    <input type="number" id="cartQty" name="quantity" value="1"
+                                           min="1" max="${book.stockQuantity}" class="detail-qty-input" required />
+                                    <button type="submit" class="btn-detail-primary">
+                                        <i class="fa-solid fa-cart-shopping"></i> Thêm vào giỏ hàng
+                                    </button>
+                                </form>
+                            </c:when>
+                            <c:otherwise>
+                                <a href="/login" class="btn-detail-primary">
+                                    <i class="fa-solid fa-right-to-bracket"></i> Đăng nhập để mua
+                                </a>
+                            </c:otherwise>
+                        </c:choose>
+                    </c:when>
+                    <c:otherwise>
+                        <button type="button" class="btn-detail-primary" disabled style="opacity:.6;cursor:not-allowed;">
+                            <i class="fa-solid fa-cart-shopping"></i> Không thể thêm vào giỏ
+                        </button>
+                    </c:otherwise>
+                </c:choose>
+                <a href="/cart" class="btn-detail-secondary">
+                    <i class="fa-solid fa-basket-shopping"></i> Xem giỏ hàng
                 </a>
             </div>
 
