@@ -11,8 +11,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import shop.domain.Cart;
 import shop.domain.User;
+import shop.domain.dto.CartDTO;
 import shop.service.CartService;
 import shop.service.UserService;
 
@@ -31,7 +31,7 @@ public class CartController {
     @GetMapping
     public String viewCart(Authentication authentication, Model model) {
         User user = getCurrentUser(authentication);
-        Cart cart = cartService.refreshCart(user.getId());
+        CartDTO cart = cartService.refreshCartDTO(user.getId());
         model.addAttribute("cart", cart);
         return "cart/index";
     }
