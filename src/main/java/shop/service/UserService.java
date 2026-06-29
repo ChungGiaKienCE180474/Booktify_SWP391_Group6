@@ -13,6 +13,7 @@ import shop.domain.Role;
 import shop.domain.RoleName;
 import shop.domain.User;
 import shop.domain.dto.CustomerDTO;
+import shop.domain.dto.ProfileDTO;
 import shop.domain.dto.RegisterDTO;
 import shop.repository.RoleRepository;
 import shop.repository.UserRepository;
@@ -82,6 +83,29 @@ public class UserService {
             return null;
         }
         return userRepository.findByEmailIgnoreCase(normalizeEmail(email));
+    }
+
+    public ProfileDTO getProfileDTOByEmail(String email) {
+        User user = getUserByEmail(email);
+        return user != null ? toProfileDTO(user) : null;
+    }
+
+    public ProfileDTO toProfileDTO(User user) {
+        if (user == null) {
+            return null;
+        }
+        ProfileDTO dto = new ProfileDTO();
+        dto.setId(user.getId());
+        dto.setEmail(user.getEmail());
+        dto.setFullName(user.getFullName());
+        dto.setPhone(user.getPhone());
+        dto.setAddress(user.getAddress());
+        dto.setAvatar(user.getAvatar());
+        dto.setStatus(user.isStatus());
+        if (user.getRole() != null) {
+            dto.setRoleName(user.getRole().getName());
+        }
+        return dto;
     }
 
     public void updatePassword(String email, String plainPassword) {

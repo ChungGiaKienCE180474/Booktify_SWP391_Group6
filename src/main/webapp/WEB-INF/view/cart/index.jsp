@@ -30,7 +30,7 @@
             </c:if>
 
             <c:choose>
-                <c:when test="${empty cart or empty cart.items}">
+                <c:when test="${empty cart.items}">
                     <div class="cart-empty">
                         <i class="fa-solid fa-cart-arrow-down"></i>
                         <h2>Giỏ hàng trống</h2>
@@ -60,8 +60,8 @@
                                                 <div class="cart-book">
                                                     <div class="cart-book__thumb">
                                                         <c:choose>
-                                                            <c:when test="${not empty item.book.imageUrl}">
-                                                                <img src="${item.book.imageUrl}" alt="${item.book.title}" />
+                                                            <c:when test="${not empty item.bookImageUrl}">
+                                                                <img src="${item.bookImageUrl}" alt="${item.bookTitle}" />
                                                             </c:when>
                                                             <c:otherwise>
                                                                 <i class="fa-solid fa-book" style="color:#94a3b8;"></i>
@@ -69,9 +69,9 @@
                                                         </c:choose>
                                                     </div>
                                                     <div>
-                                                        <a href="/books/${item.book.id}" class="cart-book__title">${item.book.title}</a>
-                                                        <div class="cart-book__author">${item.book.author}</div>
-                                                        <c:if test="${not item.book.active}">
+                                                        <a href="/books/${item.bookId}" class="cart-book__title">${item.bookTitle}</a>
+                                                        <div class="cart-book__author">${item.bookAuthor}</div>
+                                                        <c:if test="${!item.bookActive}">
                                                             <small style="color:#dc2626;">Ngừng kinh doanh</small>
                                                         </c:if>
                                                     </div>
@@ -87,7 +87,7 @@
                                                     <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}" />
                                                     <input type="hidden" name="itemId" value="${item.id}" />
                                                     <input type="number" name="quantity" value="${item.quantity}"
-                                                           min="1" max="${item.book.stockQuantity}" required />
+                                                           min="1" max="${item.bookStockQuantity}" required />
                                                     <button type="submit" class="cart-btn cart-btn--outline">Cập nhật</button>
                                                 </form>
                                             </td>
