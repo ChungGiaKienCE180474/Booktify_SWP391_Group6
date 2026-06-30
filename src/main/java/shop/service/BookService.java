@@ -30,11 +30,19 @@ public class BookService {
         return bookRepository.findAllByCategoryIdAndActiveTrueOrderByIdAsc(categoryId);
     }
 
-    public List<Book> searchBooks(String q) {
+    public List<Book> searchBooks(String q, String status) {
+        List<Book> result;
         if (!StringUtils.hasText(q)) {
-            return getAllBooks();
+            result = getAllBooks();
+        } else {
+            result = bookRepository.search(q);
         }
-        return bookRepository.search(q);
+        if ("active".equals(status)) {
+            result = result.stream().filter(Book::isActive).toList();
+        } else if ("inactive".equals(status)) {
+            result = result.stream().filter(b -> !b.isActive()).toList();
+        }
+        return result;
     }
 
     public Optional<Book> getBookById(Long id) {
@@ -45,9 +53,16 @@ public class BookService {
         return bookRepository.save(book);
     }
 
-    public void softDeleteBook(Long id) {
+    public void removeBook(Long id) {
         bookRepository.findById(id).ifPresent(book -> {
             book.setActive(false);
+            bookRepository.save(book);
+        });
+    }
+
+    public void restoreBook(Long id) {
+        bookRepository.findById(id).ifPresent(book -> {
+            book.setActive(true);
             bookRepository.save(book);
         });
     }
@@ -56,12 +71,22 @@ public class BookService {
         return bookRepository.count();
     }
 
+    /** Đếm sách active bằng COUNT query — không load data vào RAM */
     public long countActiveBooks() {
-        return bookRepository.findAll().stream().filter(Book::isActive).count();
+        return bookRepository.countByActiveTrue();
     }
 
-    public boolean existsByIsbnIgnoreCase(String isbn) {
-        return bookRepository.existsByIsbnIgnoreCase(isbn);
+    /**
+     * Kiểm tra ISBN đã bị dùng bởi sách khác chưa.
+     * @param isbn      ISBN cần kiểm tra
+     * @param excludeId id sách hiện tại (khi edit) — null khi create
+     * @return true nếu ISBN đã tồn tại ở sách khác
+     */
+    public boolean isIsbnTaken(String isbn, Long excludeId) {
+        if (!org.springframework.util.StringUtils.hasText(isbn)) return false;
+        return bookRepository.findByIsbnIgnoreCase(isbn)
+                .map(existing -> excludeId == null || !existing.getId().equals(excludeId))
+                .orElse(false);
     }
 
     public List<Book> getSuggestedBooks(Long categoryId, Long excludeBookId) {

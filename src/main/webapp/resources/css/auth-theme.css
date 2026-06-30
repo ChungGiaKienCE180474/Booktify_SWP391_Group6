@@ -1,46 +1,5 @@
-/* Shared auth & landing backgrounds — CSS only, no image files */
-
+/* Legacy hook — auth pages now use auth.css + Booktify teal theme */
 :root {
-    --auth-gradient: linear-gradient(135deg, #1D3865 0%, #5c6bc0 50%, #7b1fa2 100%);
-    --auth-accent: #512da8;
-}
-
-.auth-page-bg {
-    position: relative;
-    min-height: 100vh;
-    margin: 0;
-}
-
-.auth-page-bg::before {
-    content: "";
-    position: fixed;
-    inset: 0;
-    background: var(--auth-gradient);
-    z-index: -2;
-}
-
-.auth-page-bg::after {
-    content: "";
-    position: fixed;
-    width: 420px;
-    height: 420px;
-    border-radius: 50%;
-    background: rgba(255, 255, 255, 0.06);
-    top: -120px;
-    right: -80px;
-    z-index: -1;
-    pointer-events: none;
-}
-
-.site-logo {
-    display: block;
-    max-height: 56px;
-    width: auto;
-    margin: 0 auto 1.25rem;
-    object-fit: contain;
-}
-
-.site-logo-sm {
-    max-height: 40px;
-    margin-bottom: 1rem;
+    --auth-gradient: linear-gradient(160deg, #006B5E 0%, #004D42 100%);
+    --auth-accent: #006B5E;
 }

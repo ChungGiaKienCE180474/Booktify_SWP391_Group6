@@ -1,8 +1,10 @@
 package shop.domain;
 
 import java.math.BigDecimal;
+import java.text.NumberFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Locale;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -72,6 +74,10 @@ public class Book {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "category_id")
     private Category category;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "genre_id")
+    private Genre genre;
 
     @PrePersist
     void onCreate() {
@@ -169,6 +175,10 @@ public class Book {
         return updatedAt;
     }
 
+    public String getCreatedAtString() {
+        return createdAt == null ? "" : createdAt.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"));
+    }
+
     public String getUpdatedAtString() {
         return updatedAt == null ? "" : updatedAt.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"));
     }
@@ -177,11 +187,25 @@ public class Book {
         this.updatedAt = updatedAt;
     }
 
+    public String getPriceFormatted() {
+        if (price == null) return "0";
+        NumberFormat nf = NumberFormat.getIntegerInstance(Locale.GERMANY);
+        return nf.format(price.longValue());
+    }
+
     public Category getCategory() {
         return category;
     }
 
     public void setCategory(Category category) {
         this.category = category;
+    }
+
+    public Genre getGenre() {
+        return genre;
+    }
+
+    public void setGenre(Genre genre) {
+        this.genre = genre;
     }
 }

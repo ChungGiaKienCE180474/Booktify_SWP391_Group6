@@ -43,9 +43,7 @@ public class ClientBookController {
         if (StringUtils.hasText(q)) {
             // Keyword search across all active books (uses existing BookService.searchBooks
             // but filtered to active only)
-            books = bookService.searchBooks(q).stream()
-                    .filter(Book::isActive)
-                    .collect(java.util.stream.Collectors.toList());
+            books = bookService.searchBooks(q, "active");
         } else if (categoryId != null) {
             books = bookService.getBooksByCategory(categoryId);
             model.addAttribute("selectedCategory",

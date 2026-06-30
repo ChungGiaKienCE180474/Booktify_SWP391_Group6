@@ -3,6 +3,7 @@ package shop.service;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -11,6 +12,8 @@ import shop.domain.Book;
 import shop.domain.Cart;
 import shop.domain.CartItem;
 import shop.domain.User;
+import shop.domain.dto.CartDTO;
+import shop.domain.dto.CartItemDTO;
 import shop.repository.BookRepository;
 import shop.repository.CartItemRepository;
 import shop.repository.CartRepository;
@@ -185,6 +188,43 @@ public class CartService {
 
         recalculateTotal(cart);
         return cartRepository.save(cart);
+    }
+
+    @Transactional
+    public CartDTO refreshCartDTO(long userId) {
+        return toCartDTO(refreshCart(userId));
+    }
+
+    public CartDTO toCartDTO(Cart cart) {
+        if (cart == null || cart.getItems().isEmpty()) {
+            return CartDTO.empty();
+        }
+        CartDTO dto = new CartDTO();
+        dto.setId(cart.getId());
+        dto.setTotalAmountFormatted(cart.getTotalAmountFormatted());
+        dto.setItems(cart.getItems().stream()
+                .map(this::toCartItemDTO)
+                .collect(Collectors.toList()));
+        return dto;
+    }
+
+    private CartItemDTO toCartItemDTO(CartItem item) {
+        CartItemDTO dto = new CartItemDTO();
+        dto.setId(item.getId());
+        dto.setQuantity(item.getQuantity());
+        dto.setSubtotalFormatted(item.getSubtotalFormatted());
+
+        Book book = item.getBook();
+        if (book != null) {
+            dto.setBookId(book.getId());
+            dto.setBookTitle(book.getTitle());
+            dto.setBookAuthor(book.getAuthor());
+            dto.setBookImageUrl(book.getImageUrl());
+            dto.setBookPriceFormatted(book.getPriceFormatted());
+            dto.setBookStockQuantity(book.getStockQuantity());
+            dto.setBookActive(book.isActive());
+        }
+        return dto;
     }
 
     private Cart getOrCreateCart(long userId) {

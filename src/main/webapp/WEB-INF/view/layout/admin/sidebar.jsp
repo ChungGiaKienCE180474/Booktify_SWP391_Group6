@@ -24,18 +24,26 @@
                                 </a>
                             </div>
 
-                            <div class="admin-sidebar__section">
-                                <span class="admin-sidebar__label">Management</span>
-                                <a href="/admin/categories"
-                                    class="admin-sidebar__item ${fn:contains(pageContext.request.requestURI, '/admin/categories') ? 'active' : ''}">
-                                    <i class="fa-solid fa-tag"></i>
-                                    Categories
-                                </a>
-                                <a href="/admin/books"
-                                    class="admin-sidebar__item ${fn:contains(pageContext.request.requestURI, '/admin/books') ? 'active' : ''}">
-                                    <i class="fa-solid fa-book"></i>
-                                    Books
-                                </a>
+        <div class="admin-sidebar__section">
+            <span class="admin-sidebar__label">Management</span>
+            <a href="/admin/categories"
+               class="admin-sidebar__item ${fn:contains(pageContext.request.requestURI, '/admin/categories') ? 'active' : ''}">
+                <i class="fa-solid fa-tag"></i>
+                Categories
+            </a>
+            <a href="/admin/genres"
+               class="admin-sidebar__item ${fn:contains(pageContext.request.requestURI, '/admin/genres') ? 'active' : ''}">
+                <i class="fa-solid fa-layer-group"></i>
+                Genres
+            </a>
+            <a href="/admin/books"
+               class="admin-sidebar__item ${fn:contains(pageContext.request.requestURI, '/admin/books') ? 'active' : ''}">
+                <i class="fa-solid fa-book"></i>
+                Books
+            </a>
+           
+        </div>
+  
 
                                 <a href="/admin/authors"
                                     class="admin-sidebar__item ${fn:contains(pageContext.request.requestURI, '/admin/authors') ? 'active' : ''}">

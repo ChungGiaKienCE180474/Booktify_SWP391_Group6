@@ -77,14 +77,6 @@
                             </div>
                         </c:if>
 
-                        <%-- Active --%>
-                        <div class="admin-field admin-field--inline">
-                            <label class="admin-checkbox">
-                                <form:checkbox path="active" />
-                                Active (visible to users)
-                            </label>
-                        </div>
-
                         <%-- Actions --%>
                         <div class="admin-form__actions">
                             <a href="/admin/categories" class="admin-button admin-button--ghost">

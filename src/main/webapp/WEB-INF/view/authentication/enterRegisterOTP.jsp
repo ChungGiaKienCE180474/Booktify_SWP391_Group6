@@ -1,42 +1,63 @@
 ﻿<%@page contentType="text/html" pageEncoding="UTF-8" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <!DOCTYPE html>
-<html lang="en">
-
+<html lang="vi">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="/css/auth-theme.css" />
-    <title>OTP Verification</title>
-    <style>
-        .otp-container {
-            background: white;
-            padding: 30px;
-            border-radius: 12px;
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
-            max-width: 420px;
-            width: 100%;
-        }
-    </style>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" />
+    <link rel="stylesheet" href="/css/auth.css" />
+    <title>Booktify — Xác nhận OTP đăng ký</title>
 </head>
+<body class="auth-page">
+    <div class="auth-shell">
+        <header class="auth-topbar">
+            <a href="/" class="auth-brand">
+                <span class="auth-brand-icon"><i class="fa-solid fa-book-open"></i></span>
+                <span>Booktify</span>
+            </a>
+            <a href="/register" class="auth-back-home">
+                <i class="fa-solid fa-arrow-left"></i> Quay lại đăng ký
+            </a>
+        </header>
 
-<body class="auth-page-bg d-flex align-items-center justify-content-center flex-column">
-    <div class="otp-container mx-3">
-        <img src="/images/logo.jpg" alt="Shop" class="site-logo-sm" />
-        <h1 class="text-center h4">Verify OTP</h1>
-        <p class="text-center text-muted">Check your email and enter the OTP</p>
-        <form method="post" action="/authentication/enterRegisterOTP">
-            <div class="form-group">
-                <label for="otp">Enter OTP</label>
-                <input type="text" id="otp" name="otp" placeholder="Enter OTP" class="form-control" required />
+        <main class="auth-main">
+            <div class="auth-card">
+                <div class="auth-card-header">
+                    <div class="auth-otp-icon">
+                        <i class="fa-solid fa-envelope-circle-check"></i>
+                    </div>
+                    <h1>Xác nhận đăng ký</h1>
+                    <p>Nhập mã OTP đã gửi tới email của bạn để hoàn tất đăng ký</p>
+                </div>
+
+                <div class="auth-card-body">
+                    <c:if test="${not empty message}">
+                        <div class="auth-alert auth-alert-error">
+                            <i class="fa-solid fa-circle-exclamation"></i>
+                            ${message}
+                        </div>
+                    </c:if>
+
+                    <form method="post" action="/authentication/enterRegisterOTP">
+                        <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}" />
+                        <div class="auth-form-group">
+                            <label class="auth-label" for="otp">Mã OTP</label>
+                            <input type="text" id="otp" name="otp" class="auth-input auth-otp-input"
+                                   placeholder="000000" maxlength="6" inputmode="numeric" required />
+                            <p class="auth-hint">Mã gồm 6 chữ số được gửi tới email đăng ký.</p>
+                        </div>
+                        <button type="submit" class="auth-btn auth-btn-primary">
+                            <i class="fa-solid fa-check"></i> Hoàn tất đăng ký
+                        </button>
+                    </form>
+                </div>
+
+                <div class="auth-card-footer">
+                    Không nhận được mã? <a href="/register">Đăng ký lại</a>
+                </div>
             </div>
-            <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}" />
-            <button type="submit" class="btn btn-primary btn-block">Submit OTP</button>
-        </form>
+        </main>
     </div>
-    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
-
 </html>
