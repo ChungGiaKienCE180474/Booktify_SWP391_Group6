@@ -12,104 +12,114 @@ import shop.repository.AuthorRepository;
 @Service
 public class AuthorService {
 
-    private final AuthorRepository authorRepository;
+        private final AuthorRepository authorRepository;
 
-    public AuthorService(AuthorRepository authorRepository) {
-        this.authorRepository = authorRepository;
-    }
+        public AuthorService(AuthorRepository authorRepository) {
+                this.authorRepository = authorRepository;
+        }
 
-    /**
-     * Create Author
-     */
-    public void saveAuthor(AuthorDTO authorDTO) {
+        /**
+         * Create Author
+         */
+        public void saveAuthor(AuthorDTO authorDTO) {
 
-        // Trim dữ liệu
-        String authorName = authorDTO.getAuthorName().trim();
+                // Trim dữ liệu
+                String authorName = authorDTO.getAuthorName().trim();
 
-        String biography = authorDTO.getBiography() == null
-                ? null
-                : authorDTO.getBiography().trim();
+                String biography = authorDTO.getBiography() == null
+                                ? null
+                                : authorDTO.getBiography().trim();
 
-        String nationality = authorDTO.getNationality() == null
-                ? null
-                : authorDTO.getNationality().trim();
+                String nationality = authorDTO.getNationality() == null
+                                ? null
+                                : authorDTO.getNationality().trim();
 
-        String profileImage = authorDTO.getProfileImage() == null
-                ? null
-                : authorDTO.getProfileImage().trim();
+                String profileImage = authorDTO.getProfileImage() == null
+                                ? null
+                                : authorDTO.getProfileImage().trim();
 
-        // Mapping DTO -> Entity
-        Author author = new Author();
+                // Mapping DTO -> Entity
+                Author author = new Author();
 
-        author.setAuthorName(authorName);
-        author.setBiography(biography);
-        author.setNationality(nationality);
-        author.setProfileImage(profileImage);
+                author.setAuthorName(authorName);
+                author.setBiography(biography);
+                author.setNationality(nationality);
+                author.setProfileImage(profileImage);
 
-        // Auto timestamp
-        author.setCreatedAt(LocalDateTime.now());
-        author.setUpdatedAt(LocalDateTime.now());
+                // Auto timestamp
+                author.setCreatedAt(LocalDateTime.now());
+                author.setUpdatedAt(LocalDateTime.now());
 
-        authorRepository.save(author);
-    }
+                authorRepository.save(author);
+        }
 
-    /**
-     * Get all Authors
-     */
-    public List<Author> getAllAuthors() {
-        return authorRepository.findAllByOrderByAuthorIdDesc();
-    }
+        /**
+         * Get all Authors
+         */
+        public List<Author> getAllAuthors() {
+                return authorRepository.findAllByOrderByAuthorIdDesc();
+        }
 
-    
-    /**
-     * Check duplicate author name
-     */
-    public boolean existsByAuthorNameIgnoreCase(String authorName) {
-        return authorRepository.existsByAuthorNameIgnoreCase(authorName.trim());
-    }
+        /**
+         * Check duplicate author name
+         */
+        public boolean existsByAuthorNameIgnoreCase(String authorName) {
+                return authorRepository.existsByAuthorNameIgnoreCase(authorName.trim());
+        }
 
-    public Author getAuthorById(Long id) {
-        return authorRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Author not found"));
-    }
+        public Author getAuthorById(Long id) {
+                return authorRepository.findById(id)
+                                .orElseThrow(() -> new IllegalArgumentException("Author not found"));
+        }
 
-    /*
-     * UPDATE AUTHOR
-     */
-    public void updateAuthor(Long id, AuthorDTO authorDTO) {
+        /*
+         * UPDATE AUTHOR
+         */
+        public void updateAuthor(Long id, AuthorDTO authorDTO) {
 
-        Author author = authorRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Author not found"));
+                Author author = authorRepository.findById(id)
+                                .orElseThrow(() -> new IllegalArgumentException("Author not found"));
 
-        // Trim dữ liệu
-        String authorName = authorDTO.getAuthorName().trim();
+                // Trim dữ liệu
+                String authorName = authorDTO.getAuthorName().trim();
 
-        String biography = authorDTO.getBiography() == null
-                ? null
-                : authorDTO.getBiography().trim();
+                String biography = authorDTO.getBiography() == null
+                                ? null
+                                : authorDTO.getBiography().trim();
 
-        String nationality = authorDTO.getNationality() == null
-                ? null
-                : authorDTO.getNationality().trim();
+                String nationality = authorDTO.getNationality() == null
+                                ? null
+                                : authorDTO.getNationality().trim();
 
-        String profileImage = authorDTO.getProfileImage() == null
-                ? null
-                : authorDTO.getProfileImage().trim();
+                String profileImage = authorDTO.getProfileImage() == null
+                                ? null
+                                : authorDTO.getProfileImage().trim();
 
-        // Mapping update
-        author.setAuthorName(authorName);
-        author.setBiography(biography);
-        author.setNationality(nationality);
-        author.setProfileImage(profileImage);
+                // Mapping update
+                author.setAuthorName(authorName);
+                author.setBiography(biography);
+                author.setNationality(nationality);
+                author.setProfileImage(profileImage);
 
-        // CHỈ update updatedAt
-        author.setUpdatedAt(LocalDateTime.now());
+                // CHỈ update updatedAt
+                author.setUpdatedAt(LocalDateTime.now());
 
-        authorRepository.save(author);
-    }
+                authorRepository.save(author);
+        }
 
-    public boolean existsByAuthorNameIgnoreCaseAndIdNot(String authorName, Long id) {
-        return authorRepository.existsByAuthorNameIgnoreCaseAndAuthorIdNot(
-                authorName.trim(), id);
-    }
+        public boolean existsByAuthorNameIgnoreCaseAndIdNot(String authorName, Long id) {
+                return authorRepository.existsByAuthorNameIgnoreCaseAndAuthorIdNot(
+                                authorName.trim(), id);
+        }
+
+        /**
+         * DELETE AUTHOR
+         */
+        public void deleteAuthor(Long id) {
+
+                Author author = authorRepository.findById(id)
+                                .orElseThrow(() -> new IllegalArgumentException("Author not found"));
+
+                authorRepository.delete(author);
+        }
 }

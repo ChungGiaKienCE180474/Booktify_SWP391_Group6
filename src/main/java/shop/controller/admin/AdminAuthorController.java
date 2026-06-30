@@ -134,4 +134,19 @@ public class AdminAuthorController {
         // quay về list
         return "redirect:/admin/authors";
     }
+
+    // ================= DELETE =================
+    @PostMapping("/{id}/delete")
+    public String deleteAuthor(
+            @PathVariable Long id,
+            RedirectAttributes redirectAttributes) {
+
+        authorService.deleteAuthor(id);
+
+        redirectAttributes.addFlashAttribute(
+                "successMessage",
+                "Delete Author Successfully");
+
+        return "redirect:/admin/authors";
+    }
 }

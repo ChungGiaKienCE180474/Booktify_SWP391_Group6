@@ -29,7 +29,7 @@
                         </a>
                     </div>
 
-                
+
 
                     <div class="admin-table-wrap">
                         <table class="admin-table">
@@ -138,7 +138,11 @@
                     <div class="modal-footer">
                         <button onclick="closeDeleteModal()" class="admin-button admin-button--ghost">Cancel</button>
                         <form id="deleteForm" method="post">
-                            <button class="admin-button admin-button--danger">Delete</button>
+                            <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}" />
+
+                            <button class="admin-button admin-button--danger">
+                                Delete
+                            </button>
                         </form>
                     </div>
                 </div>
@@ -170,7 +174,13 @@
             <div id="toastContainer" class="toast-container"></div>
 
             <script>
-                function openDeleteModal(action, msg) { document.getElementById('deleteForm').action = action; document.getElementById('deleteModalMsg').textContent = msg; document.getElementById('deleteModal').style.display = 'flex'; }
+                function openDeleteModal(action, msg) {
+                    console.log("Action =", action);
+
+                    document.getElementById("deleteForm").action = action;
+                    document.getElementById("deleteModalMsg").textContent = msg;
+                    document.getElementById("deleteModal").style.display = "flex";
+                }
                 function closeDeleteModal() { document.getElementById('deleteModal').style.display = 'none'; }
                 function closeModal(id) { document.getElementById(id).style.display = 'none'; }
                 document.querySelectorAll('.js-view-author').forEach(function (b) {
