@@ -14,10 +14,12 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
+import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.session.security.web.authentication.SpringSessionRememberMeServices;
 import org.springframework.context.annotation.Lazy;
 import shop.domain.User;
 import shop.service.UserService;
+import shop.service.validator.CustomOAuth2UserService;
 import shop.service.validator.CustomUserDetailsService;
 import jakarta.servlet.DispatcherType;
 import jakarta.servlet.http.HttpServletRequest;
@@ -30,6 +32,10 @@ public class SecurityConfiguration {
     @Autowired
     @Lazy
     private UserService userService;
+
+    @Autowired
+    @Lazy
+    private CustomOAuth2UserService customOAuth2UserService;
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -73,37 +79,45 @@ public class SecurityConfiguration {
         http
                 .authenticationProvider(authProvider)
                 .authorizeHttpRequests(authorize -> authorize
-                .dispatcherTypeMatchers(DispatcherType.FORWARD, DispatcherType.INCLUDE)
-                .permitAll()
-                .requestMatchers("/", "/login", "/register", "/css/**",
-                        "/js/**", "/images/**", "/forgotpassword",
-                        "/authentication/**", "/books", "/books/**", "/client/**",
-                        "/logout", "/logout/**")
-                .permitAll()
-                .requestMatchers("/admin/**").hasRole("ADMIN")
-                .requestMatchers("/changepass", "/profile", "/profile/**", "/cart", "/cart/**").authenticated()
-                .requestMatchers("/stationery/**").authenticated()
-                .anyRequest().authenticated())
+                        .dispatcherTypeMatchers(DispatcherType.FORWARD, DispatcherType.INCLUDE)
+                        .permitAll()
+                        .requestMatchers("/", "/login", "/register", "/css/**",
+                                "/js/**", "/images/**", "/forgotpassword",
+                                "/authentication/**", "/books", "/books/**", "/client/**",
+                                "/authors", "/authors/**","/logout", "/logout/**")
+                        .permitAll()
+                        .requestMatchers("/admin/**").hasRole("ADMIN")
+                        .requestMatchers("/changepass", "/profile", "/profile/**", "/cart", "/cart/**").authenticated()
+                        .requestMatchers("/stationery/**").authenticated()
+                        .anyRequest().authenticated())
                 .csrf(csrf -> csrf
-                .ignoringRequestMatchers("/authentication/**", "/register"))
+                        .ignoringRequestMatchers("/authentication/**", "/register"))
                 .sessionManagement(sessionManagement -> sessionManagement
-                .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
-                .invalidSessionUrl("/login?expired")
-                .maximumSessions(1)
-                .maxSessionsPreventsLogin(false))
+                        .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
+                        .invalidSessionUrl("/login?expired")
+                        .maximumSessions(1)
+                        .maxSessionsPreventsLogin(false))
                 .logout(logout -> logout
+                .logoutUrl("/logout")
+                .logoutSuccessUrl("/login?logout")
                 .deleteCookies("JSESSIONID")
-                .invalidateHttpSession(true))
+                .invalidateHttpSession(true)
+                .permitAll())
                 .rememberMe(r -> r
-                .rememberMeServices(rememberMeServices()))
+                        .rememberMeServices(rememberMeServices()))
                 .formLogin(formLogin -> formLogin
                 .loginPage("/login")
                 .failureHandler(this::handleLoginFailure) // Gọi phương thức xử lý lỗi
                 .successHandler(customSuccessHandler())
                 .permitAll())
+                .oauth2Login(oauth2 -> oauth2
+                .loginPage("/login")
+                .userInfoEndpoint(userInfo -> userInfo
+                        .userService(customOAuth2UserService))
+                .successHandler(customSuccessHandler())
+                .failureHandler(this::handleOAuth2LoginFailure))
                 .exceptionHandling(ex -> ex
-                .accessDeniedPage("/access-deny"));
-                
+                        .accessDeniedPage("/access-deny"));
 
         return http.build();
     }
@@ -129,5 +143,16 @@ public class SecurityConfiguration {
             }
             response.sendRedirect("/login?error"); // Người dùng không tồn tại
         }
+    }
+
+    private void handleOAuth2LoginFailure(HttpServletRequest request, HttpServletResponse response,
+            org.springframework.security.core.AuthenticationException exception) throws IOException {
+        if (exception instanceof OAuth2AuthenticationException oauth2Exception
+                && "account_locked".equals(oauth2Exception.getError().getErrorCode())) {
+            response.sendRedirect("/login?locked");
+            return;
+        }
+        request.getSession().setAttribute("message", "Đăng nhập Google thất bại. Vui lòng thử lại.");
+        response.sendRedirect("/login?error");
     }
 }

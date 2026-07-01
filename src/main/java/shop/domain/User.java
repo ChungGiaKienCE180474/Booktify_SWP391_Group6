@@ -47,6 +47,9 @@ public class User {
     @JoinColumn(name = "role_id")
     private Role role;
 
+    @Column(name = "auth_provider", nullable = false)
+    private String authProvider = AuthProvider.LOCAL.name();
+
     public long getId() {
         return id;
     }
@@ -132,5 +135,17 @@ public class User {
 
     public void setDeleted(boolean deleted) {
         this.deleted = deleted;
+    }
+
+    public String getAuthProvider() {
+        return authProvider;
+    }
+
+    public void setAuthProvider(String authProvider) {
+        this.authProvider = authProvider;
+    }
+
+    public boolean isGoogleAccount() {
+        return AuthProvider.GOOGLE.name().equals(authProvider);
     }
 }

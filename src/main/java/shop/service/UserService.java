@@ -1,6 +1,7 @@
 package shop.service;
 
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.springframework.data.domain.Page;
@@ -11,6 +12,7 @@ import org.springframework.stereotype.Service;
 import shop.domain.dto.StaffDTO;
 import shop.domain.Role;
 import shop.domain.RoleName;
+import shop.domain.AuthProvider;
 import shop.domain.User;
 import shop.domain.dto.CustomerDTO;
 import shop.domain.dto.ProfileDTO;
@@ -46,6 +48,32 @@ public class UserService {
         user.setPassword(passwordEncoder.encode(registerDTO.getPassword()));
         user.setRole(getRoleByName(roleName));
         user.setStatus(true);
+        user.setAuthProvider(AuthProvider.LOCAL.name());
+        return userRepository.save(user);
+    }
+
+    public User processOAuth2User(String email, String fullName, String avatarUrl) {
+        User user = getUserByEmail(email);
+        if (user != null) {
+            boolean updated = false;
+            if (avatarUrl != null && (user.getAvatar() == null || user.getAvatar().isBlank())) {
+                user.setAvatar(avatarUrl);
+                updated = true;
+            }
+            if (updated) {
+                return userRepository.save(user);
+            }
+            return user;
+        }
+
+        user = new User();
+        user.setEmail(normalizeEmail(email));
+        user.setFullName(fullName != null && !fullName.isBlank() ? fullName.trim() : normalizeEmail(email));
+        user.setPassword(passwordEncoder.encode(UUID.randomUUID().toString()));
+        user.setAvatar(avatarUrl);
+        user.setRole(getRoleByName(RoleName.CUSTOMER));
+        user.setStatus(true);
+        user.setAuthProvider(AuthProvider.GOOGLE.name());
         return userRepository.save(user);
     }
 
@@ -105,6 +133,7 @@ public class UserService {
         if (user.getRole() != null) {
             dto.setRoleName(user.getRole().getName());
         }
+        dto.setAuthProvider(user.getAuthProvider());
         return dto;
     }
 
@@ -112,6 +141,9 @@ public class UserService {
         User user = getUserByEmail(email);
         if (user != null) {
             user.setPassword(passwordEncoder.encode(plainPassword));
+            if (user.isGoogleAccount()) {
+                user.setAuthProvider(AuthProvider.LOCAL.name());
+            }
             userRepository.save(user);
         }
     }
@@ -332,6 +364,7 @@ public class UserService {
         staff.setStaffRole(staffRole);
         staff.setStatus(true);
         staff.setDeleted(false);
+        staff.setAuthProvider(AuthProvider.LOCAL.name());
         staff.setRole(getRoleByName(RoleName.STAFF));
 
         return userRepository.save(staff);

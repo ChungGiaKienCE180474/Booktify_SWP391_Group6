@@ -1,6 +1,7 @@
 package shop.repository;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -20,9 +21,17 @@ public interface BookRepository extends JpaRepository<Book, Long> {
 
     List<Book> findAllByCategoryIdAndActiveTrueOrderByIdAsc(Long categoryId);
 
-    boolean existsByIsbnIgnoreCase(String isbn);
+    // ── ISBN ──────────────────────────────────────────────────────────────────
+    /** Tìm sách theo ISBN (không phân biệt hoa thường) — dùng để validate trùng */
+    Optional<Book> findByIsbnIgnoreCase(String isbn);
 
     boolean existsByCategoryId(Long categoryId);
+
+    boolean existsByGenreId(Long genreId);
+
+    // ── COUNT ─────────────────────────────────────────────────────────────────
+    /** SELECT COUNT(*) FROM books WHERE active = true — không load data */
+    long countByActiveTrue();
 
     @Query("SELECT b FROM Book b LEFT JOIN b.category c WHERE " +
            "LOWER(b.title) LIKE LOWER(CONCAT('%', :q, '%')) OR " +
