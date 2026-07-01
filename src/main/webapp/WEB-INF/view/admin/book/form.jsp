@@ -92,7 +92,7 @@
                             </div>
                         </div>
 
-                        <%-- Price + Genre --%>
+                        <%-- Price + Stock --%>
                         <div class="admin-form-grid">
                             <div class="admin-field">
                                 <label>Price <span style="color:#EF4444;">*</span></label>
@@ -102,6 +102,25 @@
                                 </div>
                                 <form:errors path="price" cssClass="admin-error" />
                             </div>
+                            <div class="admin-field">
+                                <label>Số lượng tồn kho</label>
+                                <div class="admin-qty-stepper">
+                                    <button type="button" class="admin-qty-btn" id="stockDecBtn" aria-label="Giảm số lượng">
+                                        <i class="fa-solid fa-minus"></i>
+                                    </button>
+                                    <form:input path="stockQuantity" cssClass="admin-qty-input" type="number"
+                                                id="stockQuantityInput" min="0" step="1" />
+                                    <button type="button" class="admin-qty-btn" id="stockIncBtn" aria-label="Tăng số lượng">
+                                        <i class="fa-solid fa-plus"></i>
+                                    </button>
+                                </div>
+                                <span class="admin-hint">Bấm + / − để thêm hoặc giảm số lượng sách trong kho.</span>
+                                <form:errors path="stockQuantity" cssClass="admin-error" />
+                            </div>
+                        </div>
+
+                        <%-- Genre --%>
+                        <div class="admin-form-grid">
                             <div class="admin-field">
                                 <label>Genre <span style="color:#9CA3AF;font-size:.8rem;">(optional)</span></label>
                                 <select name="genreId" id="genreId" class="admin-input"
@@ -290,6 +309,35 @@
             document.getElementById('genreErrorMsg').style.display = 'none';
             this.style.borderColor = '';
         });
+
+        // ── Stock quantity stepper ───────────────────────────────────────────────
+        var stockInput = document.getElementById('stockQuantityInput');
+        var stockDecBtn = document.getElementById('stockDecBtn');
+        var stockIncBtn = document.getElementById('stockIncBtn');
+
+        function parseStockValue() {
+            var value = parseInt(stockInput.value, 10);
+            return isNaN(value) || value < 0 ? 0 : value;
+        }
+
+        function setStockValue(value) {
+            stockInput.value = Math.max(0, value);
+        }
+
+        if (stockInput) {
+            if (!stockInput.value && stockInput.value !== '0') {
+                setStockValue(0);
+            }
+            stockDecBtn.addEventListener('click', function () {
+                setStockValue(parseStockValue() - 1);
+            });
+            stockIncBtn.addEventListener('click', function () {
+                setStockValue(parseStockValue() + 1);
+            });
+            stockInput.addEventListener('blur', function () {
+                setStockValue(parseStockValue());
+            });
+        }
     </script>
 </body>
 </html>

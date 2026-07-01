@@ -178,7 +178,11 @@
                             </div>
                             <c:if test="${!passwordEditMode}">
                                 <a href="/profile?password=edit" class="profile-btn profile-btn-outline profile-btn-sm">
-                                    <i class="fa-solid fa-key"></i> Đổi mật khẩu
+                                    <i class="fa-solid fa-key"></i>
+                                    <c:choose>
+                                        <c:when test="${profile.googleAccount}">Đặt mật khẩu</c:when>
+                                        <c:otherwise>Đổi mật khẩu</c:otherwise>
+                                    </c:choose>
                                 </a>
                             </c:if>
                         </div>
@@ -192,7 +196,14 @@
                             </dl>
                             <p class="profile-hint profile-hint-block">
                                 <i class="fa-solid fa-shield-halved"></i>
-                                Đổi mật khẩu yêu cầu xác thực OTP qua email đã đăng ký.
+                                <c:choose>
+                                    <c:when test="${profile.googleAccount}">
+                                        Tài khoản đăng nhập qua Google. Bạn có thể đặt mật khẩu để đăng nhập bằng email — chỉ cần xác thực OTP.
+                                    </c:when>
+                                    <c:otherwise>
+                                        Đổi mật khẩu yêu cầu xác thực OTP qua email đã đăng ký.
+                                    </c:otherwise>
+                                </c:choose>
                             </p>
                         </c:if>
 
@@ -200,6 +211,11 @@
                             <c:if test="${not empty otpSentMessage}">
                                 <div class="profile-alert profile-alert-success profile-alert-inline">
                                     <i class="fa-solid fa-envelope-circle-check"></i> ${otpSentMessage}
+                                </div>
+                            </c:if>
+                            <c:if test="${not empty otpVerifiedMessage}">
+                                <div class="profile-alert profile-alert-success profile-alert-inline">
+                                    <i class="fa-solid fa-circle-check"></i> ${otpVerifiedMessage}
                                 </div>
                             </c:if>
                             <c:if test="${not empty passwordErrorMessage}">
@@ -223,26 +239,56 @@
                                 </form>
                             </c:if>
 
-                            <c:if test="${otpSent}">
+                            <c:if test="${otpSent && !otpVerified}">
+                                <p class="profile-hint profile-hint-block">
+                                    Mã OTP đã gửi tới <strong>${profile.email}</strong>.
+                                </p>
+                                <form method="post" action="/profile/password/verify-otp" class="profile-form">
+                                    <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}" />
+                                    <div class="profile-form-group">
+                                        <label for="otp">Mã OTP <span class="required">*</span></label>
+                                        <input type="number" name="otp" id="otp" class="profile-input profile-otp-input"
+                                               placeholder="Nhập 6 chữ số" min="100000" max="999999" required />
+                                    </div>
+                                    <div class="profile-form-actions profile-form-actions--split">
+                                        <a href="/profile" class="profile-btn profile-btn-outline">Hủy</a>
+                                        <button type="submit" class="profile-btn profile-btn-primary">
+                                            <i class="fa-solid fa-shield-check"></i> Xác nhận OTP
+                                        </button>
+                                    </div>
+                                </form>
+                                <form method="post" action="/profile/password/send-otp" class="profile-resend-otp">
+                                    <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}" />
+                                    <button type="submit" class="profile-link-btn">Gửi lại mã OTP</button>
+                                </form>
+                            </c:if>
+
+                            <c:if test="${otpVerified}">
+                                <c:if test="${profile.googleAccount}">
+                                    <p class="profile-hint profile-hint-block">
+                                        OTP đã xác thực. Nhập mật khẩu mới — không cần mật khẩu cũ vì bạn đăng nhập bằng Google.
+                                    </p>
+                                </c:if>
                                 <form:form method="post" action="/profile/password" modelAttribute="passwordChangeForm"
                                     cssClass="profile-form">
 
-                                    <div class="profile-form-group">
-                                        <label for="otp">Mã OTP <span class="required">*</span></label>
-                                        <form:input path="otp" id="otp" cssClass="profile-input profile-otp-input"
-                                            placeholder="Nhập 6 chữ số" maxlength="6" />
-                                        <form:errors path="otp" cssClass="profile-field-error" />
-                                    </div>
+                                    <c:if test="${!profile.googleAccount}">
+                                        <div class="profile-form-group">
+                                            <label for="currentPassword">Mật khẩu hiện tại <span class="required">*</span></label>
+                                            <form:password path="currentPassword" id="currentPassword"
+                                                cssClass="profile-input" placeholder="Nhập mật khẩu hiện tại" />
+                                            <form:errors path="currentPassword" cssClass="profile-field-error" />
+                                        </div>
+                                    </c:if>
 
                                     <div class="profile-form-group">
-                                        <label for="currentPassword">Mật khẩu hiện tại <span class="required">*</span></label>
-                                        <form:password path="currentPassword" id="currentPassword"
-                                            cssClass="profile-input" placeholder="Nhập mật khẩu hiện tại" />
-                                        <form:errors path="currentPassword" cssClass="profile-field-error" />
-                                    </div>
-
-                                    <div class="profile-form-group">
-                                        <label for="newPassword">Mật khẩu mới <span class="required">*</span></label>
+                                        <label for="newPassword">
+                                            <c:choose>
+                                                <c:when test="${profile.googleAccount}">Mật khẩu mới</c:when>
+                                                <c:otherwise>Mật khẩu mới</c:otherwise>
+                                            </c:choose>
+                                            <span class="required">*</span>
+                                        </label>
                                         <form:password path="newPassword" id="newPassword" cssClass="profile-input"
                                             placeholder="Tối thiểu 3 ký tự" />
                                         <form:errors path="newPassword" cssClass="profile-field-error" />
@@ -258,15 +304,14 @@
                                     <div class="profile-form-actions profile-form-actions--split">
                                         <a href="/profile" class="profile-btn profile-btn-outline">Hủy</a>
                                         <button type="submit" class="profile-btn profile-btn-primary">
-                                            <i class="fa-solid fa-check"></i> Xác nhận đổi mật khẩu
+                                            <i class="fa-solid fa-check"></i>
+                                            <c:choose>
+                                                <c:when test="${profile.googleAccount}">Xác nhận đặt mật khẩu</c:when>
+                                                <c:otherwise>Xác nhận đổi mật khẩu</c:otherwise>
+                                            </c:choose>
                                         </button>
                                     </div>
                                 </form:form>
-
-                                <form method="post" action="/profile/password/send-otp" class="profile-resend-otp">
-                                    <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}" />
-                                    <button type="submit" class="profile-link-btn">Gửi lại mã OTP</button>
-                                </form>
                             </c:if>
                         </c:if>
                     </div>
