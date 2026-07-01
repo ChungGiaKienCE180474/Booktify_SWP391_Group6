@@ -60,9 +60,12 @@
             <i class="fa-solid fa-arrow-up-right-from-square"></i>
             View Site
         </a>
-        <a href="/logout" class="admin-sidebar__logout">
-            <i class="fa-solid fa-right-from-bracket"></i>
-            Logout
-        </a>
+        <form method="post" action="/logout" class="admin-sidebar__logout-form">
+            <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}" />
+            <button type="submit" class="admin-sidebar__logout">
+                <i class="fa-solid fa-right-from-bracket"></i>
+                Logout
+            </button>
+        </form>
     </div>
 </aside>

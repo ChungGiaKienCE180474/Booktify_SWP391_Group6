@@ -79,7 +79,7 @@
                                             </td>
                                             <td>
                                                 <span class="cart-price">
-                                                    ${item.book.priceFormatted} &#8363;
+                                                    ${item.bookPriceFormatted} &#8363;
                                                 </span>
                                             </td>
                                             <td>
