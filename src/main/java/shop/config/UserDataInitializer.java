@@ -7,6 +7,7 @@ import org.springframework.core.annotation.Order;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
+import shop.domain.AuthProvider;
 import shop.domain.RoleName;
 import shop.domain.User;
 import shop.repository.UserRepository;
@@ -44,6 +45,7 @@ public class UserDataInitializer implements CommandLineRunner {
             user.setPassword(passwordEncoder.encode(seed.password()));
             user.setFullName(seed.fullName());
             user.setStatus(true);
+            user.setAuthProvider(AuthProvider.LOCAL.name());
             user.setRole(userService.getRoleByName(seed.roleName()));
             userRepository.save(user);
         }
