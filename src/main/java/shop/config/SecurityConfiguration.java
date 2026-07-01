@@ -79,24 +79,24 @@ public class SecurityConfiguration {
         http
                 .authenticationProvider(authProvider)
                 .authorizeHttpRequests(authorize -> authorize
-                .dispatcherTypeMatchers(DispatcherType.FORWARD, DispatcherType.INCLUDE)
-                .permitAll()
-                .requestMatchers("/", "/login", "/register", "/css/**",
-                        "/js/**", "/images/**", "/forgotpassword",
-                        "/authentication/**", "/books", "/books/**", "/client/**",
-                        "/logout", "/logout/**")
-                .permitAll()
-                .requestMatchers("/admin/**").hasRole("ADMIN")
-                .requestMatchers("/changepass", "/profile", "/profile/**", "/cart", "/cart/**").authenticated()
-                .requestMatchers("/stationery/**").authenticated()
-                .anyRequest().authenticated())
+                        .dispatcherTypeMatchers(DispatcherType.FORWARD, DispatcherType.INCLUDE)
+                        .permitAll()
+                        .requestMatchers("/", "/login", "/register", "/css/**",
+                                "/js/**", "/images/**", "/forgotpassword",
+                                "/authentication/**", "/books", "/books/**", "/client/**",
+                                "/authors", "/authors/**","/logout", "/logout/**")
+                        .permitAll()
+                        .requestMatchers("/admin/**").hasRole("ADMIN")
+                        .requestMatchers("/changepass", "/profile", "/profile/**", "/cart", "/cart/**").authenticated()
+                        .requestMatchers("/stationery/**").authenticated()
+                        .anyRequest().authenticated())
                 .csrf(csrf -> csrf
-                .ignoringRequestMatchers("/authentication/**", "/register"))
+                        .ignoringRequestMatchers("/authentication/**", "/register"))
                 .sessionManagement(sessionManagement -> sessionManagement
-                .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
-                .invalidSessionUrl("/login?expired")
-                .maximumSessions(1)
-                .maxSessionsPreventsLogin(false))
+                        .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
+                        .invalidSessionUrl("/login?expired")
+                        .maximumSessions(1)
+                        .maxSessionsPreventsLogin(false))
                 .logout(logout -> logout
                 .logoutUrl("/logout")
                 .logoutSuccessUrl("/login?logout")
@@ -104,7 +104,7 @@ public class SecurityConfiguration {
                 .invalidateHttpSession(true)
                 .permitAll())
                 .rememberMe(r -> r
-                .rememberMeServices(rememberMeServices()))
+                        .rememberMeServices(rememberMeServices()))
                 .formLogin(formLogin -> formLogin
                 .loginPage("/login")
                 .failureHandler(this::handleLoginFailure) // Gọi phương thức xử lý lỗi
@@ -117,8 +117,7 @@ public class SecurityConfiguration {
                 .successHandler(customSuccessHandler())
                 .failureHandler(this::handleOAuth2LoginFailure))
                 .exceptionHandling(ex -> ex
-                .accessDeniedPage("/access-deny"));
-                
+                        .accessDeniedPage("/access-deny"));
 
         return http.build();
     }

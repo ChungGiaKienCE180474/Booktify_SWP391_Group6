@@ -31,7 +31,7 @@ public class UserDataInitializer implements CommandLineRunner {
     @Override
     public void run(String... args) {
         List<UserSeed> seeds = List.of(
-                new UserSeed("admin@booktify.local", "Admin@123", "Booktify Admin", RoleName.ADMIN),
+                new UserSeed("admin@booktify.local", "123456", "Booktify Admin", RoleName.ADMIN),
                 new UserSeed("staff@booktify.local", "Staff@123", "Booktify Staff", RoleName.STAFF),
                 new UserSeed("customer@booktify.local", "Customer@123", "Booktify Customer", RoleName.CUSTOMER));
 
