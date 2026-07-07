@@ -54,6 +54,12 @@
                                             Authors
                                         </a>
 
+                                        <a href="/admin/vouchers"
+                                            class="admin-sidebar__item ${fn:contains(pageContext.request.requestURI, '/admin/vouchers') ? 'active' : ''}">
+                                            <i class="fa-solid fa-ticket"></i>
+                                            Vouchers
+                                        </a>
+
                                         <a href="/admin/customers"
                                             class="admin-sidebar__item ${fn:contains(pageContext.request.requestURI, '/admin/customers') ? 'active' : ''}">
                                             <i class="fa-solid fa-users"></i>

@@ -149,4 +149,18 @@ public class AdminAuthorController {
 
         return "redirect:/admin/authors";
     }
+
+    @PostMapping("/{id}/restore")
+    public String restoreAuthor(
+            @PathVariable Long id,
+            RedirectAttributes redirectAttributes) {
+
+        authorService.restoreAuthor(id);
+
+        redirectAttributes.addFlashAttribute(
+                "successMessage",
+                "Restore Author Successfully");
+
+        return "redirect:/admin/authors";
+    }
 }

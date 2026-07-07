@@ -21,20 +21,22 @@ public class AuthorController {
     @GetMapping
     public String list(Model model) {
 
-        model.addAttribute("authors", authorService.getAllAuthors());
-
+        model.addAttribute(
+                "authors",
+                authorService.getActiveAuthors());
         return "author/list";
     }
 
     // Chi tiết Author
     @GetMapping("/{id}")
-    public String detail(@PathVariable Long id,
-                         Model model) {
-
+    public String detail(
+            @PathVariable Long id,
+            Model model) {
         Author author = authorService.getAuthorById(id);
-
+        if (!author.isStatus()) {
+            throw new RuntimeException("Author not found");
+        }
         model.addAttribute("author", author);
-
         return "author/detail";
     }
 

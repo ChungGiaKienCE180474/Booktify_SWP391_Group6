@@ -38,6 +38,9 @@ public class Author {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
+    @Column(nullable = false)
+    private boolean status = true;
+
     public Author() {
     }
 
@@ -124,5 +127,13 @@ public class Author {
 
         return updatedAt.format(
                 DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"));
+    }
+
+    public boolean isStatus() {
+        return status;
+    }
+
+    public void setStatus(boolean status) {
+        this.status = status;
     }
 }
