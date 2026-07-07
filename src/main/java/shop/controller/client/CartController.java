@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import shop.domain.User;
-import shop.domain.dto.CartDTO;
+import shop.domain.dto.CartRefreshResult;
 import shop.service.CartService;
 import shop.service.UserService;
 
@@ -31,8 +31,12 @@ public class CartController {
     @GetMapping
     public String viewCart(Authentication authentication, Model model) {
         User user = getCurrentUser(authentication);
-        CartDTO cart = cartService.refreshCartDTO(user.getId());
-        model.addAttribute("cart", cart);
+        CartRefreshResult refreshResult = cartService.refreshCartResult(user.getId());
+        model.addAttribute("cart", cartService.toCartDTO(refreshResult.getCart()));
+
+        if (refreshResult.hasWarnings() && !model.containsAttribute("warningMessage")) {
+            model.addAttribute("warningMessage", String.join(" ", refreshResult.getWarnings()));
+        }
         return "cart/index";
     }
 
@@ -40,34 +44,44 @@ public class CartController {
     public String addToCart(
             Authentication authentication,
             @RequestParam Long bookId,
-            @RequestParam(defaultValue = "1") int quantity,
+            @RequestParam(required = false) String quantity,
             @RequestParam(required = false) String redirect,
             RedirectAttributes redirectAttributes) {
 
         User user = getCurrentUser(authentication);
+        Integer parsedQuantity = cartService.parsePositiveIntegerQuantity(
+                quantity != null ? quantity : "1");
+        if (parsedQuantity == null) {
+            redirectAttributes.addFlashAttribute("errorMessage", CartService.MSG_QUANTITY_INVALID);
+            return redirectAfterAdd(bookId, redirect);
+        }
+
         try {
-            cartService.addBook(user.getId(), bookId, quantity);
+            cartService.addBook(user.getId(), bookId, parsedQuantity);
             redirectAttributes.addFlashAttribute("successMessage", "Đã thêm sách vào giỏ hàng.");
         } catch (IllegalArgumentException ex) {
             redirectAttributes.addFlashAttribute("errorMessage", ex.getMessage());
         }
 
-        if (redirect != null && !redirect.isBlank()) {
-            return "redirect:" + redirect;
-        }
-        return "redirect:/books/" + bookId;
+        return redirectAfterAdd(bookId, redirect);
     }
 
     @PostMapping("/update")
     public String updateQuantity(
             Authentication authentication,
             @RequestParam Long itemId,
-            @RequestParam int quantity,
+            @RequestParam(required = false) String quantity,
             RedirectAttributes redirectAttributes) {
 
         User user = getCurrentUser(authentication);
+        Integer parsedQuantity = cartService.parsePositiveIntegerQuantity(quantity);
+        if (parsedQuantity == null) {
+            redirectAttributes.addFlashAttribute("errorMessage", CartService.MSG_QUANTITY_INVALID);
+            return "redirect:/cart";
+        }
+
         try {
-            cartService.updateQuantity(user.getId(), itemId, quantity);
+            cartService.updateQuantity(user.getId(), itemId, parsedQuantity);
             redirectAttributes.addFlashAttribute("successMessage", "Đã cập nhật số lượng.");
         } catch (IllegalArgumentException ex) {
             redirectAttributes.addFlashAttribute("errorMessage", ex.getMessage());
@@ -91,6 +105,14 @@ public class CartController {
         return "redirect:/cart";
     }
 
+    @PostMapping("/clear")
+    public String clearCart(Authentication authentication, RedirectAttributes redirectAttributes) {
+        User user = getCurrentUser(authentication);
+        cartService.clearCart(user.getId());
+        redirectAttributes.addFlashAttribute("successMessage", "Đã xóa toàn bộ giỏ hàng.");
+        return "redirect:/cart";
+    }
+
     @PostMapping("/validate")
     public String validateCheckout(Authentication authentication, RedirectAttributes redirectAttributes) {
         User user = getCurrentUser(authentication);
@@ -102,9 +124,14 @@ public class CartController {
             return "redirect:/cart";
         }
 
-        redirectAttributes.addFlashAttribute("successMessage",
-                "Giỏ hàng hợp lệ. Chức năng thanh toán sẽ được triển khai tiếp theo.");
-        return "redirect:/cart";
+        return "redirect:/orders/checkout";
+    }
+
+    private String redirectAfterAdd(Long bookId, String redirect) {
+        if (redirect != null && !redirect.isBlank()) {
+            return "redirect:" + redirect;
+        }
+        return "redirect:/books/" + bookId;
     }
 
     private User getCurrentUser(Authentication authentication) {

@@ -28,6 +28,9 @@
             <c:if test="${not empty errorMessage}">
                 <div class="cart-alert cart-alert--error">${errorMessage}</div>
             </c:if>
+            <c:if test="${not empty warningMessage}">
+                <div class="cart-alert cart-alert--warn">${warningMessage}</div>
+            </c:if>
 
             <c:choose>
                 <c:when test="${empty cart.items}">
@@ -87,7 +90,7 @@
                                                     <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}" />
                                                     <input type="hidden" name="itemId" value="${item.id}" />
                                                     <input type="number" name="quantity" value="${item.quantity}"
-                                                           min="1" max="${item.bookStockQuantity}" required />
+                                                           min="1" max="${item.bookStockQuantity}" step="1" required />
                                                     <button type="submit" class="cart-btn cart-btn--outline">Cập nhật</button>
                                                 </form>
                                             </td>
@@ -127,10 +130,17 @@
                                 <a href="/books" class="cart-btn cart-btn--outline">
                                     <i class="fa-solid fa-arrow-left"></i> Tiếp tục mua sách
                                 </a>
+                                <form method="post" action="/cart/clear"
+                                      onsubmit="return confirm('Bạn có chắc muốn xóa toàn bộ giỏ hàng?');">
+                                    <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}" />
+                                    <button type="submit" class="cart-btn cart-btn--ghost" style="width:100%;">
+                                        <i class="fa-solid fa-trash-can"></i> Xóa toàn bộ giỏ hàng
+                                    </button>
+                                </form>
                                 <form method="post" action="/cart/validate">
                                     <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}" />
                                     <button type="submit" class="cart-btn cart-btn--primary" style="width:100%;">
-                                        <i class="fa-solid fa-credit-card"></i> Kiểm tra &amp; thanh toán
+                                        <i class="fa-solid fa-credit-card"></i> Tiến hành đặt hàng
                                     </button>
                                 </form>
                             </div>
