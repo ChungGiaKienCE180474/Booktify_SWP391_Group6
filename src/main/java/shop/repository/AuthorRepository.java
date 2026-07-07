@@ -17,4 +17,6 @@ public interface AuthorRepository extends JpaRepository<Author, Long> {
 
     List<Author> findAllByOrderByAuthorIdDesc();
 
+    List<Author> findAllByStatusTrueOrderByAuthorIdDesc();
+
 }

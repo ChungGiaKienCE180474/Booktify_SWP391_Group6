@@ -61,6 +61,15 @@ public class AuthorService {
         }
 
         /**
+         * Get active authors for client
+         */
+        public List<Author> getActiveAuthors() {
+
+                return authorRepository.findAllByStatusTrueOrderByAuthorIdDesc();
+
+        }
+
+        /**
          * Check duplicate author name
          */
         public boolean existsByAuthorNameIgnoreCase(String authorName) {
@@ -120,6 +129,23 @@ public class AuthorService {
                 Author author = authorRepository.findById(id)
                                 .orElseThrow(() -> new IllegalArgumentException("Author not found"));
 
-                authorRepository.delete(author);
+                author.setStatus(false);
+                author.setUpdatedAt(LocalDateTime.now());
+
+                authorRepository.save(author);
+        }
+
+        /**
+         * RESTORE AUTHOR (Soft Delete)
+         */
+        public void restoreAuthor(Long id) {
+
+                Author author = authorRepository.findById(id)
+                                .orElseThrow(() -> new IllegalArgumentException("Author not found"));
+
+                author.setStatus(true);
+                author.setUpdatedAt(LocalDateTime.now());
+
+                authorRepository.save(author);
         }
 }
