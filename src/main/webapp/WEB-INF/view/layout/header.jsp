@@ -50,35 +50,11 @@
                                     <%-- Right icons --%>
                                         <div class="header-icons">
                                             <%-- Cart (placeholder) --%>
-                                                <a href="#" class="hdr-icon-btn" title="Giỏ hàng">
+                                                <a href="/cart" class="hdr-icon-btn" title="Giỏ hàng">
                                                     <i class="fa-solid fa-cart-shopping"></i>
                                                     <span class="hdr-icon-label">Giỏ hàng</span>
                                                 </a>
 
-<<<<<<< HEAD
-            <%-- User / auth --%>
-            <c:choose>
-                <c:when test="${not empty sessionScope.username}">
-                    <div class="hdr-user-wrap" id="hdrUserWrap">
-                        <button type="button" class="hdr-icon-btn" id="hdrUserToggle">
-                            <i class="fa-solid fa-circle-user"></i>
-                            <span class="hdr-icon-label">Tài khoản</span>
-                        </button>
-                        <div class="hdr-user-menu" id="hdrUserMenu">
-                            <a href="/profile" class="hdr-dropdown-item">
-                                <i class="fa-solid fa-id-card"></i> Thông tin cá nhân
-                            </a>
-                            <a href="/orders" class="hdr-dropdown-item">
-                                <i class="fa-solid fa-box"></i> Đơn hàng của tôi
-                            </a>
-                            <div class="hdr-dropdown-sep"></div>
-                            <form class="hdr-dropdown-form" method="post" action="/logout">
-                                <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}" />
-                                <button type="submit" class="hdr-dropdown-item hdr-dropdown-btn">
-                                    <i class="fa-solid fa-right-from-bracket"></i> Đăng xuất
-                                </button>
-                            </form>
-=======
                                                 <%-- User / auth --%>
                                                     <c:choose>
                                                         <c:when test="${not empty sessionScope.username}">
@@ -92,6 +68,9 @@
                                                                     <a href="/profile" class="hdr-dropdown-item">
                                                                         <i class="fa-solid fa-id-card"></i> Thông tin cá
                                                                         nhân
+                                                                    </a>
+                                                                    <a href="/orders" class="hdr-dropdown-item">
+                                                                        <i class="fa-solid fa-box"></i> Đơn hàng của tôi
                                                                     </a>
                                                                     <div class="hdr-dropdown-sep"></div>
                                                                     <form class="hdr-dropdown-form" method="post"
@@ -119,7 +98,6 @@
                                                         </c:otherwise>
                                                     </c:choose>
                                         </div>
->>>>>>> d246c8f79da0292f63ce9d5bfff89c34da8fe8f6
                         </div>
 
                         <%-- ── CATEGORY NAV BAR ── --%>
