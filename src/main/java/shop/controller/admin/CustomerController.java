@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import shop.domain.dto.CustomerDTO;
 import shop.service.EmailService;
+import shop.service.OrderService;
 import shop.service.UserService;
 
 @Controller
@@ -22,10 +23,12 @@ public class CustomerController {
 
     private final UserService userService;
     private final EmailService emailService;
+    private final OrderService orderService;
 
-    public CustomerController(UserService userService, EmailService emailService) {
+    public CustomerController(UserService userService, EmailService emailService, OrderService orderService) {
         this.userService = userService;
         this.emailService = emailService;
+        this.orderService = orderService;
     }
 
     @GetMapping
@@ -100,6 +103,7 @@ public class CustomerController {
         }
 
         model.addAttribute("customer", customer);
+        model.addAttribute("orders", orderService.getOrdersForCustomer(id));
         return "admin/customer/detail";
     }
 

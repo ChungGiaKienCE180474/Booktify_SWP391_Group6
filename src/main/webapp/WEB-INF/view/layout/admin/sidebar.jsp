@@ -41,7 +41,25 @@
                 <i class="fa-solid fa-book"></i>
                 Books
             </a>
+<<<<<<< HEAD
+            <a href="/admin/customers"
+               class="admin-sidebar__item ${fn:contains(pageContext.request.requestURI, '/admin/customers') ? 'active' : ''}">
+                <i class="fa-solid fa-users"></i>
+                Customers
+            </a>
+            <a href="/admin/orders"
+               class="admin-sidebar__item ${fn:contains(pageContext.request.requestURI, '/admin/orders') ? 'active' : ''}">
+                <i class="fa-solid fa-receipt"></i>
+                Orders
+            </a>
+            <a href="/admin/staff"
+               class="admin-sidebar__item ${fn:contains(pageContext.request.requestURI, '/admin/staff') ? 'active' : ''}">
+                <i class="fa-solid fa-user-tie"></i>
+                Staff
+            </a>
+=======
            
+>>>>>>> d246c8f79da0292f63ce9d5bfff89c34da8fe8f6
         </div>
   
 
