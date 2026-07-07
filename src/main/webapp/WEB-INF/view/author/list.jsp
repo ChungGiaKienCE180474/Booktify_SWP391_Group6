@@ -7,8 +7,10 @@
         <head>
             <meta charset="UTF-8" />
             <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
             <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" />
 
+            <!-- GIỮ ĐỒNG BỘ CSS GLOBAL -->
             <link rel="stylesheet" href="/css/header.css" />
             <link rel="stylesheet" href="/css/footer.css" />
             <link rel="stylesheet" href="/css/homepage.css" />
@@ -22,7 +24,6 @@
                     padding: 1.5rem;
                 }
 
-                /* breadcrumb */
                 .author-breadcrumb {
                     font-size: .85rem;
                     color: var(--text-muted);
@@ -38,13 +39,11 @@
                     color: var(--primary);
                 }
 
-                /* header */
                 .author-header {
                     display: flex;
                     justify-content: space-between;
                     align-items: center;
                     margin-bottom: 1.2rem;
-                    flex-wrap: wrap;
                 }
 
                 .author-header h2 {
@@ -60,14 +59,12 @@
                     font-size: .85rem;
                 }
 
-                /* grid */
                 .author-grid {
                     display: grid;
                     grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
                     gap: 1rem;
                 }
 
-                /* card */
                 .author-card {
                     background: #fff;
                     border: 1px solid var(--border);
@@ -100,17 +97,6 @@
                     object-fit: cover;
                 }
 
-                .author-no-img {
-                    text-align: center;
-                    color: #90A4AE;
-                }
-
-                .author-no-img i {
-                    font-size: 3rem;
-                    display: block;
-                    margin-bottom: .3rem;
-                }
-
                 .author-body {
                     padding: .8rem;
                     display: flex;
@@ -121,7 +107,6 @@
                 .author-name {
                     font-size: 1rem;
                     font-weight: 700;
-                    margin-bottom: .2rem;
                     color: var(--text);
                 }
 
@@ -133,7 +118,6 @@
 
                 .author-btn {
                     margin-top: auto;
-                    display: inline-block;
                     padding: .4rem .7rem;
                     background: var(--primary);
                     color: #fff;
@@ -141,48 +125,33 @@
                     font-weight: 700;
                     text-align: center;
                     border-radius: 6px;
-                    text-decoration: none;
-                    transition: .15s;
                 }
 
                 .author-btn:hover {
                     background: var(--primary-light);
                 }
 
-                /* empty */
                 .empty-state {
                     text-align: center;
                     padding: 4rem 1rem;
                     color: var(--text-muted);
                     grid-column: 1/-1;
                 }
-
-                .empty-state i {
-                    font-size: 3rem;
-                    margin-bottom: 1rem;
-                    opacity: .3;
-                }
-
-                @media(max-width:768px) {
-                    .author-grid {
-                        grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-                    }
-                }
             </style>
         </head>
 
-        <body>
+        <body class="home-page">
 
             <jsp:include page="/WEB-INF/view/layout/header.jsp" />
 
             <div class="author-wrap">
 
-                <!-- breadcrumb -->
                 <div class="author-breadcrumb">
-                    <a href="/">Home</a> <i class="fa-solid fa-chevron-right"></i>   Authors
+                    <a href="/">Home</a>
+                    <i class="fa-solid fa-chevron-right"></i>
+                    <span>Authors</span>
                 </div>
 
-                <!-- header -->
                 <div class="author-header">
                     <div>
                         <h2>Authors</h2>
@@ -190,7 +159,6 @@
                     </div>
                 </div>
 
-                <!-- grid -->
                 <div class="author-grid">
 
                     <c:choose>
@@ -211,10 +179,7 @@
                                                 <img src="${a.profileImage}" alt="${a.authorName}" />
                                             </c:when>
                                             <c:otherwise>
-                                                <div class="author-no-img">
-                                                    <i class="fa-solid fa-user"></i>
-                                                    <span>No Image</span>
-                                                </div>
+                                                <i class="fa-solid fa-user"></i>
                                             </c:otherwise>
                                         </c:choose>
                                     </div>
@@ -222,10 +187,10 @@
                                     <div class="author-body">
                                         <div class="author-name">${a.authorName}</div>
                                         <div class="author-nationality">
-                                            ${not empty a.nationality ? a.nationality : "Unknown"}
+                                            ${a.nationality}
                                         </div>
 
-                                        <span class="author-btn">View Details</span>
+                                        <span class="author-btn">Chi tiết</span>
                                     </div>
 
                                 </a>
