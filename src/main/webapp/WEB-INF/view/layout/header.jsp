@@ -50,7 +50,7 @@
                                     <%-- Right icons --%>
                                         <div class="header-icons">
                                             <%-- Cart (placeholder) --%>
-                                                <a href="#" class="hdr-icon-btn" title="Giỏ hàng">
+                                                <a href="/cart" class="hdr-icon-btn" title="Giỏ hàng">
                                                     <i class="fa-solid fa-cart-shopping"></i>
                                                     <span class="hdr-icon-label">Giỏ hàng</span>
                                                 </a>
