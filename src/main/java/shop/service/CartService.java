@@ -14,6 +14,7 @@ import shop.domain.CartItem;
 import shop.domain.User;
 import shop.domain.dto.CartDTO;
 import shop.domain.dto.CartItemDTO;
+import shop.domain.dto.CartRefreshResult;
 import shop.repository.BookRepository;
 import shop.repository.CartItemRepository;
 import shop.repository.CartRepository;
@@ -21,6 +22,12 @@ import shop.repository.UserRepository;
 
 @Service
 public class CartService {
+
+    public static final String MSG_OUT_OF_STOCK = "Sản phẩm đã hết hàng.";
+    public static final String MSG_INACTIVE = "Sản phẩm đã ngừng kinh doanh, không thể thêm vào giỏ hàng.";
+    public static final String MSG_QUANTITY_MIN = "Số lượng phải lớn hơn hoặc bằng 1.";
+    public static final String MSG_QUANTITY_INVALID = "Số lượng phải là số nguyên dương.";
+    public static final String MSG_EXCEED_STOCK = "Số lượng vượt quá tồn kho (còn %d cuốn).";
 
     private final CartRepository cartRepository;
     private final CartItemRepository cartItemRepository;
@@ -68,7 +75,7 @@ public class CartService {
             int newQuantity = existing.getQuantity() + quantity;
             if (newQuantity > book.getStockQuantity()) {
                 throw new IllegalArgumentException(
-                        "Số lượng vượt quá tồn kho (còn " + book.getStockQuantity() + " cuốn).");
+                        String.format(MSG_EXCEED_STOCK, book.getStockQuantity()));
             }
             existing.setQuantity(newQuantity);
         } else {
@@ -95,11 +102,6 @@ public class CartService {
 
         validateBookForCart(book, quantity);
 
-        if (quantity > book.getStockQuantity()) {
-            throw new IllegalArgumentException(
-                    "Số lượng vượt quá tồn kho (còn " + book.getStockQuantity() + " cuốn).");
-        }
-
         item.setQuantity(quantity);
         Cart cart = item.getCart();
         recalculateTotal(cart);
@@ -123,6 +125,9 @@ public class CartService {
         Cart cart = cartRepository.findByUserIdWithItems(userId).orElse(null);
         if (cart == null) {
             return;
+        }
+        for (CartItem item : new ArrayList<>(cart.getItems())) {
+            cartItemRepository.delete(item);
         }
         cart.getItems().clear();
         cart.setTotalAmount(BigDecimal.ZERO);
@@ -149,7 +154,7 @@ public class CartService {
                 errors.add("\"" + book.getTitle() + "\" đã ngừng kinh doanh.");
             }
             if (book.getStockQuantity() <= 0) {
-                errors.add("\"" + book.getTitle() + "\" đã hết hàng.");
+                errors.add("\"" + book.getTitle() + "\" — " + MSG_OUT_OF_STOCK);
             } else if (item.getQuantity() > book.getStockQuantity()) {
                 errors.add("\"" + book.getTitle() + "\" chỉ còn " + book.getStockQuantity() + " cuốn trong kho.");
             }
@@ -163,20 +168,39 @@ public class CartService {
 
     @Transactional
     public Cart refreshCart(long userId) {
+        return refreshCartResult(userId).getCart();
+    }
+
+    @Transactional
+    public CartRefreshResult refreshCartWithWarnings(long userId) {
         Cart cart = cartRepository.findByUserIdWithItems(userId).orElse(null);
         if (cart == null) {
-            return null;
+            return CartRefreshResult.empty();
         }
 
+        CartRefreshResult.Builder result = CartRefreshResult.builder(cart);
         List<CartItem> toRemove = new ArrayList<>();
+
         for (CartItem item : cart.getItems()) {
             Book book = bookRepository.findById(item.getBook().getId()).orElse(null);
-            if (book == null || !book.isActive() || book.getStockQuantity() <= 0) {
+            if (book == null) {
                 toRemove.add(item);
+                result.warning("Một sản phẩm không còn tồn tại và đã được gỡ khỏi giỏ hàng.");
+                continue;
+            }
+            if (!book.isActive()) {
+                toRemove.add(item);
+                result.warning("\"" + book.getTitle() + "\" đã ngừng kinh doanh và được gỡ khỏi giỏ hàng.");
+                continue;
+            }
+            if (book.getStockQuantity() <= 0) {
+                toRemove.add(item);
+                result.warning("\"" + book.getTitle() + "\" — " + MSG_OUT_OF_STOCK);
                 continue;
             }
             if (item.getQuantity() > book.getStockQuantity()) {
-                item.setQuantity(book.getStockQuantity());
+                result.warning("\"" + book.getTitle() + "\" — "
+                        + String.format(MSG_EXCEED_STOCK, book.getStockQuantity()));
             }
             item.setBook(book);
         }
@@ -187,12 +211,21 @@ public class CartService {
         }
 
         recalculateTotal(cart);
-        return cartRepository.save(cart);
+        return result.build();
     }
 
     @Transactional
     public CartDTO refreshCartDTO(long userId) {
         return toCartDTO(refreshCart(userId));
+    }
+
+    @Transactional
+    public CartRefreshResult refreshCartResult(long userId) {
+        CartRefreshResult result = refreshCartWithWarnings(userId);
+        if (result.getCart() != null) {
+            cartRepository.save(result.getCart());
+        }
+        return result;
     }
 
     public CartDTO toCartDTO(Cart cart) {
@@ -239,20 +272,39 @@ public class CartService {
 
     private void validateBookForCart(Book book, int quantity) {
         if (!book.isActive()) {
-            throw new IllegalArgumentException("Sản phẩm đã ngừng kinh doanh, không thể thêm vào giỏ hàng.");
+            throw new IllegalArgumentException(MSG_INACTIVE);
         }
         if (book.getStockQuantity() <= 0) {
-            throw new IllegalArgumentException("Sản phẩm đã hết hàng, không thể thêm vào giỏ hàng.");
+            throw new IllegalArgumentException(MSG_OUT_OF_STOCK);
         }
         if (quantity > book.getStockQuantity()) {
             throw new IllegalArgumentException(
-                    "Số lượng vượt quá tồn kho (còn " + book.getStockQuantity() + " cuốn).");
+                    String.format(MSG_EXCEED_STOCK, book.getStockQuantity()));
         }
     }
 
     private void validateQuantity(int quantity) {
         if (quantity < 1) {
-            throw new IllegalArgumentException("Số lượng phải lớn hơn hoặc bằng 1.");
+            throw new IllegalArgumentException(MSG_QUANTITY_MIN);
+        }
+    }
+
+    public Integer parsePositiveIntegerQuantity(String raw) {
+        if (raw == null || raw.isBlank()) {
+            return null;
+        }
+        String trimmed = raw.trim();
+        if (!trimmed.matches("\\d+")) {
+            return null;
+        }
+        try {
+            long value = Long.parseLong(trimmed);
+            if (value < 1 || value > Integer.MAX_VALUE) {
+                return null;
+            }
+            return (int) value;
+        } catch (NumberFormatException ex) {
+            return null;
         }
     }
 

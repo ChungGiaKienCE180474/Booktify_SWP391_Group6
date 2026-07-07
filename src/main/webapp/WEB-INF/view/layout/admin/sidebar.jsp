@@ -25,7 +25,6 @@
                                         Dashboard
                                     </a>
                                 </div>
-
                                 <%-- Management Section (Đã sửa lỗi đóng/mở thẻ ở đây) --%>
                                     <div class="admin-sidebar__section">
                                         <span class="admin-sidebar__label">Management</span>
@@ -47,6 +46,11 @@
                                             <i class="fa-solid fa-book"></i>
                                             Books
                                         </a>
+                                      <a href="/admin/orders"
+               class="admin-sidebar__item ${fn:contains(pageContext.request.requestURI, '/admin/orders') ? 'active' : ''}">
+                <i class="fa-solid fa-receipt"></i>
+                Orders
+            </a>
 
                                         <a href="/admin/authors"
                                             class="admin-sidebar__item ${fn:contains(pageContext.request.requestURI, '/admin/authors') ? 'active' : ''}">

@@ -389,7 +389,7 @@
                                     <input type="hidden" name="redirect" value="/books/${book.id}" />
                                     <label class="detail-qty-label" for="cartQty">Số lượng</label>
                                     <input type="number" id="cartQty" name="quantity" value="1"
-                                           min="1" max="${book.stockQuantity}" class="detail-qty-input" required />
+                                           min="1" max="${book.stockQuantity}" step="1" class="detail-qty-input" required />
                                     <button type="submit" class="btn-detail-primary">
                                         <i class="fa-solid fa-cart-shopping"></i> Thêm vào giỏ hàng
                                     </button>

@@ -79,6 +79,19 @@ public class SecurityConfiguration {
         http
                 .authenticationProvider(authProvider)
                 .authorizeHttpRequests(authorize -> authorize
+<<<<<<< HEAD
+                .dispatcherTypeMatchers(DispatcherType.FORWARD, DispatcherType.INCLUDE)
+                .permitAll()
+                .requestMatchers("/", "/login", "/register", "/css/**",
+                        "/js/**", "/images/**", "/forgotpassword",
+                        "/authentication/**", "/books", "/books/**", "/client/**",
+                        "/logout", "/logout/**")
+                .permitAll()
+                .requestMatchers("/admin/**").hasRole("ADMIN")
+                .requestMatchers("/changepass", "/profile", "/profile/**", "/cart", "/cart/**", "/orders", "/orders/**").authenticated()
+                .requestMatchers("/stationery/**").authenticated()
+                .anyRequest().authenticated())
+=======
                         .dispatcherTypeMatchers(DispatcherType.FORWARD, DispatcherType.INCLUDE)
                         .permitAll()
                         .requestMatchers("/", "/login", "/register", "/css/**",
@@ -90,6 +103,7 @@ public class SecurityConfiguration {
                         .requestMatchers("/changepass", "/profile", "/profile/**", "/cart", "/cart/**").authenticated()
                         .requestMatchers("/stationery/**").authenticated()
                         .anyRequest().authenticated())
+>>>>>>> d246c8f79da0292f63ce9d5bfff89c34da8fe8f6
                 .csrf(csrf -> csrf
                         .ignoringRequestMatchers("/authentication/**", "/register"))
                 .sessionManagement(sessionManagement -> sessionManagement
