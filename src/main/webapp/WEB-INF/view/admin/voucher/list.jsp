@@ -11,7 +11,9 @@
                 <link rel="stylesheet"
                     href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" />
                 <link rel="stylesheet" href="/css/admin-dashboard.css" />
-                <title>Voucher Management — Booktify Admin</title>
+                <title>
+                    Voucher Management — Booktify Admin
+                </title>
             </head>
 
             <body class="admin-shell">
@@ -27,12 +29,21 @@
                         <div class="admin-toolbar">
 
                             <div>
-                                <p class="admin-kicker"><i class="fa-solid fa-ticket"></i> Voucher Management</p>
-                                <h2>Vouchers</h2>
+
+                                <p class="admin-kicker">
+                                    <i class="fa-solid fa-ticket"></i>
+                                    Voucher Management
+                                </p>
+
+                                <h2>
+                                    Vouchers
+                                </h2>
+
                             </div>
 
                             <a href="/admin/vouchers/create" class="admin-button">
-                                <i class="fa-solid fa-plus"></i> New Voucher
+                                <i class="fa-solid fa-plus"></i>
+                                New Voucher
                             </a>
 
                         </div>
@@ -43,17 +54,51 @@
                             <table class="admin-table">
 
                                 <thead>
+
                                     <tr>
-                                        <th style="width:48px;">#</th>
-                                        <th>Code</th>
-                                        <th>Discount</th>
-                                        <th>Order Condition</th>
-                                        <th>Quantity</th>
-                                        <th>Duration</th>
-                                        <th>Status</th>
-                                        <th>Description</th>
-                                        <th>Last Update</th>
+
+                                        <th style="width:48px;">
+                                            #
+                                        </th>
+
+                                        <th>
+                                            Code
+                                        </th>
+
+                                        <th>
+                                            Discount
+                                        </th>
+
+                                        <th>
+                                            Order Condition
+                                        </th>
+
+                                        <th>
+                                            Quantity
+                                        </th>
+
+                                        <th>
+                                            Duration
+                                        </th>
+
+                                        <th>
+                                            Status
+                                        </th>
+
+                                        <th>
+                                            Description
+                                        </th>
+
+                                        <th>
+                                            Last Update
+                                        </th>
+
+                                        <th style="width:120px;">
+                                            Action
+                                        </th>
+
                                     </tr>
+
                                 </thead>
 
 
@@ -69,9 +114,11 @@
 
 
                                             <td>
+
                                                 <div style="font-weight:700;color:#111827;">
                                                     <c:out value="${voucher.voucherCode}" />
                                                 </div>
+
                                             </td>
 
 
@@ -81,6 +128,7 @@
 
 
                                             <td>
+
                                                 <div>
                                                     Min:
                                                     <fmt:formatNumber value="${voucher.minOrderAmount}" type="number"
@@ -92,6 +140,7 @@
                                                     <fmt:formatNumber value="${voucher.maxOrderAmount}" type="number"
                                                         groupingUsed="true" /> ₫
                                                 </div>
+
                                             </td>
 
 
@@ -101,13 +150,19 @@
 
 
                                             <td style="font-size:.85rem;">
+
                                                 <div>
                                                     <c:out value="${voucher.startDate}" />
                                                 </div>
-                                                <div>-</div>
+
+                                                <div>
+                                                    -
+                                                </div>
+
                                                 <div>
                                                     <c:out value="${voucher.endDate}" />
                                                 </div>
+
                                             </td>
 
 
@@ -116,21 +171,37 @@
                                                 <c:choose>
 
                                                     <c:when test="${voucher.status == 'ACTIVE'}">
+
                                                         <span style="color:#16A34A;font-weight:700;">
                                                             ACTIVE
                                                         </span>
+
                                                     </c:when>
 
+                                                    <c:when test="${voucher.status == 'UPCOMING'}">
+
+                                                        <span style="color:#2563EB;font-weight:700;">
+                                                            UPCOMING
+                                                        </span>
+
+                                                    </c:when>
+
+
                                                     <c:when test="${voucher.status == 'EXPIRED'}">
+
                                                         <span style="color:#DC2626;font-weight:700;">
                                                             EXPIRED
                                                         </span>
+
                                                     </c:when>
 
+
                                                     <c:otherwise>
+
                                                         <span style="color:#6B7280;font-weight:700;">
                                                             INACTIVE
                                                         </span>
+
                                                     </c:otherwise>
 
                                                 </c:choose>
@@ -143,8 +214,11 @@
                                                 <c:choose>
 
                                                     <c:when test="${not empty voucher.description}">
+
                                                         <c:out value="${voucher.description}" />
+
                                                     </c:when>
+
 
                                                     <c:otherwise>
                                                         —
@@ -156,7 +230,24 @@
 
 
                                             <td style="font-size:.8rem;color:#6B7280;">
+
                                                 <c:out value="${voucher.updatedAtString}" default="—" />
+
+                                            </td>
+
+
+                                            <td>
+
+                                                <a href="/admin/vouchers/edit/${voucher.voucherId}"
+                                                    class="admin-button admin-button--ghost"
+                                                    style="padding:6px 12px;font-size:.85rem;">
+
+                                                    <i class="fa-solid fa-pen"></i>
+
+                                                    Edit
+
+                                                </a>
+
                                             </td>
 
                                         </tr>
@@ -168,7 +259,7 @@
 
                                         <tr>
 
-                                            <td colspan="9" style="text-align:center;padding:56px 20px;color:#9CA3AF;">
+                                            <td colspan="10" style="text-align:center;padding:56px 20px;color:#9CA3AF;">
 
                                                 <i class="fa-solid fa-ticket"
                                                     style="font-size:2rem;display:block;margin-bottom:10px;opacity:.3;">
@@ -187,11 +278,15 @@
 
                             </table>
 
+
                         </div>
+
 
                     </section>
 
+
                 </main>
+
 
             </body>
 

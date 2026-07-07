@@ -3,14 +3,14 @@
         <%@ taglib prefix="form" uri="http://www.springframework.org/tags/form" %>
 
             <c:choose>
-                <c:when test="${formMode=='edit'}">
-                    <c:url var="formAction" value="/admin/vouchers/${voucherId}" />
+                <c:when test="${formMode == 'edit'}">
+                    <c:url var="formAction" value="/admin/vouchers/update/${voucherId}" />
                 </c:when>
-
                 <c:otherwise>
                     <c:url var="formAction" value="/admin/vouchers" />
                 </c:otherwise>
             </c:choose>
+
 
             <!DOCTYPE html>
             <html>
@@ -20,9 +20,9 @@
                 <link rel="stylesheet" href="/css/admin-dashboard.css" />
                 <link rel="stylesheet"
                     href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" />
-
-                <title>Voucher</title>
+                <title>${formMode == 'edit' ? 'Edit Voucher' : 'Create Voucher'}</title>
             </head>
+
 
             <body class="admin-shell">
 
@@ -39,13 +39,14 @@
                             <div>
                                 <p class="admin-kicker">
                                     <i class="fa-solid fa-ticket"></i>
-                                    ${formMode=='edit'?'Edit Voucher':'Create Voucher'}
+                                    ${formMode == 'edit' ? 'Edit Voucher' : 'Create Voucher'}
                                 </p>
 
                                 <h2>
-                                    ${formMode=='edit'?'Edit Voucher':'New Voucher'}
+                                    ${formMode == 'edit' ? 'Edit Voucher' : 'New Voucher'}
                                 </h2>
                             </div>
+
 
                             <a href="/admin/vouchers" class="admin-button admin-button--ghost">
                                 <i class="fa-solid fa-arrow-left"></i>
@@ -70,6 +71,7 @@
 
 
                                     <div class="admin-field">
+
                                         <label>
                                             Voucher Code
                                             <span style="color:#EF4444;">*</span>
@@ -79,10 +81,12 @@
                                             placeholder="Example: SUMMER10" />
 
                                         <form:errors path="voucherCode" cssClass="admin-error" />
+
                                     </div>
 
 
                                     <div class="admin-field">
+
                                         <label>
                                             Discount Value
                                             <span style="color:#EF4444;">*</span>
@@ -92,64 +96,78 @@
                                             cssClass="admin-input" placeholder="Example: 10" />
 
                                         <form:errors path="discountValue" cssClass="admin-error" />
+
                                     </div>
 
 
                                     <div class="admin-field">
+
                                         <label>
                                             Minimum Order Amount
                                         </label>
 
                                         <form:input path="minOrderAmount" type="number" step="1000" min="0"
                                             cssClass="admin-input" placeholder="Example: 20000" />
+
                                         <form:errors path="minOrderAmount" cssClass="admin-error" />
+
                                     </div>
 
 
                                     <div class="admin-field">
+
                                         <label>
                                             Maximum Order Amount
                                         </label>
 
                                         <form:input path="maxOrderAmount" type="number" step="1000" min="0"
                                             cssClass="admin-input" placeholder="Example: 100000" />
+
                                         <form:errors path="maxOrderAmount" cssClass="admin-error" />
+
                                     </div>
 
 
                                     <div class="admin-field">
+
                                         <label>
                                             Quantity
                                             <span style="color:#EF4444;">*</span>
                                         </label>
 
-                                        <form:input path="quantity" type="number" cssClass="admin-input" />
+                                        <form:input path="quantity" type="number" min="1" cssClass="admin-input" />
 
                                         <form:errors path="quantity" cssClass="admin-error" />
+
                                     </div>
 
 
                                     <div class="admin-field">
+
                                         <label>
                                             Start Date
                                             <span style="color:#EF4444;">*</span>
                                         </label>
 
-                                        <form:input path="startDate" type="date" cssClass="admin-input" />
+                                        <input type="date" name="startDate" value="${voucherDTO.startDate}"
+                                            class="admin-input" />
 
                                         <form:errors path="startDate" cssClass="admin-error" />
+
                                     </div>
 
 
                                     <div class="admin-field">
+
                                         <label>
                                             End Date
                                             <span style="color:#EF4444;">*</span>
                                         </label>
 
-                                        <form:input path="endDate" type="date" cssClass="admin-input" />
-
+                                        <input type="date" name="endDate" value="${voucherDTO.endDate}"
+                                            class="admin-input" />
                                         <form:errors path="endDate" cssClass="admin-error" />
+
                                     </div>
 
 
@@ -178,9 +196,9 @@
 
                                             <i class="fa-solid fa-floppy-disk"></i>
 
-                                            ${formMode=='edit'
-                                            ?'Update Voucher'
-                                            :'Create Voucher'}
+                                            ${formMode == 'edit'
+                                            ? 'Update Voucher'
+                                            : 'Create Voucher'}
 
                                         </button>
 
@@ -192,7 +210,6 @@
                             </div>
 
                         </div>
-
 
                     </section>
 
