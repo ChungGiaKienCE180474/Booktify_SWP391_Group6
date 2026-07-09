@@ -11,9 +11,7 @@
                 <link rel="stylesheet"
                     href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" />
                 <link rel="stylesheet" href="/css/admin-dashboard.css" />
-                <title>
-                    Voucher Management — Booktify Admin
-                </title>
+                <title>Voucher Management — Booktify Admin</title>
             </head>
 
             <body class="admin-shell">
@@ -27,80 +25,38 @@
                     <section class="admin-content">
 
                         <div class="admin-toolbar">
-
                             <div>
-
                                 <p class="admin-kicker">
                                     <i class="fa-solid fa-ticket"></i>
                                     Voucher Management
                                 </p>
-
-                                <h2>
-                                    Vouchers
-                                </h2>
-
+                                <h2>Vouchers</h2>
                             </div>
 
                             <a href="/admin/vouchers/create" class="admin-button">
                                 <i class="fa-solid fa-plus"></i>
                                 New Voucher
                             </a>
-
                         </div>
-
 
                         <div class="admin-table-wrap">
 
                             <table class="admin-table">
 
                                 <thead>
-
                                     <tr>
-
-                                        <th style="width:48px;">
-                                            #
-                                        </th>
-
-                                        <th>
-                                            Code
-                                        </th>
-
-                                        <th>
-                                            Discount
-                                        </th>
-
-                                        <th>
-                                            Order Condition
-                                        </th>
-
-                                        <th>
-                                            Quantity
-                                        </th>
-
-                                        <th>
-                                            Duration
-                                        </th>
-
-                                        <th>
-                                            Status
-                                        </th>
-
-                                        <th>
-                                            Description
-                                        </th>
-
-                                        <th>
-                                            Last Update
-                                        </th>
-
-                                        <th style="width:120px;">
+                                        <th>Name</th>
+                                        <th>Code</th>
+                                        <th>Discount</th>
+                                        <th>Quantity</th>
+                                        <th>Duration</th>
+                                        <th>Status</th>
+                                        <th>Description</th>
+                                        <th style="width:150px;text-align:center;">
                                             Action
                                         </th>
-
                                     </tr>
-
                                 </thead>
-
 
                                 <tbody>
 
@@ -108,117 +64,75 @@
 
                                         <tr>
 
-                                            <td style="color:#9CA3AF;font-weight:600;">
-                                                ${vs.index + 1}
+                                            <td>
+                                                <div style="font-weight:700;color:#111827;">
+                                                    <c:out value="${voucher.voucherName}" />
+                                                </div>
                                             </td>
 
-
                                             <td>
-
                                                 <div style="font-weight:700;color:#111827;">
                                                     <c:out value="${voucher.voucherCode}" />
                                                 </div>
-
                                             </td>
-
 
                                             <td>
                                                 <c:out value="${voucher.discountValue}" />%
                                             </td>
 
-
-                                            <td>
-
-                                                <div>
-                                                    Min:
-                                                    <fmt:formatNumber value="${voucher.minOrderAmount}" type="number"
-                                                        groupingUsed="true" /> ₫
-                                                </div>
-
-                                                <div>
-                                                    Max:
-                                                    <fmt:formatNumber value="${voucher.maxOrderAmount}" type="number"
-                                                        groupingUsed="true" /> ₫
-                                                </div>
-
-                                            </td>
-
-
                                             <td>
                                                 <c:out value="${voucher.quantity}" />
                                             </td>
 
-
                                             <td style="font-size:.85rem;">
-
                                                 <div>
                                                     <c:out value="${voucher.startDate}" />
                                                 </div>
 
-                                                <div>
-                                                    -
-                                                </div>
+                                                <div>-</div>
 
                                                 <div>
                                                     <c:out value="${voucher.endDate}" />
                                                 </div>
-
                                             </td>
 
-
                                             <td>
-
                                                 <c:choose>
 
                                                     <c:when test="${voucher.status == 'ACTIVE'}">
-
                                                         <span style="color:#16A34A;font-weight:700;">
                                                             ACTIVE
                                                         </span>
-
                                                     </c:when>
 
                                                     <c:when test="${voucher.status == 'UPCOMING'}">
-
                                                         <span style="color:#2563EB;font-weight:700;">
                                                             UPCOMING
                                                         </span>
-
                                                     </c:when>
 
-
                                                     <c:when test="${voucher.status == 'EXPIRED'}">
-
                                                         <span style="color:#DC2626;font-weight:700;">
                                                             EXPIRED
                                                         </span>
-
                                                     </c:when>
 
-
                                                     <c:otherwise>
-
                                                         <span style="color:#6B7280;font-weight:700;">
                                                             INACTIVE
                                                         </span>
-
                                                     </c:otherwise>
 
                                                 </c:choose>
-
                                             </td>
-
 
                                             <td style="max-width:250px;">
 
                                                 <c:choose>
 
                                                     <c:when test="${not empty voucher.description}">
-
                                                         <c:out value="${voucher.description}" />
-
                                                     </c:when>
-
 
                                                     <c:otherwise>
                                                         —
@@ -228,66 +142,286 @@
 
                                             </td>
 
-
-                                            <td style="font-size:.8rem;color:#6B7280;">
-
-                                                <c:out value="${voucher.updatedAtString}" default="—" />
-
-                                            </td>
+                                            <td class="admin-table__actions">
 
 
-                                            <td>
+                                                <!-- VIEW -->
+
+                                                <button type="button" class="icon-link js-view-voucher"
+                                                    data-name="<c:out value='${voucher.voucherName}'/>"
+                                                    data-code="<c:out value='${voucher.voucherCode}'/>"
+                                                    data-discount="<c:out value='${voucher.discountValue}'/>"
+                                                    data-min="<c:out value='${voucher.minOrderAmount}'/>"
+                                                    data-quantity="<c:out value='${voucher.quantity}'/>"
+                                                    data-start="<c:out value='${voucher.startDate}'/>"
+                                                    data-end="<c:out value='${voucher.endDate}'/>"
+                                                    data-status="<c:out value='${voucher.status}'/>"
+                                                    data-description="<c:out value='${voucher.description}'/>">
+
+
+                                                    <i class="fa-solid fa-eye"></i>
+
+                                                </button>
+
+
+
+                                                <!-- EDIT -->
 
                                                 <a href="/admin/vouchers/edit/${voucher.voucherId}"
-                                                    class="admin-button admin-button--ghost"
-                                                    style="padding:6px 12px;font-size:.85rem;">
+                                                    class="icon-link icon-link--edit">
 
                                                     <i class="fa-solid fa-pen"></i>
 
-                                                    Edit
-
                                                 </a>
 
-                                            </td>
 
+                                            </td>
                                         </tr>
 
                                     </c:forEach>
-
 
                                     <c:if test="${empty vouchers}">
 
                                         <tr>
 
-                                            <td colspan="10" style="text-align:center;padding:56px 20px;color:#9CA3AF;">
-
+                                            <td colspan="8" style="text-align:center;padding:56px 20px;color:#9CA3AF;">
                                                 <i class="fa-solid fa-ticket"
                                                     style="font-size:2rem;display:block;margin-bottom:10px;opacity:.3;">
                                                 </i>
-
                                                 No vouchers found.
-
                                             </td>
 
                                         </tr>
 
                                     </c:if>
 
-
                                 </tbody>
 
                             </table>
+
+                        </div>
+
+                    </section>
+
+                </main>
+
+
+
+                <!-- VOUCHER DETAIL MODAL -->
+
+                <div id="voucherModal" class="modal-overlay" style="display:none;" onclick="closeModal('voucherModal')">
+
+
+                    <div class="modal-box voucher-ticket-modal" onclick="event.stopPropagation()">
+
+                        <div class="modal-header">
+
+                            <h3>
+
+                                <i class="fa-solid fa-ticket"></i>
+
+                                Voucher Details
+
+                            </h3>
+
+
+                            <button class="modal-close" onclick="closeModal('voucherModal')">
+
+                                <i class="fa-solid fa-xmark"></i>
+
+                            </button>
+
+                        </div>
+
+
+
+
+                        <div class="modal-body">
+
+
+                            <div class="modal-row">
+
+                                <span class="modal-label">
+                                    Name
+                                </span>
+
+                                <span id="mVoucherName" class="modal-value">
+                                </span>
+
+                            </div>
+
+
+
+                            <div class="modal-row">
+
+                                <span class="modal-label">
+                                    Code
+                                </span>
+
+                                <span id="mVoucherCode" class="modal-value">
+                                </span>
+
+                            </div>
+
+
+
+
+                            <div class="modal-row">
+
+                                <span class="modal-label">
+                                    Discount
+                                </span>
+
+                                <span id="mVoucherDiscount" class="modal-value">
+                                </span>
+
+                            </div>
+
+
+
+
+                            <div class="modal-row">
+
+                                <span class="modal-label">
+                                    Minimum Order
+                                </span>
+
+                                <span id="mVoucherMin" class="modal-value">
+                                </span>
+
+                            </div>
+
+
+
+
+                            <div class="modal-row">
+
+                                <span class="modal-label">
+                                    Quantity
+                                </span>
+
+                                <span id="mVoucherQuantity" class="modal-value">
+                                </span>
+
+                            </div>
+
+
+
+
+                            <div class="modal-row">
+
+                                <span class="modal-label">
+                                    Duration
+                                </span>
+
+                                <span id="mVoucherDuration" class="modal-value">
+                                </span>
+
+                            </div>
+
+
+
+
+                            <div class="modal-row">
+
+                                <span class="modal-label">
+                                    Status
+                                </span>
+
+                                <span id="mVoucherStatus" class="modal-value">
+                                </span>
+
+                            </div>
+
+
+
+
+                            <div class="modal-row">
+
+                                <span class="modal-label">
+                                    Description
+                                </span>
+
+                                <span id="mVoucherDescription" class="modal-value">
+                                </span>
+
+                            </div>
+
 
 
                         </div>
 
 
-                    </section>
+                    </div>
+
+                </div>
+
+                <script>
+
+                    document.querySelectorAll('.js-view-voucher')
+                        .forEach(function (btn) {
 
 
-                </main>
+                            btn.onclick = function () {
 
+
+                                let d = this.dataset;
+
+
+                                document.getElementById("mVoucherName").textContent =
+                                    d.name || "—";
+
+
+                                document.getElementById("mVoucherCode").textContent =
+                                    d.code || "—";
+
+
+                                document.getElementById("mVoucherDiscount").textContent =
+                                    d.discount + "%";
+
+
+                                document.getElementById("mVoucherMin").textContent =
+                                    Number(d.min).toLocaleString('vi-VN') + " ₫";
+
+
+                                document.getElementById("mVoucherQuantity").textContent =
+                                    d.quantity || "—";
+
+
+                                document.getElementById("mVoucherDuration").textContent =
+                                    d.start + " - " + d.end;
+
+
+                                document.getElementById("mVoucherStatus").textContent =
+                                    d.status || "—";
+
+
+                                document.getElementById("mVoucherDescription").textContent =
+                                    d.description || "—";
+
+
+                                document.getElementById("voucherModal")
+                                    .style.display = "flex";
+
+
+                            }
+
+                        });
+
+
+
+                    function closeModal(id) {
+
+                        document.getElementById(id)
+                            .style.display = "none";
+
+                    }
+
+                </script>
 
             </body>
 
             </html>
+
+
+            

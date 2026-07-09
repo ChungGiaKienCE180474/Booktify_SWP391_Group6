@@ -27,6 +27,9 @@ public class Voucher {
     @Column(name = "voucher_id")
     private Long voucherId;
 
+    @Column(name = "voucher_name", length = 50)
+    private String voucherName;
+
     @Column(name = "voucher_code", nullable = false, unique = true, length = 50)
     private String voucherCode;
 
@@ -98,6 +101,14 @@ public class Voucher {
 
     public void setVoucherId(Long voucherId) {
         this.voucherId = voucherId;
+    }
+
+    public String getVoucherName() {
+        return voucherName;
+    }
+
+    public void setVoucherName(String voucherName) {
+        this.voucherName = voucherName;
     }
 
     public String getVoucherCode() {

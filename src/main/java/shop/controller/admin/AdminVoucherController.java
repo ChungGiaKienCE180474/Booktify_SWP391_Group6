@@ -90,6 +90,7 @@ public class AdminVoucherController {
 
         VoucherDTO dto = new VoucherDTO();
 
+        dto.setVoucherName(voucher.getVoucherName());
         dto.setVoucherCode(voucher.getVoucherCode());
         dto.setDiscountValue(voucher.getDiscountValue());
         dto.setMinOrderAmount(voucher.getMinOrderAmount());
@@ -207,6 +208,22 @@ public class AdminVoucherController {
                     "End date cannot be in the past.");
 
         }
+    }
+
+    // =====================
+    // VIEW DETAIL
+    // =====================
+
+    @GetMapping("/view/{id}")
+    public String viewDetail(
+            @PathVariable Long id,
+            Model model) {
+
+        Voucher voucher = voucherService.getVoucherById(id);
+
+        model.addAttribute("voucher", voucher);
+
+        return "admin/voucher/detail";
     }
 
 }

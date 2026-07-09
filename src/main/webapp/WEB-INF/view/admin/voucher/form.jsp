@@ -72,6 +72,20 @@
 
                                     <div class="admin-field">
 
+                                        <div class="admin-field">
+
+                                            <label>
+                                                Voucher Name
+                                                <span style="color:#EF4444;">*</span>
+                                            </label>
+
+                                            <form:input path="voucherName" cssClass="admin-input"
+                                                placeholder="Example: Summer Sale 2026" />
+
+                                            <form:errors path="voucherName" cssClass="admin-error" />
+
+                                        </div>
+
                                         <label>
                                             Voucher Code
                                             <span style="color:#EF4444;">*</span>
