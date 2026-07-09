@@ -50,7 +50,7 @@
                                     <%-- Right icons --%>
                                         <div class="header-icons">
                                             <%-- Cart (placeholder) --%>
-                                                <a href="#" class="hdr-icon-btn" title="Giỏ hàng">
+                                                <a href="/cart" class="hdr-icon-btn" title="Giỏ hàng">
                                                     <i class="fa-solid fa-cart-shopping"></i>
                                                     <span class="hdr-icon-label">Giỏ hàng</span>
                                                 </a>
@@ -68,6 +68,9 @@
                                                                     <a href="/profile" class="hdr-dropdown-item">
                                                                         <i class="fa-solid fa-id-card"></i> Thông tin cá
                                                                         nhân
+                                                                    </a>
+                                                                    <a href="/orders" class="hdr-dropdown-item">
+                                                                        <i class="fa-solid fa-box"></i> Đơn hàng của tôi
                                                                     </a>
                                                                     <div class="hdr-dropdown-sep"></div>
                                                                     <form class="hdr-dropdown-form" method="post"

@@ -84,10 +84,11 @@ public class SecurityConfiguration {
                         .requestMatchers("/", "/login", "/register", "/css/**",
                                 "/js/**", "/images/**", "/forgotpassword",
                                 "/authentication/**", "/books", "/books/**", "/client/**",
-                                "/authors", "/authors/**","/logout", "/logout/**")
+                                "/authors", "/authors/**", "/logout", "/logout/**")
                         .permitAll()
                         .requestMatchers("/admin/**").hasRole("ADMIN")
-                        .requestMatchers("/changepass", "/profile", "/profile/**", "/cart", "/cart/**").authenticated()
+                        .requestMatchers("/changepass", "/profile", "/profile/**", "/cart", "/cart/**",
+                                "/orders", "/orders/**").authenticated()
                         .requestMatchers("/stationery/**").authenticated()
                         .anyRequest().authenticated())
                 .csrf(csrf -> csrf
