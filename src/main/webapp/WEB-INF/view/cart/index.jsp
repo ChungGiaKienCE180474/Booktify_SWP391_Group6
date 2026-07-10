@@ -13,6 +13,8 @@
                 <link rel="stylesheet" href="/css/header.css" />
                 <link rel="stylesheet" href="/css/footer.css" />
                 <link rel="stylesheet" href="/css/cart.css" />
+                <link rel="stylesheet" href="/css/voucher.css" />
+
                 <title>Giỏ hàng — Booktify</title>
             </head>
 
@@ -134,49 +136,38 @@
 
                                         <!-- Voucher List -->
                                         <div class="voucher-box">
-
                                             <h2>
                                                 <i class="fa-solid fa-ticket"></i>
                                                 Voucher khả dụng
                                             </h2>
 
                                             <c:choose>
-
                                                 <c:when test="${empty activeVouchers}">
-
                                                     <p class="voucher-empty">
                                                         Không có voucher khả dụng.
                                                     </p>
-
                                                 </c:when>
 
                                                 <c:otherwise>
 
                                                     <div class="voucher-list-scroll">
-
                                                         <c:forEach items="${activeVouchers}" var="voucher">
-
                                                             <div class="voucher-card">
-
                                                                 <div class="voucher-description">
                                                                     <strong>
                                                                         🎟 ${voucher.voucherName}
                                                                     </strong>
                                                                 </div>
-
                                                                 <div class="voucher-info">
                                                                     <span>
                                                                         Mã:
                                                                     </span>
-
                                                                     <b>
                                                                         ${voucher.voucherCode}
                                                                     </b>
                                                                 </div>
-
                                                                 <div class="voucher-info">
                                                                     Đơn hàng từ:
-
                                                                     <b>
                                                                         <fmt:formatNumber
                                                                             value="${voucher.minOrderAmount}"
@@ -187,20 +178,17 @@
 
                                                                 <div class="voucher-info">
                                                                     HSD:
-
                                                                     <b>
-                                                                        ${voucher.endDate}
+                                                                        ${voucher.endDateString}
                                                                     </b>
                                                                 </div>
 
                                                                 <div class="voucher-actions">
-
                                                                     <button type="button" class="copy-voucher-btn"
                                                                         onclick="copyVoucher('${voucher.voucherCode}')">
 
                                                                         <i class="fa-solid fa-copy"></i>
                                                                         Copy
-
                                                                     </button>
 
                                                                     <button type="button" class="detail-voucher-btn"
@@ -208,34 +196,26 @@
                                     '${voucher.voucherName}',
                                     '${voucher.minOrderAmount}',
                                     '${voucher.voucherCode}',
-                                    '${voucher.startDate}',
-                                    '${voucher.endDate}',
+                                    '${voucher.startDateString}',
+                                    '${voucher.endDateString}',
                                     '${voucher.description}'
                                 )">
 
                                                                         <i class="fa-solid fa-circle-info"></i>
                                                                         Xem chi tiết
-
                                                                     </button>
 
                                                                 </div>
-
                                                             </div>
-
                                                         </c:forEach>
-
                                                     </div>
-
                                                 </c:otherwise>
-
                                             </c:choose>
-
                                         </div>
 
 
 
                                         <!-- Order Summary -->
-
                                         <h2>Tóm tắt đơn hàng</h2>
                                         <div class="cart-summary-row">
                                             <span>Số sản phẩm</span>
@@ -279,7 +259,7 @@
                 <jsp:include page="/WEB-INF/view/layout/footer.jsp" />
 
 
-                //Voucher chi tiết
+                <!--Voucher chi tiết-->
                 <div id="voucherModal" class="voucher-modal">
 
                     <div class="voucher-modal-content">
@@ -338,7 +318,6 @@
                         endDate,
                         description
                     ) {
-
                         document.getElementById("modalVoucherName")
                             .innerText = name;
 
@@ -361,8 +340,6 @@
                             .classList.add("active");
 
                     }
-
-
                     function closeVoucherDetail() {
 
                         document.getElementById("voucherModal")

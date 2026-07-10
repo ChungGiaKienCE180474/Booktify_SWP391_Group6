@@ -77,7 +77,27 @@
                                             </td>
 
                                             <td>
-                                                <c:out value="${voucher.discountValue}" />%
+
+                                                <c:choose>
+
+                                                    <c:when test="${voucher.discountType == 'PERCENT'}">
+                                                        <c:out value="${voucher.discountValue}" />%
+                                                    </c:when>
+
+
+                                                    <c:when test="${voucher.discountType == 'FIXED'}">
+
+                                                        <fmt:formatNumber value="${voucher.discountValue}" type="number"
+                                                            groupingUsed="true" /> ₫
+
+                                                    </c:when>
+
+                                                    <c:otherwise>
+                                                        -
+                                                    </c:otherwise>
+
+                                                </c:choose>
+
                                             </td>
 
                                             <td>
@@ -86,13 +106,13 @@
 
                                             <td style="font-size:.85rem;">
                                                 <div>
-                                                    <c:out value="${voucher.startDate}" />
+                                                    <c:out value="${voucher.startDateString}" />
                                                 </div>
 
                                                 <div>-</div>
 
                                                 <div>
-                                                    <c:out value="${voucher.endDate}" />
+                                                    <c:out value="${voucher.endDateString}" />
                                                 </div>
                                             </td>
 
@@ -150,14 +170,15 @@
                                                 <button type="button" class="icon-link js-view-voucher"
                                                     data-name="<c:out value='${voucher.voucherName}'/>"
                                                     data-code="<c:out value='${voucher.voucherCode}'/>"
+                                                    data-type="<c:out value='${voucher.discountType}'/>"
                                                     data-discount="<c:out value='${voucher.discountValue}'/>"
                                                     data-min="<c:out value='${voucher.minOrderAmount}'/>"
                                                     data-quantity="<c:out value='${voucher.quantity}'/>"
-                                                    data-start="<c:out value='${voucher.startDate}'/>"
-                                                    data-end="<c:out value='${voucher.endDate}'/>"
+                                                    data-start="<c:out value='${voucher.startDateString}'/>"
+                                                    data-end="<c:out value='${voucher.endDateString}'/>"
                                                     data-status="<c:out value='${voucher.status}'/>"
-                                                    data-description="<c:out value='${voucher.description}'/>">
-
+                                                    data-description="<c:out value='${voucher.description}'/>"
+                                                    data-updated="<c:out value='${voucher.updatedAtString}'/>">
 
                                                     <i class="fa-solid fa-eye"></i>
 
@@ -174,10 +195,8 @@
 
                                                 </a>
 
-
                                             </td>
                                         </tr>
-
                                     </c:forEach>
 
                                     <c:if test="${empty vouchers}">
@@ -190,19 +209,12 @@
                                                 </i>
                                                 No vouchers found.
                                             </td>
-
                                         </tr>
-
                                     </c:if>
-
                                 </tbody>
-
                             </table>
-
                         </div>
-
                     </section>
-
                 </main>
 
 
@@ -211,149 +223,93 @@
 
                 <div id="voucherModal" class="modal-overlay" style="display:none;" onclick="closeModal('voucherModal')">
 
-
                     <div class="modal-box voucher-ticket-modal" onclick="event.stopPropagation()">
-
                         <div class="modal-header">
-
                             <h3>
-
                                 <i class="fa-solid fa-ticket"></i>
-
                                 Voucher Details
-
                             </h3>
 
-
                             <button class="modal-close" onclick="closeModal('voucherModal')">
-
                                 <i class="fa-solid fa-xmark"></i>
-
                             </button>
-
                         </div>
 
-
-
-
                         <div class="modal-body">
-
-
                             <div class="modal-row">
-
                                 <span class="modal-label">
                                     Name
                                 </span>
-
                                 <span id="mVoucherName" class="modal-value">
                                 </span>
-
                             </div>
 
-
-
                             <div class="modal-row">
-
                                 <span class="modal-label">
                                     Code
                                 </span>
-
                                 <span id="mVoucherCode" class="modal-value">
                                 </span>
-
                             </div>
 
-
-
-
                             <div class="modal-row">
-
                                 <span class="modal-label">
                                     Discount
                                 </span>
-
                                 <span id="mVoucherDiscount" class="modal-value">
                                 </span>
-
                             </div>
 
-
-
-
                             <div class="modal-row">
-
                                 <span class="modal-label">
                                     Minimum Order
                                 </span>
-
                                 <span id="mVoucherMin" class="modal-value">
                                 </span>
-
                             </div>
 
-
-
-
                             <div class="modal-row">
-
                                 <span class="modal-label">
                                     Quantity
                                 </span>
-
                                 <span id="mVoucherQuantity" class="modal-value">
                                 </span>
-
                             </div>
 
-
-
-
                             <div class="modal-row">
-
                                 <span class="modal-label">
                                     Duration
                                 </span>
-
                                 <span id="mVoucherDuration" class="modal-value">
                                 </span>
-
                             </div>
 
-
-
-
                             <div class="modal-row">
-
                                 <span class="modal-label">
                                     Status
                                 </span>
-
                                 <span id="mVoucherStatus" class="modal-value">
                                 </span>
-
                             </div>
 
-
-
-
                             <div class="modal-row">
-
                                 <span class="modal-label">
                                     Description
                                 </span>
-
                                 <span id="mVoucherDescription" class="modal-value">
                                 </span>
-
                             </div>
 
-
+                            <div class="modal-row">
+                                <span class="modal-label">
+                                    Last Update
+                                </span>
+                                <span id="mVoucherUpdated" class="modal-value">
+                                </span>
+                            </div>
 
                         </div>
-
-
                     </div>
-
                 </div>
 
                 <script>
@@ -376,9 +332,22 @@
                                     d.code || "—";
 
 
-                                document.getElementById("mVoucherDiscount").textContent =
-                                    d.discount + "%";
+                                if (d.type === "PERCENT") {
 
+                                    document.getElementById("mVoucherDiscount").textContent =
+                                        d.discount + "%";
+
+                                } else if (d.type === "FIXED") {
+
+                                    document.getElementById("mVoucherDiscount").textContent =
+                                        Number(d.discount).toLocaleString('vi-VN') + " ₫";
+
+                                } else {
+
+                                    document.getElementById("mVoucherDiscount").textContent =
+                                        "—";
+
+                                }
 
                                 document.getElementById("mVoucherMin").textContent =
                                     Number(d.min).toLocaleString('vi-VN') + " ₫";
@@ -398,6 +367,9 @@
 
                                 document.getElementById("mVoucherDescription").textContent =
                                     d.description || "—";
+
+                                document.getElementById("mVoucherUpdated").textContent =
+                                    d.updated || "—";
 
 
                                 document.getElementById("voucherModal")
@@ -422,6 +394,3 @@
             </body>
 
             </html>
-
-
-            

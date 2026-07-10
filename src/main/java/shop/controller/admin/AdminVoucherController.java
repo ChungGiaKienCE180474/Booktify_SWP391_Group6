@@ -92,6 +92,7 @@ public class AdminVoucherController {
 
         dto.setVoucherName(voucher.getVoucherName());
         dto.setVoucherCode(voucher.getVoucherCode());
+        dto.setDiscountType(voucher.getDiscountType());
         dto.setDiscountValue(voucher.getDiscountValue());
         dto.setMinOrderAmount(voucher.getMinOrderAmount());
         dto.setMaxOrderAmount(voucher.getMaxOrderAmount());
@@ -187,15 +188,16 @@ public class AdminVoucherController {
                     "Maximum amount must be greater than minimum amount.");
         }
 
-        if (voucherDTO.getDiscountValue() != null &&
-                voucherDTO.getDiscountValue()
-                        .compareTo(new BigDecimal("100")) > 0) {
+        if ("PERCENT".equals(voucherDTO.getDiscountType())
+                && voucherDTO.getDiscountValue() != null
+                && voucherDTO.getDiscountValue().compareTo(new BigDecimal("100")) > 0) {
 
             bindingResult.rejectValue(
                     "discountValue",
                     "voucher.value",
-                    "Discount must be between 1 and 100.");
+                    "Percentage discount cannot exceed 100.");
         }
+
         // Only check when CREATE
         if (id == null &&
                 voucherDTO.getEndDate() != null &&
