@@ -16,6 +16,10 @@ public class VoucherDTO {
     // FIELD
     // =====================
 
+    @NotBlank(message = "Voucher name is required.")
+    @Size(max = 50, message = "Voucher name must not exceed 50 characters.")
+    private String voucherName;
+
     @NotBlank(message = "Voucher code is required.")
     @Size(max = 50, message = "Voucher code must not exceed 50 characters.")
     private String voucherCode;
@@ -54,6 +58,14 @@ public class VoucherDTO {
     // =====================
     // GETTER SETTER
     // =====================
+
+    public String getVoucherName() {
+        return voucherName;
+    }
+
+    public void setVoucherName(String voucherName) {
+        this.voucherName = voucherName;
+    }
 
     public String getVoucherCode() {
         return voucherCode;
