@@ -23,6 +23,12 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.OneToMany;
+
 @Entity
 @Table(name = "books")
 public class Book {
@@ -78,6 +84,9 @@ public class Book {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "genre_id")
     private Genre genre;
+
+    @OneToMany(mappedBy = "book", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Rating> ratings = new ArrayList<>();
 
     @PrePersist
     void onCreate() {
@@ -188,7 +197,8 @@ public class Book {
     }
 
     public String getPriceFormatted() {
-        if (price == null) return "0";
+        if (price == null)
+            return "0";
         NumberFormat nf = NumberFormat.getIntegerInstance(Locale.GERMANY);
         return nf.format(price.longValue());
     }
@@ -207,5 +217,13 @@ public class Book {
 
     public void setGenre(Genre genre) {
         this.genre = genre;
+    }
+
+    public List<Rating> getRatings() {
+        return ratings;
+    }
+
+    public void setRatings(List<Rating> ratings) {
+        this.ratings = ratings;
     }
 }

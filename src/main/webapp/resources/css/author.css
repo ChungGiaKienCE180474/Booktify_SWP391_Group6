@@ -1,22 +1,32 @@
 .author-wrap {
     max-width: 1200px;
     margin: 0 auto;
-    padding: 1.5rem;
+    padding: 1.5rem 1.5rem 3rem;
 }
 
 .author-breadcrumb {
-    font-size: .85rem;
+    display: flex;
+    align-items: center;
+    gap: .45rem;
+    font-size: .8rem;
     color: var(--text-muted);
-    margin-bottom: 1rem;
+    margin-bottom: 1.2rem;
+    flex-wrap: wrap;
 }
 
 .author-breadcrumb a {
     text-decoration: none;
     color: var(--text-muted);
+    transition: .2s;
 }
 
 .author-breadcrumb a:hover {
     color: var(--primary);
+}
+
+.author-breadcrumb i {
+    font-size: .6rem;
+    opacity: .4;
 }
 
 .author-header {
@@ -64,6 +74,7 @@
 
 .author-img {
     height: 220px;
+    width: 100%;
     background: linear-gradient(135deg, #ECEFF1, #CFD8DC);
     display: flex;
     align-items: center;
@@ -75,6 +86,8 @@
     width: 100%;
     height: 100%;
     object-fit: cover;
+    border-radius: 12px;
+    display: block;
 }
 
 .author-body {
@@ -93,6 +106,7 @@
 .author-nationality {
     font-size: .8rem;
     color: var(--text-muted);
+    margin-top: 12px;
     margin-bottom: .8rem;
 }
 
@@ -119,100 +133,30 @@
 }
 
 
-
-
-
-
 /* =====================================================
    Author Detail
 ===================================================== */
-
-/* ==========================
-   Wrapper
-========================== */
-
-.author-wrap {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 1.5rem 1.5rem 3rem;
-}
-
-/* ==========================
-   Breadcrumb
-========================== */
-
-.author-breadcrumb {
-    display: flex;
-    align-items: center;
-    gap: .45rem;
-    font-size: .8rem;
-    color: var(--text-muted);
-    margin-bottom: 1.2rem;
-    flex-wrap: wrap;
-}
-
-.author-breadcrumb a {
-    color: var(--text-muted);
-    text-decoration: none;
-    transition: .2s;
-}
-
-.author-breadcrumb a:hover {
-    color: var(--primary);
-}
-
-.author-breadcrumb i {
-    font-size: .6rem;
-    opacity: .4;
-}
-
-/* ==========================
-   Detail
-========================== */
 
 .author-detail {
     display: grid;
     grid-template-columns: 280px 1fr;
     gap: 2.5rem;
-
     background: #fff;
     border: 1px solid var(--border);
     border-radius: var(--radius-lg);
-
     padding: 2rem;
-
     box-shadow: var(--shadow-sm);
-
     align-items: start;
-}
-
-/* ==========================
-   Image
-========================== */
-
-.author-img {
-    width: 100%;
-}
-
-.author-img img {
-    width: 100%;
-    height: 320px;
-    object-fit: cover;
-    border-radius: 12px;
-    display: block;
 }
 
 .author-no-img {
     aspect-ratio: 2/3;
-
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
-
     border: 2px dashed #ddd;
     border-radius: 12px;
-
     color: #999;
 }
 
@@ -221,23 +165,11 @@
     margin-bottom: 10px;
 }
 
-/* ==========================
-   Info
-========================== */
-
 .author-info h1 {
     margin: 0;
     font-size: 2.2rem;
     font-weight: 800;
     color: var(--text);
-}
-
-.author-nationality {
-    margin-top: 12px;
-    margin-bottom: 25px;
-
-    color: var(--text-muted);
-    font-size: .95rem;
 }
 
 .author-biography {
@@ -246,6 +178,7 @@
     font-size: .95rem;
     text-align: justify;
 }
+
 
 /* ==========================
    Responsive

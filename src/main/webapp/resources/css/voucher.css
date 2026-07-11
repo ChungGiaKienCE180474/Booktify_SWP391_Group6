@@ -1,5 +1,3 @@
-
-
 /* =========================
    Voucher Ticket
 ========================= */
@@ -36,6 +34,7 @@
     padding: 18px 20px;
     margin-bottom: 15px;
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+    overflow: visible;
 }
 
 
@@ -100,30 +99,49 @@
     line-height: 1.2;
 }
 
-
 .voucher-info b {
     color: #111827;
 }
 
 
 /* =========================
-   Copy Button
+   Buttons
 ========================= */
+
+.voucher-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 10px;
+}
+
+.copy-voucher-btn,
+.detail-voucher-btn {
+    flex: 1;
+    padding: 6px 10px;
+    border-radius: 7px;
+    cursor: pointer;
+    font-size: .8rem;
+}
 
 .copy-voucher-btn {
     margin-left: auto;
     border: none;
     background: #2563eb;
     color: white;
-    padding: 4px 10px;
-    border-radius: 7px;
-    cursor: pointer;
-    font-size: .8rem;
 }
-
 
 .copy-voucher-btn:hover {
     background: #1d4ed8;
+}
+
+.detail-voucher-btn {
+    border: none;
+    background: #16a34a;
+    color: white;
+}
+
+.detail-voucher-btn:hover {
+    background: #15803d;
 }
 
 
@@ -135,15 +153,15 @@
     width: 6px;
 }
 
-
 .voucher-list-scroll::-webkit-scrollbar-thumb {
     background: #cbd5e1;
     border-radius: 10px;
 }
 
-.voucher-card {
-    overflow: visible;
-}
+
+/* =========================
+   Voucher Modal
+========================= */
 
 .voucher-modal {
     position: fixed;
@@ -155,12 +173,9 @@
     z-index: 9999;
 }
 
-
 .voucher-modal.active {
     display: flex;
 }
-
-
 
 .voucher-modal-content {
     background: white;
@@ -171,13 +186,9 @@
     box-shadow: 0 20px 40px rgba(0, 0, 0, .2);
 }
 
-
-
 .voucher-modal-content h2 {
     margin-bottom: 20px;
 }
-
-
 
 .voucher-close {
     position: absolute;
@@ -189,97 +200,37 @@
     cursor: pointer;
 }
 
-
-
 .voucher-detail-item {
     margin-bottom: 15px;
     line-height: 1.5;
 }
-
-
 
 .voucher-detail-item b {
     display: block;
     color: #374151;
 }
 
-
-
 .voucher-detail-item span,
 .voucher-detail-item p {
     color: #6b7280;
 }
 
-.voucher-actions {
-
-    display: flex;
-
-    gap: 8px;
-
-    margin-top: 10px;
-
-}
-
-
-.copy-voucher-btn,
-.detail-voucher-btn {
-
-    flex: 1;
-
-    padding: 6px 10px;
-
-    border-radius: 7px;
-
-    cursor: pointer;
-
-    font-size: .8rem;
-
-}
-
-
-.detail-voucher-btn {
-
-    border: none;
-
-    background: #16a34a;
-
-    color: white;
-
-}
-
-
-.detail-voucher-btn:hover {
-
-    background: #15803d;
-
-}
-
-
 
 /*
 Page checkout
 */
+
 .apply-voucher-btn {
-
-    background:#dc2626;
-    color:white;
-
-    border:none;
-    border-radius:8px;
-
-    padding:0 20px;
-
-    font-weight:700;
-
-    cursor:pointer;
-
-    transition:.2s;
-
+    background: #dc2626;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 0 20px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: .2s;
 }
 
-
 .apply-voucher-btn:hover {
-
-    background:#b91c1c;
-
+    background: #b91c1c;
 }
