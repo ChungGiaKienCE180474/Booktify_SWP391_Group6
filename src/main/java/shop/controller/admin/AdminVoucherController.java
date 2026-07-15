@@ -1,6 +1,7 @@
 package shop.controller.admin;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
@@ -11,6 +12,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import jakarta.validation.Valid;
 
+import shop.domain.Voucher;
 import shop.domain.dto.VoucherDTO;
 import shop.service.VoucherService;
 
@@ -18,10 +20,6 @@ import shop.service.VoucherService;
 @RequestMapping("/admin/vouchers")
 @PreAuthorize("hasRole('ADMIN')")
 public class AdminVoucherController {
-
-    // =====================
-    // DEPENDENCY
-    // =====================
 
     private final VoucherService voucherService;
 
@@ -36,12 +34,9 @@ public class AdminVoucherController {
     @GetMapping
     public String list(Model model) {
 
-        model.addAttribute(
-                "vouchers",
-                voucherService.getAllVouchers());
+        model.addAttribute("vouchers", voucherService.getAllVouchers());
 
         return "admin/voucher/list";
-
     }
 
     // =====================
@@ -51,102 +46,29 @@ public class AdminVoucherController {
     @GetMapping("/create")
     public String createForm(Model model) {
 
-        model.addAttribute(
-                "voucherDTO",
-                new VoucherDTO());
-
-        model.addAttribute(
-                "formMode",
-                "create");
+        model.addAttribute("voucherDTO", new VoucherDTO());
+        model.addAttribute("formMode", "create");
 
         return "admin/voucher/form";
-
     }
 
     // =====================
-    // CREATE ACTION
+    // CREATE
     // =====================
 
     @PostMapping
     public String create(
-
             @Valid @ModelAttribute("voucherDTO") VoucherDTO voucherDTO,
-
             BindingResult bindingResult,
-
             Model model,
+            RedirectAttributes redirectAttributes) {
 
-            RedirectAttributes redirectAttributes
-
-    ) {
-
-        // CHECK DUPLICATE CODE
-
-        if (voucherService.existsByVoucherCodeIgnoreCase(
-                voucherDTO.getVoucherCode())) {
-
-            bindingResult.rejectValue(
-                    "voucherCode",
-                    "voucher.exists",
-                    "Voucher code already exists.");
-
-        }
-
-        // CHECK DATE
-
-        if (voucherDTO.getStartDate() != null
-                &&
-                voucherDTO.getEndDate() != null
-                &&
-                voucherDTO.getEndDate()
-                        .isBefore(voucherDTO.getStartDate())) {
-
-            bindingResult.rejectValue(
-                    "endDate",
-                    "voucher.date",
-                    "End date must be after start date.");
-
-        }
-        if (voucherDTO.getMinOrderAmount() != null
-                &&
-                voucherDTO.getMaxOrderAmount() != null
-                &&
-                voucherDTO.getMaxOrderAmount()
-                        .compareTo(voucherDTO.getMinOrderAmount()) < 0) {
-
-            bindingResult.rejectValue(
-                    "maxOrderAmount",
-                    "voucher.amount",
-                    "Maximum amount must be greater than minimum amount.");
-
-        }
-        if (voucherDTO.getDiscountValue() != null) {
-
-            if (voucherDTO.getDiscountValue()
-                    .compareTo(new BigDecimal("100")) > 0) {
-
-                bindingResult.rejectValue(
-                        "discountValue",
-                        "voucher.value",
-                        "Discount must be between 1 and 100");
-
-            }
-
-        }
-
-        // HAS ERROR
+        validateVoucher(voucherDTO, bindingResult, null);
 
         if (bindingResult.hasErrors()) {
-
-            model.addAttribute(
-                    "formMode",
-                    "create");
-
+            model.addAttribute("formMode", "create");
             return "admin/voucher/form";
-
         }
-
-        // SAVE
 
         voucherService.saveVoucher(voucherDTO);
 
@@ -155,7 +77,153 @@ public class AdminVoucherController {
                 "Create Voucher Successfully");
 
         return "redirect:/admin/vouchers";
+    }
 
+    // =====================
+    // EDIT FORM
+    // =====================
+
+    @GetMapping("/edit/{id}")
+    public String editForm(@PathVariable Long id, Model model) {
+
+        Voucher voucher = voucherService.getVoucherById(id);
+
+        VoucherDTO dto = new VoucherDTO();
+
+        dto.setVoucherName(voucher.getVoucherName());
+        dto.setVoucherCode(voucher.getVoucherCode());
+        dto.setDiscountValue(voucher.getDiscountValue());
+        dto.setMinOrderAmount(voucher.getMinOrderAmount());
+        dto.setMaxOrderAmount(voucher.getMaxOrderAmount());
+        dto.setQuantity(voucher.getQuantity());
+        dto.setStartDate(voucher.getStartDate());
+        dto.setEndDate(voucher.getEndDate());
+        dto.setDescription(voucher.getDescription());
+
+        model.addAttribute("voucherDTO", dto);
+        model.addAttribute("voucherId", id);
+        model.addAttribute("formMode", "edit");
+
+        return "admin/voucher/form";
+    }
+
+    // =====================
+    // UPDATE
+    // =====================
+
+    @PostMapping("/update/{id}")
+    public String update(
+            @PathVariable Long id,
+            @Valid @ModelAttribute("voucherDTO") VoucherDTO voucherDTO,
+            BindingResult bindingResult,
+            Model model,
+            RedirectAttributes redirectAttributes) {
+
+        validateVoucher(voucherDTO, bindingResult, id);
+
+        if (bindingResult.hasErrors()) {
+
+            model.addAttribute("formMode", "edit");
+            model.addAttribute("voucherId", id);
+
+            return "admin/voucher/form";
+        }
+
+        voucherService.updateVoucher(id, voucherDTO);
+
+        redirectAttributes.addFlashAttribute(
+                "successMessage",
+                "Update Voucher Successfully");
+
+        return "redirect:/admin/vouchers";
+    }
+
+    // =====================
+    // VALIDATION COMMON
+    // =====================
+
+    private void validateVoucher(VoucherDTO voucherDTO, BindingResult bindingResult, Long id) {
+
+        boolean exists;
+
+        if (id == null) {
+
+            exists = voucherService.existsByVoucherCodeIgnoreCase(
+                    voucherDTO.getVoucherCode());
+
+        } else {
+
+            exists = voucherService.existsByVoucherCodeIgnoreCaseAndVoucherIdNot(
+                    voucherDTO.getVoucherCode(),
+                    id);
+        }
+
+        if (exists) {
+
+            bindingResult.rejectValue(
+                    "voucherCode",
+                    "voucher.exists",
+                    "Voucher code already exists.");
+        }
+
+        if (voucherDTO.getStartDate() != null &&
+                voucherDTO.getEndDate() != null &&
+                voucherDTO.getEndDate().isBefore(voucherDTO.getStartDate())) {
+
+            bindingResult.rejectValue(
+                    "endDate",
+                    "voucher.date",
+                    "End date must be after start date.");
+        }
+
+        if (voucherDTO.getMinOrderAmount() != null &&
+                voucherDTO.getMaxOrderAmount() != null &&
+                voucherDTO.getMaxOrderAmount()
+                        .compareTo(voucherDTO.getMinOrderAmount()) < 0) {
+
+            bindingResult.rejectValue(
+                    "maxOrderAmount",
+                    "voucher.amount",
+                    "Maximum amount must be greater than minimum amount.");
+        }
+
+        if (voucherDTO.getDiscountValue() != null &&
+                voucherDTO.getDiscountValue()
+                        .compareTo(new BigDecimal("100")) > 0) {
+
+            bindingResult.rejectValue(
+                    "discountValue",
+                    "voucher.value",
+                    "Discount must be between 1 and 100.");
+        }
+        // Only check when CREATE
+        if (id == null &&
+                voucherDTO.getEndDate() != null &&
+                voucherDTO.getEndDate()
+                        .isBefore(LocalDate.now())) {
+
+            bindingResult.rejectValue(
+                    "endDate",
+                    "voucher.expired",
+                    "End date cannot be in the past.");
+
+        }
+    }
+
+    // =====================
+    // VIEW DETAIL
+    // =====================
+
+    @GetMapping("/view/{id}")
+    public String viewDetail(
+            @PathVariable Long id,
+            Model model) {
+
+        Voucher voucher = voucherService.getVoucherById(id);
+
+        model.addAttribute("voucher", voucher);
+
+        return "admin/voucher/detail";
     }
 
 }
