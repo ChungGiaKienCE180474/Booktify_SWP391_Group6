@@ -9,7 +9,7 @@
     <link rel="stylesheet" href="/css/admin-dashboard.css" />
     <title>Dashboard — Booktify Admin</title>
     <style>
-        .card-icon-blue   { background:#EFF6FF; border-color:#BFDBFE; color:#2563EB; }
+        .card-icon-blue   { background:#E3F4F1; border-color:#B7DED7; color:#006B5E; }
         .card-icon-green  { background:#F0FDF4; border-color:#BBF7D0; color:#16A34A; }
         .card-icon-orange { background:#FFF7ED; border-color:#FED7AA; color:#F97316; }
         .card-icon-purple { background:#F5F3FF; border-color:#DDD6FE; color:#7C3AED; }
@@ -31,7 +31,7 @@
                     <p>Monitor your store's books, categories, and user activity from one place.</p>
                 </div>
                 <div style="display:flex;gap:10px;flex-wrap:wrap;position:relative;z-index:1;">
-                    <a class="admin-button" href="/admin/books/create" style="background:#fff;color:#1D4ED8;border-color:#fff;">
+                    <a class="admin-button" href="/admin/books/create" style="background:#fff;color:#004D42;border-color:#fff;">
                         <i class="fa-solid fa-plus"></i> New Book
                     </a>
                     <a class="admin-button admin-button--ghost" href="/admin/categories"

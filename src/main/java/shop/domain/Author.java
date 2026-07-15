@@ -38,7 +38,7 @@ public class Author {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "boolean default true")
     private boolean status = true;
 
     public Author() {

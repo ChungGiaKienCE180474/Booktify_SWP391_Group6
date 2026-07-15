@@ -7,7 +7,7 @@
                     <div class="header-topbar-left">
                         <span><i class="fa-solid fa-truck-fast"></i> Miễn phí giao hàng đơn trên 150.000đ</span>
                         <span class="topbar-sep">|</span>
-                        <span><i class="fa-solid fa-phone"></i> Hotline: 1900-xxxx</span>
+                        <span><i class="fa-solid fa-phone"></i> Hotline: 1900-6067</span>
                     </div>
                     <div class="header-topbar-right">
                         <c:choose>
@@ -105,21 +105,14 @@
                                 <div class="header-catbar-inner">
 
                                     <a href="/books" class="catbar-link catbar-all">
-                                        <i class="fa-solid fa-bars"></i> Tất cả danh mục
+                                        <i class="fa-solid fa-book"></i> Danh mục sách
                                     </a>
 
-                                    <!-- NEW -->
-                                    <a href="/authors" class="catbar-link">
-                                         Author
+                                    <%-- Stationery module belongs to a teammate; left as a
+                                         non-functional placeholder until it's wired up. --%>
+                                    <a href="#" class="catbar-link catbar-disabled" title="Sắp ra mắt" onclick="return false;">
+                                        <i class="fa-solid fa-pen-ruler"></i> Danh mục văn phòng phẩm
                                     </a>
-
-                                    <c:forEach items="${categories}" var="cat">
-                                        <c:if test="${cat.active}">
-                                            <a href="/books?categoryId=${cat.id}" class="catbar-link">
-                                                ${cat.name}
-                                            </a>
-                                        </c:if>
-                                    </c:forEach>
 
                                 </div>
                             </nav>

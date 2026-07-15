@@ -27,6 +27,8 @@ import shop.service.BookService;
 import shop.service.CategoryService;
 import shop.service.GenreService;
 
+// Also exposes two JSON endpoints used by the admin UI: /by-category
+// (genre suggestions) and /{id}/detail (the "View" modal on the list page).
 @Controller
 @RequestMapping("/admin/genres")
 @PreAuthorize("hasRole('ADMIN')")
@@ -46,7 +48,6 @@ public class AdminGenreController {
 
     private static final int PAGE_SIZE = 10;
 
-    // ── LIST ─────────────────────────────────────────────────────────────────
     @GetMapping
     public String list(@RequestParam(required = false) String q,
                        @RequestParam(required = false) Long categoryId,
@@ -72,7 +73,6 @@ public class AdminGenreController {
         return "admin/genre/list";
     }
 
-    // ── CREATE FORM ──────────────────────────────────────────────────────────
     @GetMapping("/create")
     public String createForm(Model model) {
         model.addAttribute("genre", new Genre());
@@ -81,35 +81,32 @@ public class AdminGenreController {
         return "admin/genre/form";
     }
 
-    // ── CREATE SUBMIT ────────────────────────────────────────────────────────
+    // categoryId is optional here — it's only used to group genres in the
+    // admin UI, not a hard requirement like it is for Book.
     @PostMapping
     public String create(@ModelAttribute("genre") @Valid Genre genre,
                          BindingResult bindingResult,
                          @RequestParam(name = "categoryId", required = false) Long categoryId,
                          Model model, RedirectAttributes redirectAttributes) {
 
-        boolean categoryMissing = (categoryId == null);
-        if (categoryMissing) {
-            model.addAttribute("categoryError", "Please select a category.");
-        } else if (StringUtils.hasText(genre.getName())
-                && genreService.existsByNameAndCategory(genre.getName(), categoryId)) {
-            bindingResult.rejectValue("name", "genre.exists",
-                    "Genre already exists in this category.");
+        if (StringUtils.hasText(genre.getName()) && genreService.existsByName(genre.getName())) {
+            bindingResult.rejectValue("name", "genre.exists", "Genre already exists.");
         }
 
-        if (bindingResult.hasErrors() || categoryMissing) {
+        if (bindingResult.hasErrors()) {
             model.addAttribute("categories", categoryService.getAllCategories());
             model.addAttribute("formMode", "create");
             return "admin/genre/form";
         }
 
-        categoryService.getCategoryById(categoryId).ifPresent(genre::setCategory);
+        if (categoryId != null) {
+            categoryService.getCategoryById(categoryId).ifPresent(genre::setCategory);
+        }
         genreService.saveGenre(genre);
         redirectAttributes.addFlashAttribute("successMessage", "Genre created successfully.");
         return "redirect:/admin/genres";
     }
 
-    // ── EDIT FORM ────────────────────────────────────────────────────────────
     @GetMapping("/{id}/edit")
     public String editForm(@PathVariable Long id, Model model) {
         Genre genre = genreService.getGenreById(id)
@@ -120,7 +117,6 @@ public class AdminGenreController {
         return "admin/genre/form";
     }
 
-    // ── UPDATE SUBMIT ────────────────────────────────────────────────────────
     @PostMapping("/{id}")
     public String update(@PathVariable Long id,
                          @ModelAttribute("genre") @Valid Genre genre,
@@ -131,16 +127,12 @@ public class AdminGenreController {
         Genre existing = genreService.getGenreById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Genre not found: " + id));
 
-        boolean categoryMissing = (categoryId == null);
-        if (categoryMissing) {
-            model.addAttribute("categoryError", "Please select a category.");
-        } else if (StringUtils.hasText(genre.getName())
-                && genreService.existsByNameAndCategoryExcludeId(genre.getName(), categoryId, id)) {
-            bindingResult.rejectValue("name", "genre.exists",
-                    "Genre already exists in this category.");
+        if (StringUtils.hasText(genre.getName())
+                && genreService.existsByNameExcludeId(genre.getName(), id)) {
+            bindingResult.rejectValue("name", "genre.exists", "Genre already exists.");
         }
 
-        if (bindingResult.hasErrors() || categoryMissing) {
+        if (bindingResult.hasErrors()) {
             model.addAttribute("categories", categoryService.getAllCategories());
             model.addAttribute("formMode", "edit");
             return "admin/genre/form";
@@ -148,14 +140,14 @@ public class AdminGenreController {
 
         existing.setName(genre.getName());
         existing.setDescription(genre.getDescription());
-        // NOTE: active is NOT updated here — use Remove/Restore actions on the list page
-        categoryService.getCategoryById(categoryId).ifPresent(existing::setCategory);
+        // active is intentionally left untouched — toggling it goes through
+        // the Remove/Restore actions on the list page, not this form.
+        existing.setCategory(categoryId != null ? categoryService.getCategoryById(categoryId).orElse(null) : null);
         genreService.saveGenre(existing);
         redirectAttributes.addFlashAttribute("successMessage", "Genre updated successfully.");
         return "redirect:/admin/genres";
     }
 
-    // ── REMOVE (soft — active = false) ───────────────────────────────────────
     @PostMapping("/{id}/delete")
     public String remove(@PathVariable Long id, RedirectAttributes redirectAttributes) {
         try {
@@ -170,7 +162,6 @@ public class AdminGenreController {
         return "redirect:/admin/genres";
     }
 
-    // ── RESTORE (active = true) ───────────────────────────────────────────────
     @PostMapping("/{id}/restore")
     public String restore(@PathVariable Long id, RedirectAttributes redirectAttributes) {
         try {
@@ -183,7 +174,8 @@ public class AdminGenreController {
         return "redirect:/admin/genres";
     }
 
-    // ── AJAX: genres by category (for Book form) ──────────────────────────────
+    // Kept for future use — the book form no longer calls this since genres
+    // stopped being scoped to a category.
     @GetMapping("/by-category")
     @ResponseBody
     public ResponseEntity<List<Map<String, Object>>> getByCategory(
@@ -201,7 +193,8 @@ public class AdminGenreController {
         return ResponseEntity.ok(result);
     }
 
-    // ── AJAX: genre detail (for View modal) ───────────────────────────────────
+    // Returns up to 10 book titles for this genre plus a separate total count,
+    // since the modal only needs a preview, not the full list.
     @GetMapping("/{id}/detail")
     @ResponseBody
     public ResponseEntity<Map<String, Object>> detail(@PathVariable Long id) {
@@ -210,13 +203,14 @@ public class AdminGenreController {
             return ResponseEntity.notFound().build();
         }
 
-        List<Book> books = bookService.getAllBooks().stream()
-                .filter(b -> b.getGenre() != null && b.getGenre().getId().equals(id))
+        List<Book> allBooks = bookService.getAllBooks();
+        List<Book> books = allBooks.stream()
+                .filter(b -> b.getGenres().stream().anyMatch(g -> g.getId().equals(id)))
                 .limit(10)
                 .collect(Collectors.toList());
 
-        long totalBooks = bookService.getAllBooks().stream()
-                .filter(b -> b.getGenre() != null && b.getGenre().getId().equals(id))
+        long totalBooks = allBooks.stream()
+                .filter(b -> b.getGenres().stream().anyMatch(g -> g.getId().equals(id)))
                 .count();
 
         Map<String, Object> data = new HashMap<>();
