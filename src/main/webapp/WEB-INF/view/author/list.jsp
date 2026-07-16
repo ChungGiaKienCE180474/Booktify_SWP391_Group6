@@ -10,134 +10,13 @@
 
             <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" />
 
-            <!-- GIỮ ĐỒNG BỘ CSS GLOBAL -->
             <link rel="stylesheet" href="/css/header.css" />
             <link rel="stylesheet" href="/css/footer.css" />
             <link rel="stylesheet" href="/css/homepage.css" />
 
+            <link rel="stylesheet" href="/css/author.css" />
+
             <title>Authors — Booktify</title>
-
-            <style>
-                .author-wrap {
-                    max-width: 1200px;
-                    margin: 0 auto;
-                    padding: 1.5rem;
-                }
-
-                .author-breadcrumb {
-                    font-size: .85rem;
-                    color: var(--text-muted);
-                    margin-bottom: 1rem;
-                }
-
-                .author-breadcrumb a {
-                    text-decoration: none;
-                    color: var(--text-muted);
-                }
-
-                .author-breadcrumb a:hover {
-                    color: var(--primary);
-                }
-
-                .author-header {
-                    display: flex;
-                    justify-content: space-between;
-                    align-items: center;
-                    margin-bottom: 1.2rem;
-                }
-
-                .author-header h2 {
-                    margin: 0;
-                    color: var(--primary);
-                    font-size: 1.4rem;
-                    font-weight: 800;
-                }
-
-                .author-header p {
-                    margin: .2rem 0 0;
-                    color: var(--text-muted);
-                    font-size: .85rem;
-                }
-
-                .author-grid {
-                    display: grid;
-                    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-                    gap: 1rem;
-                }
-
-                .author-card {
-                    background: #fff;
-                    border: 1px solid var(--border);
-                    border-radius: var(--radius);
-                    overflow: hidden;
-                    text-decoration: none;
-                    color: inherit;
-                    display: flex;
-                    flex-direction: column;
-                    transition: .2s;
-                }
-
-                .author-card:hover {
-                    transform: translateY(-5px);
-                    box-shadow: var(--shadow-lg);
-                }
-
-                .author-img {
-                    height: 220px;
-                    background: linear-gradient(135deg, #ECEFF1, #CFD8DC);
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    overflow: hidden;
-                }
-
-                .author-img img {
-                    width: 100%;
-                    height: 100%;
-                    object-fit: cover;
-                }
-
-                .author-body {
-                    padding: .8rem;
-                    display: flex;
-                    flex-direction: column;
-                    flex: 1;
-                }
-
-                .author-name {
-                    font-size: 1rem;
-                    font-weight: 700;
-                    color: var(--text);
-                }
-
-                .author-nationality {
-                    font-size: .8rem;
-                    color: var(--text-muted);
-                    margin-bottom: .8rem;
-                }
-
-                .author-btn {
-                    margin-top: auto;
-                    padding: .4rem .7rem;
-                    background: var(--primary);
-                    color: #fff;
-                    font-size: .75rem;
-                    font-weight: 700;
-                    text-align: center;
-                    border-radius: 6px;
-                }
-
-                .author-btn:hover {
-                    background: var(--primary-light);
-                }
-
-                .empty-state {
-                    text-align: center;
-                    padding: 4rem 1rem;
-                    color: var(--text-muted);
-                    grid-column: 1/-1;
-                }
-            </style>
         </head>
 
         <body class="home-page">

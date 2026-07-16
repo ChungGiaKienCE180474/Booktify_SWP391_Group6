@@ -102,17 +102,32 @@
                                     <div class="admin-field">
 
                                         <label>
+                                            Discount Type
+                                            <span style="color:#EF4444;">*</span>
+                                        </label>
+
+                                        <form:select path="discountType" cssClass="admin-input">
+                                            <form:option value="" label="-- Select Type --" />
+                                            <form:option value="PERCENT" label="Percentage (%)" />
+                                            <form:option value="FIXED" label="Fixed Amount" />
+                                        </form:select>
+                                        <form:errors path="discountType" cssClass="admin-error" />
+
+                                    </div>
+
+                                    <div class="admin-field">
+
+                                        <label>
                                             Discount Value
                                             <span style="color:#EF4444;">*</span>
                                         </label>
 
-                                        <form:input path="discountValue" type="number" step="0.01" min="0.1" max="100"
-                                            cssClass="admin-input" placeholder="Example: 10" />
+                                        <form:input path="discountValue" type="number" step="1" min="0"
+                                            cssClass="admin-input" placeholder="Example: 10 or 50000" />
 
                                         <form:errors path="discountValue" cssClass="admin-error" />
 
                                     </div>
-
 
                                     <div class="admin-field">
 

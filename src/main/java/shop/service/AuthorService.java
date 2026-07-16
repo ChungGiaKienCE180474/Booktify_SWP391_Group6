@@ -1,17 +1,25 @@
 package shop.service;
 
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import shop.domain.Author;
 import shop.domain.dto.AuthorDTO;
 import shop.repository.AuthorRepository;
 
+import java.nio.file.Path;
+
 @Service
 public class AuthorService {
+
+        private String uploadDir = "src/main/resources/images/authors/";
 
         private final AuthorRepository authorRepository;
 
@@ -22,7 +30,7 @@ public class AuthorService {
         /**
          * Create Author
          */
-        public void saveAuthor(AuthorDTO authorDTO) {
+        public void saveAuthor(AuthorDTO authorDTO, MultipartFile imageFile) {
 
                 // Trim dữ liệu
                 String authorName = authorDTO.getAuthorName().trim();
@@ -45,7 +53,7 @@ public class AuthorService {
                 author.setAuthorName(authorName);
                 author.setBiography(biography);
                 author.setNationality(nationality);
-                author.setProfileImage(profileImage);
+                author.setProfileImage(uploadImage(imageFile));
 
                 // Auto timestamp
                 author.setCreatedAt(LocalDateTime.now());
@@ -95,7 +103,7 @@ public class AuthorService {
         /*
          * UPDATE AUTHOR
          */
-        public void updateAuthor(Long id, AuthorDTO authorDTO) {
+        public void updateAuthor(Long id, AuthorDTO authorDTO, MultipartFile imageFile) {
 
                 Author author = authorRepository.findById(id)
                                 .orElseThrow(() -> new IllegalArgumentException("Author not found"));
@@ -119,7 +127,9 @@ public class AuthorService {
                 author.setAuthorName(authorName);
                 author.setBiography(biography);
                 author.setNationality(nationality);
-                author.setProfileImage(profileImage);
+                if (imageFile != null && !imageFile.isEmpty()) {
+                        author.setProfileImage(uploadImage(imageFile));
+                }
 
                 // CHỈ update updatedAt
                 author.setUpdatedAt(LocalDateTime.now());
@@ -158,5 +168,44 @@ public class AuthorService {
                 author.setUpdatedAt(LocalDateTime.now());
 
                 authorRepository.save(author);
+        }
+
+        private String uploadImage(MultipartFile file) {
+
+                if (file == null || file.isEmpty()) {
+                        return null;
+                }
+
+                try {
+
+                        Path folder = Paths.get(uploadDir);
+
+                        Files.createDirectories(folder);
+
+                        String extension = "";
+
+                        String originalName = file.getOriginalFilename();
+
+                        if (originalName != null && originalName.contains(".")) {
+                                extension = originalName.substring(
+                                                originalName.lastIndexOf("."));
+                        }
+
+                        String fileName = System.currentTimeMillis() + extension;
+
+                        Path path = folder.resolve(fileName);
+
+                        Files.copy(
+                                        file.getInputStream(),
+                                        path);
+
+                        return "/images/authors/" + fileName;
+
+                } catch (Exception e) {
+
+                        e.printStackTrace();
+
+                        throw new RuntimeException("Upload image failed");
+                }
         }
 }

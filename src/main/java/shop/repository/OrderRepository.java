@@ -31,4 +31,9 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     List<Order> findByUserIdOrderByCreatedAtDesc(@Param("userId") long userId);
 
     long countByUserId(long userId);
+
+    boolean existsByUser_IdAndItems_Book_IdAndStatus(
+            Long userId,
+            Long bookId,
+            String status);
 }

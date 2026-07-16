@@ -28,11 +28,12 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
-/**
- * Book entity (table "books"). The author field is plain text, not a foreign
- * key to an authors table — the admin form suggests names from existing
- * authors but doesn't require one to exist.
- */
+import java.util.ArrayList;
+import java.util.List;
+
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.OneToMany;
+
 @Entity
 @Table(name = "books")
 public class Book {
@@ -98,6 +99,9 @@ public class Book {
             inverseJoinColumns = @JoinColumn(name = "genre_id")
     )
     private Set<Genre> genres = new LinkedHashSet<>();
+
+    @OneToMany(mappedBy = "book", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Rating> ratings = new ArrayList<>();
 
     @PrePersist
     void onCreate() {
@@ -209,7 +213,8 @@ public class Book {
 
     // Display-only formatting ("299.000") — don't use this for calculations.
     public String getPriceFormatted() {
-        if (price == null) return "0";
+        if (price == null)
+            return "0";
         NumberFormat nf = NumberFormat.getIntegerInstance(Locale.GERMANY);
         return nf.format(price.longValue());
     }
@@ -240,5 +245,13 @@ public class Book {
                 .map(Genre::getName)
                 .sorted()
                 .collect(java.util.stream.Collectors.joining(", "));
+    }
+
+    public List<Rating> getRatings() {
+        return ratings;
+    }
+
+    public void setRatings(List<Rating> ratings) {
+        this.ratings = ratings;
     }
 }
