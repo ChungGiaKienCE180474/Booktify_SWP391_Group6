@@ -1,3 +1,5 @@
+<%-- Book list with search, category/genre/status filters, pagination, and
+     two modals (view details, confirm delete/restore). --%>
 <%@ page contentType="text/html" pageEncoding="UTF-8" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <!DOCTYPE html>
@@ -11,8 +13,8 @@
     <style>
         .cat-badge {
             display:inline-flex; align-items:center; gap:4px;
-            background:#EFF6FF; border:1px solid #BFDBFE;
-            color:#2563EB; padding:3px 10px; border-radius:999px;
+            background:#E3F4F1; border:1px solid #B7DED7;
+            color:#006B5E; padding:3px 10px; border-radius:999px;
             font-size:.72rem; font-weight:700;
         }
         .isbn-tag { font-size:.72rem; color:#9CA3AF; margin-top:2px; }
@@ -68,6 +70,41 @@
             .book-modal-body { grid-template-columns: 1fr; }
             .book-modal-img { width: 100%; }
         }
+
+        /* Genre filter — compact dropdown, same footprint as the Category select */
+        .genre-filter-wrap { position: relative; max-width: 180px; flex: 1; }
+        .genre-filter-control {
+            display: flex; align-items: center; justify-content: space-between;
+            width: 100%; gap: 8px; cursor: pointer;
+            font-size: .85rem; color: #374151; background: #fff;
+        }
+        .genre-filter-control span {
+            overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+        }
+        .genre-filter-chevron { font-size: .7rem; color: #9CA3AF; transition: transform .15s; flex-shrink: 0; }
+        .genre-filter-wrap.is-open .genre-filter-chevron { transform: rotate(180deg); }
+        .genre-filter-wrap.is-open .genre-filter-control {
+            border-color: #006B5E; box-shadow: 0 0 0 3px rgba(0,107,94,.12);
+        }
+        .genre-filter-dropdown {
+            display: none; position: absolute; top: 100%; left: 0; right: 0; margin-top: 4px;
+            background: #fff; border: 1px solid #E5E7EB; border-radius: 8px;
+            box-shadow: 0 8px 24px rgba(0,0,0,.12); z-index: 1050;
+            max-height: 240px; overflow-y: auto; overflow-x: hidden; padding: 8px 10px;
+            box-sizing: border-box;
+        }
+        .genre-filter-wrap.is-open .genre-filter-dropdown { display: block; }
+        .genre-filter-option {
+            display: flex; align-items: center; gap: 8px; padding: 6px 4px; border-radius: 4px;
+            font-size: .82rem; color: #374151; cursor: pointer;
+            width: 100%; box-sizing: border-box;
+        }
+        .genre-filter-option input[type="checkbox"] { flex-shrink: 0; }
+        .genre-filter-option span {
+            min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+        }
+        .genre-filter-option:hover { background: #F9FAFB; }
+        .genre-filter-empty { font-size: .8rem; color: #9CA3AF; padding: 6px 4px; }
     </style>
 </head>
 <body class="admin-shell">
@@ -84,17 +121,52 @@
                     <i class="fa-solid fa-plus"></i> New Book
                 </a>
             </div>
+            <%-- Filter Bar: plain GET form, each field becomes a query param the
+                 controller re-reads so filters survive pagination. --%>
             <div class="admin-panel" style="padding:14px 22px;">
-                <form method="get" action="/admin/books" class="admin-search-form">
+                <form method="get" action="/admin/books" class="admin-search-form" style="flex-wrap:wrap;">
                     <div style="position:relative;flex:1;max-width:380px;">
                         <i class="fa-solid fa-magnifying-glass" style="position:absolute;left:13px;top:50%;transform:translateY(-50%);color:#9CA3AF;font-size:.82rem;pointer-events:none;"></i>
-                        <input type="text" name="q" value="<c:out value='${q}'/>" placeholder="Search by title, author, ISBN or category..." class="admin-input" style="padding-left:38px;" />
+                        <input type="text" name="q" value="<c:out value='${q}'/>" placeholder="Search by title, author, ISBN, category or genre..." class="admin-input" style="padding-left:38px;" />
                     </div>
                     <select name="status" class="admin-input" style="max-width:160px;">
                         <option value="" <c:if test="${empty status}">selected</c:if>>All Status</option>
                         <option value="active" <c:if test="${status == 'active'}">selected</c:if>>Active</option>
                         <option value="inactive" <c:if test="${status == 'inactive'}">selected</c:if>>Inactive</option>
                     </select>
+                    <select name="categoryId" class="admin-input" style="max-width:180px;">
+                        <option value="">All Categories</option>
+                        <c:forEach items="${categories}" var="cat">
+                            <option value="${cat.id}" <c:if test="${selectedCategoryId == cat.id}">selected</c:if>><c:out value="${cat.name}"/></option>
+                        </c:forEach>
+                    </select>
+                    <div class="genre-filter-wrap" id="genreFilterWrap">
+                        <button type="button" class="genre-filter-control admin-input" id="genreFilterControl" title="Filter by Genre">
+                            <span id="genreFilterLabel">
+                                <c:choose>
+                                    <c:when test="${empty selectedGenreIds}">All Genres</c:when>
+                                    <c:otherwise>${selectedGenreIds.size()} genre${selectedGenreIds.size() > 1 ? 's' : ''}</c:otherwise>
+                                </c:choose>
+                            </span>
+                            <i class="fa-solid fa-chevron-down genre-filter-chevron"></i>
+                        </button>
+                        <div class="genre-filter-dropdown" id="genreFilterDropdown">
+                            <c:choose>
+                                <c:when test="${empty genres}">
+                                    <div class="genre-filter-empty">No genres</div>
+                                </c:when>
+                                <c:otherwise>
+                                    <c:forEach items="${genres}" var="g">
+                                        <label class="genre-filter-option">
+                                            <input type="checkbox" name="genreIds" value="${g.id}" class="genre-filter-checkbox"
+                                                   <c:if test="${selectedGenreIds.contains(g.id)}">checked</c:if> />
+                                            <span><c:out value="${g.name}"/></span>
+                                        </label>
+                                    </c:forEach>
+                                </c:otherwise>
+                            </c:choose>
+                        </div>
+                    </div>
                     <button type="submit" class="admin-button"><i class="fa-solid fa-filter"></i> Filter</button>
                     <a href="/admin/books" class="admin-button admin-button--ghost"><i class="fa-solid fa-rotate-right"></i> Reset</a>
                 </form>
@@ -104,9 +176,11 @@
                     <thead>
                         <tr>
                             <th style="width:48px;">#</th>
+                            <th style="width:56px;">Photo</th>
                             <th>Title / ISBN</th>
                             <th>Author</th>
                             <th>Category</th>
+                            <th>Genres</th>
                             <th>Price</th>
                             <th>Stock</th>
                             <th>Status</th>
@@ -119,6 +193,17 @@
                             <tr>
                                 <td style="color:#9CA3AF;font-weight:600;">${vs.index + 1}</td>
                                 <td>
+                                    <c:choose>
+                                        <c:when test="${not empty book.imageUrl}">
+                                            <img src="<c:out value='${book.imageUrl}'/>" alt="Cover"
+                                                 style="width:40px;height:56px;object-fit:cover;border-radius:4px;border:1px solid #E5E7EB;">
+                                        </c:when>
+                                        <c:otherwise>
+                                            <span style="color:#9CA3AF;">&#8212;</span>
+                                        </c:otherwise>
+                                    </c:choose>
+                                </td>
+                                <td>
                                     <div style="font-weight:600;color:#111827;"><c:out value="${book.title}"/></div>
                                     <c:if test="${not empty book.isbn}">
                                         <div class="isbn-tag">ISBN: <c:out value="${book.isbn}"/></div>
@@ -129,6 +214,14 @@
                                     <c:choose>
                                         <c:when test="${not empty book.category}">
                                             <span class="cat-badge"><i class="fa-solid fa-tag" style="font-size:.6rem;"></i> <c:out value="${book.category.name}"/></span>
+                                        </c:when>
+                                        <c:otherwise><span style="color:#9CA3AF;">&#8212;</span></c:otherwise>
+                                    </c:choose>
+                                </td>
+                                <td style="max-width:220px;">
+                                    <c:choose>
+                                        <c:when test="${not empty book.genreNames}">
+                                            <span style="color:#374151;font-size:.82rem;"><c:out value="${book.genreNames}"/></span>
                                         </c:when>
                                         <c:otherwise><span style="color:#9CA3AF;">&#8212;</span></c:otherwise>
                                     </c:choose>
@@ -148,7 +241,7 @@
                                             data-author="<c:out value='${book.author}'/>"
                                             data-isbn="<c:out value='${book.isbn}'/>"
                                             data-category="<c:out value='${not empty book.category ? book.category.name : &quot;&quot;}'/>"
-                                            data-genre="<c:out value='${not empty book.genre ? book.genre.name : &quot;&quot;}'/>"
+                                            data-genre="<c:out value='${book.genreNames}'/>"
                                             data-price="<c:out value='${book.priceFormatted}'/>"
                                             data-stock="${book.stockQuantity}"
                                             data-active="${book.active}"
@@ -180,7 +273,7 @@
                         </c:forEach>
                         <c:if test="${empty books}">
                             <tr>
-                                <td colspan="9" style="text-align:center;padding:56px 20px;color:#9CA3AF;">
+                                <td colspan="11" style="text-align:center;padding:56px 20px;color:#9CA3AF;">
                                     <i class="fa-solid fa-book-open" style="font-size:2.2rem;display:block;margin-bottom:10px;opacity:.3;"></i>
                                     No books found.
                                 </td>
@@ -194,24 +287,27 @@
                         <c:choose>
                             <c:when test="${totalItems == 0}">No entries found.</c:when>
                             <c:otherwise>
-                                Showing <strong>${fromItem}</strong> to <strong>${toItem}</strong> of <strong>${totalItems}</strong> entr${totalItems == 1 ? 'y' : 'ies'}<c:if test="${not empty q or not empty status}"> (filtered)</c:if>
+                                Showing <strong>${fromItem}</strong> to <strong>${toItem}</strong> of <strong>${totalItems}</strong> entr${totalItems == 1 ? 'y' : 'ies'}<c:if test="${not empty q or not empty status or not empty selectedCategoryId or not empty selectedGenreIds}"> (filtered)</c:if>
                             </c:otherwise>
                         </c:choose>
                     </div>
                     <c:if test="${totalPages > 1}">
+                        <%-- Rebuild the query string so page links keep the active filters. --%>
+                        <c:set var="genreQS"><c:forEach items="${selectedGenreIds}" var="gid">&amp;genreIds=${gid}</c:forEach></c:set>
+                        <c:set var="pagBase" value="/admin/books?q=${q}&status=${status}&categoryId=${selectedCategoryId}${genreQS}"/>
                         <div class="admin-pagination__nav">
                             <a class="pag-btn ${currentPage == 0 ? 'pag-btn--disabled' : ''}"
-                               href="/admin/books?page=${currentPage - 1}&q=<c:out value='${q}'/>&status=<c:out value='${status}'/>">
+                               href="${pagBase}&page=${currentPage - 1}">
                                 <i class="fa-solid fa-chevron-left" style="font-size:.7rem;"></i>
                             </a>
                             <c:forEach begin="0" end="${totalPages - 1}" var="i">
                                 <a class="pag-btn ${i == currentPage ? 'pag-btn--active' : ''}"
-                                   href="/admin/books?page=${i}&q=<c:out value='${q}'/>&status=<c:out value='${status}'/>">
+                                   href="${pagBase}&page=${i}">
                                     ${i + 1}
                                 </a>
                             </c:forEach>
                             <a class="pag-btn ${currentPage >= totalPages - 1 ? 'pag-btn--disabled' : ''}"
-                               href="/admin/books?page=${currentPage + 1}&q=<c:out value='${q}'/>&status=<c:out value='${status}'/>">
+                               href="${pagBase}&page=${currentPage + 1}">
                                 <i class="fa-solid fa-chevron-right" style="font-size:.7rem;"></i>
                             </a>
                         </div>
@@ -250,12 +346,11 @@
     <div id="bookModal" class="modal-overlay" style="display:none;" onclick="closeModal('bookModal')">
         <div class="modal-box" style="max-width:680px;" onclick="event.stopPropagation()">
             <div class="modal-header">
-                <h3><i class="fa-solid fa-book" style="color:#2563EB;"></i> Book Details</h3>
+                <h3><i class="fa-solid fa-book" style="color:#006B5E;"></i> Book Details</h3>
                 <button class="modal-close" onclick="closeModal('bookModal')"><i class="fa-solid fa-xmark"></i></button>
             </div>
             <div class="modal-body">
                 <div class="book-modal-body">
-                    <%-- Image --%>
                     <div class="book-modal-img" id="mBImgWrap">
                         <div class="no-img" id="mBNoImg">
                             <i class="fa-regular fa-image"></i>
@@ -263,7 +358,6 @@
                         </div>
                         <img id="mBImg" src="" alt="Book cover" style="display:none;" />
                     </div>
-                    <%-- Info --%>
                     <div class="book-modal-info">
                         <div class="modal-row"><span class="modal-label">Title</span><span id="mBTitle" class="modal-value"></span></div>
                         <div class="modal-row"><span class="modal-label">Author</span><span id="mBAuthor" class="modal-value"></span></div>
@@ -292,6 +386,20 @@
     </c:if>
 
     <script>
+        // ── Genre filter dropdown (toggle open/close, closes on outside click) ──
+        (function () {
+            var wrap = document.getElementById('genreFilterWrap');
+            var control = document.getElementById('genreFilterControl');
+            if (!wrap || !control) return;
+            control.addEventListener('click', function (e) {
+                e.preventDefault();
+                wrap.classList.toggle('is-open');
+            });
+            document.addEventListener('click', function (e) {
+                if (!wrap.contains(e.target)) wrap.classList.remove('is-open');
+            });
+        })();
+
         function showToast(msg, type) {
             var tc = document.getElementById('toastContainer');
             var t = document.createElement('div');
@@ -301,6 +409,7 @@
             setTimeout(function () { t.classList.add('toast--show'); }, 10);
             setTimeout(function () { t.classList.remove('toast--show'); setTimeout(function () { t.remove(); }, 320); }, 3500);
         }
+        // Flash messages are rendered into hidden divs server-side; show them as toasts on load.
         var s = document.getElementById('toastSuccessMessage');
         if (s) showToast(s.textContent.trim(), 'success');
         var e = document.getElementById('toastErrorMessage');
@@ -324,26 +433,26 @@
         }
         function closeConfirmModal() { document.getElementById('confirmModal').style.display = 'none'; }
 
-        /* D\u00f9ng event delegation: l\u1eafng nghe \u1edf document, d\u00f9ng closest()
-           \u0111\u1ec3 b\u1eaft click d\u00f9 user click v\u00e0o <i> icon b\u00ean trong button */
+        // Delegated to document (rows are static here, but this also survives
+        // future re-renders) and uses closest() to catch clicks on the icon too.
         document.addEventListener('click', function (e) {
             var btn = e.target.closest('.js-view-book');
             if (!btn) return;
 
             var d = btn.dataset;
-            document.getElementById('mBTitle').textContent    = d.title    || '\u2014';
-            document.getElementById('mBAuthor').textContent   = d.author   || '\u2014';
-            document.getElementById('mBIsbn').textContent     = d.isbn     || '\u2014';
-            document.getElementById('mBCategory').textContent = d.category || '\u2014';
-            document.getElementById('mBGenre').textContent    = d.genre    || '\u2014';
-            document.getElementById('mBPrice').textContent    = (d.price   || '0') + ' \u20ab';
+            document.getElementById('mBTitle').textContent    = d.title    || '—';
+            document.getElementById('mBAuthor').textContent   = d.author   || '—';
+            document.getElementById('mBIsbn').textContent     = d.isbn     || '—';
+            document.getElementById('mBCategory').textContent = d.category || '—';
+            document.getElementById('mBGenre').textContent    = d.genre    || '—';
+            document.getElementById('mBPrice').textContent    = (d.price   || '0') + ' ₫';
             document.getElementById('mBStock').textContent    = d.stock    || '0';
             document.getElementById('mBStatus').innerHTML     = d.active === 'true'
                 ? '<span class="status-pill status-pill--on"><i class="fa-solid fa-circle-check" style="font-size:.6rem;"></i> Active</span>'
                 : '<span class="status-pill status-pill--off"><i class="fa-solid fa-circle-xmark" style="font-size:.6rem;"></i> Inactive</span>';
-            document.getElementById('mBDesc').textContent     = d.desc     || '\u2014';
-            document.getElementById('mBCreated').textContent  = d.created  || '\u2014';
-            document.getElementById('mBUpdated').textContent  = d.updated  || '\u2014';
+            document.getElementById('mBDesc').textContent     = d.desc     || '—';
+            document.getElementById('mBCreated').textContent  = d.created  || '—';
+            document.getElementById('mBUpdated').textContent  = d.updated  || '—';
 
             var img   = document.getElementById('mBImg');
             var noImg = document.getElementById('mBNoImg');

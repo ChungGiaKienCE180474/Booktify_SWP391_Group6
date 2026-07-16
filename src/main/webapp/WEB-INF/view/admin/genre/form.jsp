@@ -1,3 +1,5 @@
+<%-- Create/Edit Genre form. Category here is only for organizing genres in
+     the admin UI — it doesn't restrict which books this genre can attach to. --%>
 <%@ page contentType="text/html" pageEncoding="UTF-8" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="form" uri="http://www.springframework.org/tags/form" %>
@@ -44,18 +46,17 @@
                     <form:form modelAttribute="genre" action="${formAction}" method="post"
                                class="admin-form" id="genreForm">
 
-                        <%-- Genre Name --%>
                         <div class="admin-field">
                             <label>Genre Name <span style="color:#EF4444;">*</span></label>
                             <form:input path="name" cssClass="admin-input" placeholder="Enter genre name…" />
                             <form:errors path="name" cssClass="admin-error" />
                         </div>
 
-                        <%-- Category --%>
+
                         <div class="admin-field">
-                            <label>Category <span style="color:#EF4444;">*</span></label>
-                            <select name="categoryId" id="categoryId" class="admin-input" required>
-                                <option value="">— Select a category —</option>
+                            <label>Category <span style="color:#9CA3AF;font-size:.8rem;">(optional — for organization only)</span></label>
+                            <select name="categoryId" id="categoryId" class="admin-input">
+                                <option value="">— None —</option>
                                 <c:forEach items="${categories}" var="cat">
                                     <option value="${cat.id}"
                                         <c:if test="${not empty genre.category and genre.category.id == cat.id}">selected</c:if>>
@@ -63,21 +64,8 @@
                                     </option>
                                 </c:forEach>
                             </select>
-                            <c:if test="${not empty categoryError}">
-                                <span class="admin-error">
-                                    <i class="fa-solid fa-circle-exclamation"></i>
-                                    <c:out value="${categoryError}"/>
-                                </span>
-                            </c:if>
-                            <c:if test="${empty categoryError}">
-                                <span class="admin-error" id="categoryErrorMsg" style="display:none;">
-                                    <i class="fa-solid fa-circle-exclamation"></i>
-                                    Please select a category.
-                                </span>
-                            </c:if>
                         </div>
 
-                        <%-- Description --%>
                         <div class="admin-field">
                             <label>Description</label>
                             <form:textarea path="description" cssClass="admin-input admin-textarea"
@@ -127,27 +115,5 @@
         </section>
     </main>
 
-    <script>
-        document.getElementById('genreForm').addEventListener('submit', function (e) {
-            var cat = document.getElementById('categoryId');
-            var err = document.getElementById('categoryErrorMsg');
-            if (cat && !cat.value) {
-                e.preventDefault();
-                if (err) { err.style.display = 'flex'; }
-                cat.style.borderColor = '#EF4444';
-                cat.focus();
-            }
-        });
-        var cat = document.getElementById('categoryId');
-        if (cat) {
-            cat.addEventListener('change', function () {
-                if (this.value) {
-                    var err = document.getElementById('categoryErrorMsg');
-                    if (err) err.style.display = 'none';
-                    this.style.borderColor = '';
-                }
-            });
-        }
-    </script>
 </body>
 </html>

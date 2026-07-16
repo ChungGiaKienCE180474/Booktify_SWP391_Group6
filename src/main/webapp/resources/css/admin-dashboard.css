@@ -1,25 +1,26 @@
 /* ═══════════════════════════════════════════════════════════════════
    BOOKTIFY — ADMIN PANEL
-   Light theme  ·  Navy sidebar  ·  Orange / Blue accents
+   Light theme  ·  Teal sidebar  ·  Orange / Teal accents
+   (đồng bộ tone màu với Customer UI — xem :root trong header.css)
    ═══════════════════════════════════════════════════════════════════ */
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
 
 /* ── CSS Custom Properties ─────────────────────────────────────── */
 :root {
     /* Backgrounds */
-    --bg:          #F1F5F9;
+    --bg:          #F5F7FA;
     --white:       #FFFFFF;
-    --sidebar-bg:  #0F172A;
+    --sidebar-bg:  #004D42;
     --sidebar-hover: rgba(255,255,255,.07);
-    --sidebar-act: rgba(249,115,22,.15);
+    --sidebar-act: rgba(245,124,0,.18);
 
-    /* Brand */
-    --primary:     #2563EB;
-    --primary-dk:  #1D4ED8;
-    --primary-lt:  #EFF6FF;
-    --accent:      #F97316;
-    --accent-dk:   #EA6C0B;
-    --accent-lt:   #FFF7ED;
+    /* Brand — khớp với --primary/--accent-warm ở Customer UI (header.css) */
+    --primary:     #006B5E;
+    --primary-dk:  #004D42;
+    --primary-lt:  #E3F4F1;
+    --accent:      #F57C00;
+    --accent-dk:   #D96900;
+    --accent-lt:   #FFF3E0;
 
     /* Semantic */
     --success:     #16A34A;
@@ -92,7 +93,7 @@ body.admin-shell {
 }
 
 /* ══════════════════════════════════════════════════════════════════
-   SIDEBAR  (dark navy)
+   SIDEBAR  (dark teal — đồng bộ với Customer UI)
    ══════════════════════════════════════════════════════════════════ */
 .admin-sidebar {
     position: sticky;
@@ -128,7 +129,7 @@ body.admin-shell {
     font-size: .95rem;
     color: #fff;
     flex-shrink: 0;
-    box-shadow: 0 4px 12px rgba(249,115,22,.4);
+    box-shadow: 0 4px 12px rgba(245,124,0,.4);
 }
 
 .sidebar-logo__text { display: flex; flex-direction: column; }
@@ -292,7 +293,7 @@ body.admin-shell {
     font-size: .8rem;
     color: #fff;
     flex-shrink: 0;
-    box-shadow: 0 3px 10px rgba(37,99,235,.25);
+    box-shadow: 0 3px 10px rgba(0,107,94,.25);
 }
 
 .admin-topbar__brand h1 {
@@ -312,13 +313,13 @@ body.admin-shell {
     width: 36px;
     height: 36px;
     border-radius: var(--radius-sm);
-    background: linear-gradient(135deg, var(--primary-dk), #4F46E5);
+    background: linear-gradient(135deg, var(--primary), var(--primary-dk));
     display: grid;
     place-items: center;
     font-size: .8rem;
     color: #fff;
     flex-shrink: 0;
-    box-shadow: 0 2px 8px rgba(37,99,235,.2);
+    box-shadow: 0 2px 8px rgba(0,107,94,.2);
 }
 
 .admin-topbar__user strong {
@@ -341,14 +342,14 @@ body.admin-shell {
     padding: 7px 14px;
     border-radius: var(--radius-sm);
     background: var(--primary-lt);
-    border: 1px solid #BFDBFE;
+    border: 1px solid #B7DED7;
     color: var(--primary);
     font-size: .8rem;
     font-weight: 600;
     text-decoration: none;
     transition: var(--ease);
 }
-.admin-topbar__link:hover { background: #DBEAFE; }
+.admin-topbar__link:hover { background: #D3EEE9; }
 
 /* ── Content ──────────────────────────────────────────────────── */
 .admin-content {
@@ -398,7 +399,7 @@ body.admin-shell {
     align-items: center;
     gap: 24px;
     padding: 32px 36px;
-    background: linear-gradient(135deg, #1D3865 0%, #2563EB 55%, #1D4ED8 100%);
+    background: linear-gradient(135deg, #012B24 0%, var(--primary) 55%, var(--primary-dk) 100%);
     border-radius: var(--radius-xl);
     box-shadow: var(--shadow-md);
     position: relative;
@@ -470,7 +471,7 @@ body.admin-shell {
     height: 46px;
     border-radius: var(--radius-sm);
     background: var(--primary-lt);
-    border: 1px solid #BFDBFE;
+    border: 1px solid #B7DED7;
     display: grid;
     place-items: center;
     font-size: 1.1rem;
@@ -548,14 +549,14 @@ body.admin-shell {
     background: var(--primary);
     color: #fff;
     border-color: var(--primary);
-    box-shadow: 0 2px 8px rgba(37,99,235,.25);
+    box-shadow: 0 2px 8px rgba(0,107,94,.25);
 }
 .admin-button:hover,
 .admin-action:hover {
     background: var(--primary-dk);
     border-color: var(--primary-dk);
     transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(37,99,235,.35);
+    box-shadow: 0 4px 12px rgba(0,107,94,.35);
 }
 
 /* Ghost / Cancel */
@@ -684,7 +685,7 @@ body.admin-shell {
 /* Edit — blue */
 .icon-link--edit:hover {
     background: var(--primary-lt);
-    border-color: #BFDBFE;
+    border-color: #B7DED7;
     color: var(--primary);
 }
 
@@ -800,7 +801,7 @@ body.admin-shell {
 
 .admin-input:focus {
     border-color: var(--primary);
-    box-shadow: 0 0 0 3px rgba(37,99,235,.12);
+    box-shadow: 0 0 0 3px rgba(0,107,94,.12);
 }
 
 .admin-input::placeholder { color: var(--text-faint); }
@@ -1164,5 +1165,5 @@ select.admin-input option { background: var(--white); color: var(--text); }
     transition: background .15s, border-color .15s, color .15s;
 }
 .pag-btn:hover { background: #F3F4F6; border-color: #D1D5DB; }
-.pag-btn--active { background: #1E3A5F; border-color: #1E3A5F; color: #fff; pointer-events: none; }
+.pag-btn--active { background: var(--primary); border-color: var(--primary); color: #fff; pointer-events: none; }
 .pag-btn--disabled { opacity: .4; pointer-events: none; }

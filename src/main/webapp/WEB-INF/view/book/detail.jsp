@@ -1,3 +1,4 @@
+<%-- Storefront book detail page: full book info plus a "related books" section. --%>
 <%@ page contentType="text/html" pageEncoding="UTF-8" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <!DOCTYPE html>
@@ -108,6 +109,21 @@
             margin-bottom: 1.25rem;
         }
         .detail-info__author strong { color: var(--text); font-weight: 700; }
+        .detail-info__author-link {
+            text-decoration: none;
+            cursor: pointer;
+        }
+        .detail-info__author-link strong {
+            color: var(--primary);
+            text-decoration: underline;
+            text-decoration-color: rgba(0,107,94,.35);
+            text-underline-offset: 2px;
+            transition: color .12s, text-decoration-color .12s;
+        }
+        .detail-info__author-link:hover strong {
+            color: var(--primary-light);
+            text-decoration-color: currentColor;
+        }
 
         /* Price row */
         .detail-price-row {
@@ -264,6 +280,7 @@
             overflow: hidden;
             display: flex;
             flex-direction: column;
+            height: 300px;
             cursor: pointer;
             text-decoration: none;
             color: inherit;
@@ -271,7 +288,7 @@
         }
         .s-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-lg); }
         .s-card__thumb {
-            height: 190px;
+            height: 170px;
             overflow: hidden;
             background: linear-gradient(135deg, #ECEFF1, #CFD8DC);
             flex-shrink: 0;
@@ -283,16 +300,19 @@
         .s-card:hover .s-card__thumb img { transform:scale(1.06); }
         .s-card__placeholder { color:#90A4AE;display:flex;flex-direction:column;align-items:center;gap:.35rem; }
         .s-card__placeholder i { font-size:2.5rem; }
-        .s-card__body { padding:.65rem .8rem .8rem;flex:1;display:flex;flex-direction:column; }
-        .s-card__title { font-size:.85rem;font-weight:700;line-height:1.3;flex:1;color:var(--text);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;margin-bottom:.2rem; }
-        .s-card__author { font-size:.72rem;color:var(--text-muted);margin-bottom:.55rem; }
-        .s-card__price { font-size:.95rem;font-weight:800;color:var(--accent-warm,#F57C00);white-space:nowrap; }
+        .s-card__body { padding:.6rem .75rem .7rem;flex:1;min-width:0;min-height:0;display:flex;flex-direction:column;overflow:hidden; }
+        .s-card__title { font-size:.8rem;font-weight:700;line-height:1.3;color:var(--text);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;margin-bottom:.2rem;min-height:calc(1.3em * 2); }
+        .s-card__author { font-size:.7rem;color:var(--text-muted);margin-bottom:.4rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.2;min-height:1.2em;display:block; }
+        .s-card__price { font-size:.82rem;font-weight:800;color:var(--accent-warm,#F57C00);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:auto; }
 
+        /* ── Responsive ── */
         @media(max-width:768px){
             .detail-wrap { grid-template-columns:1fr;gap:1.5rem; }
             .detail-cover { position:static; }
             .detail-cover__frame { max-width:220px;margin:0 auto; }
             .detail-info__title { font-size:1.45rem; }
+            .s-card { height: 270px; }
+            .s-card__thumb { height: 145px; }
         }
     </style>
 </head>
@@ -359,7 +379,19 @@
             </c:if>
 
             <h1 class="detail-info__title">${book.title}</h1>
-            <p class="detail-info__author">Tác giả: <strong>${book.author}</strong></p>
+            <p class="detail-info__author">
+                Tác giả:
+                <c:choose>
+                    <c:when test="${not empty authorProfile}">
+                        <a href="/authors/${authorProfile.authorId}" class="detail-info__author-link">
+                            <strong>${book.author}</strong>
+                        </a>
+                    </c:when>
+                    <c:otherwise>
+                        <strong>${book.author}</strong>
+                    </c:otherwise>
+                </c:choose>
+            </p>
 
             <div class="detail-price-row">
                 <div class="detail-price">${book.priceFormatted} &#8363;</div>
@@ -424,6 +456,20 @@
                 <span class="meta-chip"><i class="fa-solid fa-boxes-stacked"></i> Tồn kho: ${book.stockQuantity}</span>
             </div>
 
+            <%-- Genre tags: independent from Category --%>
+            <c:if test="${not empty book.genreNames}">
+                <div class="detail-desc-label" style="margin-top:.4rem;">Thể loại (Genres)</div>
+                <div class="detail-meta" style="margin-bottom:1.25rem;padding-bottom:0;border-bottom:none;">
+                    <c:forEach items="${book.genres}" var="g">
+                        <c:if test="${g.active and not g.deleted}">
+                            <span class="meta-chip" style="border-color:var(--primary);color:var(--primary);background:rgba(0,107,94,.06);">
+                                <i class="fa-solid fa-tags"></i> <c:out value="${g.name}"/>
+                            </span>
+                        </c:if>
+                    </c:forEach>
+                </div>
+            </c:if>
+
             <%-- Description --%>
             <div class="detail-desc-label">Giới thiệu sách</div>
             <c:choose>
@@ -462,7 +508,7 @@
                         </div>
                         <div class="s-card__body">
                             <div class="s-card__title">${s.title}</div>
-                            <div class="s-card__author">${s.author}</div>
+                            <div class="s-card__author"><c:out value="${s.author}" default="—"/></div>
                             <div class="s-card__price">${s.priceFormatted} &#8363;</div>
                         </div>
                     </a>

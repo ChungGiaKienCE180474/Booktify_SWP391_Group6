@@ -13,4 +13,7 @@ public interface CartItemRepository extends JpaRepository<CartItem, Long> {
     Optional<CartItem> findByCartIdAndBookId(Long cartId, Long bookId);
 
     Optional<CartItem> findByIdAndCartUserId(Long id, long userId);
+
+    // Used to block deleting/deactivating a book that's sitting in someone's cart.
+    boolean existsByBook_Id(Long bookId);
 }
