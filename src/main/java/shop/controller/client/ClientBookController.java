@@ -5,15 +5,16 @@ import java.util.List;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import shop.domain.Book;
+import shop.service.AuthorService;
 import shop.service.BookService;
 import shop.service.CategoryService;
+import shop.service.GenreService;
 
 import shop.domain.Rating;
 import shop.service.RatingService;
@@ -33,56 +34,55 @@ public class ClientBookController {
     private final CategoryService categoryService;
     private final RatingService ratingService;
     private final UserRepository userRepository;
+    private final GenreService genreService;
+    private final AuthorService authorService;
 
-    public ClientBookController(BookService bookService, CategoryService categoryService, RatingService ratingService,
-            UserRepository userRepository) {
+    public ClientBookController(BookService bookService,
+                                 CategoryService categoryService,
+                                 RatingService ratingService,
+                                 UserRepository userRepository,
+                                 GenreService genreService,
+                                 AuthorService authorService) {
         this.bookService = bookService;
         this.categoryService = categoryService;
         this.ratingService = ratingService;
         this.userRepository = userRepository;
+        this.genreService = genreService;
+        this.authorService = authorService;
     }
 
-    /**
-     * View List Of Books — optional filter by category, keyword search, sort.
-     * Params: categoryId, q (keyword), sort (price_asc|price_desc|newest)
-     */
     @GetMapping
     public String list(
             @RequestParam(required = false) Long categoryId,
+            @RequestParam(required = false) List<Long> genreIds,
             @RequestParam(required = false) String q,
             @RequestParam(required = false, defaultValue = "default") String sort,
             Model model) {
 
-        List<Book> books;
+        // Status is hardcoded to "active" — customers should never see hidden books.
+        List<Book> books = bookService.filterBooks(q, categoryId, genreIds, "active");
 
-        if (StringUtils.hasText(q)) {
-            // Keyword search across all active books (uses existing BookService.searchBooks
-            // but filtered to active only)
-            books = bookService.searchBooks(q, "active");
-        } else if (categoryId != null) {
-            books = bookService.getBooksByCategory(categoryId);
+        if (categoryId != null) {
             model.addAttribute("selectedCategory",
                     categoryService.getCategoryById(categoryId).orElse(null));
-        } else {
-            books = bookService.getActiveBooks();
         }
 
-        // Apply sort
         switch (sort) {
             case "price_asc" -> books.sort(Comparator.comparing(Book::getPrice));
             case "price_desc" -> books.sort(Comparator.comparing(Book::getPrice).reversed());
-            // "newest" and "default" keep the id-asc order from repository
+            // "newest" and "default" both keep the id-asc order from the repository.
         }
 
         model.addAttribute("books", books);
         model.addAttribute("categories", categoryService.getAllCategories());
+        model.addAttribute("genres", genreService.getActiveGenres());
         model.addAttribute("selectedCategoryId", categoryId);
+        model.addAttribute("selectedGenreIds", genreIds == null ? List.of() : genreIds);
         model.addAttribute("q", q);
         model.addAttribute("sort", sort);
         return "book/list";
     }
 
-    /** View Book Details + Suggested Books */
     @GetMapping("/{id}")
     public String detail(@PathVariable Long id, Model model, Authentication authentication) {
         Book book = bookService.getBookById(id)
@@ -117,6 +117,8 @@ public class ClientBookController {
         }
         model.addAttribute("suggestedBooks", bookService.getSuggestedBooks(catId, id));
         model.addAttribute("categories", categoryService.getAllCategories());
+        // Only used to link the author name to their profile when one matches.
+        model.addAttribute("authorProfile", authorService.findActiveByName(book.getAuthor()).orElse(null));
         return "book/detail";
     }
 

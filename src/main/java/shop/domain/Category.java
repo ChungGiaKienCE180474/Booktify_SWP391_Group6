@@ -14,6 +14,11 @@ import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 
+/**
+ * Book category (table "categories"). Every book belongs to exactly one
+ * category (see Book.category). Independent from Genre, which is a
+ * secondary tag rather than a child of Category.
+ */
 @Entity
 @Table(name = "categories")
 public class Category {
@@ -31,6 +36,7 @@ public class Category {
     @Column(length = 500)
     private String description;
 
+    // Soft delete flag — hidden categories drop out of the book create/edit dropdown.
     @Column(nullable = false)
     private boolean active = true;
 

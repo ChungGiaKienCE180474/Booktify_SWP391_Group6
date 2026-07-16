@@ -1,3 +1,5 @@
+<%-- Form tạo/sửa Category — dùng chung cho cả 2 mode (formMode="create"|"edit"),
+     action đổi theo mode: POST /admin/categories (create) hoặc POST /admin/categories/{id} (edit). --%>
 <%@ page contentType="text/html" pageEncoding="UTF-8" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="form" uri="http://www.springframework.org/tags/form" %>
@@ -45,14 +47,12 @@
                 <div class="admin-form-card__body">
                     <form:form modelAttribute="category" action="${formAction}" method="post" class="admin-form">
 
-                        <%-- Name --%>
                         <div class="admin-field">
                             <label>Name <span style="color:#EF4444;">*</span></label>
                             <form:input path="name" cssClass="admin-input" placeholder="Enter category name…" />
                             <form:errors path="name" cssClass="admin-error" />
                         </div>
 
-                        <%-- Description --%>
                         <div class="admin-field">
                             <label>Description</label>
                             <form:textarea path="description" cssClass="admin-input admin-textarea" rows="5" placeholder="Optional — describe this category…" />

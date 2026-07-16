@@ -4,6 +4,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -87,6 +88,16 @@ public class AuthorService {
         public Author getAuthorById(Long id) {
                 return authorRepository.findById(id)
                                 .orElseThrow(() -> new IllegalArgumentException("Author not found"));
+        }
+
+        /**
+         * Resolve Book.author (free-text name) to an active Author record, so the
+         * storefront can link to that author's detail page. Empty if no active
+         * author matches — Book.author isn't a real foreign key.
+         */
+        public Optional<Author> findActiveByName(String authorName) {
+                if (authorName == null || authorName.isBlank()) return Optional.empty();
+                return authorRepository.findByAuthorNameIgnoreCaseAndStatusTrue(authorName.trim());
         }
 
         /*
