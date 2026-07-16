@@ -1,3 +1,4 @@
+<%-- Storefront book listing: category/genre/keyword filters + price sort. --%>
 <%@ page contentType="text/html" pageEncoding="UTF-8" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <!DOCTYPE html>
@@ -80,7 +81,6 @@
         .sidebar-item.active .dot,
         .sidebar-item:hover .dot { background: var(--primary); }
 
-        /* ── Main area ── */
         .shop-main {}
 
         /* ── Breadcrumb ── */
@@ -123,7 +123,6 @@
         }
         .shop-toolbar__right { display: flex; align-items: center; gap: .6rem; flex-wrap: wrap; }
 
-        /* Sort select */
         .sort-label {
             font-size: .8rem;
             color: var(--text-muted);
@@ -159,6 +158,7 @@
             overflow: hidden;
             display: flex;
             flex-direction: column;
+            height: 345px;
             transition: transform .22s, box-shadow .22s;
             cursor: pointer;
             text-decoration: none;
@@ -167,7 +167,7 @@
         .product-card:hover { transform: translateY(-5px); box-shadow: var(--shadow-lg); }
         .product-card__thumb {
             position: relative;
-            height: 210px;
+            height: 180px;
             background: linear-gradient(135deg, #ECEFF1, #CFD8DC);
             overflow: hidden;
             flex-shrink: 0;
@@ -183,26 +183,27 @@
         .product-card__cat-badge {
             position:absolute;top:.45rem;left:.45rem;
             background:var(--primary);color:#fff;
-            font-size:.62rem;font-weight:800;
-            padding:.18rem .5rem;border-radius:4px;
+            font-size:.6rem;font-weight:800;
+            padding:.16rem .45rem;border-radius:4px;
         }
-        .product-card__body { padding:.65rem .8rem .85rem;flex:1;display:flex;flex-direction:column; }
-        .product-card__cat { font-size:.67rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--primary-light);margin-bottom:.2rem; }
+        .product-card__body { padding:.6rem .75rem .7rem;flex:1;min-width:0;min-height:0;display:flex;flex-direction:column;overflow:hidden; }
+        .product-card__cat { font-size:.64rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--primary-light);margin-bottom:.2rem; }
         .product-card__title {
-            font-size:.88rem;font-weight:700;line-height:1.35;color:var(--text);
-            flex:1;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;
+            font-size:.84rem;font-weight:700;line-height:1.3;color:var(--text);
+            display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;
             margin-bottom:.2rem;
+            min-height:calc(1.3em * 2);
         }
-        .product-card__author { font-size:.73rem;color:var(--text-muted);margin-bottom:.6rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis; }
-        .product-card__footer { display:flex;align-items:center;justify-content:space-between;gap:.5rem;margin-top:auto; }
-        .product-card__price { font-size:1.05rem;font-weight:800;color:var(--accent-warm,#F57C00);white-space:nowrap; }
+        .product-card__author { font-size:.7rem;color:var(--text-muted);margin-bottom:.5rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.2;min-height:1.2em;display:block; }
+        .product-card__footer { display:flex;flex-direction:column;gap:.4rem;margin-top:auto; }
+        .product-card__price { font-size:.88rem;font-weight:800;color:var(--accent-warm,#F57C00);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;width:100%; }
         .product-card__link {
-            display:inline-flex;align-items:center;justify-content:center;
-            padding:.35rem .7rem;border-radius:6px;
-            background:var(--primary);color:#fff;font-size:.72rem;font-weight:700;
+            display:flex;align-items:center;justify-content:center;
+            width:100%;height:30px;box-sizing:border-box;border-radius:6px;
+            background:var(--primary);color:#fff;font-size:.68rem;font-weight:700;
             text-decoration:none;transition:background .15s,transform .15s;white-space:nowrap;cursor:pointer;
         }
-        .product-card__link:hover { background:var(--primary-light);transform:scale(1.04); }
+        .product-card__link:hover { background:var(--primary-light);transform:scale(1.02); }
 
         /* ── Search result keyword highlight ── */
         .search-result-bar {
@@ -238,6 +239,7 @@
         }
         .empty-state a:hover { background: var(--primary-light); }
 
+        /* ── Responsive ── */
         @media(max-width:768px){
             .shop-wrap { grid-template-columns: 1fr; }
             .shop-sidebar { position: static; display: flex; flex-wrap: wrap; }
@@ -245,6 +247,8 @@
             .sidebar-list { display: flex; flex-wrap: wrap; padding: .25rem; width: 100%; }
             .sidebar-item { padding: .4rem .7rem; border-radius: var(--radius); }
             .product-grid { grid-template-columns: repeat(auto-fill, minmax(145px,1fr)); gap: .75rem; }
+            .product-card { height: 320px; }
+            .product-card__thumb { height: 155px; }
         }
     </style>
 </head>
@@ -269,6 +273,40 @@
                     </c:if>
                 </c:forEach>
             </div>
+
+            <%-- Genre filter: independent from Category, matches books with any selected genre --%>
+            <c:if test="${not empty genres}">
+                <div class="sidebar-head" style="border-top:1px solid rgba(255,255,255,.15);">
+                    <i class="fa-solid fa-tags"></i> Thể loại (Genre)
+                </div>
+                <form method="get" action="/books" style="width:100%;box-sizing:border-box;padding:.75rem 1rem;display:flex;flex-direction:column;gap:.5rem;">
+                    <c:if test="${not empty selectedCategoryId}">
+                        <input type="hidden" name="categoryId" value="${selectedCategoryId}" />
+                    </c:if>
+                    <c:if test="${not empty q}">
+                        <input type="hidden" name="q" value="${q}" />
+                    </c:if>
+                    <c:if test="${not empty sort}">
+                        <input type="hidden" name="sort" value="${sort}" />
+                    </c:if>
+                    <c:forEach items="${genres}" var="g">
+                        <label style="display:flex;align-items:center;gap:.5rem;font-size:.83rem;color:var(--text-muted);cursor:pointer;">
+                            <input type="checkbox" name="genreIds" value="${g.id}"
+                                   <c:if test="${selectedGenreIds.contains(g.id)}">checked</c:if>
+                                   style="accent-color:var(--primary);" />
+                            <c:out value="${g.name}" />
+                        </label>
+                    </c:forEach>
+                    <button type="submit"
+                            style="align-self:flex-start;margin-top:.4rem;padding:.4rem .9rem;border:none;border-radius:6px;background:var(--primary);color:#fff;font-size:.78rem;font-weight:700;cursor:pointer;">
+                        <i class="fa-solid fa-filter"></i> Áp dụng
+                    </button>
+                    <c:if test="${not empty selectedGenreIds}">
+                        <a href="/books<c:if test='${not empty selectedCategoryId}'>?categoryId=${selectedCategoryId}</c:if>"
+                           style="font-size:.76rem;color:var(--text-muted);text-decoration:underline;">Xoá lọc thể loại</a>
+                    </c:if>
+                </form>
+            </c:if>
         </aside>
 
         <%-- ── Main ── --%>
@@ -361,7 +399,7 @@
                                 </div>
                                 <div class="product-card__body">
                                     <div class="product-card__title">${book.title}</div>
-                                    <div class="product-card__author">${book.author}</div>
+                                    <div class="product-card__author"><c:out value="${book.author}" default="—"/></div>
                                     <div class="product-card__footer">
                                         <span class="product-card__price">${book.priceFormatted} &#8363;</span>
                                         <span class="product-card__link">Chi tiết</span>

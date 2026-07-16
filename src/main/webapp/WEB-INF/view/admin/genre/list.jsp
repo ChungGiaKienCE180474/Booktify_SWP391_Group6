@@ -1,3 +1,4 @@
+<%-- Genre list with search, category/status filters and pagination. --%>
 <%@ page contentType="text/html" pageEncoding="UTF-8" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <!DOCTYPE html>
@@ -92,8 +93,8 @@
                                     <c:choose>
                                         <c:when test="${not empty genre.category}">
                                             <span style="display:inline-flex;align-items:center;gap:4px;
-                                                         background:#EFF6FF;border:1px solid #BFDBFE;
-                                                         color:#2563EB;padding:3px 10px;border-radius:999px;
+                                                         background:#E3F4F1;border:1px solid #B7DED7;
+                                                         color:#006B5E;padding:3px 10px;border-radius:999px;
                                                          font-size:.72rem;font-weight:700;">
                                                 <i class="fa-solid fa-tag" style="font-size:.6rem;"></i>
                                                 <c:out value="${genre.category.name}"/>
@@ -116,20 +117,18 @@
                                     <c:out value="${genre.updatedAtString}" default="—"/>
                                 </td>
                                 <td class="admin-table__actions">
-                                    <%-- View (always) --%>
                                     <button type="button" class="icon-link js-view-genre" title="View"
                                             data-id="${genre.id}">
                                         <i class="fa-solid fa-eye"></i>
                                     </button>
 
+                                    <%-- Edit/Delete for active rows, Restore for soft-deleted ones --%>
                                     <c:choose>
                                         <c:when test="${genre.active}">
-                                            <%-- Edit (active only) --%>
                                             <a href="/admin/genres/${genre.id}/edit"
                                                class="icon-link icon-link--edit" title="Edit">
                                                 <i class="fa-solid fa-pen"></i>
                                             </a>
-                                            <%-- Remove (active only) --%>
                                             <button type="button" class="icon-link icon-link--danger" title="Delete"
                                                     data-genre-name="<c:out value='${genre.name}'/>"
                                                     onclick="openConfirmModal('/admin/genres/${genre.id}/delete','delete','Are you sure you want to delete this genre?')">
@@ -137,7 +136,6 @@
                                             </button>
                                         </c:when>
                                         <c:otherwise>
-                                            <%-- Restore (inactive only) --%>
                                             <button type="button" class="icon-link icon-link--restore" title="Restore"
                                                     onclick="openConfirmModal('/admin/genres/${genre.id}/restore','restore','Are you sure you want to restore this genre?')">
                                                 <i class="fa-solid fa-rotate-left"></i>
@@ -221,7 +219,7 @@
     <div id="genreModal" class="modal-overlay" style="display:none;" onclick="closeGenreModal()">
         <div class="modal-box" style="max-width:520px;" onclick="event.stopPropagation()">
             <div class="modal-header">
-                <h3><i class="fa-solid fa-layer-group" style="color:#2563EB;"></i> Genre Details</h3>
+                <h3><i class="fa-solid fa-layer-group" style="color:#006B5E;"></i> Genre Details</h3>
                 <button class="modal-close" onclick="closeGenreModal()">
                     <i class="fa-solid fa-xmark"></i>
                 </button>
@@ -244,7 +242,6 @@
     </c:if>
 
     <script>
-        /* ── Toast ──────────────────────────────────────────────────────────── */
         function showToast(msg, type) {
             var tc = document.getElementById('toastContainer');
             var t = document.createElement('div');
@@ -259,7 +256,6 @@
         var e = document.getElementById('toastErrorMessage');
         if (e) showToast(e.textContent.trim(), 'error');
 
-        /* ── Confirm Modal (Remove / Restore) ───────────────────────────────── */
         function openConfirmModal(action, type, msg) {
             document.getElementById('confirmModalMsg').textContent = msg;
             document.getElementById('confirmForm').action = action;
@@ -278,7 +274,8 @@
         }
         function closeConfirmModal() { document.getElementById('confirmModal').style.display = 'none'; }
 
-        /* ── View Genre Modal (AJAX) ─────────────────────────────────────────── */
+        // Genre details (including book count/list) are fetched on demand
+        // instead of being embedded in the table, since most rows never get opened.
         document.addEventListener('click', function (e) {
             var btn = e.target.closest('.js-view-genre');
             if (!btn) return;

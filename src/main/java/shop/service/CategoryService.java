@@ -8,17 +8,22 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import shop.domain.Category;
+import shop.repository.BookRepository;
 import shop.repository.CategoryRepository;
 
 @Service
 public class CategoryService {
 
     private final CategoryRepository categoryRepository;
+    private final BookRepository bookRepository;
 
-    public CategoryService(CategoryRepository categoryRepository) {
+    public CategoryService(CategoryRepository categoryRepository, BookRepository bookRepository) {
         this.categoryRepository = categoryRepository;
+        this.bookRepository = bookRepository;
     }
 
+    // Includes inactive categories — also used by GlobalModelAdvice to build
+    // the site-wide navigation menu, so don't filter this down to active-only.
     public List<Category> getAllCategories() {
         return categoryRepository.findAllByOrderByIdAsc();
     }
@@ -47,10 +52,16 @@ public class CategoryService {
         return categoryRepository.save(category);
     }
 
+    // Blocks soft-deleting a category that still has books assigned to it —
+    // those books would otherwise be left pointing at a hidden category.
     @Transactional
     public void removeCategory(Long id) {
         Category category = categoryRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Category not found"));
+        if (bookRepository.existsByCategoryId(id)) {
+            throw new IllegalStateException(
+                    "Cannot delete this category: it still has books assigned to it.");
+        }
         category.setActive(false);
         categoryRepository.save(category);
     }

@@ -29,6 +29,8 @@ public class CategoryController {
 
     private static final int PAGE_SIZE = 10;
 
+    // Filters in memory and paginates via subList — fine here since the
+    // number of categories is small.
     @GetMapping
     public String list(@RequestParam(required = false) String q,
                        @RequestParam(required = false) String status,
@@ -100,7 +102,8 @@ public class CategoryController {
 
         existing.setName(category.getName());
         existing.setDescription(category.getDescription());
-        // NOTE: active is NOT updated here — use Remove/Restore actions on the list page
+        // active is intentionally left untouched — toggling it goes through
+        // the Remove/Restore actions on the list page, not this form.
         categoryService.saveCategory(existing);
         redirectAttributes.addFlashAttribute("successMessage", "Category updated successfully.");
         return "redirect:/admin/categories";
@@ -111,6 +114,9 @@ public class CategoryController {
         try {
             categoryService.removeCategory(id);
             redirectAttributes.addFlashAttribute("successMessage", "Category removed successfully.");
+        } catch (IllegalStateException e) {
+            // Category still has books attached — surface the specific reason.
+            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("errorMessage",
                     "An unexpected error occurred while removing the category.");

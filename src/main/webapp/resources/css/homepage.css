@@ -229,6 +229,9 @@ body.home-page {
     overflow: hidden;
     display: flex;
     flex-direction: column;
+    /* Chiều cao cố định — đảm bảo mọi card trong cùng hàng luôn đều nhau
+       bất kể tên sách/tác giả/giá dài ngắn khác nhau */
+    height: 345px;
     transition: transform .22s, box-shadow .22s;
     cursor: pointer;
     text-decoration: none;
@@ -240,7 +243,7 @@ body.home-page {
 /* Cover */
 .book-card__thumb {
     position: relative;
-    height: 210px;
+    height: 180px;
     overflow: hidden;
     background: linear-gradient(135deg, #ECEFF1, #CFD8DC);
     flex-shrink: 0;
@@ -267,9 +270,9 @@ body.home-page {
     top: .5rem; left: .5rem;
     background: var(--accent-red, #E53935);
     color: #fff;
-    font-size: .65rem;
+    font-size: .62rem;
     font-weight: 800;
-    padding: .2rem .5rem;
+    padding: .18rem .45rem;
     border-radius: 4px;
     letter-spacing: .03em;
 }
@@ -279,13 +282,16 @@ body.home-page {
 
 /* Body */
 .book-card__body {
-    padding: .7rem .8rem .9rem;
+    padding: .6rem .75rem .7rem;
     flex: 1;
+    min-width: 0;
+    min-height: 0;
     display: flex;
     flex-direction: column;
+    overflow: hidden;
 }
 .book-card__cat {
-    font-size: .68rem;
+    font-size: .64rem;
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: .07em;
@@ -296,54 +302,66 @@ body.home-page {
     text-overflow: ellipsis;
 }
 .book-card__title {
-    font-size: .88rem;
+    font-size: .84rem;
     font-weight: 700;
-    line-height: 1.35;
+    line-height: 1.3;
     color: var(--text);
     margin-bottom: .2rem;
-    flex: 1;
     display: -webkit-box;
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
+    /* Luôn chiếm đúng chỗ 2 dòng dù title ngắn/dài — để author/price/button
+       luôn thẳng hàng giữa các card, không bị lệch theo độ dài title */
+    min-height: calc(1.3em * 2);
 }
 .book-card__author {
-    font-size: .75rem;
+    font-size: .7rem;
     color: var(--text-muted);
-    margin-bottom: .6rem;
+    margin-bottom: .5rem;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    /* Luôn giữ chỗ 1 dòng kể cả khi author rỗng — tránh card bị "hụt" chiều cao */
+    line-height: 1.2;
+    min-height: 1.2em;
+    display: block;
 }
+/* Footer: giá và nút xếp theo 2 dòng riêng biệt (không chung 1 hàng) —
+   để giá dài bao nhiêu cũng không bao giờ đẩy lệch nút "Chi tiết" */
 .book-card__footer {
     display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: .5rem;
+    flex-direction: column;
+    gap: .4rem;
     margin-top: auto;
 }
 .book-card__price {
-    font-size: 1.05rem;
+    font-size: .88rem;
     font-weight: 800;
     color: var(--accent-warm, #F57C00);
     white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    width: 100%;
 }
 .book-card__detail-btn {
-    display: inline-flex;
+    display: flex;
     align-items: center;
     justify-content: center;
-    padding: .35rem .75rem;
+    width: 100%;
+    height: 30px;
+    box-sizing: border-box;
     border-radius: 6px;
     background: var(--primary);
     color: #fff;
-    font-size: .72rem;
+    font-size: .68rem;
     font-weight: 700;
     text-decoration: none;
     transition: background .15s, transform .15s;
     white-space: nowrap;
     cursor: pointer;
 }
-.book-card__detail-btn:hover { background: var(--primary-light); transform: scale(1.04); }
+.book-card__detail-btn:hover { background: var(--primary-light); transform: scale(1.02); }
 
 /* Stock badge */
 .book-card__stock {
@@ -434,6 +452,8 @@ body.home-page {
     .banner-book-tile { display: none; }
     .banner-book-tile:nth-child(1) { display: block; }
     .book-grid { grid-template-columns: repeat(auto-fill, minmax(145px, 1fr)); gap: .75rem; }
+    .book-card { height: 320px; }
+    .book-card__thumb { height: 155px; }
     .cat-grid { grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: .75rem; }
     .cta-strip { text-align: center; justify-content: center; }
 }
