@@ -17,7 +17,7 @@
                 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
                 <link rel="stylesheet"
                     href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" />
-                <link rel="stylesheet" href="/css/admin-dashboard.css" />
+                <link rel="stylesheet" href="/css/admin-dashboard.css?v=4" />
                 <title>
                     <c:choose>
                         <c:when test="${formMode=='edit'}">Edit Book</c:when>
@@ -458,7 +458,6 @@
                 <script>
                     // ── Price format (xxx.xxx ₫) ─────────────────────────────────────────────
                     var priceInput = document.getElementById('priceDisplay');
-                    // Input can be raw from Spring ("299000.00") or already de-DE
                     // formatted ("299.000") — only strip thousand-separator dots,
                     // never the decimal point.
                     function formatPrice(val) {

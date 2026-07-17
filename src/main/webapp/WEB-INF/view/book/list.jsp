@@ -1,4 +1,4 @@
-<%-- Storefront book listing: category/genre/keyword filters + price sort. --%>
+<%-- Storefront book listing: category/genre/keyword filters. --%>
 <%@ page contentType="text/html" pageEncoding="UTF-8" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <!DOCTYPE html>
@@ -122,26 +122,6 @@
             color: var(--text-muted);
         }
         .shop-toolbar__right { display: flex; align-items: center; gap: .6rem; flex-wrap: wrap; }
-
-        .sort-label {
-            font-size: .8rem;
-            color: var(--text-muted);
-            font-weight: 600;
-            white-space: nowrap;
-        }
-        .sort-select {
-            padding: .4rem .75rem;
-            border: 1px solid var(--border);
-            border-radius: var(--radius);
-            font-size: .85rem;
-            font-family: inherit;
-            color: var(--text);
-            background: #fff;
-            cursor: pointer;
-            outline: none;
-            transition: border-color .15s;
-        }
-        .sort-select:focus { border-color: var(--primary); }
 
         /* ── Product grid ── */
         .product-grid {
@@ -286,9 +266,6 @@
                     <c:if test="${not empty q}">
                         <input type="hidden" name="q" value="${q}" />
                     </c:if>
-                    <c:if test="${not empty sort}">
-                        <input type="hidden" name="sort" value="${sort}" />
-                    </c:if>
                     <c:forEach items="${genres}" var="g">
                         <label style="display:flex;align-items:center;gap:.5rem;font-size:.83rem;color:var(--text-muted);cursor:pointer;">
                             <input type="checkbox" name="genreIds" value="${g.id}"
@@ -349,22 +326,6 @@
                         </c:choose>
                     </h2>
                     <p>${empty books ? 0 : books.size()} sản phẩm</p>
-                </div>
-                <div class="shop-toolbar__right">
-                    <span class="sort-label">Sắp xếp:</span>
-                    <form method="get" action="/books" id="sortForm" style="display:contents;">
-                        <c:if test="${not empty selectedCategoryId}">
-                            <input type="hidden" name="categoryId" value="${selectedCategoryId}" />
-                        </c:if>
-                        <c:if test="${not empty q}">
-                            <input type="hidden" name="q" value="${q}" />
-                        </c:if>
-                        <select name="sort" class="sort-select" onchange="document.getElementById('sortForm').submit();">
-                            <option value="default"     ${sort == 'default'    ? 'selected' : ''}>Mặc định</option>
-                            <option value="price_asc"   ${sort == 'price_asc'  ? 'selected' : ''}>Giá tăng dần</option>
-                            <option value="price_desc"  ${sort == 'price_desc' ? 'selected' : ''}>Giá giảm dần</option>
-                        </select>
-                    </form>
                 </div>
             </div>
 

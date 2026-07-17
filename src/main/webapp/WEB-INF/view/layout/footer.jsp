@@ -42,7 +42,7 @@
                     <ul class="footer-contact">
                         <li><i class="fa-solid fa-envelope"></i> Thay đổi địa chỉ khách hàng</li>
                         <li><i class="fa-solid fa-phone"></i> 1900 1234</li>
-                        <li><i class="fa-solid fa-location-dot"></i> TP. Cần Thơ</li>
+                        <li><i class="fa-solid fa-location-dot"></i><a href="https://maps.app.goo.gl/XGtGNmDhZgtZHqs96" target="_blank">Đại học FPT Cần Thơ</a></li>                        
                     </ul>
                 </div>
             </div>

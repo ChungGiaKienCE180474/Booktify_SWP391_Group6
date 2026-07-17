@@ -5,9 +5,9 @@
             <div class="header-topbar">
                 <div class="header-topbar-inner">
                     <div class="header-topbar-left">
-                        <span><i class="fa-solid fa-truck-fast"></i> Miễn phí giao hàng đơn trên 150.000đ</span>
+                        <span><i class="fa-solid fa-book"></i> Sách gì cũng có mua hết ở Booktify</span>
                         <span class="topbar-sep">|</span>
-                        <span><i class="fa-solid fa-phone"></i> Hotline: 1900-6067</span>
+                        <span><i class="fa-solid fa-phone"></i> Hotline: 1900-1234</span>
                     </div>
                     <div class="header-topbar-right">
                         <c:choose>
@@ -41,7 +41,7 @@
                                     <form class="header-search" action="/books" method="get">
                                         <input type="text" name="q" class="header-search__input"
                                             value="${not empty q ? q : ''}"
-                                            placeholder="Tìm kiếm sách, tác giả, ISBN..." />
+                                            placeholder="Tìm kiếm sách, tác giả, ..." />
                                         <button type="submit" class="header-search__btn">
                                             <i class="fa-solid fa-magnifying-glass"></i> Tìm kiếm
                                         </button>
