@@ -1,13 +1,13 @@
 ﻿<%@page contentType="text/html" pageEncoding="UTF-8" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <!DOCTYPE html>
-<html lang="vi">
+<html lang="en">
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" />
     <link rel="stylesheet" href="/css/auth.css" />
-    <title>Booktify — Xác nhận OTP</title>
+    <title>Booktify — Verify OTP</title>
 </head>
 <body class="auth-page">
     <div class="auth-shell">
@@ -17,7 +17,7 @@
                 <span>Booktify</span>
             </a>
             <a href="/forgotpassword" class="auth-back-home">
-                <i class="fa-solid fa-arrow-left"></i> Quay lại
+                <i class="fa-solid fa-arrow-left"></i> Back
             </a>
         </header>
 
@@ -27,34 +27,34 @@
                     <div class="auth-otp-icon">
                         <i class="fa-solid fa-shield-halved"></i>
                     </div>
-                    <h1>Xác nhận OTP</h1>
-                    <p>Kiểm tra email và nhập mã OTP để đặt lại mật khẩu</p>
+                    <h1>Verify OTP</h1>
+                    <p>Check your email and enter the OTP code to reset your password</p>
                 </div>
 
                 <div class="auth-card-body">
                     <c:if test="${param.error != null}">
                         <div class="auth-alert auth-alert-error">
                             <i class="fa-solid fa-circle-exclamation"></i>
-                            OTP không hợp lệ. Vui lòng thử lại.
+                            Invalid OTP. Please try again.
                         </div>
                     </c:if>
 
                     <form method="post" action="/authentication/enterOTP">
                         <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}" />
                         <div class="auth-form-group">
-                            <label class="auth-label" for="otp">Mã OTP</label>
+                            <label class="auth-label" for="otp">OTP code</label>
                             <input type="text" id="otp" name="otp" class="auth-input auth-otp-input"
                                    placeholder="000000" maxlength="6" inputmode="numeric" required />
-                            <p class="auth-hint">Mã gồm 6 chữ số được gửi tới email của bạn.</p>
+                            <p class="auth-hint">A 6-digit code has been sent to your email.</p>
                         </div>
                         <button type="submit" class="auth-btn auth-btn-primary">
-                            <i class="fa-solid fa-check"></i> Xác nhận
+                            <i class="fa-solid fa-check"></i> Confirm
                         </button>
                     </form>
                 </div>
 
                 <div class="auth-card-footer">
-                    Không nhận được mã? <a href="/forgotpassword">Gửi lại OTP</a>
+                    Didn't receive the code? <a href="/forgotpassword">Resend OTP</a>
                 </div>
             </div>
         </main>

@@ -2,7 +2,7 @@
     <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
         <%@ taglib prefix="form" uri="http://www.springframework.org/tags/form" %>
             <!DOCTYPE html>
-            <html lang="vi">
+            <html lang="en">
 
             <head>
                 <meta charset="UTF-8" />
@@ -15,7 +15,7 @@
                 <link rel="stylesheet" href="/css/order.css" />
                 <link rel="stylesheet" href="/css/voucher.css" />
 
-                <title>Đặt hàng — Booktify</title>
+                <title>Checkout — Booktify</title>
             </head>
 
             <body class="home-page">
@@ -24,8 +24,8 @@
                 <main class="main-content">
                     <div class="cart-wrap order-wrap">
                         <div class="cart-head">
-                            <h1><i class="fa-solid fa-receipt"></i> Thanh toán đơn hàng</h1>
-                            <p>Điền thông tin nhận hàng và xác nhận đặt hàng</p>
+                            <h1><i class="fa-solid fa-receipt"></i> Order checkout</h1>
+                            <p>Fill in delivery information and confirm your order</p>
                         </div>
 
                         <c:if test="${not empty successMessage}">
@@ -42,47 +42,47 @@
                             <div class="order-form-panel">
                                 <form:form modelAttribute="checkoutForm" action="/orders/checkout" method="post"
                                     cssClass="order-form">
-                                    <h2>Thông tin nhận hàng</h2>
+                                    <h2>Delivery information</h2>
 
                                     <div class="order-field">
-                                        <label>Người nhận <span class="required">*</span></label>
+                                        <label>Recipient <span class="required">*</span></label>
                                         <form:input path="recipientName" cssClass="order-input"
-                                            placeholder="Họ và tên người nhận" />
+                                            placeholder="Recipient full name" />
                                         <form:errors path="recipientName" cssClass="order-error" />
                                     </div>
 
                                     <div class="order-field">
-                                        <label>Số điện thoại <span class="required">*</span></label>
+                                        <label>Phone number <span class="required">*</span></label>
                                         <form:input path="recipientPhone" cssClass="order-input"
                                             placeholder="VD: 0912345678" />
                                         <form:errors path="recipientPhone" cssClass="order-error" />
                                     </div>
 
                                     <div class="order-field">
-                                        <label>Địa chỉ giao hàng <span class="required">*</span></label>
+                                        <label>Shipping address <span class="required">*</span></label>
                                         <form:textarea path="shippingAddress" cssClass="order-textarea" rows="3"
-                                            placeholder="Số nhà, đường, phường/xã, quận/huyện, tỉnh/thành phố" />
+                                            placeholder="House number, street, ward, district, province/city" />
                                         <form:errors path="shippingAddress" cssClass="order-error" />
                                     </div>
 
                                     <div class="order-field order-field--info">
-                                        <label>Thanh toán</label>
+                                        <label>Payment</label>
                                         <p class="order-static-value">
                                             <i class="fa-solid fa-money-bill-wave"></i> ${paymentLabel}
                                         </p>
-                                        <p class="order-static-hint">Phí vận chuyển: ${shippingFeeFormatted} &#8363;</p>
+                                        <p class="order-static-hint">Shipping fee: ${shippingFeeFormatted} &#8363;</p>
                                     </div>
 
                                     <div class="order-field">
                                         <label>
-                                            Mã voucher
-                                            <span class="order-optional">(tùy chọn)</span>
+                                            Voucher code
+                                            <span class="order-optional">(optional)</span>
                                         </label>
 
                                         <div style="display:flex; gap:10px;">
 
                                             <form:input path="voucherCode" cssClass="order-input"
-                                                placeholder="Nhập mã voucher" />
+                                                placeholder="Enter voucher code" />
 
                                             <button type="submit" formaction="/orders/apply-voucher" formmethod="post"
                                                 class="apply-voucher-btn" name="action" value="apply">
@@ -94,26 +94,26 @@
 
                                     </div>
                                     <div class="order-field">
-                                        <label>Ghi chú</label>
+                                        <label>Note</label>
                                         <form:textarea path="note" cssClass="order-textarea" rows="2"
-                                            placeholder="Ghi chú cho đơn hàng (tùy chọn)" />
+                                            placeholder="Note for your order (optional)" />
                                     </div>
 
                                     <form:errors cssClass="order-error" element="div" />
 
                                     <div class="order-actions">
                                         <a href="/cart" class="cart-btn cart-btn--outline">
-                                            <i class="fa-solid fa-arrow-left"></i> Quay lại giỏ hàng
+                                            <i class="fa-solid fa-arrow-left"></i> Back to cart
                                         </a>
                                         <button type="submit" class="cart-btn cart-btn--primary">
-                                            <i class="fa-solid fa-check"></i> Xác nhận đặt hàng
+                                            <i class="fa-solid fa-check"></i> Confirm order
                                         </button>
                                     </div>
                                 </form:form>
                             </div>
 
                             <aside class="cart-summary order-summary">
-                                <h2>Đơn hàng của bạn</h2>
+                                <h2>Your order</h2>
                                 <c:forEach items="${cart.items}" var="item">
                                     <div class="order-summary-item">
                                         <div>
@@ -124,11 +124,11 @@
                                     </div>
                                 </c:forEach>
                                 <div class="cart-summary-row">
-                                    <span>Tạm tính</span>
+                                    <span>Subtotal</span>
                                     <span>${cart.totalAmountFormatted} &#8363;</span>
                                 </div>
                                 <div class="cart-summary-row">
-                                    <span>Phí vận chuyển</span>
+                                    <span>Shipping fee</span>
                                     <span>${shippingFeeFormatted} &#8363;</span>
                                 </div>
 
@@ -149,7 +149,7 @@
                                 </div>
 
                                 <div class="cart-summary-row total">
-                                    <span>Tổng thanh toán</span>
+                                    <span>Total</span>
                                     <span>${checkoutTotalFormatted} &#8363;</span>
                                 </div>
                             </aside>

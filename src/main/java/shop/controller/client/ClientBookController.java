@@ -126,7 +126,7 @@ public class ClientBookController {
                 !authentication.isAuthenticated()) {
             redirectAttributes.addFlashAttribute(
                     "errorMessage",
-                    "Vui lòng đăng nhập để đánh giá.");
+                    "Please log in to leave a review.");
             return "redirect:/login";
         }
         User customer = userRepository
@@ -135,7 +135,7 @@ public class ClientBookController {
         if (customer == null) {
             redirectAttributes.addFlashAttribute(
                     "errorMessage",
-                    "Không tìm thấy tài khoản.");
+                    "Account not found.");
             return "redirect:/books/" + id;
         }
         try {
@@ -146,7 +146,7 @@ public class ClientBookController {
                     reviewText);
             redirectAttributes.addFlashAttribute(
                     "successMessage",
-                    "Đánh giá thành công!");
+                    "Review submitted successfully!");
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute(
                     "errorMessage",

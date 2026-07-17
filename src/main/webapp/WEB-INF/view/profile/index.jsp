@@ -2,7 +2,7 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="form" uri="http://www.springframework.org/tags/form" %>
 <!DOCTYPE html>
-<html lang="vi">
+<html lang="en">
 
 <head>
     <meta charset="UTF-8" />
@@ -11,7 +11,7 @@
     <link rel="stylesheet" href="/css/header.css" />
     <link rel="stylesheet" href="/css/footer.css" />
     <link rel="stylesheet" href="/css/profile.css" />
-    <title>Booktify - Thông tin cá nhân</title>
+    <title>Booktify - My profile</title>
 </head>
 
 <body class="home-page">
@@ -21,8 +21,8 @@
     <main class="main-content">
         <section class="section profile-section">
             <div class="section-header">
-                <h2>Thông tin cá nhân</h2>
-                <p>Xem và quản lý tài khoản Booktify của bạn</p>
+                <h2>My profile</h2>
+                <p>View and manage your Booktify account</p>
             </div>
 
             <c:if test="${not empty successMessage}">
@@ -55,7 +55,7 @@
                     <p class="profile-sidebar-email">${profile.email}</p>
                     <ul class="profile-meta-list">
                         <li>
-                            <span class="profile-meta-label">Vai trò</span>
+                            <span class="profile-meta-label">Role</span>
                             <span class="profile-meta-value">
                                 <c:choose>
                                     <c:when test="${not empty profile.roleName}">${profile.roleName}</c:when>
@@ -64,31 +64,31 @@
                             </span>
                         </li>
                         <li>
-                            <span class="profile-meta-label">Trạng thái</span>
+                            <span class="profile-meta-label">Status</span>
                             <span class="status-badge ${profile.status ? 'status-active' : 'status-inactive'}">
-                                ${profile.status ? 'Hoạt động' : 'Bị khóa'}</span>
+                                ${profile.status ? 'Active' : 'Locked'}</span>
                         </li>
                     </ul>
                     <a href="/" class="profile-btn profile-btn-outline profile-btn-block">
-                        <i class="fa-solid fa-house"></i> Về trang chủ
+                        <i class="fa-solid fa-house"></i> Back to home
                     </a>
                 </aside>
                 </div>
 
                 <div class="profile-main">
-                    <%-- Thông tin cá nhân --%>
+                    <%-- Personal information --%>
                     <div class="profile-panel">
                         <div class="profile-panel-header profile-panel-header--actions">
                             <div class="profile-panel-header-left">
                                 <i class="fa-solid fa-id-card"></i>
                                 <div>
-                                    <h3>Thông tin tài khoản</h3>
-                                    <p>Họ tên, email, số điện thoại và địa chỉ</p>
+                                    <h3>Account information</h3>
+                                    <p>Full name, email, phone number and address</p>
                                 </div>
                             </div>
                             <c:if test="${!editMode}">
                                 <a href="/profile?edit=true" class="profile-btn profile-btn-outline profile-btn-sm">
-                                    <i class="fa-solid fa-pen-to-square"></i> Thay đổi
+                                    <i class="fa-solid fa-pen-to-square"></i> Edit
                                 </a>
                             </c:if>
                         </div>
@@ -96,7 +96,7 @@
                         <c:if test="${!editMode}">
                             <dl class="profile-info-list">
                                 <div class="profile-info-item">
-                                    <dt>Họ và tên</dt>
+                                    <dt>Full name</dt>
                                     <dd>${profile.fullName}</dd>
                                 </div>
                                 <div class="profile-info-item">
@@ -104,20 +104,20 @@
                                     <dd>${profile.email}</dd>
                                 </div>
                                 <div class="profile-info-item">
-                                    <dt>Số điện thoại</dt>
+                                    <dt>Phone number</dt>
                                     <dd>
                                         <c:choose>
                                             <c:when test="${not empty profile.phone}">${profile.phone}</c:when>
-                                            <c:otherwise><span class="profile-info-empty">Chưa cập nhật</span></c:otherwise>
+                                            <c:otherwise><span class="profile-info-empty">Not updated</span></c:otherwise>
                                         </c:choose>
                                     </dd>
                                 </div>
                                 <div class="profile-info-item">
-                                    <dt>Địa chỉ</dt>
+                                    <dt>Address</dt>
                                     <dd>
                                         <c:choose>
                                             <c:when test="${not empty profile.address}">${profile.address}</c:when>
-                                            <c:otherwise><span class="profile-info-empty">Chưa cập nhật</span></c:otherwise>
+                                            <c:otherwise><span class="profile-info-empty">Not updated</span></c:otherwise>
                                         </c:choose>
                                     </dd>
                                 </div>
@@ -129,9 +129,9 @@
                                 cssClass="profile-form">
 
                                 <div class="profile-form-group">
-                                    <label for="fullName">Họ và tên <span class="required">*</span></label>
+                                    <label for="fullName">Full name <span class="required">*</span></label>
                                     <form:input path="fullName" id="fullName" cssClass="profile-input"
-                                        placeholder="Nhập họ và tên" />
+                                        placeholder="Enter your full name" />
                                     <form:errors path="fullName" cssClass="profile-field-error" />
                                 </div>
 
@@ -139,49 +139,49 @@
                                     <label>Email</label>
                                     <input type="email" class="profile-input profile-input-readonly"
                                         value="${profile.email}" readonly disabled />
-                                    <span class="profile-hint">Email không thể thay đổi</span>
+                                    <span class="profile-hint">Email cannot be changed</span>
                                 </div>
 
                                 <div class="profile-form-group">
-                                    <label for="phone">Số điện thoại</label>
+                                    <label for="phone">Phone number</label>
                                     <form:input path="phone" id="phone" cssClass="profile-input"
                                         placeholder="VD: 0901234567" />
                                     <form:errors path="phone" cssClass="profile-field-error" />
                                 </div>
 
                                 <div class="profile-form-group">
-                                    <label for="address">Địa chỉ</label>
+                                    <label for="address">Address</label>
                                     <form:textarea path="address" id="address" cssClass="profile-textarea" rows="3"
-                                        placeholder="Nhập địa chỉ giao hàng" />
+                                        placeholder="Enter your shipping address" />
                                     <form:errors path="address" cssClass="profile-field-error" />
                                 </div>
 
                                 <div class="profile-form-actions profile-form-actions--split">
-                                    <a href="/profile" class="profile-btn profile-btn-outline">Hủy</a>
+                                    <a href="/profile" class="profile-btn profile-btn-outline">Cancel</a>
                                     <button type="submit" class="profile-btn profile-btn-primary">
-                                        <i class="fa-solid fa-floppy-disk"></i> Lưu thay đổi
+                                        <i class="fa-solid fa-floppy-disk"></i> Save changes
                                     </button>
                                 </div>
                             </form:form>
                         </c:if>
                     </div>
 
-                    <%-- Đổi mật khẩu --%>
+                    <%-- Change password --%>
                     <div class="profile-panel" id="password-section">
                         <div class="profile-panel-header profile-panel-header--actions">
                             <div class="profile-panel-header-left">
                                 <i class="fa-solid fa-lock"></i>
                                 <div>
-                                    <h3>Mật khẩu</h3>
-                                    <p>Bảo vệ tài khoản bằng mật khẩu mạnh</p>
+                                    <h3>Password</h3>
+                                    <p>Protect your account with a strong password</p>
                                 </div>
                             </div>
                             <c:if test="${!passwordEditMode}">
                                 <a href="/profile?password=edit" class="profile-btn profile-btn-outline profile-btn-sm">
                                     <i class="fa-solid fa-key"></i>
                                     <c:choose>
-                                        <c:when test="${profile.googleAccount}">Đặt mật khẩu</c:when>
-                                        <c:otherwise>Đổi mật khẩu</c:otherwise>
+                                        <c:when test="${profile.googleAccount}">Set password</c:when>
+                                        <c:otherwise>Change password</c:otherwise>
                                     </c:choose>
                                 </a>
                             </c:if>
@@ -190,7 +190,7 @@
                         <c:if test="${!passwordEditMode}">
                             <dl class="profile-info-list">
                                 <div class="profile-info-item">
-                                    <dt>Mật khẩu đăng nhập</dt>
+                                    <dt>Login password</dt>
                                     <dd class="profile-password-mask">••••••••</dd>
                                 </div>
                             </dl>
@@ -198,10 +198,10 @@
                                 <i class="fa-solid fa-shield-halved"></i>
                                 <c:choose>
                                     <c:when test="${profile.googleAccount}">
-                                        Tài khoản đăng nhập qua Google. Bạn có thể đặt mật khẩu để đăng nhập bằng email — chỉ cần xác thực OTP.
+                                        This account signs in with Google. You can set a password to log in by email — just verify with OTP.
                                     </c:when>
                                     <c:otherwise>
-                                        Đổi mật khẩu yêu cầu xác thực OTP qua email đã đăng ký.
+                                        Changing your password requires OTP verification via your registered email.
                                     </c:otherwise>
                                 </c:choose>
                             </p>
@@ -226,14 +226,14 @@
 
                             <c:if test="${!otpSent}">
                                 <p class="profile-hint profile-hint-block">
-                                    Nhấn nút bên dưới để nhận mã OTP tại email <strong>${profile.email}</strong>
+                                    Click the button below to receive an OTP code at <strong>${profile.email}</strong>
                                 </p>
                                 <form method="post" action="/profile/password/send-otp" class="profile-form">
                                     <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}" />
                                     <div class="profile-form-actions profile-form-actions--split">
-                                        <a href="/profile" class="profile-btn profile-btn-outline">Hủy</a>
+                                        <a href="/profile" class="profile-btn profile-btn-outline">Cancel</a>
                                         <button type="submit" class="profile-btn profile-btn-primary">
-                                            <i class="fa-solid fa-paper-plane"></i> Gửi mã OTP
+                                            <i class="fa-solid fa-paper-plane"></i> Send OTP code
                                         </button>
                                     </div>
                                 </form>
@@ -241,32 +241,32 @@
 
                             <c:if test="${otpSent && !otpVerified}">
                                 <p class="profile-hint profile-hint-block">
-                                    Mã OTP đã gửi tới <strong>${profile.email}</strong>.
+                                    An OTP code has been sent to <strong>${profile.email}</strong>.
                                 </p>
                                 <form method="post" action="/profile/password/verify-otp" class="profile-form">
                                     <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}" />
                                     <div class="profile-form-group">
-                                        <label for="otp">Mã OTP <span class="required">*</span></label>
+                                        <label for="otp">OTP code <span class="required">*</span></label>
                                         <input type="number" name="otp" id="otp" class="profile-input profile-otp-input"
-                                               placeholder="Nhập 6 chữ số" min="100000" max="999999" required />
+                                               placeholder="Enter 6 digits" min="100000" max="999999" required />
                                     </div>
                                     <div class="profile-form-actions profile-form-actions--split">
-                                        <a href="/profile" class="profile-btn profile-btn-outline">Hủy</a>
+                                        <a href="/profile" class="profile-btn profile-btn-outline">Cancel</a>
                                         <button type="submit" class="profile-btn profile-btn-primary">
-                                            <i class="fa-solid fa-shield-check"></i> Xác nhận OTP
+                                            <i class="fa-solid fa-shield-check"></i> Confirm OTP
                                         </button>
                                     </div>
                                 </form>
                                 <form method="post" action="/profile/password/send-otp" class="profile-resend-otp">
                                     <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}" />
-                                    <button type="submit" class="profile-link-btn">Gửi lại mã OTP</button>
+                                    <button type="submit" class="profile-link-btn">Resend OTP code</button>
                                 </form>
                             </c:if>
 
                             <c:if test="${otpVerified}">
                                 <c:if test="${profile.googleAccount}">
                                     <p class="profile-hint profile-hint-block">
-                                        OTP đã xác thực. Nhập mật khẩu mới — không cần mật khẩu cũ vì bạn đăng nhập bằng Google.
+                                        OTP verified. Enter a new password — no current password needed since you sign in with Google.
                                     </p>
                                 </c:if>
                                 <form:form method="post" action="/profile/password" modelAttribute="passwordChangeForm"
@@ -274,9 +274,9 @@
 
                                     <c:if test="${!profile.googleAccount}">
                                         <div class="profile-form-group">
-                                            <label for="currentPassword">Mật khẩu hiện tại <span class="required">*</span></label>
+                                            <label for="currentPassword">Current password <span class="required">*</span></label>
                                             <form:password path="currentPassword" id="currentPassword"
-                                                cssClass="profile-input" placeholder="Nhập mật khẩu hiện tại" />
+                                                cssClass="profile-input" placeholder="Enter your current password" />
                                             <form:errors path="currentPassword" cssClass="profile-field-error" />
                                         </div>
                                     </c:if>
@@ -284,30 +284,30 @@
                                     <div class="profile-form-group">
                                         <label for="newPassword">
                                             <c:choose>
-                                                <c:when test="${profile.googleAccount}">Mật khẩu mới</c:when>
-                                                <c:otherwise>Mật khẩu mới</c:otherwise>
+                                                <c:when test="${profile.googleAccount}">New password</c:when>
+                                                <c:otherwise>New password</c:otherwise>
                                             </c:choose>
                                             <span class="required">*</span>
                                         </label>
                                         <form:password path="newPassword" id="newPassword" cssClass="profile-input"
-                                            placeholder="Tối thiểu 3 ký tự" />
+                                            placeholder="At least 3 characters" />
                                         <form:errors path="newPassword" cssClass="profile-field-error" />
                                     </div>
 
                                     <div class="profile-form-group">
-                                        <label for="confirmPassword">Xác nhận mật khẩu mới <span class="required">*</span></label>
+                                        <label for="confirmPassword">Confirm new password <span class="required">*</span></label>
                                         <form:password path="confirmPassword" id="confirmPassword"
-                                            cssClass="profile-input" placeholder="Nhập lại mật khẩu mới" />
+                                            cssClass="profile-input" placeholder="Re-enter your new password" />
                                         <form:errors path="confirmPassword" cssClass="profile-field-error" />
                                     </div>
 
                                     <div class="profile-form-actions profile-form-actions--split">
-                                        <a href="/profile" class="profile-btn profile-btn-outline">Hủy</a>
+                                        <a href="/profile" class="profile-btn profile-btn-outline">Cancel</a>
                                         <button type="submit" class="profile-btn profile-btn-primary">
                                             <i class="fa-solid fa-check"></i>
                                             <c:choose>
-                                                <c:when test="${profile.googleAccount}">Xác nhận đặt mật khẩu</c:when>
-                                                <c:otherwise>Xác nhận đổi mật khẩu</c:otherwise>
+                                                <c:when test="${profile.googleAccount}">Confirm set password</c:when>
+                                                <c:otherwise>Confirm change password</c:otherwise>
                                             </c:choose>
                                         </button>
                                     </div>

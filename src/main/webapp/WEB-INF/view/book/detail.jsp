@@ -2,7 +2,7 @@
 <%@ page contentType="text/html" pageEncoding="UTF-8" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <!DOCTYPE html>
-<html lang="vi">
+<html lang="en">
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -322,9 +322,9 @@
 
     <%-- Breadcrumb --%>
     <nav class="breadcrumb">
-        <a href="/">Trang chủ</a>
+        <a href="/">Home</a>
         <i class="fa-solid fa-chevron-right"></i>
-        <a href="/books">Sách</a>
+        <a href="/books">Books</a>
         <c:if test="${not empty book.category}">
             <i class="fa-solid fa-chevron-right"></i>
             <a href="/books?categoryId=${book.category.id}">${book.category.name}</a>
@@ -367,7 +367,7 @@
                 </c:choose>
             </div>
             <a href="/books" class="detail-cover__back">
-                <i class="fa-solid fa-arrow-left"></i> Quay lại danh sách
+                <i class="fa-solid fa-arrow-left"></i> Back to list
             </a>
         </aside>
 
@@ -381,7 +381,7 @@
 
             <h1 class="detail-info__title">${book.title}</h1>
             <p class="detail-info__author">
-                Tác giả:
+                Author:
                 <c:choose>
                     <c:when test="${not empty authorProfile}">
                         <a href="/authors/${authorProfile.authorId}" class="detail-info__author-link">
@@ -399,12 +399,12 @@
                 <c:choose>
                     <c:when test="${book.stockQuantity > 0}">
                         <span class="detail-stock detail-stock--in">
-                            <i class="fa-solid fa-circle-check"></i> Còn hàng (${book.stockQuantity})
+                            <i class="fa-solid fa-circle-check"></i> In stock (${book.stockQuantity})
                         </span>
                     </c:when>
                     <c:otherwise>
                         <span class="detail-stock detail-stock--out">
-                            <i class="fa-solid fa-circle-xmark"></i> Hết hàng
+                            <i class="fa-solid fa-circle-xmark"></i> Out of stock
                         </span>
                     </c:otherwise>
                 </c:choose>
@@ -420,29 +420,29 @@
                                     <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}" />
                                     <input type="hidden" name="bookId" value="${book.id}" />
                                     <input type="hidden" name="redirect" value="/books/${book.id}" />
-                                    <label class="detail-qty-label" for="cartQty">Số lượng</label>
+                                    <label class="detail-qty-label" for="cartQty">Quantity</label>
                                     <input type="number" id="cartQty" name="quantity" value="1"
                                            min="1" max="${book.stockQuantity}" step="1" class="detail-qty-input" required />
                                     <button type="submit" class="btn-detail-primary">
-                                        <i class="fa-solid fa-cart-shopping"></i> Thêm vào giỏ hàng
+                                        <i class="fa-solid fa-cart-shopping"></i> Add to cart
                                     </button>
                                 </form>
                             </c:when>
                             <c:otherwise>
                                 <a href="/login" class="btn-detail-primary">
-                                    <i class="fa-solid fa-right-to-bracket"></i> Đăng nhập để mua
+                                    <i class="fa-solid fa-right-to-bracket"></i> Log in to buy
                                 </a>
                             </c:otherwise>
                         </c:choose>
                     </c:when>
                     <c:otherwise>
                         <button type="button" class="btn-detail-primary" disabled style="opacity:.6;cursor:not-allowed;">
-                            <i class="fa-solid fa-cart-shopping"></i> Không thể thêm vào giỏ
+                            <i class="fa-solid fa-cart-shopping"></i> Cannot add to cart
                         </button>
                     </c:otherwise>
                 </c:choose>
                 <a href="/cart" class="btn-detail-secondary">
-                    <i class="fa-solid fa-basket-shopping"></i> Xem giỏ hàng
+                    <i class="fa-solid fa-basket-shopping"></i> View cart
                 </a>
             </div>
 
@@ -454,12 +454,12 @@
                 <c:if test="${not empty book.category}">
                     <span class="meta-chip"><i class="fa-solid fa-layer-group"></i> ${book.category.name}</span>
                 </c:if>
-                <span class="meta-chip"><i class="fa-solid fa-boxes-stacked"></i> Tồn kho: ${book.stockQuantity}</span>
+                <span class="meta-chip"><i class="fa-solid fa-boxes-stacked"></i> Stock: ${book.stockQuantity}</span>
             </div>
 
             <%-- Genre tags: independent from Category --%>
             <c:if test="${not empty book.genreNames}">
-                <div class="detail-desc-label" style="margin-top:.4rem;">Thể loại (Genres)</div>
+                <div class="detail-desc-label" style="margin-top:.4rem;">Genres</div>
                 <div class="detail-meta" style="margin-bottom:1.25rem;padding-bottom:0;border-bottom:none;">
                     <c:forEach items="${book.genres}" var="g">
                         <c:if test="${g.active and not g.deleted}">
@@ -472,13 +472,13 @@
             </c:if>
 
             <%-- Description --%>
-            <div class="detail-desc-label">Giới thiệu sách</div>
+            <div class="detail-desc-label">About this book</div>
             <c:choose>
                 <c:when test="${not empty book.description}">
                     <p class="detail-desc">${book.description}</p>
                 </c:when>
                 <c:otherwise>
-                    <p class="detail-desc" style="color:var(--text-muted);font-style:italic;">Chưa có mô tả cho cuốn sách này.</p>
+                    <p class="detail-desc" style="color:var(--text-muted);font-style:italic;">No description available for this book.</p>
                 </c:otherwise>
             </c:choose>
         </div>
@@ -487,7 +487,7 @@
                     Section --%>
                         <section class="rating-section">
                             <h2 class="rating-title">
-                                Đánh giá sản phẩm
+                                Product reviews
                             </h2>
 
 
@@ -496,7 +496,7 @@
 
                                     <c:choose>
 
-                                        <%-- Đã đăng nhập và đủ điều kiện đánh giá --%>
+                                        <%-- Logged in and eligible to review --%>
                                             <c:when test="${canReview}">
 
                                                 <form action="/books/${book.id}/rating" method="post">
@@ -506,7 +506,7 @@
 
                                                     <div class="mb-3">
                                                         <label class="form-label">
-                                                            Số sao
+                                                            Rating
                                                         </label>
 
                                                         <div class="rating-stars-select">
@@ -532,7 +532,7 @@
 
                                                     <div class="mb-3">
                                                         <label class="form-label">
-                                                            Nhận xét
+                                                            Review
                                                         </label>
 
                                                         <textarea name="reviewText" rows="5" class="form-control"
@@ -540,41 +540,41 @@
                                                     </div>
 
                                                     <button type="submit" class="btn-detail-primary">
-                                                        Gửi đánh giá
+                                                        Submit review
                                                     </button>
 
                                                 </form>
 
                                             </c:when>
 
-                                            <%-- Đã đánh giá rồi --%>
+                                            <%-- Already reviewed --%>
                                                 <c:when test="${not empty myRating}">
 
                                                     <div class="alert alert-success">
-                                                        Bạn đã đánh giá cuốn sách này.
+                                                        You have already reviewed this book.
                                                     </div>
 
                                                 </c:when>
 
-                                                <%-- Đã đăng nhập nhưng chưa mua --%>
+                                                <%-- Logged in but has not purchased --%>
                                                     <c:when test="${not empty currentUser}">
 
                                                         <div class="alert alert-warning">
-                                                            Bạn cần mua và nhận sách trước khi có thể đánh giá.
+                                                            You need to purchase and receive the book before you can review it.
                                                         </div>
 
                                                     </c:when>
 
-                                                    <%-- Chưa đăng nhập --%>
+                                                    <%-- Not logged in --%>
                                                         <c:otherwise>
 
                                                             <div class="alert alert-info">
 
-                                                                Vui lòng
+                                                                Please
                                                                 <a href="/login">
-                                                                    đăng nhập
+                                                                    log in
                                                                 </a>
-                                                                để đánh giá sản phẩm.
+                                                                to review this product.
 
                                                             </div>
 
@@ -617,7 +617,7 @@
                                     <c:otherwise>
 
                                         <div class="no-rating">
-                                            Chưa có đánh giá nào cho sản phẩm này.
+                                            No reviews yet for this product.
                                         </div>
                                     </c:otherwise>
                                 </c:choose>
@@ -632,9 +632,9 @@
                                         <div class="sec-head__left">
                                             <div class="sec-head__icon"><i class="fa-solid fa-wand-magic-sparkles"></i>
                                             </div>
-                                            <h2 class="sec-head__title">Có thể bạn quan tâm</h2>
+                                            <h2 class="sec-head__title">You may also like</h2>
                                         </div>
-                                        <a href="/books" class="sec-head__link">Xem thêm <i
+                                        <a href="/books" class="sec-head__link">See more <i
                                                 class="fa-solid fa-chevron-right"></i></a>
                                     </div>
                                     <div class="suggested-grid">

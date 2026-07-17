@@ -108,7 +108,7 @@ public class ProfileController {
             syncSession(request.getSession(false), updated);
         }
 
-        redirectAttributes.addFlashAttribute("successMessage", "Cập nhật thông tin thành công.");
+        redirectAttributes.addFlashAttribute("successMessage", "Your information has been updated.");
         return "redirect:/profile";
     }
 
@@ -127,19 +127,19 @@ public class ProfileController {
         try {
             emailService.sendOtpEmail(
                     profile.getEmail(),
-                    "Booktify - Mã OTP đổi mật khẩu",
-                    "Mã OTP đổi mật khẩu của bạn là: " + otpValue
-                            + "\n\nVui lòng không chia sẻ mã này với bất kỳ ai.");
+                    "Booktify - Password change OTP code",
+                    "Your password change OTP code is: " + otpValue
+                            + "\n\nPlease do not share this code with anyone.");
         } catch (MessagingException e) {
             session.removeAttribute(SESSION_PROFILE_OTP);
             redirectAttributes.addFlashAttribute("passwordErrorMessage",
-                    "Không gửi được OTP. Vui lòng thử lại sau.");
+                    "Could not send OTP. Please try again later.");
             redirectAttributes.addFlashAttribute("passwordEditMode", true);
             return "redirect:/profile?password=edit";
         }
 
         redirectAttributes.addFlashAttribute("otpSentMessage",
-                "Mã OTP đã được gửi tới email " + profile.getEmail() + ".");
+                "An OTP code has been sent to the email " + profile.getEmail() + ".");
         redirectAttributes.addFlashAttribute("passwordEditMode", true);
         return "redirect:/profile?password=edit";
     }
@@ -160,20 +160,20 @@ public class ProfileController {
 
         if (storedOtp == null) {
             redirectAttributes.addFlashAttribute("passwordErrorMessage",
-                    "Vui lòng gửi mã OTP trước khi xác thực.");
+                    "Please send the OTP code before verifying.");
             redirectAttributes.addFlashAttribute("passwordEditMode", true);
             return "redirect:/profile?password=edit";
         }
 
         if (otp == null || !storedOtp.equals(otp)) {
-            redirectAttributes.addFlashAttribute("passwordErrorMessage", "Mã OTP không đúng. Vui lòng thử lại.");
+            redirectAttributes.addFlashAttribute("passwordErrorMessage", "Incorrect OTP code. Please try again.");
             redirectAttributes.addFlashAttribute("passwordEditMode", true);
             return "redirect:/profile?password=edit";
         }
 
         session.setAttribute(SESSION_PROFILE_OTP_VERIFIED, true);
         redirectAttributes.addFlashAttribute("otpVerifiedMessage",
-                "Xác thực OTP thành công. Vui lòng nhập mật khẩu mới.");
+                "OTP verified successfully. Please enter a new password.");
         redirectAttributes.addFlashAttribute("passwordEditMode", true);
         return "redirect:/profile?password=edit";
     }
@@ -197,14 +197,14 @@ public class ProfileController {
 
         if (storedOtp == null) {
             redirectAttributes.addFlashAttribute("passwordErrorMessage",
-                    "Vui lòng gửi mã OTP trước khi đổi mật khẩu.");
+                    "Please send the OTP code before changing your password.");
             redirectAttributes.addFlashAttribute("passwordEditMode", true);
             return "redirect:/profile?password=edit";
         }
 
         if (!isOtpVerified(session)) {
             redirectAttributes.addFlashAttribute("passwordErrorMessage",
-                    "Vui lòng xác thực mã OTP trước khi đổi mật khẩu.");
+                    "Please verify the OTP code before changing your password.");
             redirectAttributes.addFlashAttribute("passwordEditMode", true);
             return "redirect:/profile?password=edit";
         }
@@ -229,7 +229,7 @@ public class ProfileController {
                 model.addAttribute("passwordEditMode", true);
                 model.addAttribute("otpSent", true);
                 model.addAttribute("otpVerified", true);
-                model.addAttribute("passwordErrorMessage", "Vui lòng nhập mật khẩu hiện tại.");
+                model.addAttribute("passwordErrorMessage", "Please enter your current password.");
                 model.addAttribute("passwordError", true);
                 return "profile/index";
             }
@@ -239,7 +239,7 @@ public class ProfileController {
                 model.addAttribute("passwordEditMode", true);
                 model.addAttribute("otpSent", true);
                 model.addAttribute("otpVerified", true);
-                model.addAttribute("passwordErrorMessage", "Mật khẩu hiện tại không đúng.");
+                model.addAttribute("passwordErrorMessage", "Your current password is incorrect.");
                 model.addAttribute("passwordError", true);
                 return "profile/index";
             }
@@ -251,7 +251,7 @@ public class ProfileController {
             model.addAttribute("passwordEditMode", true);
             model.addAttribute("otpSent", true);
             model.addAttribute("otpVerified", true);
-            model.addAttribute("passwordErrorMessage", "Mật khẩu mới và xác nhận không khớp.");
+            model.addAttribute("passwordErrorMessage", "The new password and confirmation do not match.");
             model.addAttribute("passwordError", true);
             return "profile/index";
         }
@@ -263,8 +263,8 @@ public class ProfileController {
         }
 
         String successMessage = googleAccount
-                ? "Đặt mật khẩu thành công. Bạn có thể đăng nhập bằng email và mật khẩu."
-                : "Đổi mật khẩu thành công.";
+                ? "Password set successfully. You can now log in with your email and password."
+                : "Password changed successfully.";
         redirectAttributes.addFlashAttribute("passwordSuccessMessage", successMessage);
         return "redirect:/profile";
     }
