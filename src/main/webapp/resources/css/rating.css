@@ -149,3 +149,34 @@
 .star-empty {
     color: #d1d5db;
 }
+
+
+
+.rating-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+
+.rating-user {
+    font-weight: 600;
+    font-size: 16px;
+}
+
+
+.rating-edit-btn {
+    border: none;
+    background: transparent;
+    cursor: pointer;
+
+    font-size: 16px;
+    color: #777;
+
+    padding: 5px;
+}
+
+
+.rating-edit-btn:hover {
+    color: #111;
+}

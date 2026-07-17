@@ -484,6 +484,214 @@
         </div>
     </div>
 
+    <%-- Reviews --%>
+    <section class="rating-section">
+        <h2 class="rating-title">Đánh giá sản phẩm</h2>
+
+        <%-- Create Rating --%>
+        <div id="ratingFormContainer" class="rating-create">
+            <c:choose>
+                <%-- Đã đăng nhập và đủ điều kiện đánh giá --%>
+                <c:when test="${canReview}">
+                    <form  id="ratingForm" action="/ratings/create" method="post">
+                        <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}" />
+                        <input type="hidden"
+                            name="bookId"
+                            value="${book.id}" />
+                        <input type="hidden"
+                                    id="ratingAction"
+                                    value="create">
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Số sao</label>
+                            <div class="rating-stars-select">
+                                <input type="radio" id="star5" name="ratingValue" value="5" required>
+                                <label for="star5"><i class="fa-solid fa-star"></i></label>
+                                <input type="radio" id="star4" name="ratingValue" value="4">
+                                <label for="star4"><i class="fa-solid fa-star"></i></label>
+                                <input type="radio" id="star3" name="ratingValue" value="3">
+                                <label for="star3"><i class="fa-solid fa-star"></i></label>
+                                <input type="radio" id="star2" name="ratingValue" value="2">
+                                <label for="star2"><i class="fa-solid fa-star"></i></label>
+                                <input type="radio" id="star1" name="ratingValue" value="1">
+                                <label for="star1"><i class="fa-solid fa-star"></i></label>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Nhận xét</label>
+                            <textarea  id="reviewText" name="reviewText" rows="5" class="form-control" maxlength="1000" required></textarea>
+                        </div>
+                        <button id="ratingSubmitBtn" type="submit" class="btn-detail-primary">Gửi đánh giá</button>
+                    </form>
+                </c:when>
+                <%-- Đã đánh giá rồi --%>
+                <c:when test="${not empty myRating}">
+
+    <div class="alert alert-success">
+        Bạn đã đánh giá cuốn sách này.
+    </div>
+
+
+    <form id="ratingForm"
+          action="/ratings/update"
+          method="post"
+          style="display:none;">
+
+        <input type="hidden" 
+               name="${_csrf.parameterName}" 
+               value="${_csrf.token}" />
+
+
+        <input type="hidden"
+               name="bookId"
+               value="${book.id}" />
+
+
+        <div class="mb-3">
+
+            <label class="form-label">
+                Số sao
+            </label>
+
+
+            <div class="rating-stars-select">
+
+                <input type="radio" 
+                       id="star5" 
+                       name="ratingValue" 
+                       value="5">
+
+                <label for="star5">
+                    <i class="fa-solid fa-star"></i>
+                </label>
+
+
+                <input type="radio" 
+                       id="star4" 
+                       name="ratingValue" 
+                       value="4">
+
+                <label for="star4">
+                    <i class="fa-solid fa-star"></i>
+                </label>
+
+
+                <input type="radio" 
+                       id="star3" 
+                       name="ratingValue" 
+                       value="3">
+
+                <label for="star3">
+                    <i class="fa-solid fa-star"></i>
+                </label>
+
+
+                <input type="radio" 
+                       id="star2" 
+                       name="ratingValue" 
+                       value="2">
+
+                <label for="star2">
+                    <i class="fa-solid fa-star"></i>
+                </label>
+
+
+                <input type="radio" 
+                       id="star1" 
+                       name="ratingValue" 
+                       value="1">
+
+                <label for="star1">
+                    <i class="fa-solid fa-star"></i>
+                </label>
+
+            </div>
+
+        </div>
+
+
+        <div class="mb-3">
+
+            <textarea 
+                id="reviewText"
+                name="reviewText"
+                rows="5"
+                class="form-control"></textarea>
+
+        </div>
+
+
+        <button 
+            id="ratingSubmitBtn"
+            type="submit"
+            class="btn-detail-primary">
+
+            Cập nhật đánh giá
+
+        </button>
+
+    </form>
+
+</c:when>
+                <%-- Đã đăng nhập nhưng chưa mua --%>
+                <c:when test="${not empty currentUser}">
+                    <div class="alert alert-warning">Bạn cần mua và nhận sách trước khi có thể đánh giá.</div>
+                </c:when>
+                <%-- Chưa đăng nhập --%>
+                <c:otherwise>
+                    <div class="alert alert-info">
+                        Vui lòng <a href="/login">đăng nhập</a> để đánh giá sản phẩm.
+                    </div>
+                </c:otherwise>
+            </c:choose>
+        </div>
+
+        <%-- Danh sách đánh giá --%>
+        <c:choose>
+            <c:when test="${not empty ratings}">
+                <c:forEach items="${ratings}" var="rating">
+                    <div class="rating-item">
+                        <div class="rating-user">${rating.customer.fullName}</div>
+                        
+                         <c:if test="${not empty currentUser && currentUser.id == rating.customer.id}">
+                            <button
+                                type="button"
+                                class="rating-edit-btn"
+                                onclick="editRating(
+                                    '${rating.ratingValue}',
+                                    '${rating.review}')">
+
+                                <i class="fa-solid fa-pen"></i>
+                                Edit
+                            </button>
+                        </c:if>
+
+                        <div class="rating-stars">
+                            <c:forEach begin="1" end="5" var="i">
+                                <c:choose>
+                                    <c:when test="${i <= rating.ratingValue}">
+                                        <i class="fa-solid fa-star star-filled"></i>
+                                    </c:when>
+                                    <c:otherwise>
+                                        <i class="fa-regular fa-star star-empty"></i>
+                                    </c:otherwise>
+                                </c:choose>
+                            </c:forEach>
+                        </div>
+                        <div class="rating-date">${rating.createdAtFormatted}</div>
+                        <div class="rating-content">${rating.review}</div>
+                    </div>
+
+
+                </c:forEach>
+            </c:when>
+            <c:otherwise>
+                <div class="no-rating">Chưa có đánh giá nào cho sản phẩm này.</div>
+            </c:otherwise>
+        </c:choose>
+    </section>
+
+
     <%-- Suggested books --%>
     <c:if test="${not empty suggestedBooks}">
         <section class="suggested-wrap">
@@ -512,315 +720,42 @@
                             <div class="s-card__author"><c:out value="${s.author}" default="—"/></div>
                             <div class="s-card__price">${s.priceFormatted} &#8363;</div>
                         </div>
-                    </div>
-                </c:if>
-
-                <%-- Detail --%>
-                    <div class="detail-wrap">
-
-                        <%-- Cover --%>
-                            <aside class="detail-cover">
-                                <div class="detail-cover__frame">
-                                    <c:choose>
-                                        <c:when test="${not empty book.imageUrl}">
-                                            <img src="${book.imageUrl}" alt="${book.title}" />
-                                        </c:when>
-                                        <c:otherwise>
-                                            <div class="detail-cover__placeholder">
-                                                <i class="fa-solid fa-book"></i>
-                                                <span>No cover</span>
-                                            </div>
-                                        </c:otherwise>
-                                    </c:choose>
-                                </div>
-                                <a href="/books" class="detail-cover__back">
-                                    <i class="fa-solid fa-arrow-left"></i> Quay lại danh sách
-                                </a>
-                            </aside>
-
-                            <%-- Info --%>
-                                <div class="detail-info">
-                                    <c:if test="${not empty book.category}">
-                                        <a href="/books?categoryId=${book.category.id}" class="detail-info__cat-link">
-                                            <i class="fa-solid fa-tag"></i> ${book.category.name}
-                                        </a>
-                                    </c:if>
-
-                                    <h1 class="detail-info__title">${book.title}</h1>
-                                    <p class="detail-info__author">Tác giả: <strong>${book.author}</strong></p>
-
-                                    <div class="detail-price-row">
-                                        <div class="detail-price">${book.priceFormatted} &#8363;</div>
-                                        <c:choose>
-                                            <c:when test="${book.stockQuantity > 0}">
-                                                <span class="detail-stock detail-stock--in">
-                                                    <i class="fa-solid fa-circle-check"></i> Còn hàng
-                                                    (${book.stockQuantity})
-                                                </span>
-                                            </c:when>
-                                            <c:otherwise>
-                                                <span class="detail-stock detail-stock--out">
-                                                    <i class="fa-solid fa-circle-xmark"></i> Hết hàng
-                                                </span>
-                                            </c:otherwise>
-                                        </c:choose>
-                                    </div>
-
-                                    <%-- Action buttons --%>
-                                        <div class="detail-actions">
-                                            <c:choose>
-                                                <c:when test="${book.active and book.stockQuantity > 0}">
-                                                    <c:choose>
-                                                        <c:when test="${not empty sessionScope.username}">
-                                                            <form action="/cart/add" method="post"
-                                                                class="detail-cart-form">
-                                                                <input type="hidden" name="${_csrf.parameterName}"
-                                                                    value="${_csrf.token}" />
-                                                                <input type="hidden" name="bookId" value="${book.id}" />
-                                                                <input type="hidden" name="redirect"
-                                                                    value="/books/${book.id}" />
-                                                                <label class="detail-qty-label" for="cartQty">Số
-                                                                    lượng</label>
-                                                                <input type="number" id="cartQty" name="quantity"
-                                                                    value="1" min="1" max="${book.stockQuantity}"
-                                                                    step="1" class="detail-qty-input" required />
-                                                                <button type="submit" class="btn-detail-primary">
-                                                                    <i class="fa-solid fa-cart-shopping"></i> Thêm vào
-                                                                    giỏ hàng
-                                                                </button>
-                                                            </form>
-                                                        </c:when>
-                                                        <c:otherwise>
-                                                            <a href="/login" class="btn-detail-primary">
-                                                                <i class="fa-solid fa-right-to-bracket"></i> Đăng nhập
-                                                                để mua
-                                                            </a>
-                                                        </c:otherwise>
-                                                    </c:choose>
-                                                </c:when>
-                                                <c:otherwise>
-                                                    <button type="button" class="btn-detail-primary" disabled
-                                                        style="opacity:.6;cursor:not-allowed;">
-                                                        <i class="fa-solid fa-cart-shopping"></i> Không thể thêm vào giỏ
-                                                    </button>
-                                                </c:otherwise>
-                                            </c:choose>
-                                            <a href="/cart" class="btn-detail-secondary">
-                                                <i class="fa-solid fa-basket-shopping"></i> Xem giỏ hàng
-                                            </a>
-                                        </div>
-
-                                        <%-- Meta chips --%>
-                                            <div class="detail-meta">
-                                                <c:if test="${not empty book.isbn}">
-                                                    <span class="meta-chip"><i class="fa-solid fa-barcode"></i> ISBN:
-                                                        ${book.isbn}</span>
-                                                </c:if>
-                                                <c:if test="${not empty book.category}">
-                                                    <span class="meta-chip"><i class="fa-solid fa-layer-group"></i>
-                                                        ${book.category.name}</span>
-                                                </c:if>
-                                                <span class="meta-chip"><i class="fa-solid fa-boxes-stacked"></i> Tồn
-                                                    kho: ${book.stockQuantity}</span>
-                                            </div>
-
-                                            <%-- Description --%>
-                                                <div class="detail-desc-label">Giới thiệu sách</div>
-                                                <c:choose>
-                                                    <c:when test="${not empty book.description}">
-                                                        <p class="detail-desc">${book.description}</p>
-                                                    </c:when>
-                                                    <c:otherwise>
-                                                        <p class="detail-desc"
-                                                            style="color:var(--text-muted);font-style:italic;">Chưa có
-                                                            mô tả cho cuốn sách này.</p>
-                                                    </c:otherwise>
-                                                </c:choose>
-                                </div>
-                    </div>
-
-                    <%-- 
-                    Section --%>
-                        <section class="rating-section">
-                            <h2 class="rating-title">
-                                Đánh giá sản phẩm
-                            </h2>
+                    </a>
+                </c:forEach>
+            </div>
+        </section>
+    </c:if>
 
 
-                            <%-- Create Rating --%>
-                                <div class="rating-create">
+    <jsp:include page="/WEB-INF/view/layout/footer.jsp" />
 
-                                    <c:choose>
+    
+    <script>function editRating(value, review){
 
-                                        <%-- Đã đăng nhập và đủ điều kiện đánh giá --%>
-                                            <c:when test="${canReview}">
-
-                                                <form action="/books/${book.id}/rating" method="post">
-
-                                                    <input type="hidden" name="${_csrf.parameterName}"
-                                                        value="${_csrf.token}" />
-
-                                                    <div class="mb-3">
-                                                        <label class="form-label">
-                                                            Số sao
-                                                        </label>
-
-                                                        <div class="rating-stars-select">
-
-                                                            <input type="radio" id="star5" name="ratingValue" value="5"
-                                                                required>
-                                                            <label for="star5"><i class="fa-solid fa-star"></i></label>
-
-                                                            <input type="radio" id="star4" name="ratingValue" value="4">
-                                                            <label for="star4"><i class="fa-solid fa-star"></i></label>
-
-                                                            <input type="radio" id="star3" name="ratingValue" value="3">
-                                                            <label for="star3"><i class="fa-solid fa-star"></i></label>
-
-                                                            <input type="radio" id="star2" name="ratingValue" value="2">
-                                                            <label for="star2"><i class="fa-solid fa-star"></i></label>
-
-                                                            <input type="radio" id="star1" name="ratingValue" value="1">
-                                                            <label for="star1"><i class="fa-solid fa-star"></i></label>
-
-                                                        </div>
-                                                    </div>
-
-                                                    <div class="mb-3">
-                                                        <label class="form-label">
-                                                            Nhận xét
-                                                        </label>
-
-                                                        <textarea name="reviewText" rows="5" class="form-control"
-                                                            maxlength="1000" required></textarea>
-                                                    </div>
-
-                                                    <button type="submit" class="btn-detail-primary">
-                                                        Gửi đánh giá
-                                                    </button>
-
-                                                </form>
-
-                                            </c:when>
-
-                                            <%-- Đã đánh giá rồi --%>
-                                                <c:when test="${not empty myRating}">
-
-                                                    <div class="alert alert-success">
-                                                        Bạn đã đánh giá cuốn sách này.
-                                                    </div>
-
-                                                </c:when>
-
-                                                <%-- Đã đăng nhập nhưng chưa mua --%>
-                                                    <c:when test="${not empty currentUser}">
-
-                                                        <div class="alert alert-warning">
-                                                            Bạn cần mua và nhận sách trước khi có thể đánh giá.
-                                                        </div>
-
-                                                    </c:when>
-
-                                                    <%-- Chưa đăng nhập --%>
-                                                        <c:otherwise>
-
-                                                            <div class="alert alert-info">
-
-                                                                Vui lòng
-                                                                <a href="/login">
-                                                                    đăng nhập
-                                                                </a>
-                                                                để đánh giá sản phẩm.
-
-                                                            </div>
-
-                                                        </c:otherwise>
-
-                                    </c:choose>
-
-                                </div>
-
-                                <c:choose>
-                                    <c:when test="${not empty ratings}">
-                                        <c:forEach items="${ratings}" var="rating">
-                                            <div class="rating-item">
-                                                <div class="rating-user">
-                                                    ${rating.customer.fullName}
-                                                </div>
-                                              
-                                                <div class="rating-stars">
-                                                    <c:forEach begin="1" end="5" var="i">
-                                                        <c:choose>
-                                                            <c:when test="${i <= rating.ratingValue}">
-                                                                <i class="fa-solid fa-star star-filled"></i>
-                                                            </c:when>
-                                                            <c:otherwise>
-                                                                <i class="fa-regular fa-star star-empty"></i>
-                                                            </c:otherwise>
-                                                        </c:choose>
-                                                    </c:forEach>
-                                                </div>
-                                                  <div class="rating-date">
-                                                    ${rating.createdAtFormatted}
-                                                </div>
-                                                <div class="rating-content">
-                                                    ${rating.review}
-                                                </div>
-                                                
-                                            </div>
-                                        </c:forEach>
-                                    </c:when>
-                                    <c:otherwise>
-
-                                        <div class="no-rating">
-                                            Chưa có đánh giá nào cho sản phẩm này.
-                                        </div>
-                                    </c:otherwise>
-                                </c:choose>
-                        </section>
+    const form = document.getElementById("ratingForm");
 
 
-
-                        <%-- Suggested books --%>
-                            <c:if test="${not empty suggestedBooks}">
-                                <section class="suggested-wrap">
-                                    <div class="sec-head">
-                                        <div class="sec-head__left">
-                                            <div class="sec-head__icon"><i class="fa-solid fa-wand-magic-sparkles"></i>
-                                            </div>
-                                            <h2 class="sec-head__title">Có thể bạn quan tâm</h2>
-                                        </div>
-                                        <a href="/books" class="sec-head__link">Xem thêm <i
-                                                class="fa-solid fa-chevron-right"></i></a>
-                                    </div>
-                                    <div class="suggested-grid">
-                                        <c:forEach items="${suggestedBooks}" var="s">
-                                            <a href="/books/${s.id}" class="s-card">
-                                                <div class="s-card__thumb">
-                                                    <c:choose>
-                                                        <c:when test="${not empty s.imageUrl}">
-                                                            <img src="${s.imageUrl}" alt="${s.title}" />
-                                                        </c:when>
-                                                        <c:otherwise>
-                                                            <div class="s-card__placeholder"><i
-                                                                    class="fa-solid fa-book"></i></div>
-                                                        </c:otherwise>
-                                                    </c:choose>
-                                                </div>
-                                                <div class="s-card__body">
-                                                    <div class="s-card__title">${s.title}</div>
-                                                    <div class="s-card__author">${s.author}</div>
-                                                    <div class="s-card__price">${s.priceFormatted} &#8363;</div>
-                                                </div>
-                                            </a>
-                                        </c:forEach>
-                                    </div>
-                                </section>
-                            </c:if>
+    // hiện form
+    form.style.display = "block";
 
 
+    // chọn sao cũ
+    document.querySelector(
+        'input[name="ratingValue"][value="'+value+'"]'
+    ).checked = true;
 
-                            <jsp:include page="/WEB-INF/view/layout/footer.jsp" />
-        </body>
 
-        </html>
+    // điền review cũ
+    document.getElementById("reviewText").value = review;
+
+
+    // scroll tới form
+    form.scrollIntoView({
+        behavior:"smooth"
+    });
+
+}
+</script>
+</body>
+
+</html>

@@ -155,4 +155,34 @@ public class RatingService {
                                 bookId,
                                 "ACTIVE");
         }
+
+        @Transactional
+        public Rating updateRating(
+                        Long bookId,
+                        Long customerId,
+                        Integer ratingValue,
+                        String reviewText) {
+
+                Rating rating = ratingRepository
+                                .findByBook_IdAndCustomer_Id(bookId, customerId)
+                                .orElseThrow(() -> new RuntimeException("No reviews found."));
+
+                if (ratingValue < 1 || ratingValue > 5) {
+                        throw new IllegalArgumentException("The number of stars must be between 1 and 5.");
+                }
+
+                if (reviewText == null || reviewText.trim().isEmpty()) {
+                        throw new IllegalArgumentException("The field must not be left blank.");
+                }
+
+                if (reviewText.length() > 1000) {
+                        throw new IllegalArgumentException(
+                                        "The review content should be a maximum of 1000 characters.");
+                }
+
+                rating.setRatingValue(ratingValue);
+                rating.setReview(reviewText.trim());
+
+                return ratingRepository.save(rating);
+        }
 }

@@ -16,13 +16,9 @@ import shop.service.BookService;
 import shop.service.CategoryService;
 import shop.service.GenreService;
 
-import shop.domain.Rating;
 import shop.service.RatingService;
 
 import org.springframework.security.core.Authentication;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-
 import shop.domain.User;
 import shop.repository.UserRepository;
 
@@ -122,47 +118,7 @@ public class ClientBookController {
         return "book/detail";
     }
 
-    /* Rating Book */
-    @PostMapping("/{id}/rating")
-    public String createRating(
-            @PathVariable Long id,
-            @RequestParam Integer ratingValue,
-            @RequestParam String reviewText,
-            Authentication authentication,
-            RedirectAttributes redirectAttributes) {
-
-        if (authentication == null ||
-                !authentication.isAuthenticated()) {
-            redirectAttributes.addFlashAttribute(
-                    "errorMessage",
-                    "Vui lòng đăng nhập để đánh giá.");
-            return "redirect:/login";
-        }
-        User customer = userRepository
-                .findByEmail(authentication.getName());
-
-        if (customer == null) {
-            redirectAttributes.addFlashAttribute(
-                    "errorMessage",
-                    "Không tìm thấy tài khoản.");
-            return "redirect:/books/" + id;
-        }
-        try {
-            ratingService.createRating(
-                    id,
-                    customer.getId(),
-                    ratingValue,
-                    reviewText);
-            redirectAttributes.addFlashAttribute(
-                    "successMessage",
-                    "Đánh giá thành công!");
-        } catch (Exception e) {
-            redirectAttributes.addFlashAttribute(
-                    "errorMessage",
-                    e.getMessage());
-        }
-        return "redirect:/books/" + id;
-    }
+   
 
     /** View List Of Products — alias */
     @GetMapping("/products")
