@@ -8,21 +8,21 @@ import jakarta.validation.constraints.AssertTrue;
 
 // @RegisterChecked
 public class RegisterDTO {
-    private static final long serialVersionUID = 1L; // Thêm serialVersionUID
-    @Size(min = 3, message = "FirstName phải có tối thiểu 3 ký tự")
+    private static final long serialVersionUID = 1L; // Added serialVersionUID
+    @Size(min = 3, message = "First name must be at least 3 characters")
     private String firstName;
 
-    @Size(min = 3, message = "LastName phải có tối thiểu 3 ký tự")
+    @Size(min = 3, message = "Last name must be at least 3 characters")
     private String lastName;
 
-    @Email(message = "Email không hợp lệ", regexp = "^[a-zA-Z0-9_!#$%&'*+/=?`{|}~^.-]+@[a-zA-Z0-9.-]+$")
+    @Email(message = "Invalid email", regexp = "^[a-zA-Z0-9_!#$%&'*+/=?`{|}~^.-]+@[a-zA-Z0-9.-]+$")
     private String email;
-    @Size(min = 3, message = "Password phải có tối thiểu 3 ký tự")
+    @Size(min = 3, message = "Password must be at least 3 characters")
     private String password;
 
     private String confirmPassword;
 
-    @AssertTrue(message = "Password và ConfirmPassword phải trùng khớp")
+    @AssertTrue(message = "Password and Confirm Password must match")
     public boolean isPasswordMatching() {
         return password != null && password.equals(confirmPassword);
     }

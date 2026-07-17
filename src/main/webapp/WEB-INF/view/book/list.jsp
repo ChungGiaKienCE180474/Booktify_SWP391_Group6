@@ -2,7 +2,7 @@
 <%@ page contentType="text/html" pageEncoding="UTF-8" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <!DOCTYPE html>
-<html lang="vi">
+<html lang="en">
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -12,9 +12,9 @@
     <link rel="stylesheet" href="/css/homepage.css" />
     <title>
         <c:choose>
-            <c:when test="${not empty q}">Kết quả: "${q}"</c:when>
+            <c:when test="${not empty q}">Results: "${q}"</c:when>
             <c:when test="${not empty selectedCategory}">${selectedCategory.name}</c:when>
-            <c:otherwise>Tất cả sách</c:otherwise>
+            <c:otherwise>All books</c:otherwise>
         </c:choose>
         — Booktify
     </title>
@@ -239,10 +239,10 @@
 
         <%-- ── Sidebar ── --%>
         <aside class="shop-sidebar">
-            <div class="sidebar-head"><i class="fa-solid fa-bars"></i> Danh mục sách</div>
+            <div class="sidebar-head"><i class="fa-solid fa-bars"></i> Book categories</div>
             <div class="sidebar-list">
                 <a href="/books" class="sidebar-item ${empty selectedCategoryId && empty q ? 'active' : ''}">
-                    <span class="dot"></span> Tất cả sách
+                    <span class="dot"></span> All books
                 </a>
                 <c:forEach items="${categories}" var="cat">
                     <c:if test="${cat.active}">
@@ -257,7 +257,7 @@
             <%-- Genre filter: independent from Category, matches books with any selected genre --%>
             <c:if test="${not empty genres}">
                 <div class="sidebar-head" style="border-top:1px solid rgba(255,255,255,.15);">
-                    <i class="fa-solid fa-tags"></i> Thể loại (Genre)
+                    <i class="fa-solid fa-tags"></i> Genre
                 </div>
                 <form method="get" action="/books" style="width:100%;box-sizing:border-box;padding:.75rem 1rem;display:flex;flex-direction:column;gap:.5rem;">
                     <c:if test="${not empty selectedCategoryId}">
@@ -276,11 +276,11 @@
                     </c:forEach>
                     <button type="submit"
                             style="align-self:flex-start;margin-top:.4rem;padding:.4rem .9rem;border:none;border-radius:6px;background:var(--primary);color:#fff;font-size:.78rem;font-weight:700;cursor:pointer;">
-                        <i class="fa-solid fa-filter"></i> Áp dụng
+                        <i class="fa-solid fa-filter"></i> Apply
                     </button>
                     <c:if test="${not empty selectedGenreIds}">
                         <a href="/books<c:if test='${not empty selectedCategoryId}'>?categoryId=${selectedCategoryId}</c:if>"
-                           style="font-size:.76rem;color:var(--text-muted);text-decoration:underline;">Xoá lọc thể loại</a>
+                           style="font-size:.76rem;color:var(--text-muted);text-decoration:underline;">Clear genre filter</a>
                     </c:if>
                 </form>
             </c:if>
@@ -291,16 +291,16 @@
 
             <%-- Breadcrumb --%>
             <nav class="shop-breadcrumb">
-                <a href="/">Trang chủ</a>
+                <a href="/">Home</a>
                 <i class="fa-solid fa-chevron-right"></i>
-                <a href="/books">Sách</a>
+                <a href="/books">Books</a>
                 <c:if test="${not empty selectedCategory}">
                     <i class="fa-solid fa-chevron-right"></i>
                     <span>${selectedCategory.name}</span>
                 </c:if>
                 <c:if test="${not empty q}">
                     <i class="fa-solid fa-chevron-right"></i>
-                    <span>Tìm: "${q}"</span>
+                    <span>Search: "${q}"</span>
                 </c:if>
             </nav>
 
@@ -308,10 +308,10 @@
             <c:if test="${not empty q}">
                 <div class="search-result-bar">
                     <span><i class="fa-solid fa-magnifying-glass"></i>
-                        Kết quả tìm kiếm cho: "<strong>${q}</strong>"
-                        — ${empty books ? 0 : books.size()} sách
+                        Search results for: "<strong>${q}</strong>"
+                        — ${empty books ? 0 : books.size()} book(s)
                     </span>
-                    <a href="/books"><i class="fa-solid fa-xmark"></i> Xoá tìm kiếm</a>
+                    <a href="/books"><i class="fa-solid fa-xmark"></i> Clear search</a>
                 </div>
             </c:if>
 
@@ -321,11 +321,11 @@
                     <h2>
                         <c:choose>
                             <c:when test="${not empty selectedCategory}">${selectedCategory.name}</c:when>
-                            <c:when test="${not empty q}">Kết quả tìm kiếm</c:when>
-                            <c:otherwise>Tất cả sách</c:otherwise>
+                            <c:when test="${not empty q}">Search results</c:when>
+                            <c:otherwise>All books</c:otherwise>
                         </c:choose>
                     </h2>
-                    <p>${empty books ? 0 : books.size()} sản phẩm</p>
+                    <p>${empty books ? 0 : books.size()} product(s)</p>
                 </div>
             </div>
 
@@ -335,8 +335,8 @@
                     <c:when test="${empty books}">
                         <div class="empty-state">
                             <i class="fa-solid fa-box-open"></i>
-                            <p>Không tìm thấy sách nào.</p>
-                            <a href="/books"><i class="fa-solid fa-arrow-left"></i> Xem tất cả sách</a>
+                            <p>No books found.</p>
+                            <a href="/books"><i class="fa-solid fa-arrow-left"></i> View all books</a>
                         </div>
                     </c:when>
                     <c:otherwise>
@@ -363,7 +363,7 @@
                                     <div class="product-card__author"><c:out value="${book.author}" default="—"/></div>
                                     <div class="product-card__footer">
                                         <span class="product-card__price">${book.priceFormatted} &#8363;</span>
-                                        <span class="product-card__link">Chi tiết</span>
+                                        <span class="product-card__link">Details</span>
                                     </div>
                                 </div>
                             </a>

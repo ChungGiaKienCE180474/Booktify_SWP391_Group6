@@ -2,7 +2,7 @@
     <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 
         <!DOCTYPE html>
-        <html lang="vi">
+        <html lang="en">
 
         <head>
             <meta charset="UTF-8">
@@ -14,7 +14,7 @@
             <link rel="stylesheet" href="/css/footer.css">
             <link rel="stylesheet" href="/css/homepage.css">
 
-            <!-- CSS riêng của Author Detail -->
+            <!-- CSS specific to Author Detail -->
             <link rel="stylesheet" href="/css/author.css">
 
             <title>${author.authorName} — Booktify</title>

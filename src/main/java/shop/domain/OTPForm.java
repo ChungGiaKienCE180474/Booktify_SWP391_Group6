@@ -1,7 +1,7 @@
 package shop.domain;
 
 public class OTPForm {
-    private int otp; // thuộc tính cho OTP
+    private int otp; // property for OTP
 
     public int getOtp() {
         return otp;
