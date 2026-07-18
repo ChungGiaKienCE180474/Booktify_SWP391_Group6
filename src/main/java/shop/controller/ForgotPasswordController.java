@@ -38,7 +38,7 @@ public class ForgotPasswordController {
     public String recoverPassword(@RequestParam("email") String email, HttpServletRequest request,
             RedirectAttributes redirectAttributes) {
         if (email == null || email.isBlank()) {
-            redirectAttributes.addFlashAttribute("errorMessage", "Vui lòng nhập email.");
+            redirectAttributes.addFlashAttribute("errorMessage", "Please enter your email.");
             return "redirect:/forgotpassword";
         }
 
@@ -63,7 +63,7 @@ public class ForgotPasswordController {
             mySession.removeAttribute("otp");
             mySession.removeAttribute("email");
             redirectAttributes.addFlashAttribute("errorMessage",
-                    "Không gửi được OTP. Vui lòng thử lại sau.");
+                    "Could not send OTP. Please try again later.");
             return "redirect:/forgotpassword";
         }
 
@@ -126,7 +126,7 @@ public class ForgotPasswordController {
             String email = (String) session.getAttribute("email");
             if (email != null) {
                 this.userService.updatePassword(email, password);
-                // Xóa session sau khi đổi mật khẩu thành công
+                // Clear session after password change succeeds
                 session.invalidate();
                 request.setAttribute("message", "Password successfully updated!");
                 return "redirect:/login?resetsuccess";

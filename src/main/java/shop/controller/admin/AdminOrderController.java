@@ -1,5 +1,7 @@
 package shop.controller.admin;
 
+import java.util.List;
+
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -11,12 +13,15 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import shop.domain.OrderStatus;
+import shop.domain.dto.OrderDTO;
 import shop.service.OrderService;
 
 @Controller
 @RequestMapping("/admin/orders")
 @PreAuthorize("hasRole('ADMIN')")
 public class AdminOrderController {
+
+    private static final int PAGE_SIZE = 10;
 
     private final OrderService orderService;
 
@@ -25,8 +30,34 @@ public class AdminOrderController {
     }
 
     @GetMapping
-    public String listOrders(Model model) {
-        model.addAttribute("orders", orderService.getAllOrders());
+    public String listOrders(
+            @RequestParam(required = false) String keyword,
+            @RequestParam(required = false, defaultValue = "all") String status,
+            @RequestParam(required = false, defaultValue = "default") String sort,
+            @RequestParam(defaultValue = "0") int page,
+            Model model) {
+
+        List<OrderDTO> all = orderService.searchOrders(keyword, status, sort);
+        int totalItems = all.size();
+        int totalPages = totalItems == 0 ? 0 : (int) Math.ceil((double) totalItems / PAGE_SIZE);
+        if (totalPages > 0) {
+            page = Math.max(0, Math.min(page, totalPages - 1));
+        } else {
+            page = 0;
+        }
+        int from = page * PAGE_SIZE;
+        int to = Math.min(from + PAGE_SIZE, totalItems);
+
+        model.addAttribute("orders", totalItems == 0 ? List.of() : all.subList(from, to));
+        model.addAttribute("keyword", keyword);
+        model.addAttribute("status", status);
+        model.addAttribute("sort", sort);
+        model.addAttribute("currentPage", page);
+        model.addAttribute("totalPages", totalPages);
+        model.addAttribute("totalItems", totalItems);
+        model.addAttribute("fromItem", totalItems == 0 ? 0 : from + 1);
+        model.addAttribute("toItem", to);
+        model.addAttribute("orderStatuses", OrderStatus.values());
         return "admin/order/list";
     }
 

@@ -1,11 +1,11 @@
 package shop.domain;
 
 public enum OrderStatus {
-    PENDING("Chờ xác nhận"),
-    CONFIRMED("Đã xác nhận"),
-    SHIPPING("Đang giao"),
-    DELIVERED("Đã giao"),
-    CANCELLED("Đã hủy");
+    PENDING("Pending confirmation"),
+    CONFIRMED("Confirmed"),
+    SHIPPING("Shipping"),
+    DELIVERED("Delivered"),
+    CANCELLED("Cancelled");
 
     private final String label;
 

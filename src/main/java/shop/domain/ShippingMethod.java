@@ -3,9 +3,9 @@ package shop.domain;
 import java.math.BigDecimal;
 
 public enum ShippingMethod {
-    STANDARD("Giao tiêu chuẩn", new BigDecimal("30000")),
-    EXPRESS("Giao nhanh", new BigDecimal("50000")),
-    PICKUP("Nhận tại cửa hàng", BigDecimal.ZERO);
+    STANDARD("Standard delivery", new BigDecimal("30000")),
+    EXPRESS("Express delivery", new BigDecimal("50000")),
+    PICKUP("Store pickup", BigDecimal.ZERO);
 
     private final String label;
     private final BigDecimal fee;

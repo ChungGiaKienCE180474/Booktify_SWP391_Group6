@@ -23,9 +23,13 @@ public class AdminRatingController {
     }
 
     @GetMapping
-    public String list(Model model) {
+    public String list(
 
-        List<Book> books = ratingService.getBooksHasReview();
+            @RequestParam(required = false) String keyword,
+
+            Model model) {
+
+        List<Book> books = ratingService.getBooksHasReview(keyword);
 
         Map<Long, Long> reviewCounts = new HashMap<>();
         Map<Long, Double> averageRatings = new HashMap<>();
@@ -41,6 +45,7 @@ public class AdminRatingController {
                     ratingService.getAverageRating(book.getId()));
         }
 
+        model.addAttribute("keyword", keyword);
         model.addAttribute("books", books);
         model.addAttribute("reviewCounts", reviewCounts);
         model.addAttribute("averageRatings", averageRatings);

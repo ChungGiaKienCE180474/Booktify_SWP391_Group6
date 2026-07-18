@@ -17,7 +17,7 @@ public class AuthorController {
         this.authorService = authorService;
     }
 
-    // Danh sách Author
+    // Author list
     @GetMapping
     public String list(Model model) {
 
@@ -27,7 +27,7 @@ public class AuthorController {
         return "author/list";
     }
 
-    // Chi tiết Author
+    // Author detail
     @GetMapping("/{id}")
     public String detail(
             @PathVariable Long id,
@@ -37,6 +37,9 @@ public class AuthorController {
             throw new RuntimeException("Author not found");
         }
         model.addAttribute("author", author);
+        model.addAttribute(
+                "books",
+                authorService.getBooksByAuthor(id));
         return "author/detail";
     }
 

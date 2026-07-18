@@ -5,19 +5,19 @@
             <div class="header-topbar">
                 <div class="header-topbar-inner">
                     <div class="header-topbar-left">
-                        <span><i class="fa-solid fa-truck-fast"></i> Miễn phí giao hàng đơn trên 150.000đ</span>
+                        <span><i class="fa-solid fa-book"></i> Find any book you want at Booktify</span>
                         <span class="topbar-sep">|</span>
-                        <span><i class="fa-solid fa-phone"></i> Hotline: 1900-6067</span>
+                        <span><i class="fa-solid fa-phone"></i> Hotline: 1900-1234</span>
                     </div>
                     <div class="header-topbar-right">
                         <c:choose>
                             <c:when test="${empty sessionScope.username}">
-                                <a href="/login">Đăng nhập</a>
+                                <a href="/login">Login</a>
                                 <span class="topbar-sep">|</span>
-                                <a href="/register">Đăng ký</a>
+                                <a href="/register">Register</a>
                             </c:when>
                             <c:otherwise>
-                                <span>Xin chào, <strong>${not empty sessionScope.fullName ? sessionScope.fullName :
+                                <span>Hello, <strong>${not empty sessionScope.fullName ? sessionScope.fullName :
                                         sessionScope.username}</strong></span>
                             </c:otherwise>
                         </c:choose>
@@ -41,18 +41,18 @@
                                     <form class="header-search" action="/books" method="get">
                                         <input type="text" name="q" class="header-search__input"
                                             value="${not empty q ? q : ''}"
-                                            placeholder="Tìm kiếm sách, tác giả, ISBN..." />
+                                            placeholder="Search books, authors, ..." />
                                         <button type="submit" class="header-search__btn">
-                                            <i class="fa-solid fa-magnifying-glass"></i> Tìm kiếm
+                                            <i class="fa-solid fa-magnifying-glass"></i> Search
                                         </button>
                                     </form>
 
                                     <%-- Right icons --%>
                                         <div class="header-icons">
                                             <%-- Cart (placeholder) --%>
-                                                <a href="/cart" class="hdr-icon-btn" title="Giỏ hàng">
+                                                <a href="/cart" class="hdr-icon-btn" title="Cart">
                                                     <i class="fa-solid fa-cart-shopping"></i>
-                                                    <span class="hdr-icon-label">Giỏ hàng</span>
+                                                    <span class="hdr-icon-label">Cart</span>
                                                 </a>
 
                                                 <%-- User / auth --%>
@@ -62,15 +62,14 @@
                                                                 <button type="button" class="hdr-icon-btn"
                                                                     id="hdrUserToggle">
                                                                     <i class="fa-solid fa-circle-user"></i>
-                                                                    <span class="hdr-icon-label">Tài khoản</span>
+                                                                    <span class="hdr-icon-label">Account</span>
                                                                 </button>
                                                                 <div class="hdr-user-menu" id="hdrUserMenu">
                                                                     <a href="/profile" class="hdr-dropdown-item">
-                                                                        <i class="fa-solid fa-id-card"></i> Thông tin cá
-                                                                        nhân
+                                                                        <i class="fa-solid fa-id-card"></i> My profile
                                                                     </a>
                                                                     <a href="/orders" class="hdr-dropdown-item">
-                                                                        <i class="fa-solid fa-box"></i> Đơn hàng của tôi
+                                                                        <i class="fa-solid fa-box"></i> My orders
                                                                     </a>
                                                                     <div class="hdr-dropdown-sep"></div>
                                                                     <form class="hdr-dropdown-form" method="post"
@@ -82,7 +81,7 @@
                                                                             class="hdr-dropdown-item hdr-dropdown-btn">
                                                                             <i
                                                                                 class="fa-solid fa-right-from-bracket"></i>
-                                                                            Đăng xuất
+                                                                            Logout
                                                                         </button>
                                                                     </form>
                                                                 </div>
@@ -90,10 +89,8 @@
                                                         </c:when>
                                                         <c:otherwise>
                                                             <div class="hdr-auth-btns">
-                                                                <a href="/login" class="btn-hdr btn-hdr-ghost">Đăng
-                                                                    nhập</a>
-                                                                <a href="/register" class="btn-hdr btn-hdr-solid">Đăng
-                                                                    ký</a>
+                                                                <a href="/login" class="btn-hdr btn-hdr-ghost">Login</a>
+                                                                <a href="/register" class="btn-hdr btn-hdr-solid">Register</a>
                                                             </div>
                                                         </c:otherwise>
                                                     </c:choose>
@@ -105,19 +102,16 @@
                                 <div class="header-catbar-inner">
 
                                     <a href="/books" class="catbar-link catbar-all">
-                                        <i class="fa-solid fa-book"></i> Danh mục sách
+                                        <i class="fa-solid fa-book"></i> Book 
                                     </a>
 
                                     <a href="/authors" class="catbar-link">
                                         Author
+                                    <%-- Stationery module belongs to a teammate; left as a
+                                         non-functional placeholder until it's wired up. --%>
+                                    <a href="#" class="catbar-link catbar-disabled" title="Coming soon" onclick="return false;">
+                                        <i class="fa-solid fa-pen-ruler"></i> Stationery 
                                     </a>
-
-                                    <%-- Stationery module belongs to a teammate; left as a non-functional placeholder
-                                        until it's wired up. --%>
-                                        <a href="#" class="catbar-link catbar-disabled" title="Sắp ra mắt"
-                                            onclick="return false;">
-                                            <i class="fa-solid fa-pen-ruler"></i> Danh mục văn phòng phẩm
-                                        </a>
 
                                 </div>
                             </nav>

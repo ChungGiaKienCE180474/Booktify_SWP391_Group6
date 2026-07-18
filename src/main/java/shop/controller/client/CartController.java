@@ -38,7 +38,7 @@ public class CartController {
         CartRefreshResult refreshResult = cartService.refreshCartResult(user.getId());
         model.addAttribute("cart", cartService.toCartDTO(refreshResult.getCart()));
 
-        //Lấy ACTIVE vouchers
+        // Get ACTIVE vouchers
         model.addAttribute(
                 "activeVouchers",
                 voucherService.getActiveVouchers());
@@ -67,7 +67,7 @@ public class CartController {
 
         try {
             cartService.addBook(user.getId(), bookId, parsedQuantity);
-            redirectAttributes.addFlashAttribute("successMessage", "Đã thêm sách vào giỏ hàng.");
+            redirectAttributes.addFlashAttribute("successMessage", "Book added to your cart.");
         } catch (IllegalArgumentException ex) {
             redirectAttributes.addFlashAttribute("errorMessage", ex.getMessage());
         }
@@ -91,7 +91,7 @@ public class CartController {
 
         try {
             cartService.updateQuantity(user.getId(), itemId, parsedQuantity);
-            redirectAttributes.addFlashAttribute("successMessage", "Đã cập nhật số lượng.");
+            redirectAttributes.addFlashAttribute("successMessage", "Quantity updated.");
         } catch (IllegalArgumentException ex) {
             redirectAttributes.addFlashAttribute("errorMessage", ex.getMessage());
         }
@@ -107,7 +107,7 @@ public class CartController {
         User user = getCurrentUser(authentication);
         try {
             cartService.removeItem(user.getId(), itemId);
-            redirectAttributes.addFlashAttribute("successMessage", "Đã xóa sản phẩm khỏi giỏ hàng.");
+            redirectAttributes.addFlashAttribute("successMessage", "Item removed from your cart.");
         } catch (IllegalArgumentException ex) {
             redirectAttributes.addFlashAttribute("errorMessage", ex.getMessage());
         }
@@ -118,7 +118,7 @@ public class CartController {
     public String clearCart(Authentication authentication, RedirectAttributes redirectAttributes) {
         User user = getCurrentUser(authentication);
         cartService.clearCart(user.getId());
-        redirectAttributes.addFlashAttribute("successMessage", "Đã xóa toàn bộ giỏ hàng.");
+        redirectAttributes.addFlashAttribute("successMessage", "Your cart has been cleared.");
         return "redirect:/cart";
     }
 
@@ -145,11 +145,11 @@ public class CartController {
 
     private User getCurrentUser(Authentication authentication) {
         if (authentication == null || !authentication.isAuthenticated()) {
-            throw new IllegalStateException("Bạn cần đăng nhập để sử dụng giỏ hàng.");
+            throw new IllegalStateException("You need to log in to use the cart.");
         }
         User user = userService.getUserByEmail(authentication.getName());
         if (user == null) {
-            throw new IllegalStateException("Không tìm thấy người dùng.");
+            throw new IllegalStateException("User not found.");
         }
         return user;
     }

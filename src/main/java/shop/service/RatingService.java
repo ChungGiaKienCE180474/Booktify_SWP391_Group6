@@ -273,4 +273,13 @@ public class RatingService {
                 rating.setDeletedBy(null);
                 ratingRepository.save(rating);
         }
+
+        public List<Book> getBooksHasReview(String keyword) {
+
+                if (keyword == null) {
+                        keyword = "";
+                }
+
+                return ratingRepository.findBooksHasReview(keyword.trim());
+        }
 }

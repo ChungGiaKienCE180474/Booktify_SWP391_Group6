@@ -7,7 +7,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" />
-    <link rel="stylesheet" href="/css/admin-dashboard.css" />
+    <link rel="stylesheet" href="/css/admin-dashboard.css?v=4" />
     <title>Categories — Booktify Admin</title>
     <style>
         .icon-link--restore { color:#059669; }
@@ -144,21 +144,24 @@
                         </c:choose>
                     </div>
                     <c:if test="${totalPages > 1}">
+                        <c:set var="pagBase" value="/admin/categories?q=${q}&status=${status}"/>
                         <div class="admin-pagination__nav">
-                            <a class="pag-btn ${currentPage == 0 ? 'pag-btn--disabled' : ''}"
-                               href="/admin/categories?page=${currentPage - 1}&q=<c:out value='${q}'/>&status=<c:out value='${status}'/>">
-                                <i class="fa-solid fa-chevron-left" style="font-size:.7rem;"></i>
-                            </a>
+                            <a class="pag-btn ${currentPage == 0 || viewingAll ? 'pag-btn--disabled' : ''}"
+                               href="${pagBase}&page=0">First</a>
+                            <a class="pag-btn ${currentPage == 0 || viewingAll ? 'pag-btn--disabled' : ''}"
+                               href="${pagBase}&page=${currentPage - 1}">Prev</a>
                             <c:forEach begin="0" end="${totalPages - 1}" var="i">
-                                <a class="pag-btn ${i == currentPage ? 'pag-btn--active' : ''}"
-                                   href="/admin/categories?page=${i}&q=<c:out value='${q}'/>&status=<c:out value='${status}'/>">
+                                <a class="pag-btn ${i == currentPage && !viewingAll ? 'pag-btn--active' : ''}"
+                                   href="${pagBase}&page=${i}">
                                     ${i + 1}
                                 </a>
                             </c:forEach>
-                            <a class="pag-btn ${currentPage >= totalPages - 1 ? 'pag-btn--disabled' : ''}"
-                               href="/admin/categories?page=${currentPage + 1}&q=<c:out value='${q}'/>&status=<c:out value='${status}'/>">
-                                <i class="fa-solid fa-chevron-right" style="font-size:.7rem;"></i>
-                            </a>
+                            <a class="pag-btn ${currentPage >= totalPages - 1 || viewingAll ? 'pag-btn--disabled' : ''}"
+                               href="${pagBase}&page=${currentPage + 1}">Next</a>
+                            <a class="pag-btn ${currentPage >= totalPages - 1 || viewingAll ? 'pag-btn--disabled' : ''}"
+                               href="${pagBase}&page=${totalPages - 1}">Last</a>
+                            <a class="pag-btn pag-btn--all ${viewingAll ? 'pag-btn--active' : ''}"
+                               href="${pagBase}&all=true">All</a>
                         </div>
                     </c:if>
                 </div>

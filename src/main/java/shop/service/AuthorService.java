@@ -95,7 +95,8 @@ public class AuthorService {
          * author matches — Book.author isn't a real foreign key.
          */
         public Optional<Author> findActiveByName(String authorName) {
-                if (authorName == null || authorName.isBlank()) return Optional.empty();
+                if (authorName == null || authorName.isBlank())
+                        return Optional.empty();
                 return authorRepository.findByAuthorNameIgnoreCaseAndStatusTrue(authorName.trim());
         }
 
@@ -207,4 +208,33 @@ public class AuthorService {
                         throw new RuntimeException("Upload image failed");
                 }
         }
+
+        public List<Author> searchAuthors(String keyword, String status) {
+
+                String key = keyword == null ? "" : keyword.trim();
+
+                // Không filter gì
+                if (key.isEmpty() && (status == null || status.isBlank())) {
+                        return authorRepository.findAllByOrderByAuthorIdDesc();
+                }
+
+                // Chỉ search
+                if (status == null || status.isBlank()) {
+                        return authorRepository
+                                        .findByAuthorNameContainingIgnoreCaseOrNationalityContainingIgnoreCaseOrderByAuthorIdDesc(
+                                                        key,
+                                                        key);
+                }
+
+                boolean active = status.equalsIgnoreCase("active");
+
+                // Search + Status
+                return authorRepository
+                                .findByStatusAndAuthorNameContainingIgnoreCaseOrStatusAndNationalityContainingIgnoreCaseOrderByAuthorIdDesc(
+                                                active,
+                                                key,
+                                                active,
+                                                key);
+        }
+
 }

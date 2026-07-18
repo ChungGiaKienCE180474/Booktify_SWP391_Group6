@@ -25,4 +25,16 @@ public interface AuthorRepository extends JpaRepository<Author, Long> {
 
     List<Author> findAllByStatusTrueOrderByAuthorIdDesc();
 
+    List<Author> findByAuthorNameContainingIgnoreCaseOrNationalityContainingIgnoreCaseOrderByAuthorIdDesc(
+            String authorName,
+            String nationality);
+
+    List<Author> findByStatusOrderByAuthorIdDesc(boolean status);
+
+    List<Author> findByStatusAndAuthorNameContainingIgnoreCaseOrStatusAndNationalityContainingIgnoreCaseOrderByAuthorIdDesc(
+            boolean status1,
+            String authorName,
+            boolean status2,
+            String nationality);
+
 }

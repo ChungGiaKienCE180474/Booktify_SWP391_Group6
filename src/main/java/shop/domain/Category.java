@@ -32,8 +32,8 @@ public class Category {
     @Column(nullable = false, unique = true, length = 120)
     private String name;
 
-    @Size(max = 500, message = "Description must be at most 500 characters")
-    @Column(length = 500)
+    @Size(max = 10000, message = "Description must be at most 10000 characters")
+    @Column(length = 10000)
     private String description;
 
     // Soft delete flag — hidden categories drop out of the book create/edit dropdown.
@@ -92,6 +92,10 @@ public class Category {
 
     public LocalDateTime getCreatedAt() {
         return createdAt;
+    }
+
+    public String getCreatedAtString() {
+        return createdAt == null ? "" : createdAt.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"));
     }
 
     public void setCreatedAt(LocalDateTime createdAt) {

@@ -38,6 +38,43 @@
                         </div>
                     </div>
 
+                    <div class="admin-panel" style="padding:14px 22px;">
+
+                        <form method="get" action="/admin/reviews" class="admin-search-form" style="flex-wrap:wrap;">
+
+                            <div style="position:relative;flex:1;max-width:380px;">
+
+                                <i class="fa-solid fa-magnifying-glass" style="position:absolute;
+                      left:13px;
+                      top:50%;
+                      transform:translateY(-50%);
+                      color:#9CA3AF;
+                      font-size:.82rem;
+                      pointer-events:none;">
+                                </i>
+
+                                <input type="text" name="keyword" value="${keyword}"
+                                    placeholder="Search by book title or author..." class="admin-input"
+                                    style="padding-left:38px;">
+
+                            </div>
+
+                            <button type="submit" class="admin-button">
+                                <i class="fa-solid fa-filter"></i>
+                                Filter
+                            </button>
+
+                            <a href="/admin/reviews" class="admin-button admin-button--ghost">
+
+                                <i class="fa-solid fa-rotate-right"></i>
+                                Reset
+
+                            </a>
+
+                        </form>
+
+                    </div>
+
                     <div class="admin-table-wrap">
 
                         <table class="admin-table">

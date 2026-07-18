@@ -201,3 +201,33 @@
     }
 
 }
+
+
+
+
+.author-books {
+    margin-top:50px;
+}
+
+.author-books h2 {
+    font-size:26px;
+    margin-bottom:25px;
+}
+
+.book-grid {
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:25px;
+}
+
+.book-card {
+    background:white;
+    border-radius:12px;
+    padding:15px;
+}
+
+.book-card img {
+    width:100%;
+    height:260px;
+    object-fit:cover;
+}
