@@ -15,6 +15,7 @@ import shop.domain.User;
 import shop.domain.dto.CartRefreshResult;
 import shop.service.CartService;
 import shop.service.UserService;
+import shop.service.VoucherService;
 
 @Controller
 @RequestMapping("/cart")
@@ -22,10 +23,13 @@ public class CartController {
 
     private final CartService cartService;
     private final UserService userService;
+    // Voucher
+    private final VoucherService voucherService;
 
-    public CartController(CartService cartService, UserService userService) {
+    public CartController(CartService cartService, UserService userService, VoucherService voucherService) {
         this.cartService = cartService;
         this.userService = userService;
+        this.voucherService = voucherService;
     }
 
     @GetMapping
@@ -33,6 +37,11 @@ public class CartController {
         User user = getCurrentUser(authentication);
         CartRefreshResult refreshResult = cartService.refreshCartResult(user.getId());
         model.addAttribute("cart", cartService.toCartDTO(refreshResult.getCart()));
+
+        //Lấy ACTIVE vouchers
+        model.addAttribute(
+                "activeVouchers",
+                voucherService.getActiveVouchers());
 
         if (refreshResult.hasWarnings() && !model.containsAttribute("warningMessage")) {
             model.addAttribute("warningMessage", String.join(" ", refreshResult.getWarnings()));
