@@ -1,0 +1,151 @@
+/* =========================
+   Rating Form
+========================= */
+
+.rating-section {
+    max-width: 1200px;
+    margin: 40px auto;
+    padding: 24px;
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, .08);
+}
+
+.rating-title {
+    font-size: 1.4rem;
+    font-weight: 800;
+    margin-bottom: 1.5rem;
+}
+
+.rating-item {
+    padding: 18px 0;
+    border-bottom: 1px solid #ececec;
+}
+
+.rating-item:last-child {
+    border-bottom: none;
+}
+
+.rating-user {
+    font-weight: 700;
+    margin-bottom: .4rem;
+}
+
+.rating-stars i {
+    color: #f59e0b;
+}
+
+.rating-content {
+    margin-top: .5rem;
+    color: var(--text);
+}
+
+.no-rating {
+    color: var(--text-muted);
+}
+
+
+/* Form */
+
+.rating-form {
+    margin-top: 2rem;
+    padding: 1.5rem;
+    background: #f8fafc;
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+}
+
+.rating-form label {
+    font-weight: 700;
+    display: block;
+    margin-bottom: .5rem;
+}
+
+.rating-form select,
+.rating-form textarea {
+    width: 100%;
+    padding: .7rem;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    margin-bottom: 1rem;
+}
+
+.rating-form textarea {
+    min-height: 120px;
+}
+
+.rating-submit {
+    background: var(--primary);
+    color: white;
+    border: none;
+    padding: .8rem 1.5rem;
+    border-radius: 8px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.rating-stars-select {
+    display: flex;
+    flex-direction: row-reverse;
+    justify-content: flex-end;
+    gap: 8px;
+    margin: 10px 0 20px;
+}
+
+.rating-stars-select input {
+    display: none;
+}
+
+.rating-stars-select label {
+    font-size: 32px;
+    color: #d1d5db;
+    cursor: pointer;
+    transition: .2s;
+}
+
+.rating-stars-select label:hover,
+.rating-stars-select label:hover~label {
+    color: #fbbf24;
+}
+
+.rating-stars-select input:checked~label {
+    color: #fbbf24;
+}
+
+.rating-create {
+    margin: 25px 0;
+    padding: 25px;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    background: #fafafa;
+}
+
+.rating-create textarea {
+    width: 100%;
+    min-height: 150px;
+    padding: 15px;
+    border: 1px solid #d1d5db;
+    border-radius: 10px;
+    font-size: 15px;
+    resize: vertical;
+    box-sizing: border-box;
+    resize: vertical;
+    height: 120px;
+    max-height: 240px;
+}
+
+.rating-create .form-label {
+    display: block;
+    font-weight: 700;
+    margin-bottom: 10px;
+    color: #374151;
+}
+
+.star-filled {
+    color: #fbbf24;
+}
+
+.star-empty {
+    color: #d1d5db;
+}

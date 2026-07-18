@@ -12,6 +12,12 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.Size;
 import jakarta.validation.constraints.NotNull;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.OneToMany;
+
 @Entity
 @Table(name = "users")
 public class User {
@@ -49,6 +55,9 @@ public class User {
 
     @Column(name = "auth_provider", nullable = false)
     private String authProvider = AuthProvider.LOCAL.name();
+
+    @OneToMany(mappedBy = "customer", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Rating> ratings = new ArrayList<>();
 
     public long getId() {
         return id;
@@ -125,6 +134,7 @@ public class User {
     public boolean isDeleted() {
         return deleted;
     }
+
     public String getStaffRole() {
         return staffRole;
     }
@@ -147,5 +157,13 @@ public class User {
 
     public boolean isGoogleAccount() {
         return AuthProvider.GOOGLE.name().equals(authProvider);
+    }
+
+    public List<Rating> getRatings() {
+        return ratings;
+    }
+
+    public void setRatings(List<Rating> ratings) {
+        this.ratings = ratings;
     }
 }

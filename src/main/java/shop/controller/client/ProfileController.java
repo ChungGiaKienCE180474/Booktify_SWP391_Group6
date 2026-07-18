@@ -28,6 +28,8 @@ public class ProfileController {
 
     private static final String SESSION_PROFILE_OTP = "profilePasswordOtp";
     private static final String SESSION_PROFILE_OTP_VERIFIED = "profilePasswordOtpVerified";
+    private static final String ADMIN_PROFILE_BASE = "/admin/profile";
+    private static final String CUSTOMER_PROFILE_BASE = "/profile";
 
     private final UserService userService;
     private final PasswordEncoder passwordEncoder;
@@ -40,7 +42,7 @@ public class ProfileController {
         this.emailService = emailService;
     }
 
-    @GetMapping("/profile")
+    @GetMapping({ "/profile", "/admin/profile" })
     public String getProfile(
             HttpServletRequest request,
             Model model,
@@ -52,7 +54,8 @@ public class ProfileController {
             return "redirect:/login";
         }
 
-        populateProfileModel(model, profile, request.getSession(false));
+        String profileBase = resolveProfileBase(request);
+        populateProfileModel(model, profile, request.getSession(false), profileBase);
 
         boolean editMode = "true".equals(edit) || "1".equals(edit)
                 || Boolean.TRUE.equals(model.getAttribute("editMode"));
@@ -73,10 +76,10 @@ public class ProfileController {
         model.addAttribute("otpSent", hasOtpInSession(session));
         model.addAttribute("otpVerified", isOtpVerified(session));
 
-        return "profile/index";
+        return resolveProfileView(request);
     }
 
-    @PostMapping("/profile/update")
+    @PostMapping({ "/profile/update", "/admin/profile/update" })
     public String updateProfile(
             @Valid @ModelAttribute("profileUpdateForm") ProfileUpdateForm profileUpdateForm,
             BindingResult bindingResult,
@@ -89,13 +92,15 @@ public class ProfileController {
             return "redirect:/login";
         }
 
+        String profileBase = resolveProfileBase(request);
+
         if (bindingResult.hasErrors()) {
-            populateProfileModel(model, profile, request.getSession(false));
+            populateProfileModel(model, profile, request.getSession(false), profileBase);
             model.addAttribute("editMode", true);
             model.addAttribute("passwordChangeForm", new PasswordChangeForm());
             model.addAttribute("otpSent", hasOtpInSession(request.getSession(false)));
             model.addAttribute("otpVerified", isOtpVerified(request.getSession(false)));
-            return "profile/index";
+            return resolveProfileView(request);
         }
 
         User updated = userService.updateProfile(
@@ -108,17 +113,18 @@ public class ProfileController {
             syncSession(request.getSession(false), updated);
         }
 
-        redirectAttributes.addFlashAttribute("successMessage", "Cập nhật thông tin thành công.");
-        return "redirect:/profile";
+        redirectAttributes.addFlashAttribute("successMessage", "Your information has been updated.");
+        return "redirect:" + profileBase;
     }
 
-    @PostMapping("/profile/password/send-otp")
+    @PostMapping({ "/profile/password/send-otp", "/admin/profile/password/send-otp" })
     public String sendPasswordOtp(HttpServletRequest request, RedirectAttributes redirectAttributes) {
         ProfileDTO profile = getCurrentProfile(request);
         if (profile == null) {
             return "redirect:/login";
         }
 
+        String profileBase = resolveProfileBase(request);
         int otpValue = new Random().nextInt(900000) + 100000;
         HttpSession session = request.getSession();
         session.setAttribute(SESSION_PROFILE_OTP, otpValue);
@@ -127,24 +133,24 @@ public class ProfileController {
         try {
             emailService.sendOtpEmail(
                     profile.getEmail(),
-                    "Booktify - Mã OTP đổi mật khẩu",
-                    "Mã OTP đổi mật khẩu của bạn là: " + otpValue
-                            + "\n\nVui lòng không chia sẻ mã này với bất kỳ ai.");
+                    "Booktify - Password change OTP code",
+                    "Your password change OTP code is: " + otpValue
+                            + "\n\nPlease do not share this code with anyone.");
         } catch (MessagingException e) {
             session.removeAttribute(SESSION_PROFILE_OTP);
             redirectAttributes.addFlashAttribute("passwordErrorMessage",
-                    "Không gửi được OTP. Vui lòng thử lại sau.");
+                    "Could not send OTP. Please try again later.");
             redirectAttributes.addFlashAttribute("passwordEditMode", true);
-            return "redirect:/profile?password=edit";
+            return "redirect:" + profileBase + "?password=edit";
         }
 
         redirectAttributes.addFlashAttribute("otpSentMessage",
-                "Mã OTP đã được gửi tới email " + profile.getEmail() + ".");
+                "An OTP code has been sent to the email " + profile.getEmail() + ".");
         redirectAttributes.addFlashAttribute("passwordEditMode", true);
-        return "redirect:/profile?password=edit";
+        return "redirect:" + profileBase + "?password=edit";
     }
 
-    @PostMapping("/profile/password/verify-otp")
+    @PostMapping({ "/profile/password/verify-otp", "/admin/profile/password/verify-otp" })
     public String verifyPasswordOtp(
             @RequestParam(value = "otp", required = false) Integer otp,
             HttpServletRequest request,
@@ -155,30 +161,31 @@ public class ProfileController {
             return "redirect:/login";
         }
 
+        String profileBase = resolveProfileBase(request);
         HttpSession session = request.getSession(false);
         Integer storedOtp = session != null ? (Integer) session.getAttribute(SESSION_PROFILE_OTP) : null;
 
         if (storedOtp == null) {
             redirectAttributes.addFlashAttribute("passwordErrorMessage",
-                    "Vui lòng gửi mã OTP trước khi xác thực.");
+                    "Please send the OTP code before verifying.");
             redirectAttributes.addFlashAttribute("passwordEditMode", true);
-            return "redirect:/profile?password=edit";
+            return "redirect:" + profileBase + "?password=edit";
         }
 
         if (otp == null || !storedOtp.equals(otp)) {
-            redirectAttributes.addFlashAttribute("passwordErrorMessage", "Mã OTP không đúng. Vui lòng thử lại.");
+            redirectAttributes.addFlashAttribute("passwordErrorMessage", "Incorrect OTP code. Please try again.");
             redirectAttributes.addFlashAttribute("passwordEditMode", true);
-            return "redirect:/profile?password=edit";
+            return "redirect:" + profileBase + "?password=edit";
         }
 
         session.setAttribute(SESSION_PROFILE_OTP_VERIFIED, true);
         redirectAttributes.addFlashAttribute("otpVerifiedMessage",
-                "Xác thực OTP thành công. Vui lòng nhập mật khẩu mới.");
+                "OTP verified successfully. Please enter a new password.");
         redirectAttributes.addFlashAttribute("passwordEditMode", true);
-        return "redirect:/profile?password=edit";
+        return "redirect:" + profileBase + "?password=edit";
     }
 
-    @PostMapping("/profile/password")
+    @PostMapping({ "/profile/password", "/admin/profile/password" })
     public String changePassword(
             @Valid @ModelAttribute("passwordChangeForm") PasswordChangeForm passwordChangeForm,
             BindingResult bindingResult,
@@ -192,31 +199,32 @@ public class ProfileController {
             return "redirect:/login";
         }
 
+        String profileBase = resolveProfileBase(request);
         HttpSession session = request.getSession(false);
         Integer storedOtp = session != null ? (Integer) session.getAttribute(SESSION_PROFILE_OTP) : null;
 
         if (storedOtp == null) {
             redirectAttributes.addFlashAttribute("passwordErrorMessage",
-                    "Vui lòng gửi mã OTP trước khi đổi mật khẩu.");
+                    "Please send the OTP code before changing your password.");
             redirectAttributes.addFlashAttribute("passwordEditMode", true);
-            return "redirect:/profile?password=edit";
+            return "redirect:" + profileBase + "?password=edit";
         }
 
         if (!isOtpVerified(session)) {
             redirectAttributes.addFlashAttribute("passwordErrorMessage",
-                    "Vui lòng xác thực mã OTP trước khi đổi mật khẩu.");
+                    "Please verify the OTP code before changing your password.");
             redirectAttributes.addFlashAttribute("passwordEditMode", true);
-            return "redirect:/profile?password=edit";
+            return "redirect:" + profileBase + "?password=edit";
         }
 
         if (bindingResult.hasErrors()) {
-            populateProfileModel(model, profile, session);
+            populateProfileModel(model, profile, session, profileBase);
             model.addAttribute("profileUpdateForm", toProfileForm(profile));
             model.addAttribute("passwordEditMode", true);
             model.addAttribute("otpSent", true);
             model.addAttribute("otpVerified", true);
             model.addAttribute("passwordError", true);
-            return "profile/index";
+            return resolveProfileView(request);
         }
 
         boolean googleAccount = user.isGoogleAccount();
@@ -224,36 +232,36 @@ public class ProfileController {
 
         if (!googleAccount) {
             if (currentPassword == null || currentPassword.isBlank()) {
-                populateProfileModel(model, profile, session);
+                populateProfileModel(model, profile, session, profileBase);
                 model.addAttribute("profileUpdateForm", toProfileForm(profile));
                 model.addAttribute("passwordEditMode", true);
                 model.addAttribute("otpSent", true);
                 model.addAttribute("otpVerified", true);
-                model.addAttribute("passwordErrorMessage", "Vui lòng nhập mật khẩu hiện tại.");
+                model.addAttribute("passwordErrorMessage", "Please enter your current password.");
                 model.addAttribute("passwordError", true);
-                return "profile/index";
+                return resolveProfileView(request);
             }
             if (!passwordEncoder.matches(currentPassword, user.getPassword())) {
-                populateProfileModel(model, profile, session);
+                populateProfileModel(model, profile, session, profileBase);
                 model.addAttribute("profileUpdateForm", toProfileForm(profile));
                 model.addAttribute("passwordEditMode", true);
                 model.addAttribute("otpSent", true);
                 model.addAttribute("otpVerified", true);
-                model.addAttribute("passwordErrorMessage", "Mật khẩu hiện tại không đúng.");
+                model.addAttribute("passwordErrorMessage", "Your current password is incorrect.");
                 model.addAttribute("passwordError", true);
-                return "profile/index";
+                return resolveProfileView(request);
             }
         }
 
         if (!passwordChangeForm.getNewPassword().equals(passwordChangeForm.getConfirmPassword())) {
-            populateProfileModel(model, profile, session);
+            populateProfileModel(model, profile, session, profileBase);
             model.addAttribute("profileUpdateForm", toProfileForm(profile));
             model.addAttribute("passwordEditMode", true);
             model.addAttribute("otpSent", true);
             model.addAttribute("otpVerified", true);
-            model.addAttribute("passwordErrorMessage", "Mật khẩu mới và xác nhận không khớp.");
+            model.addAttribute("passwordErrorMessage", "The new password and confirmation do not match.");
             model.addAttribute("passwordError", true);
-            return "profile/index";
+            return resolveProfileView(request);
         }
 
         userService.updatePassword(user.getEmail(), passwordChangeForm.getNewPassword());
@@ -263,10 +271,23 @@ public class ProfileController {
         }
 
         String successMessage = googleAccount
-                ? "Đặt mật khẩu thành công. Bạn có thể đăng nhập bằng email và mật khẩu."
-                : "Đổi mật khẩu thành công.";
+                ? "Password set successfully. You can now log in with your email and password."
+                : "Password changed successfully.";
         redirectAttributes.addFlashAttribute("passwordSuccessMessage", successMessage);
-        return "redirect:/profile";
+        return "redirect:" + profileBase;
+    }
+
+    private String resolveProfileBase(HttpServletRequest request) {
+        return isAdminProfileRequest(request) ? ADMIN_PROFILE_BASE : CUSTOMER_PROFILE_BASE;
+    }
+
+    private String resolveProfileView(HttpServletRequest request) {
+        return isAdminProfileRequest(request) ? "admin/profile/index" : "profile/index";
+    }
+
+    private boolean isAdminProfileRequest(HttpServletRequest request) {
+        String uri = request.getRequestURI();
+        return uri != null && uri.startsWith("/admin/profile");
     }
 
     private ProfileDTO getCurrentProfile(HttpServletRequest request) {
@@ -290,8 +311,10 @@ public class ProfileController {
         return session != null && Boolean.TRUE.equals(session.getAttribute(SESSION_PROFILE_OTP_VERIFIED));
     }
 
-    private void populateProfileModel(Model model, ProfileDTO profile, HttpSession session) {
+    private void populateProfileModel(Model model, ProfileDTO profile, HttpSession session, String profileBase) {
         model.addAttribute("profile", profile);
+        model.addAttribute("profileBase", profileBase);
+        model.addAttribute("adminProfile", ADMIN_PROFILE_BASE.equals(profileBase));
         if (session != null) {
             model.addAttribute("username", session.getAttribute("username"));
             model.addAttribute("fullName", session.getAttribute("fullName"));

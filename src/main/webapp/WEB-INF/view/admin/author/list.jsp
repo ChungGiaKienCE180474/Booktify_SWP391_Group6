@@ -8,7 +8,7 @@
             <meta charset="UTF-8" />
             <meta name="viewport" content="width=device-width, initial-scale=1.0" />
             <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" />
-            <link rel="stylesheet" href="/css/admin-dashboard.css" />
+            <link rel="stylesheet" href="/css/admin-dashboard.css?v=4" />
             <title>Authors — Booktify Admin</title>
         </head>
 
@@ -43,7 +43,6 @@
                                     <th>Author</th>
                                     <th>Nationality</th>
                                     <th>Biography</th>
-                                    <th>Photo</th>
                                     <th>Last Update</th>
                                     <th>Status</th>
                                     <th style="width:150px;">Actions</th>
@@ -77,19 +76,6 @@
                                                     <c:out value="${author.biography.length()>80
                                                     ? author.biography.substring(0,80).concat('...')
                                                     : author.biography}" />
-                                                </c:when>
-
-                                                <c:otherwise>
-                                                    —
-                                                </c:otherwise>
-                                            </c:choose>
-                                        </td>
-
-                                        <td>
-                                            <c:choose>
-                                                <c:when test="${not empty author.profileImage}">
-                                                    <img src="${author.profileImage}"
-                                                        style="width:52px;height:52px;border-radius:50%;object-fit:cover;border:2px solid #E5E7EB;">
                                                 </c:when>
 
                                                 <c:otherwise>
@@ -178,7 +164,7 @@
 
                                     <tr>
 
-                                        <td colspan="8" style="text-align:center;padding:56px 20px;color:#9CA3AF;">
+                                        <td colspan="7" style="text-align:center;padding:56px 20px;color:#9CA3AF;">
 
                                             <i class="fa-solid fa-feather"
                                                 style="font-size:2rem;display:block;margin-bottom:10px;opacity:.3;">
@@ -367,7 +353,7 @@
                                 d.created || '—';
 
                             document.getElementById('mAuthorImage').src =
-                                d.image || '';
+                                d.image ? d.image + '?v=' + Date.now() : '';
 
                             document.getElementById('authorModal').style.display = 'flex';
 

@@ -12,6 +12,8 @@ import shop.domain.Author;
 import shop.domain.dto.AuthorDTO;
 import shop.service.AuthorService;
 
+import org.springframework.web.multipart.MultipartFile;
+
 @Controller
 @RequestMapping("/admin/authors")
 @PreAuthorize("hasRole('ADMIN')")
@@ -48,6 +50,7 @@ public class AdminAuthorController {
     public String create(
             @Valid @ModelAttribute("authorDTO") AuthorDTO authorDTO,
             BindingResult bindingResult,
+            @RequestParam(value = "imageFile", required = false) MultipartFile imageFile,
             Model model,
             RedirectAttributes redirectAttributes) {
 
@@ -65,7 +68,7 @@ public class AdminAuthorController {
         }
 
         // Gọi service để lưu dữ liệu xuống DB
-        authorService.saveAuthor(authorDTO);
+        authorService.saveAuthor(authorDTO, imageFile);
 
         // Flash message hiển thị 1 lần sau redirect
         redirectAttributes.addFlashAttribute(
@@ -104,6 +107,7 @@ public class AdminAuthorController {
             @PathVariable Long id,
             @Valid @ModelAttribute("authorDTO") AuthorDTO authorDTO,
             BindingResult bindingResult,
+            @RequestParam(value = "imageFile", required = false) MultipartFile imageFile,
             Model model,
             RedirectAttributes redirectAttributes) {
 
@@ -125,7 +129,7 @@ public class AdminAuthorController {
         }
 
         // Gọi service update dữ liệu
-        authorService.updateAuthor(id, authorDTO);
+        authorService.updateAuthor(id, authorDTO, imageFile);
 
         redirectAttributes.addFlashAttribute(
                 "successMessage",

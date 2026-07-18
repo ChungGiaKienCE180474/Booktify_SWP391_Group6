@@ -1,0 +1,236 @@
+/* =========================
+   Voucher Ticket
+========================= */
+
+.voucher-box {
+    margin-bottom: 20px;
+}
+
+.voucher-box h2 {
+    margin-bottom: 15px;
+}
+
+
+/* vùng chứa scroll */
+
+.voucher-list-scroll {
+    max-height: 390px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: 8px;
+}
+
+
+/* =========================
+   Ticket Card
+========================= */
+
+.voucher-card {
+    position: relative;
+    min-height: auto;
+    background: #ffffff;
+    border: 2px dashed #d1d5db;
+    border-radius: 16px;
+    padding: 18px 20px;
+    margin-bottom: 15px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+    overflow: visible;
+}
+
+
+/* =========================
+   Hai lỗ vé
+========================= */
+
+.voucher-card::before,
+.voucher-card::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 32px;
+    height: 32px;
+    background: #f8fafc;
+    border-radius: 50%;
+    z-index: 2;
+}
+
+
+/* lỗ trái */
+
+.voucher-card::before {
+    left: -16px;
+}
+
+
+/* lỗ phải */
+
+.voucher-card::after {
+    right: -16px;
+}
+
+
+/* =========================
+   Description
+========================= */
+
+.voucher-description {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #111827;
+    margin-bottom: 12px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+
+/* =========================
+   Info rows
+========================= */
+
+.voucher-info {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 5px;
+    font-size: .9rem;
+    color: #475569;
+    line-height: 1.2;
+}
+
+.voucher-info b {
+    color: #111827;
+}
+
+
+/* =========================
+   Buttons
+========================= */
+
+.voucher-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 10px;
+}
+
+.copy-voucher-btn,
+.detail-voucher-btn {
+    flex: 1;
+    padding: 6px 10px;
+    border-radius: 7px;
+    cursor: pointer;
+    font-size: .8rem;
+}
+
+.copy-voucher-btn {
+    margin-left: auto;
+    border: none;
+    background: #2563eb;
+    color: white;
+}
+
+.copy-voucher-btn:hover {
+    background: #1d4ed8;
+}
+
+.detail-voucher-btn {
+    border: none;
+    background: #16a34a;
+    color: white;
+}
+
+.detail-voucher-btn:hover {
+    background: #15803d;
+}
+
+
+/* =========================
+   Scrollbar
+========================= */
+
+.voucher-list-scroll::-webkit-scrollbar {
+    width: 6px;
+}
+
+.voucher-list-scroll::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 10px;
+}
+
+
+/* =========================
+   Voucher Modal
+========================= */
+
+.voucher-modal {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, .45);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+}
+
+.voucher-modal.active {
+    display: flex;
+}
+
+.voucher-modal-content {
+    background: white;
+    width: 420px;
+    padding: 25px;
+    border-radius: 16px;
+    position: relative;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, .2);
+}
+
+.voucher-modal-content h2 {
+    margin-bottom: 20px;
+}
+
+.voucher-close {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    border: none;
+    background: none;
+    font-size: 20px;
+    cursor: pointer;
+}
+
+.voucher-detail-item {
+    margin-bottom: 15px;
+    line-height: 1.5;
+}
+
+.voucher-detail-item b {
+    display: block;
+    color: #374151;
+}
+
+.voucher-detail-item span,
+.voucher-detail-item p {
+    color: #6b7280;
+}
+
+
+/*
+Page checkout
+*/
+
+.apply-voucher-btn {
+    background: #dc2626;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 0 20px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: .2s;
+}
+
+.apply-voucher-btn:hover {
+    background: #b91c1c;
+}

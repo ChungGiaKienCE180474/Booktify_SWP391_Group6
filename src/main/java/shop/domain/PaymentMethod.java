@@ -1,7 +1,7 @@
 package shop.domain;
 
 public enum PaymentMethod {
-    COD("Thanh toán khi nhận hàng (COD)");
+    COD("Cash on delivery (COD)");
 
     private final String label;
 

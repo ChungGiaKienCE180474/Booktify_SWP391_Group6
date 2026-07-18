@@ -31,6 +31,8 @@ import shop.domain.dto.OrderItemDTO;
 import shop.repository.BookRepository;
 import shop.repository.OrderRepository;
 import shop.repository.UserRepository;
+import shop.service.VoucherService;
+import shop.domain.Voucher;
 
 @Service
 public class OrderService {
@@ -41,15 +43,18 @@ public class OrderService {
     private final BookRepository bookRepository;
     private final CartService cartService;
     private final UserRepository userRepository;
+    private final VoucherService voucherService;
 
     public OrderService(OrderRepository orderRepository,
-                        BookRepository bookRepository,
-                        CartService cartService,
-                        UserRepository userRepository) {
+            BookRepository bookRepository,
+            CartService cartService,
+            UserRepository userRepository,
+            VoucherService voucherService) {
         this.orderRepository = orderRepository;
         this.bookRepository = bookRepository;
         this.cartService = cartService;
         this.userRepository = userRepository;
+        this.voucherService = voucherService;
     }
 
     @Transactional(readOnly = true)
@@ -181,7 +186,6 @@ public class OrderService {
             throw new IllegalArgumentException(String.join(" ", validationErrors));
         }
 
-        BigDecimal discountAmount = resolveDiscount(form.getVoucherCode());
         BigDecimal shippingFee = COD_SHIPPING_FEE;
 
         Order order = new Order();
@@ -195,7 +199,6 @@ public class OrderService {
         order.setStatus(OrderStatus.PENDING.name());
         order.setVoucherCode(blankToNull(form.getVoucherCode()));
         order.setNote(blankToNull(form.getNote()));
-        order.setDiscountAmount(discountAmount);
         order.setShippingFee(shippingFee);
 
         BigDecimal subtotal = BigDecimal.ZERO;
@@ -222,14 +225,46 @@ public class OrderService {
         }
 
         order.setSubtotal(subtotal);
-        BigDecimal total = subtotal.subtract(discountAmount).add(shippingFee);
+
+        BigDecimal discountAmount = resolveDiscount(
+                form.getVoucherCode(),
+                subtotal);
+
+        BigDecimal finalShippingFee = shippingFee;
+
+        if (form.getVoucherCode() != null
+                && !form.getVoucherCode().isBlank()) {
+            Voucher voucher = voucherService.findValidVoucher(
+                    form.getVoucherCode());
+            if ("FREESHIP".equals(voucher.getDiscountType())) {
+                finalShippingFee = BigDecimal.ZERO;
+            }
+        }
+
+        order.setDiscountAmount(discountAmount);
+        order.setShippingFee(finalShippingFee);
+
+        BigDecimal total = subtotal
+                .subtract(discountAmount)
+                .add(finalShippingFee);
+
         if (total.compareTo(BigDecimal.ZERO) < 0) {
             total = BigDecimal.ZERO;
         }
         order.setTotalAmount(total);
 
         Order saved = orderRepository.save(order);
+
+        // giảm số lượng voucher sau khi tạo order
+        if (form.getVoucherCode() != null
+                && !form.getVoucherCode().isBlank()) {
+
+            voucherService.decreaseVoucherQuantity(
+                    form.getVoucherCode());
+        }
+
         cartService.clearCart(userId);
+
         return toDetailDTO(saved);
     }
 
@@ -249,9 +284,20 @@ public class OrderService {
     }
 
     public void validateCheckoutForm(CheckoutForm form) {
-        if (form.getVoucherCode() != null && !form.getVoucherCode().isBlank()) {
-            resolveDiscount(form.getVoucherCode());
+        String voucherCode = form.getVoucherCode();
+        if (voucherCode == null || voucherCode.isBlank()) {
+            return;
         }
+
+        // bỏ khoảng trắng
+        voucherCode = voucherCode.trim();
+        // không cho nhập nhiều mã
+        if (voucherCode.contains(",")
+                || voucherCode.contains(" ")) {
+            throw new IllegalArgumentException(
+                    "Chỉ được áp dụng một voucher cho mỗi đơn hàng.");
+        }
+        voucherService.findValidVoucher(voucherCode);
     }
 
     public List<String> validateCartItemsForOrder(Cart cart) {
@@ -308,9 +354,22 @@ public class OrderService {
         return formatMoney(COD_SHIPPING_FEE);
     }
 
-    public String getCheckoutTotalFormatted(BigDecimal subtotal) {
-        BigDecimal base = subtotal == null ? BigDecimal.ZERO : subtotal;
-        return formatMoney(base.add(COD_SHIPPING_FEE));
+    public String getCheckoutTotalFormatted(
+            BigDecimal subtotal,
+            BigDecimal discountAmount,
+            BigDecimal shippingFee) {
+        BigDecimal base = subtotal == null
+                ? BigDecimal.ZERO
+                : subtotal;
+        BigDecimal discount = discountAmount == null
+                ? BigDecimal.ZERO
+                : discountAmount;
+        BigDecimal ship = shippingFee == null
+                ? BigDecimal.ZERO
+                : shippingFee;
+        return formatMoney(
+                base.subtract(discount)
+                        .add(ship));
     }
 
     private void validateBookLine(Book book, int quantity) {
@@ -329,11 +388,15 @@ public class OrderService {
         }
     }
 
-    private BigDecimal resolveDiscount(String voucherCode) {
+    private BigDecimal resolveDiscount(
+            String voucherCode,
+            BigDecimal subtotal) {
         if (voucherCode == null || voucherCode.isBlank()) {
             return BigDecimal.ZERO;
         }
-        throw new IllegalArgumentException("Mã voucher/khuyến mãi không hợp lệ hoặc chưa được hỗ trợ.");
+        return voucherService.calculateDiscount(
+                voucherCode,
+                subtotal);
     }
 
     private String generateUniqueOrderCode() {
@@ -398,7 +461,7 @@ public class OrderService {
         return value.trim();
     }
 
-    private String formatMoney(BigDecimal amount) {
+    public String formatMoney(BigDecimal amount) {
         if (amount == null) {
             return "0";
         }
