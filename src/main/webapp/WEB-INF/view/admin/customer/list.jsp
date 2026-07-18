@@ -271,10 +271,11 @@
         }
 
         .customer-modal {
-            width: 640px;
-            max-width: 96vw;
+            width: 1040px;
+            max-width: calc(100vw - 48px);
             max-height: 88vh;
             overflow-y: auto;
+            overflow-x: hidden;
             background: #ffffff;
             color: #1f2937;
             border-radius: 18px;
@@ -484,6 +485,110 @@
             cursor: pointer;
         }
 
+
+        .order-history-loading,
+        .order-history-error,
+        .order-history-empty {
+            padding: 18px;
+            border: 1px dashed #d1d5db;
+            border-radius: 14px;
+            background: #f9fafb;
+            color: #6b7280;
+            text-align: center;
+            font-weight: 700;
+        }
+
+        .order-history-error {
+            border-color: #fecaca;
+            background: #fef2f2;
+            color: #b91c1c;
+        }
+
+        .order-history-table-wrap {
+            width: 100%;
+            overflow-x: hidden;
+            border: 1px solid #e5e7eb;
+            border-radius: 14px;
+        }
+
+        .order-history-table {
+            width: 100%;
+            table-layout: fixed;
+            border-collapse: collapse;
+            background: #ffffff;
+        }
+
+        .order-history-table th,
+        .order-history-table td {
+            padding: 12px 10px;
+            border-bottom: 1px solid #e5e7eb;
+            text-align: left;
+            white-space: normal;
+            overflow-wrap: anywhere;
+            word-break: break-word;
+            color: #111827;
+            font-size: 13px;
+            vertical-align: middle;
+        }
+
+        .order-history-table th {
+            background: #f8fafc;
+            color: #64748b;
+            font-size: 11px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: .04em;
+        }
+
+        .order-history-table th:nth-child(1),
+        .order-history-table td:nth-child(1) {
+            width: 28%;
+            white-space: nowrap;
+        }
+
+        .order-history-table th:nth-child(2),
+        .order-history-table td:nth-child(2) {
+            width: 14%;
+            white-space: nowrap;
+        }
+
+        .order-history-table th:nth-child(3),
+        .order-history-table td:nth-child(3) {
+            width: 23%;
+        }
+
+        .order-history-table th:nth-child(4),
+        .order-history-table td:nth-child(4) {
+            width: 23%;
+            white-space: nowrap;
+        }
+
+        .order-history-table th:nth-child(5),
+        .order-history-table td:nth-child(5) {
+            width: 12%;
+            text-align: center;
+            white-space: nowrap;
+        }
+
+        .order-history-table tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        .order-view-link {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+            padding: 7px 9px;
+            border-radius: 9px;
+            background: #2563eb;
+            color: #ffffff;
+            text-decoration: none;
+            font-size: 12px;
+            font-weight: 800;
+            white-space: nowrap;
+        }
+
         @media (max-width: 900px) {
             .customer-stats {
                 grid-template-columns: 1fr;
@@ -502,6 +607,59 @@
                 grid-template-columns: 1fr;
             }
         }
+
+        @media (max-width: 700px) {
+            .customer-modal {
+                width: calc(100vw - 20px);
+                max-width: calc(100vw - 20px);
+            }
+
+            .customer-modal-body {
+                padding: 16px;
+            }
+
+            .order-history-table th,
+            .order-history-table td {
+                padding: 9px 5px;
+                font-size: 11px;
+            }
+
+            .order-history-table th:nth-child(1),
+            .order-history-table td:nth-child(1) {
+                width: 27%;
+                white-space: normal;
+            }
+
+            .order-history-table th:nth-child(2),
+            .order-history-table td:nth-child(2) {
+                width: 15%;
+            }
+
+            .order-history-table th:nth-child(3),
+            .order-history-table td:nth-child(3) {
+                width: 22%;
+            }
+
+            .order-history-table th:nth-child(4),
+            .order-history-table td:nth-child(4) {
+                width: 24%;
+                white-space: normal;
+            }
+
+            .order-history-table th:nth-child(5),
+            .order-history-table td:nth-child(5) {
+                width: 12%;
+            }
+
+            .order-view-link {
+                padding: 6px;
+                font-size: 0;
+            }
+
+            .order-view-link i {
+                font-size: 12px;
+            }
+        }
     </style>
 </head>
 
@@ -513,10 +671,13 @@
 
     <section class="admin-content">
 
-        <div class="admin-hero">
+        <div class="admin-toolbar">
             <div>
-                <p class="admin-kicker">Customer Management</p>
-                <h2>Customer Management</h2>
+                <p class="admin-kicker">
+                    <i class="fa-solid fa-users"></i>
+                    Customer Management
+                </p>
+                <h2>Customers</h2>
                 <p>Manage customer information and account status.</p>
             </div>
         </div>
@@ -633,6 +794,7 @@
                                         <button type="button"
                                                 class="btn-small btn-view"
                                                 onclick="openCustomerModal(
+                                                        '${customer.id}',
                                                         '${customer.customerCode}',
                                                         '${customer.initial}',
                                                         '${customer.fullName}',
@@ -749,8 +911,33 @@
 
             <div class="order-section">
                 <h4><i class="fa-solid fa-cart-shopping"></i> Order History</h4>
-                <div class="order-empty">
-                    Order history is not connected yet.
+
+                <div id="modalOrderLoading" class="order-history-loading">
+                    <i class="fa-solid fa-spinner fa-spin"></i>
+                    Loading order history...
+                </div>
+
+                <div id="modalOrderError" class="order-history-error" style="display:none;">
+                    Could not load order history.
+                </div>
+
+                <div id="modalOrderEmpty" class="order-history-empty" style="display:none;">
+                    This customer has no orders yet.
+                </div>
+
+                <div id="modalOrderTableWrap" class="order-history-table-wrap" style="display:none;">
+                    <table class="order-history-table">
+                        <thead>
+                            <tr>
+                                <th>Order Code</th>
+                                <th>Total</th>
+                                <th>Status</th>
+                                <th>Date</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody id="modalOrderTableBody"></tbody>
+                    </table>
                 </div>
             </div>
         </div>
@@ -799,8 +986,8 @@
 </div>
 
 <script>
-    function openCustomerModal(id, initial, fullName, email, phone, address, status) {
-        document.getElementById("modalCustomerId").innerText = id;
+    function openCustomerModal(customerId, customerCode, initial, fullName, email, phone, address, status) {
+        document.getElementById("modalCustomerId").innerText = customerCode || customerId;
         document.getElementById("modalInitial").innerText = initial || "U";
         document.getElementById("modalFullName").innerText = fullName || "N/A";
         document.getElementById("modalEmail").innerText = email || "N/A";
@@ -816,6 +1003,76 @@
         }
 
         document.getElementById("customerDetailModal").classList.add("show");
+        loadCustomerOrders(customerId);
+    }
+
+    async function loadCustomerOrders(customerId) {
+        const loading = document.getElementById("modalOrderLoading");
+        const errorBox = document.getElementById("modalOrderError");
+        const emptyBox = document.getElementById("modalOrderEmpty");
+        const tableWrap = document.getElementById("modalOrderTableWrap");
+        const tableBody = document.getElementById("modalOrderTableBody");
+
+        loading.style.display = "block";
+        errorBox.style.display = "none";
+        emptyBox.style.display = "none";
+        tableWrap.style.display = "none";
+        tableBody.innerHTML = "";
+
+        try {
+            const response = await fetch(
+                "/admin/customers/" + encodeURIComponent(customerId) + "/orders",
+                {
+                    method: "GET",
+                    headers: {
+                        "Accept": "application/json"
+                    }
+                }
+            );
+
+            if (!response.ok) {
+                throw new Error("Could not load customer orders.");
+            }
+
+            const orders = await response.json();
+            loading.style.display = "none";
+
+            if (!Array.isArray(orders) || orders.length === 0) {
+                emptyBox.style.display = "block";
+                return;
+            }
+
+            orders.forEach(function (order) {
+                const row = document.createElement("tr");
+
+                appendTextCell(row, order.orderCode || "N/A");
+                appendTextCell(row, (order.totalAmountFormatted || "0") + " ₫");
+                appendTextCell(row, order.statusLabel || order.status || "N/A");
+                appendTextCell(row, order.createdAtFormatted || "N/A");
+
+                const actionCell = document.createElement("td");
+                const link = document.createElement("a");
+                link.href = "/admin/orders/" + order.id;
+                link.className = "order-view-link";
+                link.innerHTML = '<i class="fa-solid fa-eye"></i> View';
+                actionCell.appendChild(link);
+                row.appendChild(actionCell);
+
+                tableBody.appendChild(row);
+            });
+
+            tableWrap.style.display = "block";
+        } catch (error) {
+            loading.style.display = "none";
+            errorBox.textContent = error.message || "Could not load order history.";
+            errorBox.style.display = "block";
+        }
+    }
+
+    function appendTextCell(row, value) {
+        const cell = document.createElement("td");
+        cell.textContent = value;
+        row.appendChild(cell);
     }
 
     function closeCustomerModal() {

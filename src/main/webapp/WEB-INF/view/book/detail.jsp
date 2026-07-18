@@ -1,4 +1,4 @@
-<%-- Storefront book detail page: full book info plus a "related books" section. --%>
+﻿<%-- Storefront book detail page: full book info plus a "related books" section. --%>
 <%@ page contentType="text/html" pageEncoding="UTF-8" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <!DOCTYPE html>
@@ -11,9 +11,9 @@
     <link rel="stylesheet" href="/css/footer.css" />
     <link rel="stylesheet" href="/css/homepage.css" />
     <link rel="stylesheet" href="/css/rating.css" />
-    <title>${book.title} — Booktify</title>
+    <title>${book.title} ΓÇö Booktify</title>
     <style>
-        /* ── Breadcrumb ── */
+        /* ΓöÇΓöÇ Breadcrumb ΓöÇΓöÇ */
         .breadcrumb {
             max-width: 1200px;
             margin: 0 auto;
@@ -29,7 +29,7 @@
         .breadcrumb a:hover { color: var(--primary); }
         .breadcrumb i { font-size: .6rem; opacity: .4; }
 
-        /* ── Detail layout ── */
+        /* ΓöÇΓöÇ Detail layout ΓöÇΓöÇ */
         .detail-wrap {
             max-width: 1200px;
             margin: 0 auto;
@@ -40,7 +40,7 @@
             align-items: start;
         }
 
-        /* ── Left: cover ── */
+        /* ΓöÇΓöÇ Left: cover ΓöÇΓöÇ */
         .detail-cover {
             position: sticky;
             top: 112px;
@@ -79,7 +79,7 @@
         }
         .detail-cover__back:hover { color: var(--primary); }
 
-        /* ── Right: info ── */
+        /* ΓöÇΓöÇ Right: info ΓöÇΓöÇ */
         .detail-info__cat-link {
             display: inline-flex;
             align-items: center;
@@ -143,6 +143,36 @@
             font-weight: 800;
             color: var(--accent-warm, #F57C00);
             white-space: nowrap;
+        }
+        .detail-price-stack {
+            display: flex;
+            flex-direction: column;
+            gap: .35rem;
+        }
+        .detail-discount-line {
+            display: flex;
+            align-items: center;
+            gap: .65rem;
+            flex-wrap: wrap;
+        }
+        .detail-old-price {
+            color: #94a3b8;
+            font-size: 1rem;
+            font-weight: 700;
+            text-decoration: line-through;
+        }
+        .detail-discount-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: .35rem .7rem;
+            border-radius: 999px;
+            background: #fee2e2;
+            color: #dc2626;
+            font-size: .78rem;
+            font-weight: 800;
+        }
+        .detail-price--sale {
+            color: #dc2626;
         }
         .detail-stock {
             display: inline-flex;
@@ -263,7 +293,7 @@
             color: var(--text);
         }
 
-        /* ── Suggested ── */
+        /* ΓöÇΓöÇ Suggested ΓöÇΓöÇ */
         .suggested-wrap {
             max-width: 1200px;
             margin: 0 auto;
@@ -305,8 +335,13 @@
         .s-card__title { font-size:.8rem;font-weight:700;line-height:1.3;color:var(--text);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;margin-bottom:.2rem;min-height:calc(1.3em * 2); }
         .s-card__author { font-size:.7rem;color:var(--text-muted);margin-bottom:.4rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.2;min-height:1.2em;display:block; }
         .s-card__price { font-size:.82rem;font-weight:800;color:var(--accent-warm,#F57C00);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:auto; }
+        .s-card__price-box { display:flex;flex-direction:column;gap:3px;margin-top:auto; }
+        .s-card__discount-line { display:flex;align-items:center;gap:5px;flex-wrap:wrap; }
+        .s-card__old-price { color:#94a3b8;font-size:.68rem;font-weight:700;text-decoration:line-through; }
+        .s-card__discount-badge { display:inline-flex;padding:2px 6px;border-radius:999px;background:#fee2e2;color:#dc2626;font-size:.62rem;font-weight:800; }
+        .s-card__price--sale { color:#dc2626;font-size:.9rem; }
 
-        /* ── Responsive ── */
+        /* ΓöÇΓöÇ Responsive ΓöÇΓöÇ */
         @media(max-width:768px){
             .detail-wrap { grid-template-columns:1fr;gap:1.5rem; }
             .detail-cover { position:static; }
@@ -395,7 +430,29 @@
             </p>
 
             <div class="detail-price-row">
-                <div class="detail-price">${book.priceFormatted} &#8363;</div>
+                <c:choose>
+                    <c:when test="${not empty bestPromotion}">
+                        <div class="detail-price-stack">
+                            <div class="detail-discount-line">
+                                <span class="detail-old-price">
+                                    ${book.priceFormatted} &#8363;
+                                </span>
+                                <span class="detail-discount-badge">
+                                    ${discountLabel}
+                                </span>
+                            </div>
+                            <div class="detail-price detail-price--sale">
+                                ${discountedPriceFormatted} &#8363;
+                            </div>
+                        </div>
+                    </c:when>
+                    <c:otherwise>
+                        <div class="detail-price">
+                            ${book.priceFormatted} &#8363;
+                        </div>
+                    </c:otherwise>
+                </c:choose>
+
                 <c:choose>
                     <c:when test="${book.stockQuantity > 0}">
                         <span class="detail-stock detail-stock--in">
@@ -480,7 +537,6 @@
             </c:choose>
         </div>
     </div>
-
     <%-- Reviews --%>
     <section class="rating-section">
         <h2 class="rating-title">Product reviews</h2>
@@ -616,16 +672,15 @@
         </c:choose>
     </section>
 
-
     <%-- Suggested books --%>
     <c:if test="${not empty suggestedBooks}">
         <section class="suggested-wrap">
             <div class="sec-head">
                 <div class="sec-head__left">
                     <div class="sec-head__icon"><i class="fa-solid fa-wand-magic-sparkles"></i></div>
-                    <h2 class="sec-head__title">Có thể bạn quan tâm</h2>
+                    <h2 class="sec-head__title">You may also like</h2>
                 </div>
-                <a href="/books" class="sec-head__link">Xem thêm <i class="fa-solid fa-chevron-right"></i></a>
+                <a href="/books" class="sec-head__link">See more <i class="fa-solid fa-chevron-right"></i></a>
             </div>
             <div class="suggested-grid">
                 <c:forEach items="${suggestedBooks}" var="s">
@@ -643,14 +698,26 @@
                         <div class="s-card__body">
                             <div class="s-card__title">${s.title}</div>
                             <div class="s-card__author"><c:out value="${s.author}" default="—"/></div>
-                            <div class="s-card__price">${s.priceFormatted} &#8363;</div>
+                            <div class="s-card__price-box">
+                                <c:choose>
+                                    <c:when test="${not empty suggestedPromotionMap[s.id]}">
+                                        <div class="s-card__discount-line">
+                                            <span class="s-card__old-price">${s.priceFormatted} &#8363;</span>
+                                            <span class="s-card__discount-badge">${suggestedDiscountLabelMap[s.id]}</span>
+                                        </div>
+                                        <div class="s-card__price s-card__price--sale">${suggestedDiscountedPriceFormattedMap[s.id]} &#8363;</div>
+                                    </c:when>
+                                    <c:otherwise>
+                                        <div class="s-card__price">${s.priceFormatted} &#8363;</div>
+                                    </c:otherwise>
+                                </c:choose>
+                            </div>
                         </div>
                     </a>
                 </c:forEach>
             </div>
         </section>
     </c:if>
-
 
     <jsp:include page="/WEB-INF/view/layout/footer.jsp" />
 

@@ -208,7 +208,6 @@ public class AdminVoucherController {
                     "endDate",
                     "voucher.expired",
                     "End date cannot be in the past.");
-
         }
     }
 

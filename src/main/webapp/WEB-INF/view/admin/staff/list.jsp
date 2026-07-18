@@ -436,15 +436,18 @@
 
     <section class="admin-content">
 
-        <div class="admin-hero">
+        <div class="admin-toolbar">
             <div>
-                <p class="admin-kicker">Staff Management</p>
-                <h2>Staff Management</h2>
+                <p class="admin-kicker">
+                    <i class="fa-solid fa-user-tie"></i>
+                    Staff Management
+                </p>
+                <h2>Staff</h2>
                 <p>Manage staff accounts, roles, status and information.</p>
             </div>
 
             <div style="display:flex; gap:12px; flex-wrap:wrap;">
-                <a href="/admin/staff/deleted" class="admin-button">
+                <a href="/admin/staff/deleted" class="admin-button admin-button--ghost">
                     <i class="fa-solid fa-trash-can"></i>
                     Deleted Staff
                 </a>
@@ -583,21 +586,11 @@
 
                                 <td>
                                     <div class="staff-actions">
-                                        <button type="button"
-                                                class="btn-small btn-view"
-                                                onclick="openDetailModal(
-                                                        '${staff.staffCode}',
-                                                        '${staff.initial}',
-                                                        '${staff.fullName}',
-                                                        '${staff.email}',
-                                                        '${empty staff.staffRole ? 'N/A' : staff.staffRole}',
-                                                        '${empty staff.phone ? 'N/A' : staff.phone}',
-                                                        '${empty staff.address ? 'N/A' : staff.address}',
-                                                        '${staff.status}'
-                                                        )">
+                                        <a href="/admin/staff/${staff.id}"
+                                           class="btn-small btn-view">
                                             <i class="fa-solid fa-eye"></i>
                                             View
-                                        </button>
+                                        </a>
 
                                         <button type="button"
                                                 class="btn-small btn-edit"
