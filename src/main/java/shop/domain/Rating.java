@@ -37,6 +37,9 @@ public class Rating {
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
 
+    @Column(name = "deleted_by")
+    private String deletedBy;
+
     public Rating() {
     }
 
@@ -118,5 +121,13 @@ public class Rating {
         }
 
         return createdAt.format(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
+    }
+
+    public String getDeletedBy() {
+        return deletedBy;
+    }
+
+    public void setDeletedBy(String deletedBy) {
+        this.deletedBy = deletedBy;
     }
 }

@@ -331,7 +331,7 @@
                 <jsp:include page="/WEB-INF/view/layout/footer.jsp" />
 
 
-                <!--Voucher details-->
+
                 <div id="voucherModal" class="voucher-modal">
 
                     <div class="voucher-modal-content">

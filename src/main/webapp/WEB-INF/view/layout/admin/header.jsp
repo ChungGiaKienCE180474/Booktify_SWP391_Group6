@@ -21,6 +21,10 @@
                 <span>${not empty sessionScope.role ? sessionScope.role : 'ADMIN'}</span>
             </div>
         </div>
+        <a class="admin-topbar__link" href="/admin/profile">
+            <i class="fa-solid fa-id-card"></i>
+            My Profile
+        </a>
         <a class="admin-topbar__link" href="/">
             <i class="fa-solid fa-arrow-up-right-from-square"></i>
             Customer View

@@ -24,6 +24,13 @@ import shop.service.GenreService;
 import shop.service.PromotionService;
 import shop.service.RatingService;
 
+
+import shop.service.RatingService;
+
+import org.springframework.security.core.Authentication;
+import shop.domain.User;
+import shop.repository.UserRepository;
+
 @Controller
 @RequestMapping("/books")
 public class ClientBookController {
