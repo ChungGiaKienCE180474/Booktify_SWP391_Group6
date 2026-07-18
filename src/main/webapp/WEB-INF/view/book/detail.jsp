@@ -441,9 +441,6 @@
                         </button>
                     </c:otherwise>
                 </c:choose>
-                <a href="/cart" class="btn-detail-secondary">
-                    <i class="fa-solid fa-basket-shopping"></i> View cart
-                </a>
             </div>
 
             <%-- Meta chips --%>

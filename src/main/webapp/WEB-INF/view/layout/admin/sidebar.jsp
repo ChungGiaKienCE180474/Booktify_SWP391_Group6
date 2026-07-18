@@ -25,6 +25,8 @@
                                         Dashboard
                                     </a>
                                 </div>
+                               
+
                                 <%-- Management Section (Đã sửa lỗi đóng/mở thẻ ở đây) --%>
                                     <div class="admin-sidebar__section">
                                         <span class="admin-sidebar__label">Management</span>
@@ -80,10 +82,6 @@
 
                         <%-- Footer --%>
                             <div class="admin-sidebar__footer">
-                                <a href="/" class="admin-sidebar__item" style="margin-bottom:6px;">
-                                    <i class="fa-solid fa-arrow-up-right-from-square"></i>
-                                    Customer View
-                                </a>
                                 <form method="post" action="/logout" class="admin-sidebar__logout-form">
                                     <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}" />
                                     <button type="submit" class="admin-sidebar__logout">
