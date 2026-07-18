@@ -6,7 +6,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" />
-    <link rel="stylesheet" href="/css/admin-dashboard.css" />
+    <link rel="stylesheet" href="/css/admin-dashboard.css?v=4" />
     <title>Dashboard — Booktify Admin</title>
     <style>
         .card-icon-blue   { background:#E3F4F1; border-color:#B7DED7; color:#006B5E; }
@@ -29,15 +29,6 @@
                     <p class="admin-kicker"><i class="fa-solid fa-hand-wave"></i> Welcome back</p>
                     <h2>Dashboard Overview</h2>
                     <p>Monitor your store's books, categories, and user activity from one place.</p>
-                </div>
-                <div style="display:flex;gap:10px;flex-wrap:wrap;position:relative;z-index:1;">
-                    <a class="admin-button" href="/admin/books/create" style="background:#fff;color:#004D42;border-color:#fff;">
-                        <i class="fa-solid fa-plus"></i> New Book
-                    </a>
-                    <a class="admin-button admin-button--ghost" href="/admin/categories"
-                       style="background:rgba(255,255,255,.15);border-color:rgba(255,255,255,.35);color:#fff;">
-                        <i class="fa-solid fa-tag"></i> Categories
-                    </a>
                 </div>
             </div>
 

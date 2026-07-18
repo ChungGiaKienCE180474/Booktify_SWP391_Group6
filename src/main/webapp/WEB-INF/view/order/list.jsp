@@ -1,7 +1,7 @@
 <%@ page contentType="text/html" pageEncoding="UTF-8" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <!DOCTYPE html>
-<html lang="vi">
+<html lang="en">
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -10,7 +10,7 @@
     <link rel="stylesheet" href="/css/footer.css" />
     <link rel="stylesheet" href="/css/cart.css" />
     <link rel="stylesheet" href="/css/order.css" />
-    <title>Lịch sử đơn hàng — Booktify</title>
+    <title>Order history — Booktify</title>
 </head>
 <body class="home-page">
     <jsp:include page="/WEB-INF/view/layout/header.jsp" />
@@ -18,8 +18,8 @@
     <main class="main-content">
         <div class="cart-wrap order-wrap">
             <div class="cart-head">
-                <h1><i class="fa-solid fa-box"></i> Đơn hàng của tôi</h1>
-                <p>Theo dõi trạng thái các đơn hàng đã đặt</p>
+                <h1><i class="fa-solid fa-box"></i> My orders</h1>
+                <p>Track the status of your placed orders</p>
             </div>
 
             <c:if test="${not empty successMessage}">
@@ -33,10 +33,10 @@
                 <c:when test="${empty orders}">
                     <div class="cart-empty">
                         <i class="fa-solid fa-box-open"></i>
-                        <h2>Chưa có đơn hàng</h2>
-                        <p style="color:var(--cart-muted);">Hãy mua sách và đặt hàng để xem lịch sử tại đây.</p>
+                        <h2>No orders yet</h2>
+                        <p style="color:var(--cart-muted);">Buy books and place an order to see your history here.</p>
                         <a href="/books" class="cart-btn cart-btn--primary" style="margin-top:1rem;">
-                            <i class="fa-solid fa-book"></i> Khám phá sách
+                            <i class="fa-solid fa-book"></i> Explore books
                         </a>
                     </div>
                 </c:when>
@@ -53,7 +53,7 @@
                                     <span><i class="fa-solid fa-user"></i> ${order.recipientName}</span>
                                 </div>
                                 <div class="order-card__total">
-                                    Tổng tiền: <strong>${order.totalAmountFormatted} &#8363;</strong>
+                                    Total: <strong>${order.totalAmountFormatted} &#8363;</strong>
                                 </div>
                             </a>
                         </c:forEach>

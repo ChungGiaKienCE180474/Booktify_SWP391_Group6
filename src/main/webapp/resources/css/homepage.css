@@ -119,7 +119,8 @@ body.home-page {
     text-align: center;
     transition: transform .2s;
 }
-.banner-book-tile:nth-child(2) {
+.banner-book-tile:nth-child(2),
+.banner-book-tile:nth-child(5) {
     transform: translateY(-14px);
     background: rgba(255,255,255,.22);
 }

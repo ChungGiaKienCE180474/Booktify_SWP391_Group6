@@ -43,8 +43,8 @@ public class Book {
     private Long id;
 
     @NotBlank(message = "Title is required")
-    @Size(max = 200, message = "Title must be at most 200 characters")
-    @Column(nullable = false, length = 200)
+    @Size(max = 500, message = "Title must be at most 500 characters")
+    @Column(nullable = false, length = 500)
     private String title;
 
     // Optional — a book can be saved without an author selected.
@@ -56,8 +56,8 @@ public class Book {
     @Column(length = 20, unique = true)
     private String isbn;
 
-    @Size(max = 1000, message = "Description must be at most 1000 characters")
-    @Column(length = 1000)
+    @Size(max = 10000, message = "Description must be at most 10000 characters")
+    @Column(length = 10000)
     private String description;
 
     @NotNull(message = "Price is required")

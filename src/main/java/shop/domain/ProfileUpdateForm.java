@@ -5,14 +5,14 @@ import jakarta.validation.constraints.Size;
 
 public class ProfileUpdateForm {
 
-    @NotBlank(message = "Họ tên không được để trống")
-    @Size(min = 3, message = "Họ tên phải có tối thiểu 3 ký tự")
+    @NotBlank(message = "Full name must not be empty")
+    @Size(min = 3, message = "Full name must be at least 3 characters")
     private String fullName;
 
-    @Size(max = 20, message = "Số điện thoại tối đa 20 ký tự")
+    @Size(max = 20, message = "Phone number must be at most 20 characters")
     private String phone;
 
-    @Size(max = 255, message = "Địa chỉ tối đa 255 ký tự")
+    @Size(max = 255, message = "Address must be at most 255 characters")
     private String address;
 
     public String getFullName() {

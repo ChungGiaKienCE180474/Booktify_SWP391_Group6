@@ -8,8 +8,7 @@
                         Booktify
                     </a>
                     <p class="footer-desc">
-                        Nhà sách trực tuyến — khám phá, đặt hàng và tận hưởng những cuốn sách yêu thích mọi lúc, mọi
-                        nơi.
+                        Online bookstore — explore, order, and enjoy your favorite books anytime, anywhere.
                     </p>
                     <div class="footer-social">
                         <a href="#" aria-label="Facebook"><i class="fa-brands fa-facebook-f"></i></a>
@@ -18,37 +17,37 @@
                 </div>
 
                 <div class="footer-col">
-                    <h4>Dịch vụ</h4>
+                    <h4>Services</h4>
                     <ul>
-                        <li><a href="#">Điều khoản sử dụng</a></li>
-                        <li><a href="#">Chính sách bảo mật thông tin cá nhân</a></li>
-                        <li><a href="#">Chính sách bảo mật thanh toán</a></li>
-                        <li><a href="#">Giới thiệu Booktify</a></li>
+                        <li><a href="#">Terms of use</a></li>
+                        <li><a href="#">Personal data privacy policy</a></li>
+                        <li><a href="#">Payment security policy</a></li>
+                        <li><a href="#">About Booktify</a></li>
                     </ul>
                 </div>
 
                 <div class="footer-col">
-                    <h4>Hỗ trợ</h4>
+                    <h4>Support</h4>
                     <ul>
-                        <li><a href="#">Chính sách vận chuyển</a></li>
-                        <li><a href="#">Chính sách đổi - trả - hoàn tiền</a></li>
-                        <li><a href="#">Chính sách bảo hành - bồi hoàn</a></li>
-                        <li><a href="#">Chính sách khách sỉ</a></li>
+                        <li><a href="#">Shipping policy</a></li>
+                        <li><a href="#">Exchange - return - refund policy</a></li>
+                        <li><a href="#">Warranty - compensation policy</a></li>
+                        <li><a href="#">Wholesale customer policy</a></li>
                     </ul>
                 </div>
 
                 <div class="footer-col">
-                    <h4>Tài khoản của tôi</h4>
+                    <h4>My account</h4>
                     <ul class="footer-contact">
-                        <li><i class="fa-solid fa-envelope"></i> Thay đổi địa chỉ khách hàng</li>
+                        <li><i class="fa-solid fa-envelope"></i> Change customer address</li>
                         <li><i class="fa-solid fa-phone"></i> 1900 1234</li>
-                        <li><i class="fa-solid fa-location-dot"></i> TP. Cần Thơ</li>
+                        <li><i class="fa-solid fa-location-dot"></i><a href="https://maps.app.goo.gl/XGtGNmDhZgtZHqs96" target="_blank">FPT University Can Tho</a></li>
                     </ul>
                 </div>
             </div>
 
             <div class="footer-bottom">
-                <p>&copy; Giấy chứng nhận Đăng ký Kinh doanh số 0123456789 do Sở Kế hoạch và Đầu tư Thành phố Cần Thơ cấp ngày 2/7/2030, đăng ký thay đổi lần thứ 4, ngày 2/7/2030</p>
+                <p>&copy; Business Registration Certificate No. 0123456789 issued by the Department of Planning and Investment of Can Tho City on 2/7/2030, 4th amendment registered on 2/7/2030</p>
             </div>
         </div>
     </footer>
