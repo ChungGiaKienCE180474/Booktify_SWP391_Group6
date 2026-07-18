@@ -455,7 +455,7 @@
             </div>
 
             <%-- Genre tags: independent from Category --%>
-            <c:if test="${not empty book.genreNames}">
+            <c:if test="${not empty book.genres}">
                 <div class="detail-desc-label" style="margin-top:.4rem;">Genres</div>
                 <div class="detail-meta" style="margin-bottom:1.25rem;padding-bottom:0;border-bottom:none;">
                     <c:forEach items="${book.genres}" var="g">
@@ -483,24 +483,17 @@
 
     <%-- Reviews --%>
     <section class="rating-section">
-        <h2 class="rating-title">Review Product</h2>
+        <h2 class="rating-title">Product reviews</h2>
 
-        <%-- Create Rating --%>
         <div id="ratingFormContainer" class="rating-create">
             <c:choose>
-                <%-- Đã đăng nhập và đủ điều kiện đánh giá --%>
                 <c:when test="${canReview}">
-                    <form  id="ratingForm" action="/ratings/create" method="post">
+                    <form id="ratingForm" action="/ratings/create" method="post">
                         <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}" />
-                        <input type="hidden"
-                            name="bookId"
-                            value="${book.id}" />
-                        <input type="hidden"
-                                    id="ratingAction"
-                                    value="create">
-                        
+                        <input type="hidden" name="bookId" value="${book.id}" />
+
                         <div class="mb-3">
-                            <label class="form-label">Number of stars</label>
+                            <label class="form-label">Rating</label>
                             <div class="rating-stars-select">
                                 <input type="radio" id="star5" name="ratingValue" value="5" required>
                                 <label for="star5"><i class="fa-solid fa-star"></i></label>
@@ -514,180 +507,91 @@
                                 <label for="star1"><i class="fa-solid fa-star"></i></label>
                             </div>
                         </div>
+
                         <div class="mb-3">
                             <label class="form-label">Review</label>
-                            <textarea  id="reviewText" name="reviewText" rows="5" class="form-control" maxlength="1000" required></textarea>
+                            <textarea id="reviewText" name="reviewText" rows="5" class="form-control"
+                                maxlength="1000" required></textarea>
                         </div>
-                        <button id="ratingSubmitBtn" type="submit" class="btn-detail-primary">Submit</button>
+
+                        <button id="ratingSubmitBtn" type="submit" class="btn-detail-primary">
+                            Submit review
+                        </button>
                     </form>
                 </c:when>
-                <%-- Đã đánh giá rồi --%>
+
                 <c:when test="${not empty myRating}">
+                    <div class="alert alert-success">
+                        You have already reviewed this book.
+                    </div>
 
-    <div class="alert alert-success">
-        You have reviewed this book.
-    </div>
+                    <form id="ratingForm" action="/ratings/update" method="post" style="display:none;">
+                        <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}" />
+                        <input type="hidden" name="bookId" value="${book.id}" />
 
+                        <div class="mb-3">
+                            <label class="form-label">Rating</label>
+                            <div class="rating-stars-select">
+                                <input type="radio" id="star5" name="ratingValue" value="5">
+                                <label for="star5"><i class="fa-solid fa-star"></i></label>
+                                <input type="radio" id="star4" name="ratingValue" value="4">
+                                <label for="star4"><i class="fa-solid fa-star"></i></label>
+                                <input type="radio" id="star3" name="ratingValue" value="3">
+                                <label for="star3"><i class="fa-solid fa-star"></i></label>
+                                <input type="radio" id="star2" name="ratingValue" value="2">
+                                <label for="star2"><i class="fa-solid fa-star"></i></label>
+                                <input type="radio" id="star1" name="ratingValue" value="1">
+                                <label for="star1"><i class="fa-solid fa-star"></i></label>
+                            </div>
+                        </div>
 
-    <form id="ratingForm"
-          action="/ratings/update"
-          method="post"
-          style="display:none;">
+                        <div class="mb-3">
+                            <label class="form-label">Review</label>
+                            <textarea id="reviewText" name="reviewText" rows="5" class="form-control"
+                                maxlength="1000"></textarea>
+                        </div>
 
-        <input type="hidden" 
-               name="${_csrf.parameterName}" 
-               value="${_csrf.token}" />
-
-
-        <input type="hidden"
-               name="bookId"
-               value="${book.id}" />
-
-                                        <%-- Logged in and eligible to review --%>
-                                            <c:when test="${canReview}">
-
-        <div class="mb-3">
-
-            <label class="form-label">
-                Number of stars.
-            </label>
-
-                                                    <div class="mb-3">
-                                                        <label class="form-label">
-                                                            Rating
-                                                        </label>
-
-            <div class="rating-stars-select">
-
-                <input type="radio" 
-                       id="star5" 
-                       name="ratingValue" 
-                       value="5">
-
-                <label for="star5">
-                    <i class="fa-solid fa-star"></i>
-                </label>
-
-
-                <input type="radio" 
-                       id="star4" 
-                       name="ratingValue" 
-                       value="4">
-
-                <label for="star4">
-                    <i class="fa-solid fa-star"></i>
-                </label>
-
-
-                                                    <div class="mb-3">
-                                                        <label class="form-label">
-                                                            Review
-                                                        </label>
-
-                <label for="star3">
-                    <i class="fa-solid fa-star"></i>
-                </label>
-
-                                                    <button type="submit" class="btn-detail-primary">
-                                                        Submit review
-                                                    </button>
-
-                <input type="radio" 
-                       id="star2" 
-                       name="ratingValue" 
-                       value="2">
-
-                <label for="star2">
-                    <i class="fa-solid fa-star"></i>
-                </label>
-
-                                            <%-- Already reviewed --%>
-                                                <c:when test="${not empty myRating}">
-
-                                                    <div class="alert alert-success">
-                                                        You have already reviewed this book.
-                                                    </div>
-
-                <label for="star1">
-                    <i class="fa-solid fa-star"></i>
-                </label>
-
-                                                <%-- Logged in but has not purchased --%>
-                                                    <c:when test="${not empty currentUser}">
-
-                                                        <div class="alert alert-warning">
-                                                            You need to purchase and receive the book before you can review it.
-                                                        </div>
-
-
-                                                    <%-- Not logged in --%>
-                                                        <c:otherwise>
-
-            <textarea 
-                id="reviewText"
-                name="reviewText"
-                rows="5"
-                class="form-control"></textarea>
-
-                                                                Please
-                                                                <a href="/login">
-                                                                    log in
-                                                                </a>
-                                                                to review this product.
-
-
-        <button 
-            id="ratingSubmitBtn"
-            type="submit"
-            class="btn-detail-primary">
-
-            Update Review
-
-        </button>
-
-    </form>
-
-</c:when>
-                <%-- Đã đăng nhập nhưng chưa mua --%>
-                <c:when test="${not empty currentUser}">
-                    <div class="alert alert-warning">You need to buy and receive the product before you can leave a review.</div>
+                        <button id="ratingSubmitBtn" type="submit" class="btn-detail-primary">
+                            Update review
+                        </button>
+                    </form>
                 </c:when>
-                <%-- Chưa đăng nhập --%>
+
+                <c:when test="${not empty currentUser}">
+                    <div class="alert alert-warning">
+                        You need to purchase and receive this book before you can review it.
+                    </div>
+                </c:when>
+
                 <c:otherwise>
                     <div class="alert alert-info">
-                        Please <a href="/login">login</a> in to rate the product.
+                        Please <a href="/login">log in</a> to review this product.
                     </div>
                 </c:otherwise>
             </c:choose>
         </div>
 
-        <%-- Danh sách đánh giá --%>
         <c:choose>
             <c:when test="${not empty ratings}">
                 <c:forEach items="${ratings}" var="rating">
                     <div class="rating-item">
                         <div class="rating-user">${rating.customer.fullName}</div>
-                        
-                         <c:if test="${not empty currentUser && currentUser.id == rating.customer.id}">
-                            <button type="button"
-                                    class="rating-edit-btn"
-                                    onclick="editRating('${rating.ratingValue}', '${rating.review}')">
+
+                        <c:if test="${not empty currentUser && currentUser.id == rating.customer.id}">
+                            <button type="button" class="rating-edit-btn"
+                                onclick="editRating('${rating.ratingValue}', '${rating.review}')">
                                 <i class="fa-solid fa-pen"></i>
                             </button>
 
                             <form action="/ratings/delete" method="post" style="display:inline;">
                                 <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}" />
                                 <input type="hidden" name="bookId" value="${book.id}" />
-
-                                <button type="submit"
-                                        class="rating-delete-btn"
-                                        onclick="return confirm('Delete this review?')">
+                                <button type="submit" class="rating-delete-btn"
+                                    onclick="return confirm('Delete this review?')">
                                     <i class="fa-solid fa-trash-can"></i>
                                 </button>
                             </form>
                         </c:if>
-
-                    
 
                         <div class="rating-stars">
                             <c:forEach begin="1" end="5" var="i">
@@ -704,12 +608,10 @@
                         <div class="rating-date">${rating.createdAtFormatted}</div>
                         <div class="rating-content">${rating.review}</div>
                     </div>
-
-
                 </c:forEach>
             </c:when>
             <c:otherwise>
-                <div class="no-rating">There are no reviews for this product yet.</div>
+                <div class="no-rating">No reviews yet for this product.</div>
             </c:otherwise>
         </c:choose>
     </section>
@@ -752,33 +654,24 @@
 
     <jsp:include page="/WEB-INF/view/layout/footer.jsp" />
 
-    
-    <script>function editRating(value, review){
+    <script>
+        function editRating(value, review) {
+            const form = document.getElementById("ratingForm");
+            if (!form) return;
 
-    const form = document.getElementById("ratingForm");
+            form.style.display = "block";
 
+            const starInput = document.querySelector(
+                'input[name="ratingValue"][value="' + value + '"]'
+            );
+            if (starInput) starInput.checked = true;
 
-    // hiện form
-    form.style.display = "block";
+            const reviewField = document.getElementById("reviewText");
+            if (reviewField) reviewField.value = review || "";
 
-
-    // chọn sao cũ
-    document.querySelector(
-        'input[name="ratingValue"][value="'+value+'"]'
-    ).checked = true;
-
-
-    // điền review cũ
-    document.getElementById("reviewText").value = review;
-
-
-    // scroll tới form
-    form.scrollIntoView({
-        behavior:"smooth"
-    });
-
-}
-</script>
+            form.scrollIntoView({ behavior: "smooth" });
+        }
+    </script>
 </body>
 
 </html>

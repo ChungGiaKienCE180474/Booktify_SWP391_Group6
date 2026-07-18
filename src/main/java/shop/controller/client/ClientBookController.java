@@ -14,7 +14,6 @@ import shop.service.AuthorService;
 import shop.service.BookService;
 import shop.service.CategoryService;
 import shop.service.GenreService;
-
 import shop.service.RatingService;
 
 import org.springframework.security.core.Authentication;
@@ -107,48 +106,6 @@ public class ClientBookController {
         // Only used to link the author name to their profile when one matches.
         model.addAttribute("authorProfile", authorService.findActiveByName(book.getAuthor()).orElse(null));
         return "book/detail";
-    }
-
-    /* Rating Book */
-    @PostMapping("/{id}/rating")
-    public String createRating(
-            @PathVariable Long id,
-            @RequestParam Integer ratingValue,
-            @RequestParam String reviewText,
-            Authentication authentication,
-            RedirectAttributes redirectAttributes) {
-
-        if (authentication == null ||
-                !authentication.isAuthenticated()) {
-            redirectAttributes.addFlashAttribute(
-                    "errorMessage",
-                    "Please log in to leave a review.");
-            return "redirect:/login";
-        }
-        User customer = userRepository
-                .findByEmail(authentication.getName());
-
-        if (customer == null) {
-            redirectAttributes.addFlashAttribute(
-                    "errorMessage",
-                    "Account not found.");
-            return "redirect:/books/" + id;
-        }
-        try {
-            ratingService.createRating(
-                    id,
-                    customer.getId(),
-                    ratingValue,
-                    reviewText);
-            redirectAttributes.addFlashAttribute(
-                    "successMessage",
-                    "Review submitted successfully!");
-        } catch (Exception e) {
-            redirectAttributes.addFlashAttribute(
-                    "errorMessage",
-                    e.getMessage());
-        }
-        return "redirect:/books/" + id;
     }
 
     /** View List Of Products — alias */
