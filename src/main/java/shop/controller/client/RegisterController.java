@@ -63,7 +63,7 @@ public class RegisterController {
         int otpValue = new Random().nextInt(999999);
         String email = registerDTO.getEmail();
 
-        // Chuyển đổi RegisterDTO thành JSON và lưu vào session
+        // Convert RegisterDTO to JSON and save to session
         try {
             String registerDTOJson = objectMapper.writeValueAsString(registerDTO);
             mySession.setAttribute("registerDTO", registerDTOJson);
@@ -73,7 +73,7 @@ public class RegisterController {
             return "authentication/register";
         }
 
-        // Lưu OTP và email vào session
+        // Save OTP and email to session
         mySession.setAttribute("otp", otpValue);
         mySession.setAttribute("email", email);
 
@@ -94,7 +94,7 @@ public class RegisterController {
     @GetMapping("/authentication/enterRegisterOTP")
     public String getOTPPage(Model model, HttpServletRequest request) {
         HttpSession session = request.getSession();
-        String registerDTOJson = (String) session.getAttribute("registerDTO"); // Lấy JSON từ session
+        String registerDTOJson = (String) session.getAttribute("registerDTO"); // Get JSON from session
 
         if (registerDTOJson == null) {
             request.setAttribute("message", "Session expired. Please register again.");
@@ -109,11 +109,11 @@ public class RegisterController {
     public String validateOtp(HttpServletRequest request, @RequestParam("otp") int otp, Model model) {
         HttpSession session = request.getSession();
         Integer generatedOtp = (Integer) session.getAttribute("otp");
-        String registerDTOJson = (String) session.getAttribute("registerDTO"); // Lấy JSON từ session
+        String registerDTOJson = (String) session.getAttribute("registerDTO"); // Get JSON from session
 
         RegisterDTO registerDTO = null;
         try {
-            // Chuyển đổi JSON thành RegisterDTO
+            // Convert JSON to RegisterDTO
             registerDTO = objectMapper.readValue(registerDTOJson, RegisterDTO.class);
         } catch (JsonProcessingException e) {
             e.printStackTrace();

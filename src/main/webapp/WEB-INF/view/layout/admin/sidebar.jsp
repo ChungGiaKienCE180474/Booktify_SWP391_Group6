@@ -91,7 +91,7 @@
                             <div class="admin-sidebar__footer">
                                 <a href="/" class="admin-sidebar__item" style="margin-bottom:6px;">
                                     <i class="fa-solid fa-arrow-up-right-from-square"></i>
-                                    View Site
+                                    Customer View
                                 </a>
                                 <form method="post" action="/logout" class="admin-sidebar__logout-form">
                                     <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}" />

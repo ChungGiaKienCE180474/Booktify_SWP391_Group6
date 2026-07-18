@@ -35,14 +35,23 @@ public class CategoryController {
     public String list(@RequestParam(required = false) String q,
                        @RequestParam(required = false) String status,
                        @RequestParam(defaultValue = "0") int page,
+                       @RequestParam(defaultValue = "false") boolean all,
                        Model model) {
-        java.util.List<shop.domain.Category> all = categoryService.searchCategories(q, status);
-        int totalItems = all.size();
+        java.util.List<shop.domain.Category> allCategories = categoryService.searchCategories(q, status);
+        int totalItems = allCategories.size();
         int totalPages = Math.max(1, (int) Math.ceil((double) totalItems / PAGE_SIZE));
-        page = Math.max(0, Math.min(page, totalPages - 1));
-        int from = page * PAGE_SIZE;
-        int to   = Math.min(from + PAGE_SIZE, totalItems);
-        model.addAttribute("categories", all.subList(from, to));
+        int from;
+        int to;
+        if (all) {
+            page = 0;
+            from = 0;
+            to = totalItems;
+        } else {
+            page = Math.max(0, Math.min(page, totalPages - 1));
+            from = page * PAGE_SIZE;
+            to   = Math.min(from + PAGE_SIZE, totalItems);
+        }
+        model.addAttribute("categories", allCategories.subList(from, to));
         model.addAttribute("q", q);
         model.addAttribute("status", status);
         model.addAttribute("currentPage", page);
@@ -50,6 +59,7 @@ public class CategoryController {
         model.addAttribute("totalItems", totalItems);
         model.addAttribute("fromItem", totalItems == 0 ? 0 : from + 1);
         model.addAttribute("toItem", to);
+        model.addAttribute("viewingAll", all);
         return "admin/category/list";
     }
 

@@ -650,11 +650,16 @@ body.admin-shell {
 .admin-table tbody tr:hover { background: #F0F6FF; }
 .admin-table tbody tr:last-child td { border-bottom: none; }
 
-.admin-table__actions {
-    display: flex;
-    align-items: center;
-    gap: 6px;
+/* Ô Actions giữ nguyên là table-cell (KHÔNG dùng display:flex) để viền dưới —
+   tức vạch ngang phân cách hàng — chạy suốt hết chiều rộng khung lớn và nằm
+   đúng đáy hàng, thay vì bị cắt ngắn/lệch theo cụm 3 nút như khi dùng flex. */
+.admin-table td.admin-table__actions {
+    vertical-align: top;       /* 3 nút mặc định nằm ở TOP của hàng */
+    white-space: nowrap;       /* view / edit / delete luôn trên MỘT hàng ngang, không xuống dòng */
+    font-size: 0;              /* bỏ khoảng trắng thừa giữa các nút inline */
 }
+.admin-table__actions .icon-link { vertical-align: top; }
+.admin-table__actions .icon-link + .icon-link { margin-left: 6px; }  /* khoảng cách giữa các nút (thay cho gap của flex) */
 
 .inline-form { display: inline; }
 
@@ -662,18 +667,31 @@ body.admin-shell {
 .icon-link {
     width: 34px;
     height: 34px;
+    box-sizing: border-box;
     border-radius: var(--radius-xs);
     border: 1px solid var(--border);
     background: var(--white);
     color: var(--text-muted);
-    display: inline-grid;
-    place-items: center;
+    /* inline-flex + reset padding/line-height/appearance so <button> and <a>
+       render identically — otherwise the browser's default button styles push
+       the icon off-center and the row looks misaligned */
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    margin: 0;
+    line-height: 1;
+    font-family: inherit;
+    vertical-align: middle;
+    -webkit-appearance: none;
+    appearance: none;
     text-decoration: none;
     font-size: .82rem;
     transition: var(--ease);
     cursor: pointer;
     flex-shrink: 0;
 }
+.icon-link > i { display: block; line-height: 1; }
 
 /* View — default gray */
 .icon-link:hover {
@@ -1129,41 +1147,49 @@ select.admin-input option { background: var(--white); color: var(--text); }
 }
 
 /* ── Pagination ─────────────────────────────────────────────────────────── */
+/* Nav bar renders visually above the summary text (order), regardless of
+   DOM order — the "X of Y items" line sits bottom-right underneath it. */
 .admin-pagination {
     display: flex;
-    align-items: center;
-    justify-content: space-between;
-    flex-wrap: wrap;
-    gap: 10px;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 8px;
     padding: 14px 4px 4px;
 }
 .admin-pagination__info {
+    order: 2;
     font-size: .82rem;
     color: #6B7280;
 }
 .admin-pagination__info strong { color: #111827; }
 .admin-pagination__nav {
+    order: 1;
     display: flex;
-    align-items: center;
-    gap: 4px;
+    align-items: stretch;
     flex-wrap: wrap;
+    border: 1px solid #E5E7EB;
+    border-radius: 8px;
+    overflow: hidden;
+    background: #fff;
 }
 .pag-btn {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    min-width: 34px;
+    min-width: 38px;
     height: 34px;
-    padding: 0 10px;
-    border-radius: 6px;
+    padding: 0 12px;
     font-size: .8rem;
     font-weight: 600;
     text-decoration: none;
-    border: 1px solid #E5E7EB;
     color: #374151;
     background: #fff;
-    transition: background .15s, border-color .15s, color .15s;
+    border-right: 1px solid #E5E7EB;
+    transition: background .15s, color .15s;
+    white-space: nowrap;
 }
-.pag-btn:hover { background: #F3F4F6; border-color: #D1D5DB; }
-.pag-btn--active { background: var(--primary); border-color: var(--primary); color: #fff; pointer-events: none; }
+.pag-btn:last-child { border-right: none; }
+.pag-btn:hover { background: #F3F4F6; }
+.pag-btn--active { background: var(--primary); color: #fff; pointer-events: none; }
 .pag-btn--disabled { opacity: .4; pointer-events: none; }
+.pag-btn--all { font-weight: 700; }

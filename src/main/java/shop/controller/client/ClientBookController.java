@@ -1,6 +1,5 @@
 package shop.controller.client;
 
-import java.util.Comparator;
 import java.util.List;
 
 import org.springframework.stereotype.Controller;
@@ -52,7 +51,6 @@ public class ClientBookController {
             @RequestParam(required = false) Long categoryId,
             @RequestParam(required = false) List<Long> genreIds,
             @RequestParam(required = false) String q,
-            @RequestParam(required = false, defaultValue = "default") String sort,
             Model model) {
 
         // Status is hardcoded to "active" — customers should never see hidden books.
@@ -63,19 +61,12 @@ public class ClientBookController {
                     categoryService.getCategoryById(categoryId).orElse(null));
         }
 
-        switch (sort) {
-            case "price_asc" -> books.sort(Comparator.comparing(Book::getPrice));
-            case "price_desc" -> books.sort(Comparator.comparing(Book::getPrice).reversed());
-            // "newest" and "default" both keep the id-asc order from the repository.
-        }
-
         model.addAttribute("books", books);
         model.addAttribute("categories", categoryService.getAllCategories());
         model.addAttribute("genres", genreService.getActiveGenres());
         model.addAttribute("selectedCategoryId", categoryId);
         model.addAttribute("selectedGenreIds", genreIds == null ? List.of() : genreIds);
         model.addAttribute("q", q);
-        model.addAttribute("sort", sort);
         return "book/list";
     }
 
@@ -118,7 +109,47 @@ public class ClientBookController {
         return "book/detail";
     }
 
-   
+    /* Rating Book */
+    @PostMapping("/{id}/rating")
+    public String createRating(
+            @PathVariable Long id,
+            @RequestParam Integer ratingValue,
+            @RequestParam String reviewText,
+            Authentication authentication,
+            RedirectAttributes redirectAttributes) {
+
+        if (authentication == null ||
+                !authentication.isAuthenticated()) {
+            redirectAttributes.addFlashAttribute(
+                    "errorMessage",
+                    "Please log in to leave a review.");
+            return "redirect:/login";
+        }
+        User customer = userRepository
+                .findByEmail(authentication.getName());
+
+        if (customer == null) {
+            redirectAttributes.addFlashAttribute(
+                    "errorMessage",
+                    "Account not found.");
+            return "redirect:/books/" + id;
+        }
+        try {
+            ratingService.createRating(
+                    id,
+                    customer.getId(),
+                    ratingValue,
+                    reviewText);
+            redirectAttributes.addFlashAttribute(
+                    "successMessage",
+                    "Review submitted successfully!");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute(
+                    "errorMessage",
+                    e.getMessage());
+        }
+        return "redirect:/books/" + id;
+    }
 
     /** View List Of Products — alias */
     @GetMapping("/products")

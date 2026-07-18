@@ -2,7 +2,7 @@
     <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 
         <!DOCTYPE html>
-        <html lang="vi">
+        <html lang="en">
 
         <head>
             <meta charset="UTF-8" />
@@ -44,7 +44,7 @@
                         <c:when test="${empty authors}">
                             <div class="empty-state">
                                 <i class="fa-solid fa-user-slash"></i>
-                                <p>No author listed.</p>
+                                <p>No authors found.</p>
                             </div>
                         </c:when>
 

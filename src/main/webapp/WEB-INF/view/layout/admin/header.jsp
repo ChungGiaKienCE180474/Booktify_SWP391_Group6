@@ -7,7 +7,7 @@
         </div>
         <div>
             <h1>Booktify Admin</h1>
-            <p>Manage books, categories &amp; users</p>
+            <p>Booktify Administration Center</p>
         </div>
     </div>
 
@@ -23,7 +23,7 @@
         </div>
         <a class="admin-topbar__link" href="/">
             <i class="fa-solid fa-arrow-up-right-from-square"></i>
-            View Site
+            Customer View
         </a>
     </div>
 </header>

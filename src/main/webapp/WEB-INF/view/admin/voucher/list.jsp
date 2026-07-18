@@ -10,7 +10,7 @@
                 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
                 <link rel="stylesheet"
                     href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" />
-                <link rel="stylesheet" href="/css/admin-dashboard.css" />
+                <link rel="stylesheet" href="/css/admin-dashboard.css?v=4" />
                 <title>Voucher Management — Booktify Admin</title>
             </head>
 
@@ -391,6 +391,223 @@
 
                 </script>
 
+
+
+                <!-- VOUCHER DETAIL MODAL -->
+
+                <div id="voucherModal" class="modal-overlay" style="display:none;" onclick="closeModal('voucherModal')">
+
+
+                    <div class="modal-box voucher-ticket-modal" onclick="event.stopPropagation()">
+
+                        <div class="modal-header">
+
+                            <h3>
+
+                                <i class="fa-solid fa-ticket"></i>
+
+                                Voucher Details
+
+                            </h3>
+
+
+                            <button class="modal-close" onclick="closeModal('voucherModal')">
+
+                                <i class="fa-solid fa-xmark"></i>
+
+                            </button>
+
+                        </div>
+
+
+
+
+                        <div class="modal-body">
+
+
+                            <div class="modal-row">
+
+                                <span class="modal-label">
+                                    Name
+                                </span>
+
+                                <span id="mVoucherName" class="modal-value">
+                                </span>
+
+                            </div>
+
+
+
+                            <div class="modal-row">
+
+                                <span class="modal-label">
+                                    Code
+                                </span>
+
+                                <span id="mVoucherCode" class="modal-value">
+                                </span>
+
+                            </div>
+
+
+
+
+                            <div class="modal-row">
+
+                                <span class="modal-label">
+                                    Discount
+                                </span>
+
+                                <span id="mVoucherDiscount" class="modal-value">
+                                </span>
+
+                            </div>
+
+
+
+
+                            <div class="modal-row">
+
+                                <span class="modal-label">
+                                    Minimum Order
+                                </span>
+
+                                <span id="mVoucherMin" class="modal-value">
+                                </span>
+
+                            </div>
+
+
+
+
+                            <div class="modal-row">
+
+                                <span class="modal-label">
+                                    Quantity
+                                </span>
+
+                                <span id="mVoucherQuantity" class="modal-value">
+                                </span>
+
+                            </div>
+
+
+
+
+                            <div class="modal-row">
+
+                                <span class="modal-label">
+                                    Duration
+                                </span>
+
+                                <span id="mVoucherDuration" class="modal-value">
+                                </span>
+
+                            </div>
+
+
+
+
+                            <div class="modal-row">
+
+                                <span class="modal-label">
+                                    Status
+                                </span>
+
+                                <span id="mVoucherStatus" class="modal-value">
+                                </span>
+
+                            </div>
+
+
+
+
+                            <div class="modal-row">
+
+                                <span class="modal-label">
+                                    Description
+                                </span>
+
+                                <span id="mVoucherDescription" class="modal-value">
+                                </span>
+
+                            </div>
+
+
+
+                        </div>
+
+
+                    </div>
+
+                </div>
+
+                <script>
+
+                    document.querySelectorAll('.js-view-voucher')
+                        .forEach(function (btn) {
+
+
+                            btn.onclick = function () {
+
+
+                                let d = this.dataset;
+
+
+                                document.getElementById("mVoucherName").textContent =
+                                    d.name || "—";
+
+
+                                document.getElementById("mVoucherCode").textContent =
+                                    d.code || "—";
+
+
+                                document.getElementById("mVoucherDiscount").textContent =
+                                    d.discount + "%";
+
+
+                                document.getElementById("mVoucherMin").textContent =
+                                    Number(d.min).toLocaleString('vi-VN') + " ₫";
+
+
+                                document.getElementById("mVoucherQuantity").textContent =
+                                    d.quantity || "—";
+
+
+                                document.getElementById("mVoucherDuration").textContent =
+                                    d.start + " - " + d.end;
+
+
+                                document.getElementById("mVoucherStatus").textContent =
+                                    d.status || "—";
+
+
+                                document.getElementById("mVoucherDescription").textContent =
+                                    d.description || "—";
+
+
+                                document.getElementById("voucherModal")
+                                    .style.display = "flex";
+
+
+                            }
+
+                        });
+
+
+
+                    function closeModal(id) {
+
+                        document.getElementById(id)
+                            .style.display = "none";
+
+                    }
+
+                </script>
+
             </body>
 
             </html>
+
+
+            

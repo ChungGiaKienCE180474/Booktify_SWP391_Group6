@@ -54,7 +54,7 @@ public class OrderController {
         CartDTO cart = cartService.toCartDTO(refreshedCart);
 
         if (cart.isEmpty()) {
-            redirectAttributes.addFlashAttribute("errorMessage", "Không thể tạo đơn hàng khi giỏ hàng trống.");
+            redirectAttributes.addFlashAttribute("errorMessage", "Cannot create an order with an empty cart.");
             return "redirect:/cart";
         }
 
@@ -87,7 +87,7 @@ public class OrderController {
         try {
             var order = orderService.createOrderFromCart(user.getId(), checkoutForm);
             redirectAttributes.addFlashAttribute("successMessage",
-                    "Đặt hàng thành công! Mã đơn: " + order.getOrderCode());
+                    "Order placed successfully! Order code: " + order.getOrderCode());
             return "redirect:/orders/" + order.getId();
         } catch (IllegalArgumentException ex) {
             BigDecimal discount = BigDecimal.ZERO;
@@ -145,7 +145,7 @@ public class OrderController {
 
             model.addAttribute(
                     "successMessage",
-                    "Áp dụng voucher thành công!");
+                    "Voucher applied successfully!");
 
         } catch (IllegalArgumentException e) {
 
@@ -230,7 +230,7 @@ public class OrderController {
                     return "order/detail";
                 })
                 .orElseGet(() -> {
-                    redirectAttributes.addFlashAttribute("errorMessage", "Không tìm thấy đơn hàng.");
+                    redirectAttributes.addFlashAttribute("errorMessage", "Order not found.");
                     return "redirect:/orders";
                 });
     }
@@ -266,11 +266,11 @@ public class OrderController {
 
     private User getCurrentUser(Authentication authentication) {
         if (authentication == null || !authentication.isAuthenticated()) {
-            throw new IllegalStateException("Bạn cần đăng nhập để đặt hàng.");
+            throw new IllegalStateException("You need to log in to place an order.");
         }
         User user = userService.getUserByEmail(authentication.getName());
         if (user == null) {
-            throw new IllegalStateException("Không tìm thấy người dùng.");
+            throw new IllegalStateException("User not found.");
         }
         return user;
     }

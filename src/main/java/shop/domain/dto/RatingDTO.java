@@ -14,13 +14,13 @@ public class RatingDTO {
     @NotNull
     private Long customerId;
 
-    @NotNull(message = "Please select the number of stars.")
-    @Min(value = 1, message = "The number of stars must be between 1 and 5.")
-    @Max(value = 5, message = "The number of stars must be between 1 and 5.")
+    @NotNull(message = "Please select a star rating.")
+    @Min(value = 1, message = "The rating must be between 1 and 5.")
+    @Max(value = 5, message = "The rating must be between 1 and 5.")
     private Integer ratingValue;
 
     @NotBlank(message = "Please enter your review.")
-    @Size(max = 1000, message = "The review content should be a maximum of 1000 characters.")
+    @Size(max = 1000, message = "The review must be at most 1000 characters.")
     private String review;
 
     public RatingDTO() {

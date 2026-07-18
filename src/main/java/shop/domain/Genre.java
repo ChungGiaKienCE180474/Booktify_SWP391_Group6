@@ -35,8 +35,8 @@ public class Genre {
     @Column(nullable = false, length = 120)
     private String name;
 
-    @Size(max = 500, message = "Description must be at most 500 characters")
-    @Column(length = 500)
+    @Size(max = 50000, message = "Description must be at most 50000 characters")
+    @Column(length = 50000)
     private String description;
 
     // Only used to group/filter genres in the admin screen — unrelated to the
