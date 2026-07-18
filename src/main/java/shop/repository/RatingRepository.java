@@ -17,4 +17,14 @@ public interface RatingRepository extends JpaRepository<Rating, Integer> {
 
     Optional<Rating> findByBook_IdAndCustomer_Id(Long bookId, Long customerId);
 
+    Optional<Rating> findByBook_IdAndCustomer_IdAndStatus(
+            Long bookId,
+            Long customerId,
+            String status);
+
+    boolean existsByBook_IdAndCustomer_IdAndStatus(
+            Long bookId,
+            Long customerId,
+            String status);
+            
 }

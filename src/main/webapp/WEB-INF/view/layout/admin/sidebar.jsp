@@ -48,11 +48,18 @@
                                             <i class="fa-solid fa-book"></i>
                                             Books
                                         </a>
-                                      <a href="/admin/orders"
-               class="admin-sidebar__item ${fn:contains(pageContext.request.requestURI, '/admin/orders') ? 'active' : ''}">
-                <i class="fa-solid fa-receipt"></i>
-                Orders
-            </a>
+
+                                        <a href="/admin/reviews"
+                                            class="admin-sidebar__item ${fn:contains(pageContext.request.requestURI, '/admin/reviews') ? 'active' : ''}">
+                                            <i class="fa-solid fa-star"></i>
+                                            Reviews
+                                        </a>
+
+                                        <a href="/admin/orders"
+                                            class="admin-sidebar__item ${fn:contains(pageContext.request.requestURI, '/admin/orders') ? 'active' : ''}">
+                                            <i class="fa-solid fa-receipt"></i>
+                                            Orders
+                                        </a>
 
                                         <a href="/admin/authors"
                                             class="admin-sidebar__item ${fn:contains(pageContext.request.requestURI, '/admin/authors') ? 'active' : ''}">
@@ -77,6 +84,8 @@
                                             <i class="fa-solid fa-user-tie"></i>
                                             Staff
                                         </a>
+
+
                                     </div> <%-- Đóng thẻ chuẩn cho khối Management --%>
                         </nav>
 
