@@ -144,6 +144,36 @@
             color: var(--accent-warm, #F57C00);
             white-space: nowrap;
         }
+        .detail-price-stack {
+            display: flex;
+            flex-direction: column;
+            gap: .35rem;
+        }
+        .detail-discount-line {
+            display: flex;
+            align-items: center;
+            gap: .65rem;
+            flex-wrap: wrap;
+        }
+        .detail-old-price {
+            color: #94a3b8;
+            font-size: 1rem;
+            font-weight: 700;
+            text-decoration: line-through;
+        }
+        .detail-discount-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: .35rem .7rem;
+            border-radius: 999px;
+            background: #fee2e2;
+            color: #dc2626;
+            font-size: .78rem;
+            font-weight: 800;
+        }
+        .detail-price--sale {
+            color: #dc2626;
+        }
         .detail-stock {
             display: inline-flex;
             align-items: center;
@@ -305,6 +335,11 @@
         .s-card__title { font-size:.8rem;font-weight:700;line-height:1.3;color:var(--text);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;margin-bottom:.2rem;min-height:calc(1.3em * 2); }
         .s-card__author { font-size:.7rem;color:var(--text-muted);margin-bottom:.4rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.2;min-height:1.2em;display:block; }
         .s-card__price { font-size:.82rem;font-weight:800;color:var(--accent-warm,#F57C00);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:auto; }
+        .s-card__price-box { display:flex;flex-direction:column;gap:3px;margin-top:auto; }
+        .s-card__discount-line { display:flex;align-items:center;gap:5px;flex-wrap:wrap; }
+        .s-card__old-price { color:#94a3b8;font-size:.68rem;font-weight:700;text-decoration:line-through; }
+        .s-card__discount-badge { display:inline-flex;padding:2px 6px;border-radius:999px;background:#fee2e2;color:#dc2626;font-size:.62rem;font-weight:800; }
+        .s-card__price--sale { color:#dc2626;font-size:.9rem; }
 
         /* ── Responsive ── */
         @media(max-width:768px){
@@ -395,7 +430,29 @@
             </p>
 
             <div class="detail-price-row">
-                <div class="detail-price">${book.priceFormatted} &#8363;</div>
+                <c:choose>
+                    <c:when test="${not empty bestPromotion}">
+                        <div class="detail-price-stack">
+                            <div class="detail-discount-line">
+                                <span class="detail-old-price">
+                                    ${book.priceFormatted} &#8363;
+                                </span>
+                                <span class="detail-discount-badge">
+                                    ${discountLabel}
+                                </span>
+                            </div>
+                            <div class="detail-price detail-price--sale">
+                                ${discountedPriceFormatted} &#8363;
+                            </div>
+                        </div>
+                    </c:when>
+                    <c:otherwise>
+                        <div class="detail-price">
+                            ${book.priceFormatted} &#8363;
+                        </div>
+                    </c:otherwise>
+                </c:choose>
+
                 <c:choose>
                     <c:when test="${book.stockQuantity > 0}">
                         <span class="detail-stock detail-stock--in">
@@ -483,7 +540,7 @@
             </c:choose>
         </div>
     </div>
-                    <%-- 
+                    <%--
                     Section --%>
                         <section class="rating-section">
                             <h2 class="rating-title">
@@ -591,7 +648,7 @@
                                                 <div class="rating-user">
                                                     ${rating.customer.fullName}
                                                 </div>
-                                              
+
                                                 <div class="rating-stars">
                                                     <c:forEach begin="1" end="5" var="i">
                                                         <c:choose>
@@ -610,7 +667,7 @@
                                                 <div class="rating-content">
                                                     ${rating.review}
                                                 </div>
-                                                
+
                                             </div>
                                         </c:forEach>
                                     </c:when>
@@ -654,7 +711,28 @@
                                                 <div class="s-card__body">
                                                     <div class="s-card__title">${s.title}</div>
                                                     <div class="s-card__author">${s.author}</div>
-                                                    <div class="s-card__price">${s.priceFormatted} &#8363;</div>
+                                                    <div class="s-card__price-box">
+                                                        <c:choose>
+                                                            <c:when test="${not empty suggestedPromotionMap[s.id]}">
+                                                                <div class="s-card__discount-line">
+                                                                    <span class="s-card__old-price">
+                                                                        ${s.priceFormatted} &#8363;
+                                                                    </span>
+                                                                    <span class="s-card__discount-badge">
+                                                                        ${suggestedDiscountLabelMap[s.id]}
+                                                                    </span>
+                                                                </div>
+                                                                <div class="s-card__price s-card__price--sale">
+                                                                    ${suggestedDiscountedPriceFormattedMap[s.id]} &#8363;
+                                                                </div>
+                                                            </c:when>
+                                                            <c:otherwise>
+                                                                <div class="s-card__price">
+                                                                    ${s.priceFormatted} &#8363;
+                                                                </div>
+                                                            </c:otherwise>
+                                                        </c:choose>
+                                                    </div>
                                                 </div>
                                             </a>
                                         </c:forEach>

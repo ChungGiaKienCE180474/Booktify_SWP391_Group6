@@ -11,6 +11,50 @@
             <link rel="stylesheet" href="/css/header.css" />
             <link rel="stylesheet" href="/css/footer.css" />
             <link rel="stylesheet" href="/css/homepage.css" />
+            <style>
+                .book-card__footer {
+                    align-items: flex-end;
+                }
+
+                .book-card__price-box {
+                    display: flex;
+                    min-width: 0;
+                    flex: 1;
+                    flex-direction: column;
+                    gap: 4px;
+                }
+
+                .book-card__discount-line {
+                    display: flex;
+                    align-items: center;
+                    gap: 6px;
+                    flex-wrap: wrap;
+                }
+
+                .book-card__old-price {
+                    color: #94a3b8;
+                    font-size: .72rem;
+                    font-weight: 700;
+                    text-decoration: line-through;
+                }
+
+                .book-card__discount-badge {
+                    display: inline-flex;
+                    align-items: center;
+                    padding: 3px 7px;
+                    border-radius: 999px;
+                    background: #fee2e2;
+                    color: #dc2626;
+                    font-size: .68rem;
+                    font-weight: 800;
+                    white-space: nowrap;
+                }
+
+                .book-card__price--sale {
+                    color: #dc2626;
+                    font-size: 1rem;
+                }
+            </style>
             <title>Booktify — Online Bookstore</title>
         </head>
 
@@ -31,7 +75,7 @@
                                     life skills and more. Fast delivery, best prices.</p>
                                 <div class="banner-actions">
                                     <a href="/books" class="btn-banner btn-banner-primary">
-                                        <i class="fa-solid fa-book-open"></i> Buys now
+                                        <i class="fa-solid fa-book-open"></i> Buy now
                                     </a>
                                     <c:if test="${empty sessionScope.username}">
                                         <a href="/register" class="btn-banner btn-banner-outline">
@@ -134,8 +178,28 @@
                                                         <c:out value="${book.author}" default="—" />
                                                     </div>
                                                     <div class="book-card__footer">
-                                                        <span class="book-card__price">${book.priceFormatted}
-                                                            &#8363;</span>
+                                                        <div class="book-card__price-box">
+                                                            <c:choose>
+                                                                <c:when test="${not empty bestPromotionMap[book.id]}">
+                                                                    <div class="book-card__discount-line">
+                                                                        <span class="book-card__old-price">
+                                                                            ${book.priceFormatted} &#8363;
+                                                                        </span>
+                                                                        <span class="book-card__discount-badge">
+                                                                            ${discountLabelMap[book.id]}
+                                                                        </span>
+                                                                    </div>
+                                                                    <span class="book-card__price book-card__price--sale">
+                                                                        ${discountedPriceFormattedMap[book.id]} &#8363;
+                                                                    </span>
+                                                                </c:when>
+                                                                <c:otherwise>
+                                                                    <span class="book-card__price">
+                                                                        ${book.priceFormatted} &#8363;
+                                                                    </span>
+                                                                </c:otherwise>
+                                                            </c:choose>
+                                                        </div>
                                                         <span class="book-card__detail-btn">Details</span>
                                                     </div>
                                                 </div>
@@ -187,8 +251,28 @@
                                                             <c:out value="${book.author}" default="—" />
                                                         </div>
                                                         <div class="book-card__footer">
-                                                            <span class="book-card__price">${book.priceFormatted}
-                                                                &#8363;</span>
+                                                            <div class="book-card__price-box">
+                                                                <c:choose>
+                                                                    <c:when test="${not empty bestPromotionMap[book.id]}">
+                                                                        <div class="book-card__discount-line">
+                                                                            <span class="book-card__old-price">
+                                                                                ${book.priceFormatted} &#8363;
+                                                                            </span>
+                                                                            <span class="book-card__discount-badge">
+                                                                                ${discountLabelMap[book.id]}
+                                                                            </span>
+                                                                        </div>
+                                                                        <span class="book-card__price book-card__price--sale">
+                                                                            ${discountedPriceFormattedMap[book.id]} &#8363;
+                                                                        </span>
+                                                                    </c:when>
+                                                                    <c:otherwise>
+                                                                        <span class="book-card__price">
+                                                                            ${book.priceFormatted} &#8363;
+                                                                        </span>
+                                                                    </c:otherwise>
+                                                                </c:choose>
+                                                            </div>
                                                             <span class="book-card__detail-btn">Details</span>
                                                         </div>
                                                     </div>
