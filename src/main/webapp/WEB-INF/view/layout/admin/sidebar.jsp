@@ -48,6 +48,12 @@
                                             Books
                                         </a>
 
+                                        <a href="/admin/reviews"
+                                            class="admin-sidebar__item ${fn:contains(pageContext.request.requestURI, '/admin/reviews') ? 'active' : ''}">
+                                            <i class="fa-solid fa-star"></i>
+                                            Reviews
+                                        </a>
+
                                         <a href="/admin/orders"
                                             class="admin-sidebar__item ${fn:contains(pageContext.request.requestURI, '/admin/orders') ? 'active' : ''}">
                                             <i class="fa-solid fa-receipt"></i>

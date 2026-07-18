@@ -512,7 +512,7 @@
             </div>
 
             <%-- Genre tags: independent from Category --%>
-            <c:if test="${not empty book.genreNames}">
+            <c:if test="${not empty book.genres}">
                 <div class="detail-desc-label" style="margin-top:.4rem;">Genres</div>
                 <div class="detail-meta" style="margin-bottom:1.25rem;padding-bottom:0;border-bottom:none;">
                     <c:forEach items="${book.genres}" var="g">
@@ -658,27 +658,139 @@
                     <i class="fa-solid fa-star"></i>
                 </label>
 
-                                            <%-- Already reviewed --%>
-                                                <c:when test="${not empty myRating}">
+                <c:when test="${not empty myRating}">
+                    <div class="alert alert-success">
+                        You have already reviewed this book.
+                    </div>
 
-                                                    <div class="alert alert-success">
-                                                        You have already reviewed this book.
-                                                    </div>
+                    <form id="ratingForm" action="/ratings/update" method="post" style="display:none;">
+                        <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}" />
+                        <input type="hidden" name="bookId" value="${book.id}" />
 
+                        <div class="mb-3">
+                            <label class="form-label">Rating</label>
+                            <div class="rating-stars-select">
+                                <input type="radio" id="star5" name="ratingValue" value="5">
+                                <label for="star5"><i class="fa-solid fa-star"></i></label>
+                                <input type="radio" id="star4" name="ratingValue" value="4">
+                                <label for="star4"><i class="fa-solid fa-star"></i></label>
+                                <input type="radio" id="star3" name="ratingValue" value="3">
+                                <label for="star3"><i class="fa-solid fa-star"></i></label>
+                                <input type="radio" id="star2" name="ratingValue" value="2">
+                                <label for="star2"><i class="fa-solid fa-star"></i></label>
+                                <input type="radio" id="star1" name="ratingValue" value="1">
+                                <label for="star1"><i class="fa-solid fa-star"></i></label>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Review</label>
+                            <textarea id="reviewText" name="reviewText" rows="5" class="form-control"
+                                maxlength="1000"></textarea>
+                        </div>
+
+                        <button id="ratingSubmitBtn" type="submit" class="btn-detail-primary">
+                            Update review
+                        </button>
+                    </form>
+                </c:when>
                 <label for="star1">
                     <i class="fa-solid fa-star"></i>
                 </label>
 
-                                                <%-- Logged in but has not purchased --%>
-                                                    <c:when test="${not empty currentUser}">
+                <c:when test="${not empty currentUser}">
+                    <div class="alert alert-warning">
+                        You need to purchase and receive this book before you can review it.
+                    </div>
+                </c:when>
 
-                                                        <div class="alert alert-warning">
-                                                            You need to purchase and receive the book before you can review it.
-                                                        </div>
+                <c:otherwise>
+                    <div class="alert alert-info">
+                        Please <a href="/login">log in</a> to review this product.
+                    </div>
+                </c:otherwise>
+            </c:choose>
+        </div>
+
+        <c:choose>
+            <c:when test="${not empty ratings}">
+                <c:forEach items="${ratings}" var="rating">
+                    <div class="rating-item">
+                        <div class="rating-user">${rating.customer.fullName}</div>
+
+                        <c:if test="${not empty currentUser && currentUser.id == rating.customer.id}">
+                            <button type="button" class="rating-edit-btn"
+                                onclick="editRating('${rating.ratingValue}', '${rating.review}')">
+                                <i class="fa-solid fa-pen"></i>
+                            </button>
+
+                            <form action="/ratings/delete" method="post" style="display:inline;">
+                                <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}" />
+                                <input type="hidden" name="bookId" value="${book.id}" />
+                                <button type="submit" class="rating-delete-btn"
+                                    onclick="return confirm('Delete this review?')">
+                                    <i class="fa-solid fa-trash-can"></i>
+                                </button>
+                            </form>
+                        </c:if>
+
+                        <div class="rating-stars">
+                            <c:forEach begin="1" end="5" var="i">
+                                <c:choose>
+                                    <c:when test="${i <= rating.ratingValue}">
+                                        <i class="fa-solid fa-star star-filled"></i>
+                                    </c:when>
+                                    <c:otherwise>
+                                        <i class="fa-regular fa-star star-empty"></i>
+                                    </c:otherwise>
+                                </c:choose>
+                            </c:forEach>
+                        </div>
+                        <div class="rating-date">${rating.createdAtFormatted}</div>
+                        <div class="rating-content">${rating.review}</div>
+                    </div>
+                </c:forEach>
+            </c:when>
+            <c:otherwise>
+                <div class="no-rating">No reviews yet for this product.</div>
+            </c:otherwise>
+        </c:choose>
+    </section>
 
 
-                                                    <%-- Not logged in --%>
-                                                        <c:otherwise>
+    <%-- Suggested books --%>
+    <c:if test="${not empty suggestedBooks}">
+        <section class="suggested-wrap">
+            <div class="sec-head">
+                <div class="sec-head__left">
+                    <div class="sec-head__icon"><i class="fa-solid fa-wand-magic-sparkles"></i></div>
+                    <h2 class="sec-head__title">Có thể bạn quan tâm</h2>
+                </div>
+                <a href="/books" class="sec-head__link">Xem thêm <i class="fa-solid fa-chevron-right"></i></a>
+            </div>
+            <div class="suggested-grid">
+                <c:forEach items="${suggestedBooks}" var="s">
+                    <a href="/books/${s.id}" class="s-card">
+                        <div class="s-card__thumb">
+                            <c:choose>
+                                <c:when test="${not empty s.imageUrl}">
+                                    <img src="${s.imageUrl}" alt="${s.title}" />
+                                </c:when>
+                                <c:otherwise>
+                                    <div class="s-card__placeholder"><i class="fa-solid fa-book"></i></div>
+                                </c:otherwise>
+                            </c:choose>
+                        </div>
+                        <div class="s-card__body">
+                            <div class="s-card__title">${s.title}</div>
+                            <div class="s-card__author"><c:out value="${s.author}" default="—"/></div>
+                            <div class="s-card__price">${s.priceFormatted} &#8363;</div>
+                        </div>
+                    </a>
+                </c:forEach>
+            </div>
+        </section>
+    </c:if>
 
             <textarea 
                 id="reviewText"
@@ -686,11 +798,7 @@
                 rows="5"
                 class="form-control"></textarea>
 
-                                                                Please
-                                                                <a href="/login">
-                                                                    log in
-                                                                </a>
-                                                                to review this product.
+    <jsp:include page="/WEB-INF/view/layout/footer.jsp" />
 
 
         <button 

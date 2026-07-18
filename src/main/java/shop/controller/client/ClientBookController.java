@@ -301,6 +301,7 @@ public class ClientBookController {
         return "book/detail";
     }
 
+    /** View List Of Products — alias */
     @PostMapping("/{id}/rating")
     public String createRating(
             @PathVariable Long id,
