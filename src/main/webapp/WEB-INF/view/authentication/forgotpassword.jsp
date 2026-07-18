@@ -1,13 +1,13 @@
 ﻿<%@page contentType="text/html" pageEncoding="UTF-8" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <!DOCTYPE html>
-<html lang="vi">
+<html lang="en">
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" />
     <link rel="stylesheet" href="/css/auth.css" />
-    <title>Booktify — Quên mật khẩu</title>
+    <title>Booktify — Forgot password</title>
 </head>
 <body class="auth-page">
     <div class="auth-shell">
@@ -17,24 +17,24 @@
                 <span>Booktify</span>
             </a>
             <a href="/login" class="auth-back-home">
-                <i class="fa-solid fa-arrow-left"></i> Về đăng nhập
+                <i class="fa-solid fa-arrow-left"></i> Back to login
             </a>
         </header>
 
         <main class="auth-main">
             <div class="auth-card">
                 <div class="auth-card-header">
-                    <h1>Quên mật khẩu?</h1>
-                    <p>Khôi phục mật khẩu qua email trong 3 bước</p>
+                    <h1>Forgot password?</h1>
+                    <p>Recover your password via email in 3 steps</p>
                 </div>
 
                 <div class="auth-card-body">
                     <div class="auth-steps">
-                        <h3><i class="fa-solid fa-list-ol"></i> Hướng dẫn</h3>
+                        <h3><i class="fa-solid fa-list-ol"></i> Instructions</h3>
                         <ol>
-                            <li><span>1.</span> Nhập email đã đăng ký bên dưới.</li>
-                            <li><span>2.</span> Hệ thống gửi mã OTP về email của bạn.</li>
-                            <li><span>3.</span> Nhập OTP ở trang tiếp theo để đặt lại mật khẩu.</li>
+                            <li><span>1.</span> Enter your registered email below.</li>
+                            <li><span>2.</span> The system sends an OTP code to your email.</li>
+                            <li><span>3.</span> Enter the OTP on the next page to reset your password.</li>
                         </ol>
                     </div>
 
@@ -47,7 +47,7 @@
                     <c:if test="${param.invalidemail != null}">
                         <div class="auth-alert auth-alert-error">
                             <i class="fa-solid fa-circle-exclamation"></i>
-                            Email không hợp lệ hoặc chưa được đăng ký.
+                            Invalid email or not registered.
                         </div>
                     </c:if>
 
@@ -57,14 +57,14 @@
                             <label class="auth-label" for="email-for-pass">Email</label>
                             <input type="email" id="email-for-pass" name="email" class="auth-input" required
                                    placeholder="name@example.com" />
-                            <p class="auth-hint">Nhập email đã đăng ký. Chúng tôi sẽ gửi mã OTP tới email này.</p>
+                            <p class="auth-hint">Enter your registered email. We will send an OTP code to this email.</p>
                         </div>
                         <div class="auth-btn-group">
                             <button type="submit" class="auth-btn auth-btn-primary">
-                                <i class="fa-solid fa-paper-plane"></i> Gửi OTP
+                                <i class="fa-solid fa-paper-plane"></i> Send OTP
                             </button>
                             <a href="/login" class="auth-btn auth-btn-secondary" style="text-align:center;text-decoration:none;">
-                                Quay lại
+                                Back
                             </a>
                         </div>
                     </form>

@@ -17,6 +17,11 @@ import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 
+/**
+ * Genre entity (table "genres"). Books and genres are many-to-many through
+ * book_genres (see Book.genres) — a genre doesn't need to share the category
+ * of the books it's attached to.
+ */
 @Entity
 @Table(name = "genres")
 public class Genre {
@@ -30,17 +35,21 @@ public class Genre {
     @Column(nullable = false, length = 120)
     private String name;
 
-    @Size(max = 500, message = "Description must be at most 500 characters")
-    @Column(length = 500)
+    @Size(max = 50000, message = "Description must be at most 50000 characters")
+    @Column(length = 50000)
     private String description;
 
+    // Only used to group/filter genres in the admin screen — unrelated to the
+    // category of any book this genre gets attached to.
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "category_id")
     private Category category;
 
+    // Hidden but recoverable. Different from "deleted" below.
     @Column(nullable = false)
     private boolean active = true;
 
+    // Soft-deleted for good — not meant to be restored through the normal UI.
     @Column(nullable = false, columnDefinition = "boolean default false")
     private boolean deleted = false;
 
@@ -61,8 +70,6 @@ public class Genre {
     void onUpdate() {
         this.updatedAt = LocalDateTime.now();
     }
-
-    // ── Getters / Setters ─────────────────────────────────────────────────────
 
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
@@ -94,5 +101,21 @@ public class Genre {
 
     public String getCreatedAtString() {
         return createdAt == null ? "" : createdAt.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"));
+    }
+
+    // Book.genres is a Set<Genre>, so equality must be id-based rather than
+    // reference-based — otherwise the same genre loaded in different
+    // sessions would be treated as duplicates.
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Genre)) return false;
+        Genre other = (Genre) o;
+        return id != null && id.equals(other.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return getClass().hashCode();
     }
 }

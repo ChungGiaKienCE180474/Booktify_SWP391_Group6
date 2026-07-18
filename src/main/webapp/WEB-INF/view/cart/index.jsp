@@ -3,7 +3,7 @@
         <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 
             <!DOCTYPE html>
-            <html lang="vi">
+            <html lang="en">
 
             <head>
                 <meta charset="UTF-8" />
@@ -13,7 +13,9 @@
                 <link rel="stylesheet" href="/css/header.css" />
                 <link rel="stylesheet" href="/css/footer.css" />
                 <link rel="stylesheet" href="/css/cart.css" />
-                <title>Giỏ hàng — Booktify</title>
+                <link rel="stylesheet" href="/css/voucher.css" />
+
+                <title>Cart — Booktify</title>
             </head>
 
             <body class="home-page">
@@ -23,8 +25,8 @@
                 <main class="main-content">
                     <div class="cart-wrap">
                         <div class="cart-head">
-                            <h1><i class="fa-solid fa-cart-shopping"></i> Giỏ hàng của bạn</h1>
-                            <p>Quản lý sách trước khi đặt hàng</p>
+                            <h1><i class="fa-solid fa-cart-shopping"></i> Your cart</h1>
+                            <p>Manage your books before checkout</p>
                         </div>
 
                         <c:if test="${not empty successMessage}">
@@ -41,10 +43,10 @@
                             <c:when test="${empty cart.items}">
                                 <div class="cart-empty">
                                     <i class="fa-solid fa-cart-arrow-down"></i>
-                                    <h2>Giỏ hàng trống</h2>
-                                    <p style="color:var(--cart-muted);">Hãy khám phá sách và thêm vào giỏ hàng nhé!</p>
+                                    <h2>Your cart is empty</h2>
+                                    <p style="color:var(--cart-muted);">Explore books and add them to your cart!</p>
                                     <a href="/books" class="cart-btn cart-btn--primary" style="margin-top:1rem;">
-                                        <i class="fa-solid fa-book"></i> Xem sách
+                                        <i class="fa-solid fa-book"></i> Browse books
                                     </a>
                                 </div>
                             </c:when>
@@ -54,10 +56,10 @@
                                         <table class="cart-table">
                                             <thead>
                                                 <tr>
-                                                    <th>Sản phẩm</th>
-                                                    <th>Đơn giá</th>
-                                                    <th>Số lượng</th>
-                                                    <th>Thành tiền</th>
+                                                    <th>Product</th>
+                                                    <th>Unit price</th>
+                                                    <th>Quantity</th>
+                                                    <th>Subtotal</th>
                                                     <th></th>
                                                 </tr>
                                             </thead>
@@ -84,8 +86,7 @@
                                                                     <div class="cart-book__author">${item.bookAuthor}
                                                                     </div>
                                                                     <c:if test="${!item.bookActive}">
-                                                                        <small style="color:#dc2626;">Ngừng kinh
-                                                                            doanh</small>
+                                                                        <small style="color:#dc2626;">Discontinued</small>
                                                                     </c:if>
                                                                 </div>
                                                             </div>
@@ -105,7 +106,7 @@
                                                                     value="${item.quantity}" min="1"
                                                                     max="${item.bookStockQuantity}" step="1" required />
                                                                 <button type="submit"
-                                                                    class="cart-btn cart-btn--outline">Cập nhật</button>
+                                                                    class="cart-btn cart-btn--outline">Update</button>
                                                             </form>
                                                         </td>
                                                         <td>
@@ -119,7 +120,7 @@
                                                                     value="${_csrf.token}" />
                                                                 <input type="hidden" name="itemId" value="${item.id}" />
                                                                 <button type="submit" class="cart-btn cart-btn--ghost"
-                                                                    title="Xóa">
+                                                                    title="Remove">
                                                                     <i class="fa-solid fa-trash"></i>
                                                                 </button>
                                                             </form>
@@ -134,49 +135,38 @@
 
                                         <!-- Voucher List -->
                                         <div class="voucher-box">
-
                                             <h2>
                                                 <i class="fa-solid fa-ticket"></i>
-                                                Voucher khả dụng
+                                                Available vouchers
                                             </h2>
 
                                             <c:choose>
-
                                                 <c:when test="${empty activeVouchers}">
-
                                                     <p class="voucher-empty">
-                                                        Không có voucher khả dụng.
+                                                        No vouchers available.
                                                     </p>
-
                                                 </c:when>
 
                                                 <c:otherwise>
 
                                                     <div class="voucher-list-scroll">
-
                                                         <c:forEach items="${activeVouchers}" var="voucher">
-
                                                             <div class="voucher-card">
-
                                                                 <div class="voucher-description">
                                                                     <strong>
                                                                         🎟 ${voucher.voucherName}
                                                                     </strong>
                                                                 </div>
-
                                                                 <div class="voucher-info">
                                                                     <span>
-                                                                        Mã:
+                                                                        Code:
                                                                     </span>
-
                                                                     <b>
                                                                         ${voucher.voucherCode}
                                                                     </b>
                                                                 </div>
-
                                                                 <div class="voucher-info">
-                                                                    Đơn hàng từ:
-
+                                                                    Orders from:
                                                                     <b>
                                                                         <fmt:formatNumber
                                                                             value="${voucher.minOrderAmount}"
@@ -186,21 +176,18 @@
                                                                 </div>
 
                                                                 <div class="voucher-info">
-                                                                    HSD:
-
+                                                                    Expiry:
                                                                     <b>
-                                                                        ${voucher.endDate}
+                                                                        ${voucher.endDateString}
                                                                     </b>
                                                                 </div>
 
                                                                 <div class="voucher-actions">
-
                                                                     <button type="button" class="copy-voucher-btn"
                                                                         onclick="copyVoucher('${voucher.voucherCode}')">
 
                                                                         <i class="fa-solid fa-copy"></i>
                                                                         Copy
-
                                                                     </button>
 
                                                                     <button type="button" class="detail-voucher-btn"
@@ -208,56 +195,48 @@
                                     '${voucher.voucherName}',
                                     '${voucher.minOrderAmount}',
                                     '${voucher.voucherCode}',
-                                    '${voucher.startDate}',
-                                    '${voucher.endDate}',
+                                    '${voucher.startDateString}',
+                                    '${voucher.endDateString}',
                                     '${voucher.description}'
                                 )">
 
                                                                         <i class="fa-solid fa-circle-info"></i>
-                                                                        Xem chi tiết
-
+                                                                        View details
                                                                     </button>
 
                                                                 </div>
-
                                                             </div>
-
                                                         </c:forEach>
-
                                                     </div>
-
                                                 </c:otherwise>
-
                                             </c:choose>
-
                                         </div>
 
 
 
                                         <!-- Order Summary -->
-
-                                        <h2>Tóm tắt đơn hàng</h2>
+                                        <h2>Order summary</h2>
                                         <div class="cart-summary-row">
-                                            <span>Số sản phẩm</span>
+                                            <span>Items</span>
                                             <span>${cartItemCount}</span>
                                         </div>
                                         <div class="cart-summary-row total">
-                                            <span>Tổng tiền</span>
+                                            <span>Total</span>
                                             <span>
                                                 ${cart.totalAmountFormatted} &#8363;
                                             </span>
                                         </div>
                                         <div class="cart-summary-actions">
                                             <a href="/books" class="cart-btn cart-btn--outline">
-                                                <i class="fa-solid fa-arrow-left"></i> Tiếp tục mua sách
+                                                <i class="fa-solid fa-arrow-left"></i> Continue shopping
                                             </a>
                                             <form method="post" action="/cart/clear"
-                                                onsubmit="return confirm('Bạn có chắc muốn xóa toàn bộ giỏ hàng?');">
+                                                onsubmit="return confirm('Are you sure you want to clear your entire cart?');">
                                                 <input type="hidden" name="${_csrf.parameterName}"
                                                     value="${_csrf.token}" />
                                                 <button type="submit" class="cart-btn cart-btn--ghost"
                                                     style="width:100%;">
-                                                    <i class="fa-solid fa-trash-can"></i> Xóa toàn bộ giỏ hàng
+                                                    <i class="fa-solid fa-trash-can"></i> Clear entire cart
                                                 </button>
                                             </form>
                                             <form method="post" action="/cart/validate">
@@ -265,7 +244,7 @@
                                                     value="${_csrf.token}" />
                                                 <button type="submit" class="cart-btn cart-btn--primary"
                                                     style="width:100%;">
-                                                    <i class="fa-solid fa-credit-card"></i> Tiến hành đặt hàng
+                                                    <i class="fa-solid fa-credit-card"></i> Proceed to checkout
                                                 </button>
                                             </form>
                                         </div>
@@ -279,7 +258,7 @@
                 <jsp:include page="/WEB-INF/view/layout/footer.jsp" />
 
 
-                <!-- Voucher chi tiết -->
+                <!--Voucher details-->
                 <div id="voucherModal" class="voucher-modal">
 
                     <div class="voucher-modal-content">
@@ -294,22 +273,22 @@
                         </h2>
 
                         <div class="voucher-detail-item">
-                            <b>Đơn hàng tối thiểu:</b>
+                            <b>Minimum order:</b>
                             <span id="modalMinOrder"></span>
                         </div>
 
                         <div class="voucher-detail-item">
-                            <b>Mã giảm giá:</b>
+                            <b>Discount code:</b>
                             <span id="modalCode"></span>
                         </div>
 
                         <div class="voucher-detail-item">
-                            <b>Thời gian áp dụng:</b>
+                            <b>Valid period:</b>
                             <span id="modalDate"></span>
                         </div>
 
                         <div class="voucher-detail-item">
-                            <b>Chi tiết:</b>
+                            <b>Details:</b>
                             <p id="modalDescription"></p>
                         </div>
                     </div>
@@ -323,7 +302,7 @@
                             .then(() => {
 
                                 alert(
-                                    "Đã sao chép mã voucher: " + code
+                                    "Voucher code copied: " + code
                                 );
 
                             });
@@ -338,7 +317,6 @@
                         endDate,
                         description
                     ) {
-
                         document.getElementById("modalVoucherName")
                             .innerText = name;
 
@@ -355,14 +333,12 @@
 
                         document.getElementById("modalDescription")
                             .innerText =
-                            description || "Không có mô tả";
+                            description || "No description";
 
                         document.getElementById("voucherModal")
                             .classList.add("active");
 
                     }
-
-
                     function closeVoucherDetail() {
 
                         document.getElementById("voucherModal")

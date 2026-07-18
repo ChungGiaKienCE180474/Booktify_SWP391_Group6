@@ -66,6 +66,10 @@ public class Voucher {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
+    private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+
+    private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
+
     // =====================
     // CONSTRUCTOR
     // =====================
@@ -208,14 +212,23 @@ public class Voucher {
     }
 
     public String getUpdatedAtString() {
-
         if (updatedAt == null) {
             return "";
         }
-
-        return updatedAt.format(
-                DateTimeFormatter.ofPattern(
-                        "yyyy-MM-dd HH:mm"));
+        return updatedAt.format(DATE_TIME_FORMATTER);
     }
 
+    public String getStartDateString() {
+        if (startDate == null) {
+            return "";
+        }
+        return startDate.format(DATE_FORMATTER);
+    }
+
+    public String getEndDateString() {
+        if (endDate == null) {
+            return "";
+        }
+        return endDate.format(DATE_FORMATTER);
+    }
 }

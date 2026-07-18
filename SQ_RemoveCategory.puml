@@ -1,0 +1,67 @@
+@startuml SQ_RemoveCategory
+skinparam sequenceMessageAlign center
+skinparam responseMessageBelowArrow true
+skinparam FontSize 12
+skinparam ParticipantPadding 20
+skinparam BoxPadding 10
+
+actor Admin
+
+participant "category/list.jsp\n<<Screen>>" as Screen
+participant "CategoryController\n<<Controller>>" as CC
+participant "CategoryService\n<<Service>>" as CS
+participant "CategoryRepository\n<<Repository>>" as CR
+participant "BookRepository\n<<Repository>>" as BR
+database "Database\n<<DB>>" as DB
+
+' ─── 1. Admin bấm Remove ────────────────────────────────────────────────────
+Admin -> Screen : Click nút "Remove" trên\ncategory cần xoá
+Screen -> CC    : POST /admin/categories/{id}/delete
+
+' ─── 2. Controller gọi Service ──────────────────────────────────────────────
+CC -> CS : removeCategory(id)
+
+' ─── 3. Kiểm tra Category tồn tại ──────────────────────────────────────────
+CS -> CR : findById(id)
+CR -> DB : SELECT * FROM categories\nWHERE id = {id}
+DB --> CR : result row
+CR --> CS : Optional<Category>
+
+alt [Category không tồn tại]
+    CS --> CC : throw IllegalArgumentException\n("Category not found")
+    CC --> Screen : redirect /admin/categories\n[flash: errorMessage — unexpected error]
+    Screen --> Admin : Hiển thị toast lỗi
+
+else [Category tồn tại]
+
+    ' ─── 4. Kiểm tra còn Book không ────────────────────────────────────────
+    CS -> BR : existsByCategoryId(id)
+    BR -> DB : SELECT COUNT(*) > 0 FROM books\nWHERE category_id = {id}
+    DB --> BR : boolean
+    BR --> CS : hasBooks
+
+    alt [hasBooks = true — Category còn chứa Book]
+        CS --> CC : throw IllegalStateException\n("Cannot delete: has books assigned")
+        CC --> Screen : redirect /admin/categories\n[flash: errorMessage — e.getMessage()]
+        Screen --> Admin : Hiển thị toast lỗi\n(không cho xoá)
+
+    else [hasBooks = false — Category không có Book nào]
+
+        ' ─── 5. Soft delete ─────────────────────────────────────────────────
+        CS -> CS : category.setActive(false)
+
+        CS -> CR : save(category)
+        CR -> DB : UPDATE categories\nSET active = false\nWHERE id = {id}
+        DB --> CR : updated row
+        CR --> CS : Category (active = false)
+
+        CS --> CC : void (success)
+
+        ' ─── 6. Phản hồi thành công ─────────────────────────────────────────
+        CC --> Screen : redirect /admin/categories\n[flash: successMessage — "Category removed successfully."]
+        Screen --> Admin : Hiển thị toast thành công\nCategory ẩn khỏi danh sách
+
+    end
+end
+
+@enduml

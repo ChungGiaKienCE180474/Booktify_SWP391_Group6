@@ -273,15 +273,6 @@ body.home-page {
         border: none;
         padding: .35rem 0;
     }
-}
-
-
-
-
-
-/* =========================
-   Voucher Ticket
-========================= */
 
 .voucher-box {
     margin-bottom: 20px;
@@ -304,7 +295,6 @@ body.home-page {
 
 /* =========================
    Ticket Card
-========================= */
 
 .voucher-card {
     position: relative;
@@ -320,7 +310,6 @@ body.home-page {
 
 /* =========================
    Hai lỗ vé
-========================= */
 
 .voucher-card::before,
 .voucher-card::after {
@@ -352,7 +341,6 @@ body.home-page {
 
 /* =========================
    Description
-========================= */
 
 .voucher-description {
     font-size: 1rem;
@@ -367,7 +355,6 @@ body.home-page {
 
 /* =========================
    Info rows
-========================= */
 
 .voucher-info {
     display: flex;
@@ -387,7 +374,6 @@ body.home-page {
 
 /* =========================
    Copy Button
-========================= */
 
 .copy-voucher-btn {
     margin-left: auto;
@@ -408,7 +394,6 @@ body.home-page {
 
 /* =========================
    Scrollbar
-========================= */
 
 .voucher-list-scroll::-webkit-scrollbar {
     width: 6px;

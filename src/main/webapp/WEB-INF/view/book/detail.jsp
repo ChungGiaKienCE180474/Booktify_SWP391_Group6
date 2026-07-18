@@ -1,7 +1,8 @@
+<%-- Storefront book detail page: full book info plus a "related books" section. --%>
 <%@ page contentType="text/html" pageEncoding="UTF-8" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <!DOCTYPE html>
-<html lang="vi">
+<html lang="en">
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -9,6 +10,7 @@
     <link rel="stylesheet" href="/css/header.css" />
     <link rel="stylesheet" href="/css/footer.css" />
     <link rel="stylesheet" href="/css/homepage.css" />
+    <link rel="stylesheet" href="/css/rating.css" />
     <title>${book.title} — Booktify</title>
     <style>
         /* ── Breadcrumb ── */
@@ -108,6 +110,21 @@
             margin-bottom: 1.25rem;
         }
         .detail-info__author strong { color: var(--text); font-weight: 700; }
+        .detail-info__author-link {
+            text-decoration: none;
+            cursor: pointer;
+        }
+        .detail-info__author-link strong {
+            color: var(--primary);
+            text-decoration: underline;
+            text-decoration-color: rgba(0,107,94,.35);
+            text-underline-offset: 2px;
+            transition: color .12s, text-decoration-color .12s;
+        }
+        .detail-info__author-link:hover strong {
+            color: var(--primary-light);
+            text-decoration-color: currentColor;
+        }
 
         /* Price row */
         .detail-price-row {
@@ -264,6 +281,7 @@
             overflow: hidden;
             display: flex;
             flex-direction: column;
+            height: 300px;
             cursor: pointer;
             text-decoration: none;
             color: inherit;
@@ -271,7 +289,7 @@
         }
         .s-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-lg); }
         .s-card__thumb {
-            height: 190px;
+            height: 170px;
             overflow: hidden;
             background: linear-gradient(135deg, #ECEFF1, #CFD8DC);
             flex-shrink: 0;
@@ -283,16 +301,19 @@
         .s-card:hover .s-card__thumb img { transform:scale(1.06); }
         .s-card__placeholder { color:#90A4AE;display:flex;flex-direction:column;align-items:center;gap:.35rem; }
         .s-card__placeholder i { font-size:2.5rem; }
-        .s-card__body { padding:.65rem .8rem .8rem;flex:1;display:flex;flex-direction:column; }
-        .s-card__title { font-size:.85rem;font-weight:700;line-height:1.3;flex:1;color:var(--text);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;margin-bottom:.2rem; }
-        .s-card__author { font-size:.72rem;color:var(--text-muted);margin-bottom:.55rem; }
-        .s-card__price { font-size:.95rem;font-weight:800;color:var(--accent-warm,#F57C00);white-space:nowrap; }
+        .s-card__body { padding:.6rem .75rem .7rem;flex:1;min-width:0;min-height:0;display:flex;flex-direction:column;overflow:hidden; }
+        .s-card__title { font-size:.8rem;font-weight:700;line-height:1.3;color:var(--text);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;margin-bottom:.2rem;min-height:calc(1.3em * 2); }
+        .s-card__author { font-size:.7rem;color:var(--text-muted);margin-bottom:.4rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.2;min-height:1.2em;display:block; }
+        .s-card__price { font-size:.82rem;font-weight:800;color:var(--accent-warm,#F57C00);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:auto; }
 
+        /* ── Responsive ── */
         @media(max-width:768px){
             .detail-wrap { grid-template-columns:1fr;gap:1.5rem; }
             .detail-cover { position:static; }
             .detail-cover__frame { max-width:220px;margin:0 auto; }
             .detail-info__title { font-size:1.45rem; }
+            .s-card { height: 270px; }
+            .s-card__thumb { height: 145px; }
         }
     </style>
 </head>
@@ -301,9 +322,9 @@
 
     <%-- Breadcrumb --%>
     <nav class="breadcrumb">
-        <a href="/">Trang chủ</a>
+        <a href="/">Home</a>
         <i class="fa-solid fa-chevron-right"></i>
-        <a href="/books">Sách</a>
+        <a href="/books">Books</a>
         <c:if test="${not empty book.category}">
             <i class="fa-solid fa-chevron-right"></i>
             <a href="/books?categoryId=${book.category.id}">${book.category.name}</a>
@@ -346,7 +367,7 @@
                 </c:choose>
             </div>
             <a href="/books" class="detail-cover__back">
-                <i class="fa-solid fa-arrow-left"></i> Quay lại danh sách
+                <i class="fa-solid fa-arrow-left"></i> Back to list
             </a>
         </aside>
 
@@ -359,19 +380,31 @@
             </c:if>
 
             <h1 class="detail-info__title">${book.title}</h1>
-            <p class="detail-info__author">Tác giả: <strong>${book.author}</strong></p>
+            <p class="detail-info__author">
+                Author:
+                <c:choose>
+                    <c:when test="${not empty authorProfile}">
+                        <a href="/authors/${authorProfile.authorId}" class="detail-info__author-link">
+                            <strong>${book.author}</strong>
+                        </a>
+                    </c:when>
+                    <c:otherwise>
+                        <strong>${book.author}</strong>
+                    </c:otherwise>
+                </c:choose>
+            </p>
 
             <div class="detail-price-row">
                 <div class="detail-price">${book.priceFormatted} &#8363;</div>
                 <c:choose>
                     <c:when test="${book.stockQuantity > 0}">
                         <span class="detail-stock detail-stock--in">
-                            <i class="fa-solid fa-circle-check"></i> Còn hàng (${book.stockQuantity})
+                            <i class="fa-solid fa-circle-check"></i> In stock (${book.stockQuantity})
                         </span>
                     </c:when>
                     <c:otherwise>
                         <span class="detail-stock detail-stock--out">
-                            <i class="fa-solid fa-circle-xmark"></i> Hết hàng
+                            <i class="fa-solid fa-circle-xmark"></i> Out of stock
                         </span>
                     </c:otherwise>
                 </c:choose>
@@ -387,29 +420,29 @@
                                     <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}" />
                                     <input type="hidden" name="bookId" value="${book.id}" />
                                     <input type="hidden" name="redirect" value="/books/${book.id}" />
-                                    <label class="detail-qty-label" for="cartQty">Số lượng</label>
+                                    <label class="detail-qty-label" for="cartQty">Quantity</label>
                                     <input type="number" id="cartQty" name="quantity" value="1"
                                            min="1" max="${book.stockQuantity}" step="1" class="detail-qty-input" required />
                                     <button type="submit" class="btn-detail-primary">
-                                        <i class="fa-solid fa-cart-shopping"></i> Thêm vào giỏ hàng
+                                        <i class="fa-solid fa-cart-shopping"></i> Add to cart
                                     </button>
                                 </form>
                             </c:when>
                             <c:otherwise>
                                 <a href="/login" class="btn-detail-primary">
-                                    <i class="fa-solid fa-right-to-bracket"></i> Đăng nhập để mua
+                                    <i class="fa-solid fa-right-to-bracket"></i> Log in to buy
                                 </a>
                             </c:otherwise>
                         </c:choose>
                     </c:when>
                     <c:otherwise>
                         <button type="button" class="btn-detail-primary" disabled style="opacity:.6;cursor:not-allowed;">
-                            <i class="fa-solid fa-cart-shopping"></i> Không thể thêm vào giỏ
+                            <i class="fa-solid fa-cart-shopping"></i> Cannot add to cart
                         </button>
                     </c:otherwise>
                 </c:choose>
                 <a href="/cart" class="btn-detail-secondary">
-                    <i class="fa-solid fa-basket-shopping"></i> Xem giỏ hàng
+                    <i class="fa-solid fa-basket-shopping"></i> View cart
                 </a>
             </div>
 
@@ -421,56 +454,217 @@
                 <c:if test="${not empty book.category}">
                     <span class="meta-chip"><i class="fa-solid fa-layer-group"></i> ${book.category.name}</span>
                 </c:if>
-                <span class="meta-chip"><i class="fa-solid fa-boxes-stacked"></i> Tồn kho: ${book.stockQuantity}</span>
+                <span class="meta-chip"><i class="fa-solid fa-boxes-stacked"></i> Stock: ${book.stockQuantity}</span>
             </div>
 
+            <%-- Genre tags: independent from Category --%>
+            <c:if test="${not empty book.genreNames}">
+                <div class="detail-desc-label" style="margin-top:.4rem;">Genres</div>
+                <div class="detail-meta" style="margin-bottom:1.25rem;padding-bottom:0;border-bottom:none;">
+                    <c:forEach items="${book.genres}" var="g">
+                        <c:if test="${g.active and not g.deleted}">
+                            <span class="meta-chip" style="border-color:var(--primary);color:var(--primary);background:rgba(0,107,94,.06);">
+                                <i class="fa-solid fa-tags"></i> <c:out value="${g.name}"/>
+                            </span>
+                        </c:if>
+                    </c:forEach>
+                </div>
+            </c:if>
+
             <%-- Description --%>
-            <div class="detail-desc-label">Giới thiệu sách</div>
+            <div class="detail-desc-label">About this book</div>
             <c:choose>
                 <c:when test="${not empty book.description}">
                     <p class="detail-desc">${book.description}</p>
                 </c:when>
                 <c:otherwise>
-                    <p class="detail-desc" style="color:var(--text-muted);font-style:italic;">Chưa có mô tả cho cuốn sách này.</p>
+                    <p class="detail-desc" style="color:var(--text-muted);font-style:italic;">No description available for this book.</p>
                 </c:otherwise>
             </c:choose>
         </div>
     </div>
+                    <%-- 
+                    Section --%>
+                        <section class="rating-section">
+                            <h2 class="rating-title">
+                                Product reviews
+                            </h2>
 
-    <%-- Suggested books --%>
-    <c:if test="${not empty suggestedBooks}">
-        <section class="suggested-wrap">
-            <div class="sec-head">
-                <div class="sec-head__left">
-                    <div class="sec-head__icon"><i class="fa-solid fa-wand-magic-sparkles"></i></div>
-                    <h2 class="sec-head__title">Có thể bạn quan tâm</h2>
-                </div>
-                <a href="/books" class="sec-head__link">Xem thêm <i class="fa-solid fa-chevron-right"></i></a>
-            </div>
-            <div class="suggested-grid">
-                <c:forEach items="${suggestedBooks}" var="s">
-                    <a href="/books/${s.id}" class="s-card">
-                        <div class="s-card__thumb">
-                            <c:choose>
-                                <c:when test="${not empty s.imageUrl}">
-                                    <img src="${s.imageUrl}" alt="${s.title}" />
-                                </c:when>
-                                <c:otherwise>
-                                    <div class="s-card__placeholder"><i class="fa-solid fa-book"></i></div>
-                                </c:otherwise>
-                            </c:choose>
-                        </div>
-                        <div class="s-card__body">
-                            <div class="s-card__title">${s.title}</div>
-                            <div class="s-card__author">${s.author}</div>
-                            <div class="s-card__price">${s.priceFormatted} &#8363;</div>
-                        </div>
-                    </a>
-                </c:forEach>
-            </div>
-        </section>
-    </c:if>
 
-    <jsp:include page="/WEB-INF/view/layout/footer.jsp" />
-</body>
-</html>
+                            <%-- Create Rating --%>
+                                <div class="rating-create">
+
+                                    <c:choose>
+
+                                        <%-- Logged in and eligible to review --%>
+                                            <c:when test="${canReview}">
+
+                                                <form action="/books/${book.id}/rating" method="post">
+
+                                                    <input type="hidden" name="${_csrf.parameterName}"
+                                                        value="${_csrf.token}" />
+
+                                                    <div class="mb-3">
+                                                        <label class="form-label">
+                                                            Rating
+                                                        </label>
+
+                                                        <div class="rating-stars-select">
+
+                                                            <input type="radio" id="star5" name="ratingValue" value="5"
+                                                                required>
+                                                            <label for="star5"><i class="fa-solid fa-star"></i></label>
+
+                                                            <input type="radio" id="star4" name="ratingValue" value="4">
+                                                            <label for="star4"><i class="fa-solid fa-star"></i></label>
+
+                                                            <input type="radio" id="star3" name="ratingValue" value="3">
+                                                            <label for="star3"><i class="fa-solid fa-star"></i></label>
+
+                                                            <input type="radio" id="star2" name="ratingValue" value="2">
+                                                            <label for="star2"><i class="fa-solid fa-star"></i></label>
+
+                                                            <input type="radio" id="star1" name="ratingValue" value="1">
+                                                            <label for="star1"><i class="fa-solid fa-star"></i></label>
+
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="mb-3">
+                                                        <label class="form-label">
+                                                            Review
+                                                        </label>
+
+                                                        <textarea name="reviewText" rows="5" class="form-control"
+                                                            maxlength="1000" required></textarea>
+                                                    </div>
+
+                                                    <button type="submit" class="btn-detail-primary">
+                                                        Submit review
+                                                    </button>
+
+                                                </form>
+
+                                            </c:when>
+
+                                            <%-- Already reviewed --%>
+                                                <c:when test="${not empty myRating}">
+
+                                                    <div class="alert alert-success">
+                                                        You have already reviewed this book.
+                                                    </div>
+
+                                                </c:when>
+
+                                                <%-- Logged in but has not purchased --%>
+                                                    <c:when test="${not empty currentUser}">
+
+                                                        <div class="alert alert-warning">
+                                                            You need to purchase and receive the book before you can review it.
+                                                        </div>
+
+                                                    </c:when>
+
+                                                    <%-- Not logged in --%>
+                                                        <c:otherwise>
+
+                                                            <div class="alert alert-info">
+
+                                                                Please
+                                                                <a href="/login">
+                                                                    log in
+                                                                </a>
+                                                                to review this product.
+
+                                                            </div>
+
+                                                        </c:otherwise>
+
+                                    </c:choose>
+
+                                </div>
+
+                                <c:choose>
+                                    <c:when test="${not empty ratings}">
+                                        <c:forEach items="${ratings}" var="rating">
+                                            <div class="rating-item">
+                                                <div class="rating-user">
+                                                    ${rating.customer.fullName}
+                                                </div>
+                                              
+                                                <div class="rating-stars">
+                                                    <c:forEach begin="1" end="5" var="i">
+                                                        <c:choose>
+                                                            <c:when test="${i <= rating.ratingValue}">
+                                                                <i class="fa-solid fa-star star-filled"></i>
+                                                            </c:when>
+                                                            <c:otherwise>
+                                                                <i class="fa-regular fa-star star-empty"></i>
+                                                            </c:otherwise>
+                                                        </c:choose>
+                                                    </c:forEach>
+                                                </div>
+                                                  <div class="rating-date">
+                                                    ${rating.createdAtFormatted}
+                                                </div>
+                                                <div class="rating-content">
+                                                    ${rating.review}
+                                                </div>
+                                                
+                                            </div>
+                                        </c:forEach>
+                                    </c:when>
+                                    <c:otherwise>
+
+                                        <div class="no-rating">
+                                            No reviews yet for this product.
+                                        </div>
+                                    </c:otherwise>
+                                </c:choose>
+                        </section>
+
+
+
+                        <%-- Suggested books --%>
+                            <c:if test="${not empty suggestedBooks}">
+                                <section class="suggested-wrap">
+                                    <div class="sec-head">
+                                        <div class="sec-head__left">
+                                            <div class="sec-head__icon"><i class="fa-solid fa-wand-magic-sparkles"></i>
+                                            </div>
+                                            <h2 class="sec-head__title">You may also like</h2>
+                                        </div>
+                                        <a href="/books" class="sec-head__link">See more <i
+                                                class="fa-solid fa-chevron-right"></i></a>
+                                    </div>
+                                    <div class="suggested-grid">
+                                        <c:forEach items="${suggestedBooks}" var="s">
+                                            <a href="/books/${s.id}" class="s-card">
+                                                <div class="s-card__thumb">
+                                                    <c:choose>
+                                                        <c:when test="${not empty s.imageUrl}">
+                                                            <img src="${s.imageUrl}" alt="${s.title}" />
+                                                        </c:when>
+                                                        <c:otherwise>
+                                                            <div class="s-card__placeholder"><i
+                                                                    class="fa-solid fa-book"></i></div>
+                                                        </c:otherwise>
+                                                    </c:choose>
+                                                </div>
+                                                <div class="s-card__body">
+                                                    <div class="s-card__title">${s.title}</div>
+                                                    <div class="s-card__author">${s.author}</div>
+                                                    <div class="s-card__price">${s.priceFormatted} &#8363;</div>
+                                                </div>
+                                            </a>
+                                        </c:forEach>
+                                    </div>
+                                </section>
+                            </c:if>
+
+
+
+                            <jsp:include page="/WEB-INF/view/layout/footer.jsp" />
+        </body>
+
+        </html>

@@ -1,25 +1,26 @@
 /* ═══════════════════════════════════════════════════════════════════
    BOOKTIFY — ADMIN PANEL
-   Light theme  ·  Navy sidebar  ·  Orange / Blue accents
+   Light theme  ·  Teal sidebar  ·  Orange / Teal accents
+   (đồng bộ tone màu với Customer UI — xem :root trong header.css)
    ═══════════════════════════════════════════════════════════════════ */
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
 
 /* ── CSS Custom Properties ─────────────────────────────────────── */
 :root {
     /* Backgrounds */
-    --bg:          #F1F5F9;
+    --bg:          #F5F7FA;
     --white:       #FFFFFF;
-    --sidebar-bg:  #0F172A;
+    --sidebar-bg:  #004D42;
     --sidebar-hover: rgba(255,255,255,.07);
-    --sidebar-act: rgba(249,115,22,.15);
+    --sidebar-act: rgba(245,124,0,.18);
 
-    /* Brand */
-    --primary:     #2563EB;
-    --primary-dk:  #1D4ED8;
-    --primary-lt:  #EFF6FF;
-    --accent:      #F97316;
-    --accent-dk:   #EA6C0B;
-    --accent-lt:   #FFF7ED;
+    /* Brand — khớp với --primary/--accent-warm ở Customer UI (header.css) */
+    --primary:     #006B5E;
+    --primary-dk:  #004D42;
+    --primary-lt:  #E3F4F1;
+    --accent:      #F57C00;
+    --accent-dk:   #D96900;
+    --accent-lt:   #FFF3E0;
 
     /* Semantic */
     --success:     #16A34A;
@@ -92,7 +93,7 @@ body.admin-shell {
 }
 
 /* ══════════════════════════════════════════════════════════════════
-   SIDEBAR  (dark navy)
+   SIDEBAR  (dark teal — đồng bộ với Customer UI)
    ══════════════════════════════════════════════════════════════════ */
 .admin-sidebar {
     position: sticky;
@@ -128,7 +129,7 @@ body.admin-shell {
     font-size: .95rem;
     color: #fff;
     flex-shrink: 0;
-    box-shadow: 0 4px 12px rgba(249,115,22,.4);
+    box-shadow: 0 4px 12px rgba(245,124,0,.4);
 }
 
 .sidebar-logo__text { display: flex; flex-direction: column; }
@@ -292,7 +293,7 @@ body.admin-shell {
     font-size: .8rem;
     color: #fff;
     flex-shrink: 0;
-    box-shadow: 0 3px 10px rgba(37,99,235,.25);
+    box-shadow: 0 3px 10px rgba(0,107,94,.25);
 }
 
 .admin-topbar__brand h1 {
@@ -312,13 +313,13 @@ body.admin-shell {
     width: 36px;
     height: 36px;
     border-radius: var(--radius-sm);
-    background: linear-gradient(135deg, var(--primary-dk), #4F46E5);
+    background: linear-gradient(135deg, var(--primary), var(--primary-dk));
     display: grid;
     place-items: center;
     font-size: .8rem;
     color: #fff;
     flex-shrink: 0;
-    box-shadow: 0 2px 8px rgba(37,99,235,.2);
+    box-shadow: 0 2px 8px rgba(0,107,94,.2);
 }
 
 .admin-topbar__user strong {
@@ -341,14 +342,14 @@ body.admin-shell {
     padding: 7px 14px;
     border-radius: var(--radius-sm);
     background: var(--primary-lt);
-    border: 1px solid #BFDBFE;
+    border: 1px solid #B7DED7;
     color: var(--primary);
     font-size: .8rem;
     font-weight: 600;
     text-decoration: none;
     transition: var(--ease);
 }
-.admin-topbar__link:hover { background: #DBEAFE; }
+.admin-topbar__link:hover { background: #D3EEE9; }
 
 /* ── Content ──────────────────────────────────────────────────── */
 .admin-content {
@@ -398,7 +399,7 @@ body.admin-shell {
     align-items: center;
     gap: 24px;
     padding: 32px 36px;
-    background: linear-gradient(135deg, #1D3865 0%, #2563EB 55%, #1D4ED8 100%);
+    background: linear-gradient(135deg, #012B24 0%, var(--primary) 55%, var(--primary-dk) 100%);
     border-radius: var(--radius-xl);
     box-shadow: var(--shadow-md);
     position: relative;
@@ -470,7 +471,7 @@ body.admin-shell {
     height: 46px;
     border-radius: var(--radius-sm);
     background: var(--primary-lt);
-    border: 1px solid #BFDBFE;
+    border: 1px solid #B7DED7;
     display: grid;
     place-items: center;
     font-size: 1.1rem;
@@ -548,14 +549,14 @@ body.admin-shell {
     background: var(--primary);
     color: #fff;
     border-color: var(--primary);
-    box-shadow: 0 2px 8px rgba(37,99,235,.25);
+    box-shadow: 0 2px 8px rgba(0,107,94,.25);
 }
 .admin-button:hover,
 .admin-action:hover {
     background: var(--primary-dk);
     border-color: var(--primary-dk);
     transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(37,99,235,.35);
+    box-shadow: 0 4px 12px rgba(0,107,94,.35);
 }
 
 /* Ghost / Cancel */
@@ -649,11 +650,16 @@ body.admin-shell {
 .admin-table tbody tr:hover { background: #F0F6FF; }
 .admin-table tbody tr:last-child td { border-bottom: none; }
 
-.admin-table__actions {
-    display: flex;
-    align-items: center;
-    gap: 6px;
+/* Ô Actions giữ nguyên là table-cell (KHÔNG dùng display:flex) để viền dưới —
+   tức vạch ngang phân cách hàng — chạy suốt hết chiều rộng khung lớn và nằm
+   đúng đáy hàng, thay vì bị cắt ngắn/lệch theo cụm 3 nút như khi dùng flex. */
+.admin-table td.admin-table__actions {
+    vertical-align: top;       /* 3 nút mặc định nằm ở TOP của hàng */
+    white-space: nowrap;       /* view / edit / delete luôn trên MỘT hàng ngang, không xuống dòng */
+    font-size: 0;              /* bỏ khoảng trắng thừa giữa các nút inline */
 }
+.admin-table__actions .icon-link { vertical-align: top; }
+.admin-table__actions .icon-link + .icon-link { margin-left: 6px; }  /* khoảng cách giữa các nút (thay cho gap của flex) */
 
 .inline-form { display: inline; }
 
@@ -661,18 +667,31 @@ body.admin-shell {
 .icon-link {
     width: 34px;
     height: 34px;
+    box-sizing: border-box;
     border-radius: var(--radius-xs);
     border: 1px solid var(--border);
     background: var(--white);
     color: var(--text-muted);
-    display: inline-grid;
-    place-items: center;
+    /* inline-flex + reset padding/line-height/appearance so <button> and <a>
+       render identically — otherwise the browser's default button styles push
+       the icon off-center and the row looks misaligned */
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    margin: 0;
+    line-height: 1;
+    font-family: inherit;
+    vertical-align: middle;
+    -webkit-appearance: none;
+    appearance: none;
     text-decoration: none;
     font-size: .82rem;
     transition: var(--ease);
     cursor: pointer;
     flex-shrink: 0;
 }
+.icon-link > i { display: block; line-height: 1; }
 
 /* View — default gray */
 .icon-link:hover {
@@ -684,7 +703,7 @@ body.admin-shell {
 /* Edit — blue */
 .icon-link--edit:hover {
     background: var(--primary-lt);
-    border-color: #BFDBFE;
+    border-color: #B7DED7;
     color: var(--primary);
 }
 
@@ -800,7 +819,7 @@ body.admin-shell {
 
 .admin-input:focus {
     border-color: var(--primary);
-    box-shadow: 0 0 0 3px rgba(37,99,235,.12);
+    box-shadow: 0 0 0 3px rgba(0,107,94,.12);
 }
 
 .admin-input::placeholder { color: var(--text-faint); }
@@ -1128,41 +1147,49 @@ select.admin-input option { background: var(--white); color: var(--text); }
 }
 
 /* ── Pagination ─────────────────────────────────────────────────────────── */
+/* Nav bar renders visually above the summary text (order), regardless of
+   DOM order — the "X of Y items" line sits bottom-right underneath it. */
 .admin-pagination {
     display: flex;
-    align-items: center;
-    justify-content: space-between;
-    flex-wrap: wrap;
-    gap: 10px;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 8px;
     padding: 14px 4px 4px;
 }
 .admin-pagination__info {
+    order: 2;
     font-size: .82rem;
     color: #6B7280;
 }
 .admin-pagination__info strong { color: #111827; }
 .admin-pagination__nav {
+    order: 1;
     display: flex;
-    align-items: center;
-    gap: 4px;
+    align-items: stretch;
     flex-wrap: wrap;
+    border: 1px solid #E5E7EB;
+    border-radius: 8px;
+    overflow: hidden;
+    background: #fff;
 }
 .pag-btn {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    min-width: 34px;
+    min-width: 38px;
     height: 34px;
-    padding: 0 10px;
-    border-radius: 6px;
+    padding: 0 12px;
     font-size: .8rem;
     font-weight: 600;
     text-decoration: none;
-    border: 1px solid #E5E7EB;
     color: #374151;
     background: #fff;
-    transition: background .15s, border-color .15s, color .15s;
+    border-right: 1px solid #E5E7EB;
+    transition: background .15s, color .15s;
+    white-space: nowrap;
 }
-.pag-btn:hover { background: #F3F4F6; border-color: #D1D5DB; }
-.pag-btn--active { background: #1E3A5F; border-color: #1E3A5F; color: #fff; pointer-events: none; }
+.pag-btn:last-child { border-right: none; }
+.pag-btn:hover { background: #F3F4F6; }
+.pag-btn--active { background: var(--primary); color: #fff; pointer-events: none; }
 .pag-btn--disabled { opacity: .4; pointer-events: none; }
+.pag-btn--all { font-weight: 700; }

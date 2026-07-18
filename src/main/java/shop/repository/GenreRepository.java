@@ -18,6 +18,11 @@ public interface GenreRepository extends JpaRepository<Genre, Long> {
 
     List<Genre> findAllByCategoryIdAndDeletedFalseAndActiveTrueOrderByNameAsc(Long categoryId);
 
+    List<Genre> findAllByActiveTrueAndDeletedFalseOrderByNameAsc();
+
+    // Used to re-validate genre ids submitted from the book form.
+    List<Genre> findAllByIdInAndActiveTrueAndDeletedFalse(List<Long> ids);
+
     @Query("SELECT g FROM Genre g LEFT JOIN g.category c WHERE g.deleted = false AND (" +
            "LOWER(g.name) LIKE LOWER(CONCAT('%', :q, '%')) OR " +
            "LOWER(COALESCE(g.description, '')) LIKE LOWER(CONCAT('%', :q, '%'))) " +
@@ -34,4 +39,9 @@ public interface GenreRepository extends JpaRepository<Genre, Long> {
 
     boolean existsByNameIgnoreCaseAndCategoryIdAndDeletedFalseAndIdNot(
             String name, Long categoryId, Long id);
+
+    // Global uniqueness check, since genre names no longer scope to a category.
+    boolean existsByNameIgnoreCaseAndDeletedFalse(String name);
+
+    boolean existsByNameIgnoreCaseAndDeletedFalseAndIdNot(String name, Long id);
 }

@@ -1,3 +1,4 @@
+<%-- Category list with search, status filter and pagination. --%>
 <%@ page contentType="text/html" pageEncoding="UTF-8" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <!DOCTYPE html>
@@ -6,7 +7,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" />
-    <link rel="stylesheet" href="/css/admin-dashboard.css" />
+    <link rel="stylesheet" href="/css/admin-dashboard.css?v=4" />
     <title>Categories — Booktify Admin</title>
     <style>
         .icon-link--restore { color:#059669; }
@@ -92,7 +93,6 @@
                                     <c:out value="${category.updatedAtString}" default="—"/>
                                 </td>
                                 <td class="admin-table__actions">
-                                    <%-- View (always) --%>
                                     <button type="button" class="icon-link js-view-category" title="View"
                                             data-name="<c:out value='${category.name}'/>"
                                             data-desc="<c:out value='${category.description}'/>"
@@ -101,21 +101,19 @@
                                         <i class="fa-solid fa-eye"></i>
                                     </button>
 
+                                    <%-- Edit/Delete for active rows, Restore for soft-deleted ones --%>
                                     <c:choose>
                                         <c:when test="${category.active}">
-                                            <%-- Edit (active only) --%>
                                             <a href="/admin/categories/${category.id}/edit"
                                                class="icon-link icon-link--edit" title="Edit">
                                                 <i class="fa-solid fa-pen"></i>
                                             </a>
-                                            <%-- Remove (active only) --%>
                                             <button type="button" class="icon-link icon-link--danger" title="Delete"
                                                     onclick="openConfirmModal('/admin/categories/${category.id}/delete','delete','Are you sure you want to delete this category?')">
                                                 <i class="fa-solid fa-trash"></i>
                                             </button>
                                         </c:when>
                                         <c:otherwise>
-                                            <%-- Restore (inactive only) --%>
                                             <button type="button" class="icon-link icon-link--restore" title="Restore"
                                                     onclick="openConfirmModal('/admin/categories/${category.id}/restore','restore','Are you sure you want to restore this category?')">
                                                 <i class="fa-solid fa-rotate-left"></i>
@@ -146,21 +144,24 @@
                         </c:choose>
                     </div>
                     <c:if test="${totalPages > 1}">
+                        <c:set var="pagBase" value="/admin/categories?q=${q}&status=${status}"/>
                         <div class="admin-pagination__nav">
-                            <a class="pag-btn ${currentPage == 0 ? 'pag-btn--disabled' : ''}"
-                               href="/admin/categories?page=${currentPage - 1}&q=<c:out value='${q}'/>&status=<c:out value='${status}'/>">
-                                <i class="fa-solid fa-chevron-left" style="font-size:.7rem;"></i>
-                            </a>
+                            <a class="pag-btn ${currentPage == 0 || viewingAll ? 'pag-btn--disabled' : ''}"
+                               href="${pagBase}&page=0">First</a>
+                            <a class="pag-btn ${currentPage == 0 || viewingAll ? 'pag-btn--disabled' : ''}"
+                               href="${pagBase}&page=${currentPage - 1}">Prev</a>
                             <c:forEach begin="0" end="${totalPages - 1}" var="i">
-                                <a class="pag-btn ${i == currentPage ? 'pag-btn--active' : ''}"
-                                   href="/admin/categories?page=${i}&q=<c:out value='${q}'/>&status=<c:out value='${status}'/>">
+                                <a class="pag-btn ${i == currentPage && !viewingAll ? 'pag-btn--active' : ''}"
+                                   href="${pagBase}&page=${i}">
                                     ${i + 1}
                                 </a>
                             </c:forEach>
-                            <a class="pag-btn ${currentPage >= totalPages - 1 ? 'pag-btn--disabled' : ''}"
-                               href="/admin/categories?page=${currentPage + 1}&q=<c:out value='${q}'/>&status=<c:out value='${status}'/>">
-                                <i class="fa-solid fa-chevron-right" style="font-size:.7rem;"></i>
-                            </a>
+                            <a class="pag-btn ${currentPage >= totalPages - 1 || viewingAll ? 'pag-btn--disabled' : ''}"
+                               href="${pagBase}&page=${currentPage + 1}">Next</a>
+                            <a class="pag-btn ${currentPage >= totalPages - 1 || viewingAll ? 'pag-btn--disabled' : ''}"
+                               href="${pagBase}&page=${totalPages - 1}">Last</a>
+                            <a class="pag-btn pag-btn--all ${viewingAll ? 'pag-btn--active' : ''}"
+                               href="${pagBase}&all=true">All</a>
                         </div>
                     </c:if>
                 </div>
@@ -222,7 +223,6 @@
     </c:if>
 
     <script>
-        /* ── Toast ──────────────────────────────────────────────────────────── */
         function showToast(msg, type) {
             var tc = document.getElementById('toastContainer');
             var t = document.createElement('div');
@@ -237,7 +237,6 @@
         var e = document.getElementById('toastErrorMessage');
         if (e) showToast(e.textContent.trim(), 'error');
 
-        /* ── Confirm Modal (Remove / Restore) ───────────────────────────────── */
         function openConfirmModal(action, type, msg) {
             document.getElementById('confirmModalMsg').textContent = msg;
             document.getElementById('confirmForm').action = action;
@@ -256,7 +255,6 @@
         }
         function closeConfirmModal() { document.getElementById('confirmModal').style.display = 'none'; }
 
-        /* ── View Category Modal ────────────────────────────────────────────── */
         document.addEventListener('click', function (e) {
             var btn = e.target.closest('.js-view-category');
             if (!btn) return;

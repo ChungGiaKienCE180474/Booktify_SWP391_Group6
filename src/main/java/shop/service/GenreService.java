@@ -10,6 +10,8 @@ import org.springframework.util.StringUtils;
 import shop.domain.Genre;
 import shop.repository.GenreRepository;
 
+// Genre has two independent flags: "active" (can be toggled back on) and
+// "deleted" (permanent soft-delete). All queries here exclude deleted=true.
 @Service
 public class GenreService {
 
@@ -29,6 +31,21 @@ public class GenreService {
 
     public List<Genre> getActiveGenresByCategory(Long categoryId) {
         return genreRepository.findAllByCategoryIdAndDeletedFalseAndActiveTrueOrderByNameAsc(categoryId);
+    }
+
+    // Not filtered by category — the book form lets you pick any active genre
+    // regardless of the book's own category.
+    public List<Genre> getActiveGenres() {
+        return genreRepository.findAllByActiveTrueAndDeletedFalseOrderByNameAsc();
+    }
+
+    // Re-resolves ids against the DB and drops anything invalid, inactive or
+    // deleted, so a stale/tampered form submission can't sneak in a bad genre.
+    public List<Genre> getValidGenresByIds(List<Long> ids) {
+        if (ids == null || ids.isEmpty())
+            return List.of();
+        List<Long> distinctIds = ids.stream().distinct().toList();
+        return genreRepository.findAllByIdInAndActiveTrueAndDeletedFalse(distinctIds);
     }
 
     public List<Genre> searchGenres(String q, Long categoryId, String status) {
@@ -81,5 +98,14 @@ public class GenreService {
     public boolean existsByNameAndCategoryExcludeId(String name, Long categoryId, Long excludeId) {
         return genreRepository.existsByNameIgnoreCaseAndCategoryIdAndDeletedFalseAndIdNot(
                 name, categoryId, excludeId);
+    }
+
+    // Genre names are now unique globally, not per-category.
+    public boolean existsByName(String name) {
+        return genreRepository.existsByNameIgnoreCaseAndDeletedFalse(name);
+    }
+
+    public boolean existsByNameExcludeId(String name, Long excludeId) {
+        return genreRepository.existsByNameIgnoreCaseAndDeletedFalseAndIdNot(name, excludeId);
     }
 }

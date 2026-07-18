@@ -24,9 +24,11 @@ public class VoucherDTO {
     @Size(max = 50, message = "Voucher code must not exceed 50 characters.")
     private String voucherCode;
 
+    @NotBlank(message = "Voucher type is required.")
+    private String discountType;
+
     @NotNull(message = "Discount value is required.")
     @DecimalMin(value = "0.0", inclusive = false, message = "Discount value must be greater than 0.")
-    @DecimalMax(value = "100.0", message = "Discount value must be between 0.1 and 100.")
     private BigDecimal discountValue;
 
     @DecimalMin(value = "0", inclusive = true, message = "Minimum order amount cannot be negative.")
@@ -73,6 +75,14 @@ public class VoucherDTO {
 
     public void setVoucherCode(String voucherCode) {
         this.voucherCode = voucherCode;
+    }
+
+    public String getDiscountType() {
+        return discountType;
+    }
+
+    public void setDiscountType(String discountType) {
+        this.discountType = discountType;
     }
 
     public BigDecimal getDiscountValue() {

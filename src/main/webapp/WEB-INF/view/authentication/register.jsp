@@ -2,13 +2,13 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="form" uri="http://www.springframework.org/tags/form" %>
 <!DOCTYPE html>
-<html lang="vi">
+<html lang="en">
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" />
     <link rel="stylesheet" href="/css/auth.css" />
-    <title>Booktify — Đăng ký</title>
+    <title>Booktify — Register</title>
 </head>
 <body class="auth-page">
     <div class="auth-shell">
@@ -18,28 +18,28 @@
                 <span>Booktify</span>
             </a>
             <a href="/login" class="auth-back-home">
-                <i class="fa-solid fa-arrow-left"></i> Đã có tài khoản
+                <i class="fa-solid fa-arrow-left"></i> Already have an account
             </a>
         </header>
 
         <main class="auth-main">
             <div class="auth-card auth-card--wide">
                 <div class="auth-card-header">
-                    <h1>Tạo tài khoản</h1>
-                    <p>Tham gia Booktify để khám phá hàng nghìn đầu sách</p>
+                    <h1>Create account</h1>
+                    <p>Join Booktify to explore thousands of books</p>
                 </div>
 
                 <div class="auth-card-body">
                     <c:if test="${param.exist != null}">
                         <div class="auth-alert auth-alert-error">
                             <i class="fa-solid fa-circle-exclamation"></i>
-                            Email đã được đăng ký. Vui lòng đăng nhập.
+                            This email is already registered. Please log in.
                         </div>
                     </c:if>
                     <c:if test="${param.password != null}">
                         <div class="auth-alert auth-alert-error">
                             <i class="fa-solid fa-circle-exclamation"></i>
-                            Mật khẩu và xác nhận mật khẩu phải trùng khớp.
+                            Password and confirmation password must match.
                         </div>
                     </c:if>
                     <c:if test="${not empty message}">
@@ -52,13 +52,13 @@
                     <form:form method="post" action="/register" modelAttribute="registerUser">
                         <div class="auth-form-row">
                             <div class="auth-form-group">
-                                <label class="auth-label">Họ</label>
-                                <form:input path="firstName" cssClass="auth-input" placeholder="Nguyễn" />
+                                <label class="auth-label">First name</label>
+                                <form:input path="firstName" cssClass="auth-input" placeholder="John" />
                                 <form:errors path="firstName" cssClass="auth-invalid-feedback" />
                             </div>
                             <div class="auth-form-group">
-                                <label class="auth-label">Tên</label>
-                                <form:input path="lastName" cssClass="auth-input" placeholder="Văn A" />
+                                <label class="auth-label">Last name</label>
+                                <form:input path="lastName" cssClass="auth-input" placeholder="Doe" />
                                 <form:errors path="lastName" cssClass="auth-invalid-feedback" />
                             </div>
                         </div>
@@ -72,27 +72,27 @@
 
                         <div class="auth-form-row">
                             <div class="auth-form-group">
-                                <label class="auth-label">Mật khẩu</label>
+                                <label class="auth-label">Password</label>
                                 <form:password path="password" cssClass="auth-input"
-                                    placeholder="Tối thiểu 3 ký tự" />
+                                    placeholder="At least 3 characters" />
                                 <form:errors path="password" cssClass="auth-invalid-feedback" />
                             </div>
                             <div class="auth-form-group">
-                                <label class="auth-label">Xác nhận mật khẩu</label>
+                                <label class="auth-label">Confirm password</label>
                                 <form:password path="confirmPassword" cssClass="auth-input"
-                                    placeholder="Nhập lại mật khẩu" />
+                                    placeholder="Re-enter password" />
                                 <form:errors path="confirmPassword" cssClass="auth-invalid-feedback" />
                             </div>
                         </div>
 
                         <button type="submit" class="auth-btn auth-btn-primary">
-                            <i class="fa-solid fa-user-plus"></i> Đăng ký
+                            <i class="fa-solid fa-user-plus"></i> Register
                         </button>
                     </form:form>
                 </div>
 
                 <div class="auth-card-footer">
-                    Đã có tài khoản? <a href="/login">Đăng nhập</a>
+                    Already have an account? <a href="/login">Login</a>
                 </div>
             </div>
         </main>
