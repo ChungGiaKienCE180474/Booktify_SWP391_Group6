@@ -480,69 +480,126 @@
             </c:choose>
         </div>
     </div>
-                    <%-- 
-                    Section --%>
-                        <section class="rating-section">
-                            <h2 class="rating-title">
-                                Product reviews
-                            </h2>
+
+    <%-- Reviews --%>
+    <section class="rating-section">
+        <h2 class="rating-title">Review Product</h2>
+
+        <%-- Create Rating --%>
+        <div id="ratingFormContainer" class="rating-create">
+            <c:choose>
+                <%-- Đã đăng nhập và đủ điều kiện đánh giá --%>
+                <c:when test="${canReview}">
+                    <form  id="ratingForm" action="/ratings/create" method="post">
+                        <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}" />
+                        <input type="hidden"
+                            name="bookId"
+                            value="${book.id}" />
+                        <input type="hidden"
+                                    id="ratingAction"
+                                    value="create">
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Number of stars</label>
+                            <div class="rating-stars-select">
+                                <input type="radio" id="star5" name="ratingValue" value="5" required>
+                                <label for="star5"><i class="fa-solid fa-star"></i></label>
+                                <input type="radio" id="star4" name="ratingValue" value="4">
+                                <label for="star4"><i class="fa-solid fa-star"></i></label>
+                                <input type="radio" id="star3" name="ratingValue" value="3">
+                                <label for="star3"><i class="fa-solid fa-star"></i></label>
+                                <input type="radio" id="star2" name="ratingValue" value="2">
+                                <label for="star2"><i class="fa-solid fa-star"></i></label>
+                                <input type="radio" id="star1" name="ratingValue" value="1">
+                                <label for="star1"><i class="fa-solid fa-star"></i></label>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Review</label>
+                            <textarea  id="reviewText" name="reviewText" rows="5" class="form-control" maxlength="1000" required></textarea>
+                        </div>
+                        <button id="ratingSubmitBtn" type="submit" class="btn-detail-primary">Submit</button>
+                    </form>
+                </c:when>
+                <%-- Đã đánh giá rồi --%>
+                <c:when test="${not empty myRating}">
+
+    <div class="alert alert-success">
+        You have reviewed this book.
+    </div>
 
 
-                            <%-- Create Rating --%>
-                                <div class="rating-create">
+    <form id="ratingForm"
+          action="/ratings/update"
+          method="post"
+          style="display:none;">
 
-                                    <c:choose>
+        <input type="hidden" 
+               name="${_csrf.parameterName}" 
+               value="${_csrf.token}" />
+
+
+        <input type="hidden"
+               name="bookId"
+               value="${book.id}" />
 
                                         <%-- Logged in and eligible to review --%>
                                             <c:when test="${canReview}">
 
-                                                <form action="/books/${book.id}/rating" method="post">
+        <div class="mb-3">
 
-                                                    <input type="hidden" name="${_csrf.parameterName}"
-                                                        value="${_csrf.token}" />
+            <label class="form-label">
+                Number of stars.
+            </label>
 
                                                     <div class="mb-3">
                                                         <label class="form-label">
                                                             Rating
                                                         </label>
 
-                                                        <div class="rating-stars-select">
+            <div class="rating-stars-select">
 
-                                                            <input type="radio" id="star5" name="ratingValue" value="5"
-                                                                required>
-                                                            <label for="star5"><i class="fa-solid fa-star"></i></label>
+                <input type="radio" 
+                       id="star5" 
+                       name="ratingValue" 
+                       value="5">
 
-                                                            <input type="radio" id="star4" name="ratingValue" value="4">
-                                                            <label for="star4"><i class="fa-solid fa-star"></i></label>
+                <label for="star5">
+                    <i class="fa-solid fa-star"></i>
+                </label>
 
-                                                            <input type="radio" id="star3" name="ratingValue" value="3">
-                                                            <label for="star3"><i class="fa-solid fa-star"></i></label>
 
-                                                            <input type="radio" id="star2" name="ratingValue" value="2">
-                                                            <label for="star2"><i class="fa-solid fa-star"></i></label>
+                <input type="radio" 
+                       id="star4" 
+                       name="ratingValue" 
+                       value="4">
 
-                                                            <input type="radio" id="star1" name="ratingValue" value="1">
-                                                            <label for="star1"><i class="fa-solid fa-star"></i></label>
+                <label for="star4">
+                    <i class="fa-solid fa-star"></i>
+                </label>
 
-                                                        </div>
-                                                    </div>
 
                                                     <div class="mb-3">
                                                         <label class="form-label">
                                                             Review
                                                         </label>
 
-                                                        <textarea name="reviewText" rows="5" class="form-control"
-                                                            maxlength="1000" required></textarea>
-                                                    </div>
+                <label for="star3">
+                    <i class="fa-solid fa-star"></i>
+                </label>
 
                                                     <button type="submit" class="btn-detail-primary">
                                                         Submit review
                                                     </button>
 
-                                                </form>
+                <input type="radio" 
+                       id="star2" 
+                       name="ratingValue" 
+                       value="2">
 
-                                            </c:when>
+                <label for="star2">
+                    <i class="fa-solid fa-star"></i>
+                </label>
 
                                             <%-- Already reviewed --%>
                                                 <c:when test="${not empty myRating}">
@@ -551,7 +608,9 @@
                                                         You have already reviewed this book.
                                                     </div>
 
-                                                </c:when>
+                <label for="star1">
+                    <i class="fa-solid fa-star"></i>
+                </label>
 
                                                 <%-- Logged in but has not purchased --%>
                                                     <c:when test="${not empty currentUser}">
@@ -560,12 +619,15 @@
                                                             You need to purchase and receive the book before you can review it.
                                                         </div>
 
-                                                    </c:when>
 
                                                     <%-- Not logged in --%>
                                                         <c:otherwise>
 
-                                                            <div class="alert alert-info">
+            <textarea 
+                id="reviewText"
+                name="reviewText"
+                rows="5"
+                class="form-control"></textarea>
 
                                                                 Please
                                                                 <a href="/login">
@@ -573,95 +635,150 @@
                                                                 </a>
                                                                 to review this product.
 
-                                                            </div>
 
-                                                        </c:otherwise>
+        <button 
+            id="ratingSubmitBtn"
+            type="submit"
+            class="btn-detail-primary">
 
-                                    </c:choose>
+            Update Review
 
-                                </div>
+        </button>
 
+    </form>
+
+</c:when>
+                <%-- Đã đăng nhập nhưng chưa mua --%>
+                <c:when test="${not empty currentUser}">
+                    <div class="alert alert-warning">You need to buy and receive the product before you can leave a review.</div>
+                </c:when>
+                <%-- Chưa đăng nhập --%>
+                <c:otherwise>
+                    <div class="alert alert-info">
+                        Please <a href="/login">login</a> in to rate the product.
+                    </div>
+                </c:otherwise>
+            </c:choose>
+        </div>
+
+        <%-- Danh sách đánh giá --%>
+        <c:choose>
+            <c:when test="${not empty ratings}">
+                <c:forEach items="${ratings}" var="rating">
+                    <div class="rating-item">
+                        <div class="rating-user">${rating.customer.fullName}</div>
+                        
+                         <c:if test="${not empty currentUser && currentUser.id == rating.customer.id}">
+                            <button type="button"
+                                    class="rating-edit-btn"
+                                    onclick="editRating('${rating.ratingValue}', '${rating.review}')">
+                                <i class="fa-solid fa-pen"></i>
+                            </button>
+
+                            <form action="/ratings/delete" method="post" style="display:inline;">
+                                <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}" />
+                                <input type="hidden" name="bookId" value="${book.id}" />
+
+                                <button type="submit"
+                                        class="rating-delete-btn"
+                                        onclick="return confirm('Delete this review?')">
+                                    <i class="fa-solid fa-trash-can"></i>
+                                </button>
+                            </form>
+                        </c:if>
+
+                    
+
+                        <div class="rating-stars">
+                            <c:forEach begin="1" end="5" var="i">
                                 <c:choose>
-                                    <c:when test="${not empty ratings}">
-                                        <c:forEach items="${ratings}" var="rating">
-                                            <div class="rating-item">
-                                                <div class="rating-user">
-                                                    ${rating.customer.fullName}
-                                                </div>
-                                              
-                                                <div class="rating-stars">
-                                                    <c:forEach begin="1" end="5" var="i">
-                                                        <c:choose>
-                                                            <c:when test="${i <= rating.ratingValue}">
-                                                                <i class="fa-solid fa-star star-filled"></i>
-                                                            </c:when>
-                                                            <c:otherwise>
-                                                                <i class="fa-regular fa-star star-empty"></i>
-                                                            </c:otherwise>
-                                                        </c:choose>
-                                                    </c:forEach>
-                                                </div>
-                                                  <div class="rating-date">
-                                                    ${rating.createdAtFormatted}
-                                                </div>
-                                                <div class="rating-content">
-                                                    ${rating.review}
-                                                </div>
-                                                
-                                            </div>
-                                        </c:forEach>
+                                    <c:when test="${i <= rating.ratingValue}">
+                                        <i class="fa-solid fa-star star-filled"></i>
                                     </c:when>
                                     <c:otherwise>
-
-                                        <div class="no-rating">
-                                            No reviews yet for this product.
-                                        </div>
+                                        <i class="fa-regular fa-star star-empty"></i>
                                     </c:otherwise>
                                 </c:choose>
-                        </section>
+                            </c:forEach>
+                        </div>
+                        <div class="rating-date">${rating.createdAtFormatted}</div>
+                        <div class="rating-content">${rating.review}</div>
+                    </div>
 
 
-
-                        <%-- Suggested books --%>
-                            <c:if test="${not empty suggestedBooks}">
-                                <section class="suggested-wrap">
-                                    <div class="sec-head">
-                                        <div class="sec-head__left">
-                                            <div class="sec-head__icon"><i class="fa-solid fa-wand-magic-sparkles"></i>
-                                            </div>
-                                            <h2 class="sec-head__title">You may also like</h2>
-                                        </div>
-                                        <a href="/books" class="sec-head__link">See more <i
-                                                class="fa-solid fa-chevron-right"></i></a>
-                                    </div>
-                                    <div class="suggested-grid">
-                                        <c:forEach items="${suggestedBooks}" var="s">
-                                            <a href="/books/${s.id}" class="s-card">
-                                                <div class="s-card__thumb">
-                                                    <c:choose>
-                                                        <c:when test="${not empty s.imageUrl}">
-                                                            <img src="${s.imageUrl}" alt="${s.title}" />
-                                                        </c:when>
-                                                        <c:otherwise>
-                                                            <div class="s-card__placeholder"><i
-                                                                    class="fa-solid fa-book"></i></div>
-                                                        </c:otherwise>
-                                                    </c:choose>
-                                                </div>
-                                                <div class="s-card__body">
-                                                    <div class="s-card__title">${s.title}</div>
-                                                    <div class="s-card__author">${s.author}</div>
-                                                    <div class="s-card__price">${s.priceFormatted} &#8363;</div>
-                                                </div>
-                                            </a>
-                                        </c:forEach>
-                                    </div>
-                                </section>
-                            </c:if>
+                </c:forEach>
+            </c:when>
+            <c:otherwise>
+                <div class="no-rating">There are no reviews for this product yet.</div>
+            </c:otherwise>
+        </c:choose>
+    </section>
 
 
+    <%-- Suggested books --%>
+    <c:if test="${not empty suggestedBooks}">
+        <section class="suggested-wrap">
+            <div class="sec-head">
+                <div class="sec-head__left">
+                    <div class="sec-head__icon"><i class="fa-solid fa-wand-magic-sparkles"></i></div>
+                    <h2 class="sec-head__title">Có thể bạn quan tâm</h2>
+                </div>
+                <a href="/books" class="sec-head__link">Xem thêm <i class="fa-solid fa-chevron-right"></i></a>
+            </div>
+            <div class="suggested-grid">
+                <c:forEach items="${suggestedBooks}" var="s">
+                    <a href="/books/${s.id}" class="s-card">
+                        <div class="s-card__thumb">
+                            <c:choose>
+                                <c:when test="${not empty s.imageUrl}">
+                                    <img src="${s.imageUrl}" alt="${s.title}" />
+                                </c:when>
+                                <c:otherwise>
+                                    <div class="s-card__placeholder"><i class="fa-solid fa-book"></i></div>
+                                </c:otherwise>
+                            </c:choose>
+                        </div>
+                        <div class="s-card__body">
+                            <div class="s-card__title">${s.title}</div>
+                            <div class="s-card__author"><c:out value="${s.author}" default="—"/></div>
+                            <div class="s-card__price">${s.priceFormatted} &#8363;</div>
+                        </div>
+                    </a>
+                </c:forEach>
+            </div>
+        </section>
+    </c:if>
 
-                            <jsp:include page="/WEB-INF/view/layout/footer.jsp" />
-        </body>
 
-        </html>
+    <jsp:include page="/WEB-INF/view/layout/footer.jsp" />
+
+    
+    <script>function editRating(value, review){
+
+    const form = document.getElementById("ratingForm");
+
+
+    // hiện form
+    form.style.display = "block";
+
+
+    // chọn sao cũ
+    document.querySelector(
+        'input[name="ratingValue"][value="'+value+'"]'
+    ).checked = true;
+
+
+    // điền review cũ
+    document.getElementById("reviewText").value = review;
+
+
+    // scroll tới form
+    form.scrollIntoView({
+        behavior:"smooth"
+    });
+
+}
+</script>
+</body>
+
+</html>

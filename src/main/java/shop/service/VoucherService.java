@@ -169,22 +169,22 @@ public class VoucherService {
                 Voucher voucher = voucherRepository
                                 .findByVoucherCodeIgnoreCase(voucherCode.trim())
                                 .orElseThrow(() -> new IllegalArgumentException(
-                                                "Voucher không tồn tại."));
+                                                "The voucher does not exist."));
 
                 LocalDate today = LocalDate.now();
 
                 if (voucher.getStartDate() != null
                                 && today.isBefore(voucher.getStartDate())) {
-                        throw new IllegalArgumentException("Voucher chưa bắt đầu.");
+                        throw new IllegalArgumentException("The voucher has not been activated yet.");
                 }
 
                 if (voucher.getEndDate() != null
                                 && today.isAfter(voucher.getEndDate())) {
-                        throw new IllegalArgumentException("Voucher đã hết hạn.");
+                        throw new IllegalArgumentException("The voucher has expired.");
                 }
 
                 if (voucher.getQuantity() <= 0) {
-                        throw new IllegalArgumentException("Voucher đã hết lượt sử dụng.");
+                        throw new IllegalArgumentException("The voucher has been used up.");
                 }
 
                 return voucher;
@@ -199,7 +199,7 @@ public class VoucherService {
                 if (voucher.getMinOrderAmount() != null
                                 && subtotal.compareTo(voucher.getMinOrderAmount()) < 0) {
                         throw new IllegalArgumentException(
-                                        "Đơn hàng chưa đạt giá trị tối thiểu để dùng voucher.");
+                                        "Your order has not reached the minimum value required to use the voucher.");
                 }
 
                 BigDecimal discount = BigDecimal.ZERO;
@@ -231,7 +231,7 @@ public class VoucherService {
 
                         default:
                                 throw new IllegalArgumentException(
-                                                "Loại voucher không hợp lệ.");
+                                                "This voucher type is invalid.");
                 }
 
                 return discount;
@@ -243,7 +243,7 @@ public class VoucherService {
 
                 if (voucher.getQuantity() <= 0) {
                         throw new IllegalArgumentException(
-                                        "Voucher đã hết lượt sử dụng.");
+                                        "The voucher has been used up.");
                 }
 
                 voucher.setQuantity(voucher.getQuantity() - 1);

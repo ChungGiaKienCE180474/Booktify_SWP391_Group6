@@ -23,6 +23,7 @@ public class RatingController {
         this.userRepository = userRepository;
     }
 
+    // CREATE
     @PostMapping("/create")
     public String createRating(
             @RequestParam Long bookId,
@@ -30,8 +31,13 @@ public class RatingController {
             @RequestParam String reviewText,
             Authentication authentication) {
 
+        if (authentication == null) {
+            return "redirect:/login";
+        }
+
         User user = userRepository
                 .findByEmail(authentication.getName());
+
         if (user == null) {
             return "redirect:/login";
         }
@@ -45,4 +51,45 @@ public class RatingController {
         return "redirect:/books/" + bookId;
     }
 
+    // UPDATE
+    @PostMapping("/update")
+    public String updateRating(
+            @RequestParam Long bookId,
+            @RequestParam Integer ratingValue,
+            @RequestParam String reviewText,
+            Authentication authentication) {
+
+        User user = userRepository.findByEmail(authentication.getName());
+
+        ratingService.updateRating(
+                bookId,
+                user.getId(),
+                ratingValue,
+                reviewText);
+
+        return "redirect:/books/" + bookId;
+    }
+
+    // DELETE
+    @PostMapping("/delete")
+    public String deleteRating(
+            @RequestParam Long bookId,
+            Authentication authentication) {
+
+        if (authentication == null) {
+            return "redirect:/login";
+        }
+
+        User user = userRepository.findByEmail(authentication.getName());
+
+        if (user == null) {
+            return "redirect:/login";
+        }
+
+        ratingService.deleteRating(
+                bookId,
+                user.getId());
+
+        return "redirect:/books/" + bookId;
+    }
 }
