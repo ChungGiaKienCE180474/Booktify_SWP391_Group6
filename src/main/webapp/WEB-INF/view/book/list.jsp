@@ -177,6 +177,11 @@
         .product-card__author { font-size:.7rem;color:var(--text-muted);margin-bottom:.5rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.2;min-height:1.2em;display:block; }
         .product-card__footer { display:flex;flex-direction:column;gap:.4rem;margin-top:auto; }
         .product-card__price { font-size:.88rem;font-weight:800;color:var(--accent-warm,#F57C00);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;width:100%; }
+        .product-card__price-box { display:flex;flex-direction:column;gap:4px;width:100%;min-width:0; }
+        .product-card__discount-line { display:flex;align-items:center;gap:6px;flex-wrap:wrap; }
+        .product-card__old-price { color:#94a3b8;font-size:.72rem;font-weight:700;text-decoration:line-through; }
+        .product-card__discount-badge { display:inline-flex;padding:3px 7px;border-radius:999px;background:#fee2e2;color:#dc2626;font-size:.68rem;font-weight:800;white-space:nowrap; }
+        .product-card__price--sale { color:#dc2626;font-size:1rem; }
         .product-card__link {
             display:flex;align-items:center;justify-content:center;
             width:100%;height:30px;box-sizing:border-box;border-radius:6px;
@@ -362,7 +367,28 @@
                                     <div class="product-card__title">${book.title}</div>
                                     <div class="product-card__author"><c:out value="${book.author}" default="—"/></div>
                                     <div class="product-card__footer">
-                                        <span class="product-card__price">${book.priceFormatted} &#8363;</span>
+                                        <div class="product-card__price-box">
+                                            <c:choose>
+                                                <c:when test="${not empty bestPromotionMap[book.id]}">
+                                                    <div class="product-card__discount-line">
+                                                        <span class="product-card__old-price">
+                                                            ${book.priceFormatted} &#8363;
+                                                        </span>
+                                                        <span class="product-card__discount-badge">
+                                                            ${discountLabelMap[book.id]}
+                                                        </span>
+                                                    </div>
+                                                    <span class="product-card__price product-card__price--sale">
+                                                        ${discountedPriceFormattedMap[book.id]} &#8363;
+                                                    </span>
+                                                </c:when>
+                                                <c:otherwise>
+                                                    <span class="product-card__price">
+                                                        ${book.priceFormatted} &#8363;
+                                                    </span>
+                                                </c:otherwise>
+                                            </c:choose>
+                                        </div>
                                         <span class="product-card__link">Details</span>
                                     </div>
                                 </div>
