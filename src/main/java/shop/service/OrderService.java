@@ -5,6 +5,7 @@ import java.text.NumberFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
@@ -13,6 +14,7 @@ import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 import shop.domain.Book;
 import shop.domain.Cart;
@@ -73,6 +75,86 @@ public class OrderService {
         return orderRepository.findAllWithUserAndItemsOrderByCreatedAtDesc().stream()
                 .map(this::toDetailDTO)
                 .collect(Collectors.toList());
+    }
+
+    @Transactional(readOnly = true)
+    public List<OrderDTO> searchOrders(String keyword, String status, String sort) {
+        List<Order> orders = orderRepository.findAllWithUserAndItemsOrderByCreatedAtDesc();
+
+        if (StringUtils.hasText(keyword)) {
+            String q = keyword.trim().toLowerCase(Locale.ROOT);
+            orders = orders.stream()
+                    .filter(o -> matchesKeyword(o, q))
+                    .collect(Collectors.toList());
+        }
+
+        if (StringUtils.hasText(status) && !"all".equalsIgnoreCase(status)) {
+            String statusUpper = status.trim().toUpperCase(Locale.ROOT);
+            orders = orders.stream()
+                    .filter(o -> statusUpper.equals(o.getStatus()))
+                    .collect(Collectors.toList());
+        }
+
+        orders.sort(resolveSortComparator(sort));
+        return orders.stream()
+                .map(this::toDetailDTO)
+                .collect(Collectors.toList());
+    }
+
+    private boolean matchesKeyword(Order order, String keyword) {
+        return containsIgnoreCase(order.getOrderCode(), keyword)
+                || (order.getUser() != null && (
+                        containsIgnoreCase(order.getUser().getFullName(), keyword)
+                                || containsIgnoreCase(order.getUser().getEmail(), keyword)))
+                || containsIgnoreCase(order.getRecipientName(), keyword)
+                || containsIgnoreCase(order.getRecipientPhone(), keyword);
+    }
+
+    private boolean containsIgnoreCase(String value, String keyword) {
+        return value != null && value.toLowerCase(Locale.ROOT).contains(keyword);
+    }
+
+    private Comparator<Order> resolveSortComparator(String sort) {
+        if (sort == null) {
+            sort = "default";
+        }
+        switch (sort) {
+            case "oldest":
+                return Comparator.comparing(Order::getCreatedAt,
+                        Comparator.nullsLast(Comparator.naturalOrder()));
+            case "id_asc":
+                return Comparator.comparing(Order::getId);
+            case "id_desc":
+                return Comparator.comparing(Order::getId).reversed();
+            case "total_asc":
+                return Comparator.comparing(Order::getTotalAmount,
+                        Comparator.nullsLast(Comparator.naturalOrder()));
+            case "total_desc":
+                return Comparator.comparing(Order::getTotalAmount,
+                        Comparator.nullsLast(Comparator.naturalOrder())).reversed();
+            case "code_asc":
+                return Comparator.comparing(Order::getOrderCode,
+                        Comparator.nullsLast(String::compareToIgnoreCase));
+            case "code_desc":
+                return Comparator.comparing(Order::getOrderCode,
+                        Comparator.nullsLast(String::compareToIgnoreCase)).reversed();
+            case "customer_asc":
+                return Comparator.comparing(
+                        this::getCustomerFullName,
+                        Comparator.nullsLast(String.CASE_INSENSITIVE_ORDER));
+            case "customer_desc":
+                return Comparator.comparing(
+                        this::getCustomerFullName,
+                        Comparator.nullsLast(String.CASE_INSENSITIVE_ORDER)).reversed();
+            case "default":
+            default:
+                return Comparator.comparing(Order::getCreatedAt,
+                        Comparator.nullsLast(Comparator.naturalOrder())).reversed();
+        }
+    }
+
+    private String getCustomerFullName(Order order) {
+        return order.getUser() != null ? order.getUser().getFullName() : null;
     }
 
     @Transactional(readOnly = true)
