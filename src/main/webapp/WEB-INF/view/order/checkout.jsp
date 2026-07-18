@@ -15,6 +15,39 @@
                 <link rel="stylesheet" href="/css/order.css" />
                 <link rel="stylesheet" href="/css/voucher.css" />
 
+                <style>
+                    .checkout-item-prices {
+                        display: flex;
+                        align-items: flex-end;
+                        flex-direction: column;
+                        gap: 3px;
+                        text-align: right;
+                    }
+
+                    .checkout-old-price {
+                        color: #94a3b8;
+                        font-size: .75rem;
+                        font-weight: 700;
+                        text-decoration: line-through;
+                    }
+
+                    .checkout-discount-badge {
+                        display: inline-flex;
+                        margin-top: 3px;
+                        padding: 2px 7px;
+                        border-radius: 999px;
+                        background: #fee2e2;
+                        color: #dc2626;
+                        font-size: .68rem;
+                        font-weight: 800;
+                    }
+
+                    .checkout-sale-price {
+                        color: #dc2626;
+                        font-weight: 800;
+                    }
+                </style>
+
                 <title>Checkout — Booktify</title>
             </head>
 
@@ -54,7 +87,7 @@
                                     <div class="order-field">
                                         <label>Phone number <span class="required">*</span></label>
                                         <form:input path="recipientPhone" cssClass="order-input"
-                                            placeholder="VD: 0912345678" />
+                                            placeholder="Example: 0912345678" />
                                         <form:errors path="recipientPhone" cssClass="order-error" />
                                     </div>
 
@@ -118,9 +151,32 @@
                                     <div class="order-summary-item">
                                         <div>
                                             <strong>${item.bookTitle}</strong>
-                                            <div class="order-summary-meta">x${item.quantity}</div>
+                                            <div class="order-summary-meta">
+                                                x${item.quantity}
+
+                                                <c:if test="${item.promotionApplied}">
+                                                    <span class="checkout-discount-badge">
+                                                        ${item.promotionLabel}
+                                                    </span>
+                                                </c:if>
+                                            </div>
                                         </div>
-                                        <span>${item.subtotalFormatted} &#8363;</span>
+
+                                        <c:choose>
+                                            <c:when test="${item.promotionApplied}">
+                                                <div class="checkout-item-prices">
+                                                    <span class="checkout-old-price">
+                                                        ${item.originalSubtotalFormatted} &#8363;
+                                                    </span>
+                                                    <span class="checkout-sale-price">
+                                                        ${item.subtotalFormatted} &#8363;
+                                                    </span>
+                                                </div>
+                                            </c:when>
+                                            <c:otherwise>
+                                                <span>${item.subtotalFormatted} &#8363;</span>
+                                            </c:otherwise>
+                                        </c:choose>
                                     </div>
                                 </c:forEach>
                                 <div class="cart-summary-row">

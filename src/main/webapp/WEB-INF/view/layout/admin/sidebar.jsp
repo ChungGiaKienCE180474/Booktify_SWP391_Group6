@@ -25,7 +25,6 @@
                                         Dashboard
                                     </a>
                                 </div>
-                               
 
                                 <%-- Management Section (Đã sửa lỗi đóng/mở thẻ ở đây) --%>
                                     <div class="admin-sidebar__section">
@@ -49,12 +48,6 @@
                                             Books
                                         </a>
 
-                                        <a href="/admin/reviews"
-                                            class="admin-sidebar__item ${fn:contains(pageContext.request.requestURI, '/admin/reviews') ? 'active' : ''}">
-                                            <i class="fa-solid fa-star"></i>
-                                            Reviews
-                                        </a>
-
                                         <a href="/admin/orders"
                                             class="admin-sidebar__item ${fn:contains(pageContext.request.requestURI, '/admin/orders') ? 'active' : ''}">
                                             <i class="fa-solid fa-receipt"></i>
@@ -71,6 +64,12 @@
                                             class="admin-sidebar__item ${fn:contains(pageContext.request.requestURI, '/admin/vouchers') ? 'active' : ''}">
                                             <i class="fa-solid fa-ticket"></i>
                                             Vouchers
+                                        </a>
+
+                                        <a href="/admin/promotions"
+                                            class="admin-sidebar__item ${fn:contains(pageContext.request.requestURI, '/admin/promotions') ? 'active' : ''}">
+                                            <i class="fa-solid fa-percent"></i>
+                                            Promotions
                                         </a>
 
                                         <a href="/admin/customers"
@@ -91,8 +90,14 @@
 
                         <%-- Footer --%>
                             <div class="admin-sidebar__footer">
+                                <a href="/" class="admin-sidebar__item" style="margin-bottom:6px;">
+                                    <i class="fa-solid fa-arrow-up-right-from-square"></i>
+                                    Customer View
+                                </a>
+
                                 <form method="post" action="/logout" class="admin-sidebar__logout-form">
                                     <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}" />
+
                                     <button type="submit" class="admin-sidebar__logout">
                                         <i class="fa-solid fa-right-from-bracket"></i>
                                         Logout
