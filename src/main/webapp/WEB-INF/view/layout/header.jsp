@@ -105,11 +105,20 @@
                                         <i class="fa-solid fa-book"></i> Book 
                                     </a>
 
+                                    <a href="/authors" class="catbar-link">
+                                        Author
                                     <%-- Stationery module belongs to a teammate; left as a
                                          non-functional placeholder until it's wired up. --%>
                                     <a href="#" class="catbar-link catbar-disabled" title="Coming soon" onclick="return false;">
                                         <i class="fa-solid fa-pen-ruler"></i> Stationery 
                                     </a>
+
+                                    <%-- Stationery module belongs to a teammate; left as a non-functional placeholder
+                                        until it's wired up. --%>
+                                        <a href="#" class="catbar-link catbar-disabled" title="Sắp ra mắt"
+                                            onclick="return false;">
+                                            <i class="fa-solid fa-pen-ruler"></i> Danh mục văn phòng phẩm
+                                        </a>
 
                                 </div>
                             </nav>

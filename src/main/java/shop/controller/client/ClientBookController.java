@@ -15,13 +15,9 @@ import shop.service.BookService;
 import shop.service.CategoryService;
 import shop.service.GenreService;
 
-import shop.domain.Rating;
 import shop.service.RatingService;
 
 import org.springframework.security.core.Authentication;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-
 import shop.domain.User;
 import shop.repository.UserRepository;
 
