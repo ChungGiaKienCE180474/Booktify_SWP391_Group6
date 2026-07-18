@@ -69,4 +69,27 @@ public class RatingController {
 
         return "redirect:/books/" + bookId;
     }
+
+    // DELETE
+    @PostMapping("/delete")
+    public String deleteRating(
+            @RequestParam Long bookId,
+            Authentication authentication) {
+
+        if (authentication == null) {
+            return "redirect:/login";
+        }
+
+        User user = userRepository.findByEmail(authentication.getName());
+
+        if (user == null) {
+            return "redirect:/login";
+        }
+
+        ratingService.deleteRating(
+                bookId,
+                user.getId());
+
+        return "redirect:/books/" + bookId;
+    }
 }

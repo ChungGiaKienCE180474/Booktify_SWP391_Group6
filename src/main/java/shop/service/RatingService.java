@@ -34,6 +34,24 @@ public class RatingService {
                 this.orderRepository = orderRepository;
         }
 
+        public List<Book> getBooksHasReview() {
+                return ratingRepository.findAll()
+                                .stream()
+                                .map(Rating::getBook)
+                                .distinct()
+                                .toList();
+
+        }
+
+        public List<Rating> getRatingsByBookForAdmin(Long bookId) {
+                return ratingRepository.findByBook_Id(bookId);
+        }
+
+        public Book getBook(Long bookId) {
+                return bookRepository.findById(bookId)
+                                .orElseThrow(() -> new RuntimeException("Book not found."));
+        }
+
         @Transactional
         public Rating createRating(
                         Long bookId,
@@ -44,33 +62,33 @@ public class RatingService {
                 // Validate số sao
                 if (ratingValue == null || ratingValue < 1 || ratingValue > 5) {
                         throw new IllegalArgumentException(
-                                        "Số sao phải từ 1 đến 5.");
+                                        "The number of stars must be between 1 and 5.");
                 }
 
                 // Validate nội dung
                 if (reviewText == null || reviewText.trim().isEmpty()) {
                         throw new IllegalArgumentException(
-                                        "Nội dung đánh giá không được để trống.");
+                                        "The evaluation section must not be left blank.");
                 }
 
                 if (reviewText.length() > 1000) {
                         throw new IllegalArgumentException(
-                                        "Nội dung đánh giá tối đa 1000 ký tự.");
+                                        "The review content should be a maximum of 1000 characters.");
                 }
 
                 // Kiểm tra sách tồn tại
                 Book book = bookRepository.findById(bookId)
-                                .orElseThrow(() -> new RuntimeException("Không tìm thấy sách."));
+                                .orElseThrow(() -> new RuntimeException("Book not found."));
 
                 // Kiểm tra customer tồn tại
                 User customer = userRepository.findById(customerId)
-                                .orElseThrow(() -> new RuntimeException("Không tìm thấy khách hàng."));
+                                .orElseThrow(() -> new RuntimeException("No customer found."));
 
                 if (customer.getRole() == null
                                 || !"CUSTOMER".equals(customer.getRole().getName())) {
 
                         throw new RuntimeException(
-                                        "Chỉ khách hàng mới có thể đánh giá sản phẩm.");
+                                        "Only customers can rate the product.");
 
                 }
 
@@ -80,21 +98,24 @@ public class RatingService {
                                                 customerId,
                                                 bookId,
                                                 "DELIVERED");
-
                 if (!purchased) {
                         throw new RuntimeException(
-                                        "Bạn chỉ có thể đánh giá sách đã mua.");
+                                        "You can only rate books you have purchased.");
                 }
-
                 // Kiểm tra đã đánh giá trước đó
-                boolean exists = ratingRepository
-                                .existsByBook_IdAndCustomer_Id(
-                                                bookId,
-                                                customerId);
-
-                if (exists) {
+                Optional<Rating> oldRating = ratingRepository.findByBook_IdAndCustomer_Id(
+                                bookId,
+                                customerId);
+                if (oldRating.isPresent()) {
+                        Rating rating = oldRating.get();
+                        if ("DELETED".equals(rating.getStatus())) {
+                                rating.setRatingValue(ratingValue);
+                                rating.setReview(reviewText.trim());
+                                rating.setStatus("ACTIVE");
+                                return ratingRepository.save(rating);
+                        }
                         throw new RuntimeException(
-                                        "Bạn đã đánh giá sách này rồi.");
+                                        "You have already reviewed this book.");
                 }
 
                 // Tạo rating
@@ -110,15 +131,9 @@ public class RatingService {
         }
 
         public boolean canCustomerReview(Long bookId, Long customerId) {
-
-                User customer = userRepository.findById(customerId).orElse(null);
-
+                User customer = userRepository.findById(customerId)
+                                .orElse(null);
                 if (customer == null) {
-                        return false;
-                }
-
-                if (customer.getRole() == null
-                                || !"CUSTOMER".equals(customer.getRole().getName())) {
                         return false;
                 }
 
@@ -127,17 +142,21 @@ public class RatingService {
                                                 customerId,
                                                 bookId,
                                                 "DELIVERED");
-
                 if (!purchased) {
                         return false;
                 }
 
-                boolean reviewed = ratingRepository
-                                .existsByBook_IdAndCustomer_Id(
-                                                bookId,
-                                                customerId);
+                Optional<Rating> rating = ratingRepository.findByBook_IdAndCustomer_Id(bookId, customerId);
 
-                return !reviewed;
+                if (rating.isEmpty()) {
+                        return true;
+                }
+                // Nếu khách đã xóa review
+                if ("DELETED".equals(rating.get().getStatus())) {
+                        return true;
+                }
+                // ACTIVE hoặc HIDDEN đều tính là đã review
+                return false;
         }
 
         public Optional<Rating> getCustomerRating(
@@ -164,7 +183,9 @@ public class RatingService {
                         String reviewText) {
 
                 Rating rating = ratingRepository
-                                .findByBook_IdAndCustomer_Id(bookId, customerId)
+                                .findByBook_IdAndCustomer_Id(
+                                                bookId,
+                                                customerId)
                                 .orElseThrow(() -> new RuntimeException("No reviews found."));
 
                 if (ratingValue < 1 || ratingValue > 5) {
@@ -182,7 +203,74 @@ public class RatingService {
 
                 rating.setRatingValue(ratingValue);
                 rating.setReview(reviewText.trim());
+                rating.setStatus("ACTIVE");
 
                 return ratingRepository.save(rating);
+        }
+
+        // DELETE
+        @Transactional
+        public void deleteRating(Long bookId, Long customerId) {
+
+                Rating rating = ratingRepository
+                                .findByBook_IdAndCustomer_IdAndStatus(
+                                                bookId,
+                                                customerId,
+                                                "ACTIVE")
+                                .orElseThrow(() -> new RuntimeException("Rating not found."));
+
+                rating.setStatus("DELETED");
+
+                // khách hàng tự xóa
+                rating.setDeletedBy("CUSTOMER");
+
+                ratingRepository.save(rating);
+        }
+
+        public Long getReviewCount(Long bookId) {
+
+                return (long) ratingRepository
+                                .findByBook_IdAndStatus(bookId, "ACTIVE")
+                                .size();
+        }
+
+        public Double getAverageRating(Long bookId) {
+
+                List<Rating> ratings = ratingRepository.findByBook_IdAndStatus(
+                                bookId,
+                                "ACTIVE");
+
+                if (ratings.isEmpty()) {
+                        return 0.0;
+                }
+
+                return ratings.stream()
+                                .mapToInt(Rating::getRatingValue)
+                                .average()
+                                .orElse(0.0);
+        }
+
+        @Transactional
+        public void hideRating(Integer ratingId) {
+                Rating rating = ratingRepository.findById(ratingId)
+                                .orElseThrow(() -> new RuntimeException("Rating not found."));
+                rating.setStatus("HIDDEN");
+                // admin ẩn
+                rating.setDeletedBy("ADMIN");
+                ratingRepository.save(rating);
+        }
+
+        @Transactional
+        public void visibleRating(Integer ratingId) {
+                Rating rating = ratingRepository.findById(ratingId)
+                                .orElseThrow(() -> new RuntimeException("Rating not found."));
+                // chỉ restore review do ADMIN hide
+                if (!"ADMIN".equals(rating.getDeletedBy())) {
+                        throw new RuntimeException(
+                                        "Customer deleted review cannot be restored.");
+                }
+                rating.setStatus("ACTIVE");
+                rating.setDeletedBy(null);
+                ratingRepository.save(rating);
         }
 }

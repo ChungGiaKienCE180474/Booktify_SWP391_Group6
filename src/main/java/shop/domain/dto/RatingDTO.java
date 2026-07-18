@@ -14,13 +14,13 @@ public class RatingDTO {
     @NotNull
     private Long customerId;
 
-    @NotNull(message = "Vui lòng chọn số sao.")
-    @Min(value = 1, message = "Số sao phải từ 1 đến 5.")
-    @Max(value = 5, message = "Số sao phải từ 1 đến 5.")
+    @NotNull(message = "Please select the number of stars.")
+    @Min(value = 1, message = "The number of stars must be between 1 and 5.")
+    @Max(value = 5, message = "The number of stars must be between 1 and 5.")
     private Integer ratingValue;
 
-    @NotBlank(message = "Vui lòng nhập nội dung đánh giá.")
-    @Size(max = 1000, message = "Nội dung đánh giá tối đa 1000 ký tự.")
+    @NotBlank(message = "Please enter your review.")
+    @Size(max = 1000, message = "The review content should be a maximum of 1000 characters.")
     private String review;
 
     public RatingDTO() {

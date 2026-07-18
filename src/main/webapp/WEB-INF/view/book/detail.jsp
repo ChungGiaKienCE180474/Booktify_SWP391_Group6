@@ -486,7 +486,7 @@
 
     <%-- Reviews --%>
     <section class="rating-section">
-        <h2 class="rating-title">Đánh giá sản phẩm</h2>
+        <h2 class="rating-title">Review Product</h2>
 
         <%-- Create Rating --%>
         <div id="ratingFormContainer" class="rating-create">
@@ -503,7 +503,7 @@
                                     value="create">
                         
                         <div class="mb-3">
-                            <label class="form-label">Số sao</label>
+                            <label class="form-label">Number of stars</label>
                             <div class="rating-stars-select">
                                 <input type="radio" id="star5" name="ratingValue" value="5" required>
                                 <label for="star5"><i class="fa-solid fa-star"></i></label>
@@ -518,17 +518,17 @@
                             </div>
                         </div>
                         <div class="mb-3">
-                            <label class="form-label">Nhận xét</label>
+                            <label class="form-label">Review</label>
                             <textarea  id="reviewText" name="reviewText" rows="5" class="form-control" maxlength="1000" required></textarea>
                         </div>
-                        <button id="ratingSubmitBtn" type="submit" class="btn-detail-primary">Gửi đánh giá</button>
+                        <button id="ratingSubmitBtn" type="submit" class="btn-detail-primary">Submit</button>
                     </form>
                 </c:when>
                 <%-- Đã đánh giá rồi --%>
                 <c:when test="${not empty myRating}">
 
     <div class="alert alert-success">
-        Bạn đã đánh giá cuốn sách này.
+        You have reviewed this book.
     </div>
 
 
@@ -550,7 +550,7 @@
         <div class="mb-3">
 
             <label class="form-label">
-                Số sao
+                Number of stars.
             </label>
 
 
@@ -626,7 +626,7 @@
             type="submit"
             class="btn-detail-primary">
 
-            Cập nhật đánh giá
+            Update Review
 
         </button>
 
@@ -635,12 +635,12 @@
 </c:when>
                 <%-- Đã đăng nhập nhưng chưa mua --%>
                 <c:when test="${not empty currentUser}">
-                    <div class="alert alert-warning">Bạn cần mua và nhận sách trước khi có thể đánh giá.</div>
+                    <div class="alert alert-warning">You need to buy and receive the product before you can leave a review.</div>
                 </c:when>
                 <%-- Chưa đăng nhập --%>
                 <c:otherwise>
                     <div class="alert alert-info">
-                        Vui lòng <a href="/login">đăng nhập</a> để đánh giá sản phẩm.
+                        Please <a href="/login">login</a> in to rate the product.
                     </div>
                 </c:otherwise>
             </c:choose>
@@ -654,17 +654,25 @@
                         <div class="rating-user">${rating.customer.fullName}</div>
                         
                          <c:if test="${not empty currentUser && currentUser.id == rating.customer.id}">
-                            <button
-                                type="button"
-                                class="rating-edit-btn"
-                                onclick="editRating(
-                                    '${rating.ratingValue}',
-                                    '${rating.review}')">
-
+                            <button type="button"
+                                    class="rating-edit-btn"
+                                    onclick="editRating('${rating.ratingValue}', '${rating.review}')">
                                 <i class="fa-solid fa-pen"></i>
-                                Edit
                             </button>
+
+                            <form action="/ratings/delete" method="post" style="display:inline;">
+                                <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}" />
+                                <input type="hidden" name="bookId" value="${book.id}" />
+
+                                <button type="submit"
+                                        class="rating-delete-btn"
+                                        onclick="return confirm('Delete this review?')">
+                                    <i class="fa-solid fa-trash-can"></i>
+                                </button>
+                            </form>
                         </c:if>
+
+                    
 
                         <div class="rating-stars">
                             <c:forEach begin="1" end="5" var="i">
@@ -686,7 +694,7 @@
                 </c:forEach>
             </c:when>
             <c:otherwise>
-                <div class="no-rating">Chưa có đánh giá nào cho sản phẩm này.</div>
+                <div class="no-rating">There are no reviews for this product yet.</div>
             </c:otherwise>
         </c:choose>
     </section>
