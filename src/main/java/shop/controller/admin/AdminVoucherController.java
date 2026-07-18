@@ -197,11 +197,6 @@ public class AdminVoucherController {
                     "voucher.value",
                     "Percentage discount cannot exceed 100.");
         }
-        // Only check when CREATE
-        if (id == null &&
-                voucherDTO.getEndDate() != null &&
-                voucherDTO.getEndDate()
-                        .isBefore(LocalDate.now())) {
 
         // Only check when CREATE
         if (id == null &&
