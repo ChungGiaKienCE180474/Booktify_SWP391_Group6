@@ -74,6 +74,33 @@ public class CartController {
 
         return redirectAfterAdd(bookId, redirect);
     }
+    @PostMapping("/add-vpp")
+public String addVppToCart(
+        Authentication authentication,
+        @RequestParam Long vppItemId,
+        @RequestParam(required = false) String quantity,
+        @RequestParam(required = false) String redirect,
+        RedirectAttributes redirectAttributes) {
+
+    User user = getCurrentUser(authentication);
+
+    Integer parsedQuantity = cartService.parsePositiveIntegerQuantity(
+            quantity != null ? quantity : "1");
+
+    if (parsedQuantity == null) {
+        redirectAttributes.addFlashAttribute("errorMessage", CartService.MSG_QUANTITY_INVALID);
+        return redirectAfterAddVpp(redirect);
+    }
+
+    try {
+        cartService.addVppItem(user.getId(), vppItemId, parsedQuantity);
+        redirectAttributes.addFlashAttribute("successMessage", "Stationery item added to your cart.");
+    } catch (IllegalArgumentException ex) {
+        redirectAttributes.addFlashAttribute("errorMessage", ex.getMessage());
+    }
+
+    return redirectAfterAddVpp(redirect);
+}
 
     @PostMapping("/update")
     public String updateQuantity(
@@ -142,6 +169,13 @@ public class CartController {
         }
         return "redirect:/books/" + bookId;
     }
+    private String redirectAfterAddVpp(String redirect) {
+    if (redirect != null && !redirect.isBlank()) {
+        return "redirect:" + redirect;
+    }
+
+    return "redirect:/customer/vpp";
+}
 
     private User getCurrentUser(Authentication authentication) {
         if (authentication == null || !authentication.isAuthenticated()) {

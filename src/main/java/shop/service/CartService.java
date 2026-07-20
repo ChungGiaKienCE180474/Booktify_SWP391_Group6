@@ -13,6 +13,7 @@ import shop.domain.Cart;
 import shop.domain.CartItem;
 import shop.domain.Promotion;
 import shop.domain.User;
+import shop.domain.VppItem;
 import shop.domain.dto.CartDTO;
 import shop.domain.dto.CartItemDTO;
 import shop.domain.dto.CartRefreshResult;
@@ -20,15 +21,16 @@ import shop.repository.BookRepository;
 import shop.repository.CartItemRepository;
 import shop.repository.CartRepository;
 import shop.repository.UserRepository;
+import shop.repository.VppItemRepository;
 
 @Service
 public class CartService {
 
     public static final String MSG_OUT_OF_STOCK =
-            "This book is out of stock.";
+            "This product is out of stock.";
 
     public static final String MSG_INACTIVE =
-            "This book is no longer available and cannot be added to the cart.";
+            "This product is no longer available and cannot be added to the cart.";
 
     public static final String MSG_QUANTITY_MIN =
             "Quantity must be at least 1.";
@@ -37,12 +39,13 @@ public class CartService {
             "Quantity must be a positive integer.";
 
     public static final String MSG_EXCEED_STOCK =
-            "The requested quantity exceeds available stock. Only %d book(s) remain.";
+            "The requested quantity exceeds available stock. Only %d item(s) remain.";
 
     private final CartRepository cartRepository;
     private final CartItemRepository cartItemRepository;
     private final BookRepository bookRepository;
     private final UserRepository userRepository;
+    private final VppItemRepository vppItemRepository;
     private final PromotionService promotionService;
 
     public CartService(
@@ -50,12 +53,14 @@ public class CartService {
             CartItemRepository cartItemRepository,
             BookRepository bookRepository,
             UserRepository userRepository,
+            VppItemRepository vppItemRepository,
             PromotionService promotionService) {
 
         this.cartRepository = cartRepository;
         this.cartItemRepository = cartItemRepository;
         this.bookRepository = bookRepository;
         this.userRepository = userRepository;
+        this.vppItemRepository = vppItemRepository;
         this.promotionService = promotionService;
     }
 
@@ -73,7 +78,7 @@ public class CartService {
                 .findByUserIdWithItems(userId)
                 .orElse(null);
 
-        if (cart == null || cart.getItems().isEmpty()) {
+        if (cart == null || cart.getItems() == null || cart.getItems().isEmpty()) {
             return 0;
         }
 
@@ -84,19 +89,14 @@ public class CartService {
     }
 
     @Transactional
-    public Cart addBook(
-            long userId,
-            long bookId,
-            int quantity) {
+    public Cart addBook(long userId, long bookId, int quantity) {
 
         validateQuantity(quantity);
 
         Book book = bookRepository
                 .findById(bookId)
                 .orElseThrow(() ->
-                        new IllegalArgumentException(
-                                "Book not found."
-                        )
+                        new IllegalArgumentException("Book not found.")
                 );
 
         validateBookForCart(book, quantity);
@@ -104,24 +104,16 @@ public class CartService {
         Cart cart = getOrCreateCart(userId);
 
         CartItem existing = cartItemRepository
-                .findByCartIdAndBookId(
-                        cart.getId(),
-                        bookId
-                )
+                .findByCartIdAndBookId(cart.getId(), bookId)
                 .orElse(null);
 
         if (existing != null) {
 
-            int newQuantity =
-                    existing.getQuantity() + quantity;
+            int newQuantity = existing.getQuantity() + quantity;
 
             if (newQuantity > book.getStockQuantity()) {
-
                 throw new IllegalArgumentException(
-                        String.format(
-                                MSG_EXCEED_STOCK,
-                                book.getStockQuantity()
-                        )
+                        String.format(MSG_EXCEED_STOCK, book.getStockQuantity())
                 );
             }
 
@@ -133,6 +125,7 @@ public class CartService {
 
             item.setCart(cart);
             item.setBook(book);
+            item.setVppItem(null);
             item.setQuantity(quantity);
 
             cart.getItems().add(item);
@@ -144,36 +137,91 @@ public class CartService {
     }
 
     @Transactional
-    public Cart updateQuantity(
-            long userId,
-            long cartItemId,
-            int quantity) {
+    public Cart addVppItem(long userId, long vppItemId, int quantity) {
+
+        validateQuantity(quantity);
+
+        VppItem vppItem = vppItemRepository
+                .findById(vppItemId)
+                .orElseThrow(() ->
+                        new IllegalArgumentException("Stationery item not found.")
+                );
+
+        validateVppForCart(vppItem, quantity);
+
+        Cart cart = getOrCreateCart(userId);
+
+        CartItem existing = cartItemRepository
+                .findByCartIdAndVppItemId(cart.getId(), vppItemId)
+                .orElse(null);
+
+        if (existing != null) {
+
+            int newQuantity = existing.getQuantity() + quantity;
+
+            if (newQuantity > vppItem.getStockQuantity()) {
+                throw new IllegalArgumentException(
+                        String.format(MSG_EXCEED_STOCK, vppItem.getStockQuantity())
+                );
+            }
+
+            existing.setQuantity(newQuantity);
+
+        } else {
+
+            CartItem item = new CartItem();
+
+            item.setCart(cart);
+            item.setBook(null);
+            item.setVppItem(vppItem);
+            item.setQuantity(quantity);
+
+            cart.getItems().add(item);
+        }
+
+        recalculateTotal(cart);
+
+        return cartRepository.save(cart);
+    }
+
+    @Transactional
+    public Cart updateQuantity(long userId, long cartItemId, int quantity) {
 
         validateQuantity(quantity);
 
         CartItem item = cartItemRepository
-                .findByIdAndCartUserId(
-                        cartItemId,
-                        userId
-                )
+                .findByIdAndCartUserId(cartItemId, userId)
                 .orElseThrow(() ->
-                        new IllegalArgumentException(
-                                "Cart item not found."
-                        )
+                        new IllegalArgumentException("Cart item not found.")
                 );
 
-        Book book = bookRepository
-                .findById(item.getBook().getId())
-                .orElseThrow(() ->
-                        new IllegalArgumentException(
-                                "Book not found."
-                        )
-                );
+        if (item.getBook() != null) {
 
-        validateBookForCart(book, quantity);
+            Book book = bookRepository
+                    .findById(item.getBook().getId())
+                    .orElseThrow(() ->
+                            new IllegalArgumentException("Book not found.")
+                    );
+
+            validateBookForCart(book, quantity);
+            item.setBook(book);
+
+        } else if (item.getVppItem() != null) {
+
+            VppItem vppItem = vppItemRepository
+                    .findById(item.getVppItem().getId())
+                    .orElseThrow(() ->
+                            new IllegalArgumentException("Stationery item not found.")
+                    );
+
+            validateVppForCart(vppItem, quantity);
+            item.setVppItem(vppItem);
+
+        } else {
+            throw new IllegalArgumentException("Invalid cart item.");
+        }
 
         item.setQuantity(quantity);
-        item.setBook(book);
 
         Cart cart = item.getCart();
 
@@ -183,19 +231,12 @@ public class CartService {
     }
 
     @Transactional
-    public Cart removeItem(
-            long userId,
-            long cartItemId) {
+    public Cart removeItem(long userId, long cartItemId) {
 
         CartItem item = cartItemRepository
-                .findByIdAndCartUserId(
-                        cartItemId,
-                        userId
-                )
+                .findByIdAndCartUserId(cartItemId, userId)
                 .orElseThrow(() ->
-                        new IllegalArgumentException(
-                                "Cart item not found."
-                        )
+                        new IllegalArgumentException("Cart item not found.")
                 );
 
         Cart cart = item.getCart();
@@ -220,9 +261,7 @@ public class CartService {
             return;
         }
 
-        for (CartItem item :
-                new ArrayList<>(cart.getItems())) {
-
+        for (CartItem item : new ArrayList<>(cart.getItems())) {
             cartItemRepository.delete(item);
         }
 
@@ -242,71 +281,74 @@ public class CartService {
 
         List<String> errors = new ArrayList<>();
 
-        if (cart == null || cart.getItems().isEmpty()) {
-
-            errors.add(
-                    "The cart must contain at least one item."
-            );
-
+        if (cart == null || cart.getItems() == null || cart.getItems().isEmpty()) {
+            errors.add("The cart must contain at least one item.");
             return errors;
         }
 
         for (CartItem item : cart.getItems()) {
 
-            Book book = bookRepository
-                    .findById(item.getBook().getId())
-                    .orElse(null);
+            if (item.getBook() != null) {
 
-            if (book == null) {
+                Book book = bookRepository
+                        .findById(item.getBook().getId())
+                        .orElse(null);
 
-                errors.add(
-                        "An item in your cart no longer exists."
-                );
+                if (book == null) {
+                    errors.add("An item in your cart no longer exists.");
+                    continue;
+                }
+
+                if (!book.isActive()) {
+                    errors.add("\"" + book.getTitle() + "\" is no longer available.");
+                }
+
+                if (book.getStockQuantity() <= 0) {
+                    errors.add("\"" + book.getTitle() + "\" — " + MSG_OUT_OF_STOCK);
+                } else if (item.getQuantity() > book.getStockQuantity()) {
+                    errors.add("\"" + book.getTitle() + "\" only has "
+                            + book.getStockQuantity()
+                            + " item(s) remaining in stock.");
+                }
+
+                if (book.getPrice() == null || book.getPrice().compareTo(BigDecimal.ZERO) < 0) {
+                    errors.add("\"" + book.getTitle() + "\" has an invalid selling price.");
+                }
 
                 continue;
             }
 
-            if (!book.isActive()) {
+            if (item.getVppItem() != null) {
 
-                errors.add(
-                        "\""
-                                + book.getTitle()
-                                + "\" is no longer available."
-                );
+                VppItem vppItem = vppItemRepository
+                        .findById(item.getVppItem().getId())
+                        .orElse(null);
+
+                if (vppItem == null) {
+                    errors.add("A stationery item in your cart no longer exists.");
+                    continue;
+                }
+
+                if (vppItem.isDeleted() || !vppItem.isActive()) {
+                    errors.add("\"" + vppItem.getName() + "\" is no longer available.");
+                }
+
+                if (vppItem.getStockQuantity() == null || vppItem.getStockQuantity() <= 0) {
+                    errors.add("\"" + vppItem.getName() + "\" — " + MSG_OUT_OF_STOCK);
+                } else if (item.getQuantity() > vppItem.getStockQuantity()) {
+                    errors.add("\"" + vppItem.getName() + "\" only has "
+                            + vppItem.getStockQuantity()
+                            + " item(s) remaining in stock.");
+                }
+
+                if (vppItem.getPrice() == null || vppItem.getPrice().compareTo(BigDecimal.ZERO) < 0) {
+                    errors.add("\"" + vppItem.getName() + "\" has an invalid selling price.");
+                }
+
+                continue;
             }
 
-            if (book.getStockQuantity() <= 0) {
-
-                errors.add(
-                        "\""
-                                + book.getTitle()
-                                + "\" — "
-                                + MSG_OUT_OF_STOCK
-                );
-
-            } else if (
-                    item.getQuantity()
-                            > book.getStockQuantity()) {
-
-                errors.add(
-                        "\""
-                                + book.getTitle()
-                                + "\" only has "
-                                + book.getStockQuantity()
-                                + " book(s) remaining in stock."
-                );
-            }
-
-            if (book.getPrice() == null
-                    || book.getPrice()
-                    .compareTo(BigDecimal.ZERO) < 0) {
-
-                errors.add(
-                        "\""
-                                + book.getTitle()
-                                + "\" has an invalid selling price."
-                );
-            }
+            errors.add("An item in your cart is invalid.");
         }
 
         return errors;
@@ -314,14 +356,11 @@ public class CartService {
 
     @Transactional
     public Cart refreshCart(long userId) {
-
-        return refreshCartResult(userId)
-                .getCart();
+        return refreshCartResult(userId).getCart();
     }
 
     @Transactional
-    public CartRefreshResult refreshCartWithWarnings(
-            long userId) {
+    public CartRefreshResult refreshCartWithWarnings(long userId) {
 
         Cart cart = cartRepository
                 .findByUserIdWithItems(userId)
@@ -339,81 +378,81 @@ public class CartService {
 
         for (CartItem item : cart.getItems()) {
 
-            Book book = bookRepository
-                    .findById(item.getBook().getId())
-                    .orElse(null);
+            if (item.getBook() != null) {
 
-            if (book == null) {
+                Book book = bookRepository
+                        .findById(item.getBook().getId())
+                        .orElse(null);
 
-                itemsToRemove.add(item);
+                if (book == null) {
+                    itemsToRemove.add(item);
+                    result.warning("An item no longer exists and was removed from your cart.");
+                    continue;
+                }
 
-                result.warning(
-                        "An item no longer exists and was removed from your cart."
-                );
+                if (!book.isActive()) {
+                    itemsToRemove.add(item);
+                    result.warning("\"" + book.getTitle() + "\" is no longer available and was removed from your cart.");
+                    continue;
+                }
 
+                if (book.getStockQuantity() <= 0) {
+                    itemsToRemove.add(item);
+                    result.warning("\"" + book.getTitle() + "\" — " + MSG_OUT_OF_STOCK);
+                    continue;
+                }
+
+                if (item.getQuantity() > book.getStockQuantity()) {
+                    result.warning("\"" + book.getTitle() + "\" — "
+                            + String.format(MSG_EXCEED_STOCK, book.getStockQuantity()));
+                }
+
+                item.setBook(book);
                 continue;
             }
 
-            if (!book.isActive()) {
+            if (item.getVppItem() != null) {
 
-                itemsToRemove.add(item);
+                VppItem vppItem = vppItemRepository
+                        .findById(item.getVppItem().getId())
+                        .orElse(null);
 
-                result.warning(
-                        "\""
-                                + book.getTitle()
-                                + "\" is no longer available and was removed from your cart."
-                );
+                if (vppItem == null) {
+                    itemsToRemove.add(item);
+                    result.warning("A stationery item no longer exists and was removed from your cart.");
+                    continue;
+                }
 
+                if (vppItem.isDeleted() || !vppItem.isActive()) {
+                    itemsToRemove.add(item);
+                    result.warning("\"" + vppItem.getName() + "\" is no longer available and was removed from your cart.");
+                    continue;
+                }
+
+                if (vppItem.getStockQuantity() == null || vppItem.getStockQuantity() <= 0) {
+                    itemsToRemove.add(item);
+                    result.warning("\"" + vppItem.getName() + "\" — " + MSG_OUT_OF_STOCK);
+                    continue;
+                }
+
+                if (item.getQuantity() > vppItem.getStockQuantity()) {
+                    result.warning("\"" + vppItem.getName() + "\" — "
+                            + String.format(MSG_EXCEED_STOCK, vppItem.getStockQuantity()));
+                }
+
+                item.setVppItem(vppItem);
                 continue;
             }
 
-            if (book.getStockQuantity() <= 0) {
-
-                itemsToRemove.add(item);
-
-                result.warning(
-                        "\""
-                                + book.getTitle()
-                                + "\" — "
-                                + MSG_OUT_OF_STOCK
-                );
-
-                continue;
-            }
-
-            if (item.getQuantity()
-                    > book.getStockQuantity()) {
-
-                result.warning(
-                        "\""
-                                + book.getTitle()
-                                + "\" — "
-                                + String.format(
-                                MSG_EXCEED_STOCK,
-                                book.getStockQuantity()
-                        )
-                );
-            }
-
-            /*
-             * Replace the book reference with the latest database version
-             * before recalculating prices and stock information.
-             */
-            item.setBook(book);
+            itemsToRemove.add(item);
+            result.warning("An invalid item was removed from your cart.");
         }
 
         for (CartItem item : itemsToRemove) {
-
             cart.getItems().remove(item);
-
             cartItemRepository.delete(item);
         }
 
-        /*
-         * Recalculate the cart whenever it is opened or used during checkout.
-         * This allows newly activated, expired, or disabled promotions to be
-         * reflected immediately.
-         */
         recalculateTotal(cart);
 
         return result.build();
@@ -421,24 +460,17 @@ public class CartService {
 
     @Transactional
     public CartDTO refreshCartDTO(long userId) {
-
-        return toCartDTO(
-                refreshCart(userId)
-        );
+        return toCartDTO(refreshCart(userId));
     }
 
     @Transactional
-    public CartRefreshResult refreshCartResult(
-            long userId) {
+    public CartRefreshResult refreshCartResult(long userId) {
 
         CartRefreshResult result =
                 refreshCartWithWarnings(userId);
 
         if (result.getCart() != null) {
-
-            cartRepository.save(
-                    result.getCart()
-            );
+            cartRepository.save(result.getCart());
         }
 
         return result;
@@ -446,10 +478,7 @@ public class CartService {
 
     public CartDTO toCartDTO(Cart cart) {
 
-        if (cart == null
-                || cart.getItems() == null
-                || cart.getItems().isEmpty()) {
-
+        if (cart == null || cart.getItems() == null || cart.getItems().isEmpty()) {
             return CartDTO.empty();
         }
 
@@ -458,9 +487,7 @@ public class CartService {
         dto.setId(cart.getId());
 
         dto.setTotalAmountFormatted(
-                promotionService.formatMoney(
-                        cart.getTotalAmount()
-                )
+                promotionService.formatMoney(cart.getTotalAmount())
         );
 
         dto.setItems(
@@ -473,8 +500,7 @@ public class CartService {
         return dto;
     }
 
-    private CartItemDTO toCartItemDTO(
-            CartItem item) {
+    private CartItemDTO toCartItemDTO(CartItem item) {
 
         CartItemDTO dto = new CartItemDTO();
 
@@ -483,112 +509,99 @@ public class CartService {
 
         Book book = item.getBook();
 
-        if (book == null) {
+        if (book != null) {
 
-            dto.setBookTitle("Unavailable book");
-            dto.setBookPriceFormatted("0");
-            dto.setOriginalPriceFormatted("0");
-            dto.setEffectivePriceFormatted("0");
-            dto.setOriginalSubtotalFormatted("0");
-            dto.setSubtotalFormatted("0");
-            dto.setPromotionApplied(false);
+            BigDecimal originalPrice =
+                    book.getPrice() == null
+                            ? BigDecimal.ZERO
+                            : book.getPrice();
+
+            Promotion bestPromotion =
+                    promotionService
+                            .getBestPromotionForBook(book)
+                            .orElse(null);
+
+            BigDecimal effectivePrice =
+                    bestPromotion == null
+                            ? originalPrice
+                            : promotionService.calculateDiscountedPrice(originalPrice, bestPromotion);
+
+            BigDecimal originalSubtotal =
+                    originalPrice.multiply(BigDecimal.valueOf(item.getQuantity()));
+
+            BigDecimal effectiveSubtotal =
+                    effectivePrice.multiply(BigDecimal.valueOf(item.getQuantity()));
+
+            dto.setBookId(book.getId());
+            dto.setBookTitle(book.getTitle());
+            dto.setBookAuthor(book.getAuthor());
+            dto.setBookImageUrl(book.getImageUrl());
+
+            dto.setBookPriceFormatted(promotionService.formatMoney(effectivePrice));
+            dto.setOriginalPriceFormatted(promotionService.formatMoney(originalPrice));
+            dto.setEffectivePriceFormatted(promotionService.formatMoney(effectivePrice));
+            dto.setOriginalSubtotalFormatted(promotionService.formatMoney(originalSubtotal));
+            dto.setSubtotalFormatted(promotionService.formatMoney(effectiveSubtotal));
+
+            dto.setPromotionApplied(bestPromotion != null);
+
+            dto.setPromotionLabel(
+                    bestPromotion == null
+                            ? ""
+                            : promotionService.getDiscountLabel(book, bestPromotion)
+            );
+
+            dto.setBookStockQuantity(book.getStockQuantity());
+            dto.setBookActive(book.isActive());
 
             return dto;
         }
 
-        BigDecimal originalPrice =
-                book.getPrice() == null
-                        ? BigDecimal.ZERO
-                        : book.getPrice();
+        VppItem vppItem = item.getVppItem();
 
-        Promotion bestPromotion =
-                promotionService
-                        .getBestPromotionForBook(book)
-                        .orElse(null);
+        if (vppItem != null) {
 
-        BigDecimal effectivePrice =
-                bestPromotion == null
-                        ? originalPrice
-                        : promotionService
-                        .calculateDiscountedPrice(
-                                originalPrice,
-                                bestPromotion
-                        );
+            BigDecimal price =
+                    vppItem.getPrice() == null
+                            ? BigDecimal.ZERO
+                            : vppItem.getPrice();
 
-        BigDecimal originalSubtotal =
-                originalPrice.multiply(
-                        BigDecimal.valueOf(
-                                item.getQuantity()
-                        )
-                );
+            BigDecimal subtotal =
+                    price.multiply(BigDecimal.valueOf(item.getQuantity()));
 
-        BigDecimal effectiveSubtotal =
-                effectivePrice.multiply(
-                        BigDecimal.valueOf(
-                                item.getQuantity()
-                        )
-                );
+            dto.setBookId(vppItem.getId());
+            dto.setBookTitle(vppItem.getName());
+            dto.setBookAuthor("Stationery");
+            dto.setBookImageUrl("/uploads/vpp/" + vppItem.getId() + "/image");
 
-        dto.setBookId(book.getId());
-        dto.setBookTitle(book.getTitle());
-        dto.setBookAuthor(book.getAuthor());
-        dto.setBookImageUrl(book.getImageUrl());
+            dto.setBookPriceFormatted(promotionService.formatMoney(price));
+            dto.setOriginalPriceFormatted(promotionService.formatMoney(price));
+            dto.setEffectivePriceFormatted(promotionService.formatMoney(price));
+            dto.setOriginalSubtotalFormatted(promotionService.formatMoney(subtotal));
+            dto.setSubtotalFormatted(promotionService.formatMoney(subtotal));
 
-        /*
-         * Keep bookPriceFormatted for compatibility with the current JSP.
-         * It now contains the effective price.
-         */
-        dto.setBookPriceFormatted(
-                promotionService.formatMoney(
-                        effectivePrice
-                )
-        );
+            dto.setPromotionApplied(false);
+            dto.setPromotionLabel("");
 
-        dto.setOriginalPriceFormatted(
-                promotionService.formatMoney(
-                        originalPrice
-                )
-        );
+            dto.setBookStockQuantity(
+                    vppItem.getStockQuantity() == null ? 0 : vppItem.getStockQuantity()
+            );
 
-        dto.setEffectivePriceFormatted(
-                promotionService.formatMoney(
-                        effectivePrice
-                )
-        );
+            dto.setBookActive(vppItem.isActive() && !vppItem.isDeleted());
 
-        dto.setOriginalSubtotalFormatted(
-                promotionService.formatMoney(
-                        originalSubtotal
-                )
-        );
+            return dto;
+        }
 
-        dto.setSubtotalFormatted(
-                promotionService.formatMoney(
-                        effectiveSubtotal
-                )
-        );
-
-        dto.setPromotionApplied(
-                bestPromotion != null
-        );
-
-        dto.setPromotionLabel(
-                bestPromotion == null
-                        ? ""
-                        : promotionService
-                        .getDiscountLabel(
-                                book,
-                                bestPromotion
-                        )
-        );
-
-        dto.setBookStockQuantity(
-                book.getStockQuantity()
-        );
-
-        dto.setBookActive(
-                book.isActive()
-        );
+        dto.setBookTitle("Unavailable product");
+        dto.setBookPriceFormatted("0");
+        dto.setOriginalPriceFormatted("0");
+        dto.setEffectivePriceFormatted("0");
+        dto.setOriginalSubtotalFormatted("0");
+        dto.setSubtotalFormatted("0");
+        dto.setPromotionApplied(false);
+        dto.setPromotionLabel("");
+        dto.setBookStockQuantity(0);
+        dto.setBookActive(false);
 
         return dto;
     }
@@ -602,60 +615,68 @@ public class CartService {
                     User user = userRepository
                             .findById(userId)
                             .orElseThrow(() ->
-                                    new IllegalArgumentException(
-                                            "User not found."
-                                    )
+                                    new IllegalArgumentException("User not found.")
                             );
 
                     Cart cart = new Cart();
 
                     cart.setUser(user);
+                    cart.setTotalAmount(BigDecimal.ZERO);
 
                     return cartRepository.save(cart);
                 });
     }
 
-    private void validateBookForCart(
-            Book book,
-            int quantity) {
+    private void validateBookForCart(Book book, int quantity) {
 
         if (!book.isActive()) {
-
-            throw new IllegalArgumentException(
-                    MSG_INACTIVE
-            );
+            throw new IllegalArgumentException(MSG_INACTIVE);
         }
 
         if (book.getStockQuantity() <= 0) {
-
-            throw new IllegalArgumentException(
-                    MSG_OUT_OF_STOCK
-            );
+            throw new IllegalArgumentException(MSG_OUT_OF_STOCK);
         }
 
         if (quantity > book.getStockQuantity()) {
-
             throw new IllegalArgumentException(
-                    String.format(
-                            MSG_EXCEED_STOCK,
-                            book.getStockQuantity()
-                    )
+                    String.format(MSG_EXCEED_STOCK, book.getStockQuantity())
             );
+        }
+
+        if (book.getPrice() == null || book.getPrice().compareTo(BigDecimal.ZERO) < 0) {
+            throw new IllegalArgumentException("Book price is invalid.");
+        }
+    }
+
+    private void validateVppForCart(VppItem item, int quantity) {
+
+        if (item.isDeleted() || !item.isActive()) {
+            throw new IllegalArgumentException(MSG_INACTIVE);
+        }
+
+        if (item.getStockQuantity() == null || item.getStockQuantity() <= 0) {
+            throw new IllegalArgumentException(MSG_OUT_OF_STOCK);
+        }
+
+        if (quantity > item.getStockQuantity()) {
+            throw new IllegalArgumentException(
+                    String.format(MSG_EXCEED_STOCK, item.getStockQuantity())
+            );
+        }
+
+        if (item.getPrice() == null || item.getPrice().compareTo(BigDecimal.ZERO) < 0) {
+            throw new IllegalArgumentException("Stationery item price is invalid.");
         }
     }
 
     private void validateQuantity(int quantity) {
 
         if (quantity < 1) {
-
-            throw new IllegalArgumentException(
-                    MSG_QUANTITY_MIN
-            );
+            throw new IllegalArgumentException(MSG_QUANTITY_MIN);
         }
     }
 
-    public Integer parsePositiveIntegerQuantity(
-            String raw) {
+    public Integer parsePositiveIntegerQuantity(String raw) {
 
         if (raw == null || raw.isBlank()) {
             return null;
@@ -669,37 +690,25 @@ public class CartService {
 
         try {
 
-            long value =
-                    Long.parseLong(trimmed);
+            long value = Long.parseLong(trimmed);
 
-            if (value < 1
-                    || value > Integer.MAX_VALUE) {
-
+            if (value < 1 || value > Integer.MAX_VALUE) {
                 return null;
             }
 
             return (int) value;
 
         } catch (NumberFormatException exception) {
-
             return null;
         }
     }
 
-    /**
-     * Recalculates the cart total using the current effective selling price
-     * of every book.
-     */
     private void recalculateTotal(Cart cart) {
 
-        if (cart == null
-                || cart.getItems() == null
-                || cart.getItems().isEmpty()) {
+        if (cart == null || cart.getItems() == null || cart.getItems().isEmpty()) {
 
             if (cart != null) {
-                cart.setTotalAmount(
-                        BigDecimal.ZERO
-                );
+                cart.setTotalAmount(BigDecimal.ZERO);
             }
 
             return;
@@ -707,28 +716,20 @@ public class CartService {
 
         BigDecimal total = cart.getItems()
                 .stream()
-                .filter(item ->
-                        item != null
-                                && item.getBook() != null
-                )
+                .filter(item -> item != null)
                 .map(item -> {
 
-                    BigDecimal effectivePrice =
-                            promotionService
-                                    .getEffectivePrice(
-                                            item.getBook()
-                                    );
+                    BigDecimal effectivePrice = BigDecimal.ZERO;
 
-                    return effectivePrice.multiply(
-                            BigDecimal.valueOf(
-                                    item.getQuantity()
-                            )
-                    );
+                    if (item.getBook() != null) {
+                        effectivePrice = promotionService.getEffectivePrice(item.getBook());
+                    } else if (item.getVppItem() != null && item.getVppItem().getPrice() != null) {
+                        effectivePrice = item.getVppItem().getPrice();
+                    }
+
+                    return effectivePrice.multiply(BigDecimal.valueOf(item.getQuantity()));
                 })
-                .reduce(
-                        BigDecimal.ZERO,
-                        BigDecimal::add
-                );
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
 
         cart.setTotalAmount(total);
     }
