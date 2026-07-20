@@ -31,6 +31,8 @@ import shop.domain.dto.OrderItemDTO;
 import shop.repository.BookRepository;
 import shop.repository.OrderRepository;
 import shop.repository.UserRepository;
+import shop.domain.VppItem;
+import shop.repository.VppItemRepository;
 
 @Service
 public class OrderService {
@@ -44,6 +46,7 @@ public class OrderService {
     private final UserRepository userRepository;
     private final VoucherService voucherService;
     private final PromotionService promotionService;
+    private final VppItemRepository vppItemRepository;
 
     public OrderService(
             OrderRepository orderRepository,
@@ -51,7 +54,8 @@ public class OrderService {
             CartService cartService,
             UserRepository userRepository,
             VoucherService voucherService,
-            PromotionService promotionService) {
+            PromotionService promotionService,
+            VppItemRepository vppItemRepository) {
 
         this.orderRepository = orderRepository;
         this.bookRepository = bookRepository;
@@ -59,6 +63,7 @@ public class OrderService {
         this.userRepository = userRepository;
         this.voucherService = voucherService;
         this.promotionService = promotionService;
+        this.vppItemRepository = vppItemRepository;
     }
 
     @Transactional(readOnly = true)
@@ -407,6 +412,63 @@ public class OrderService {
 
         for (CartItem cartItem :
                 cart.getItems()) {
+                        if (cartItem.getBook() == null && cartItem.getVppItem() != null) {
+
+    VppItem vppItem = vppItemRepository
+            .findById(cartItem.getVppItem().getId())
+            .orElseThrow(() ->
+                    new IllegalArgumentException(
+                            "A stationery item in your cart no longer exists."
+                    )
+            );
+
+    validateVppLine(
+            vppItem,
+            cartItem.getQuantity()
+    );
+
+    BigDecimal unitPrice =
+            vppItem.getPrice();
+
+    BigDecimal lineTotal =
+            unitPrice.multiply(
+                    BigDecimal.valueOf(
+                            cartItem.getQuantity()
+                    )
+            );
+
+    subtotal =
+            subtotal.add(lineTotal);
+
+    OrderItem orderItem =
+            new OrderItem();
+
+    orderItem.setOrder(order);
+    orderItem.setBook(null);
+    orderItem.setVppItem(vppItem);
+    orderItem.setBookTitle(vppItem.getName());
+    orderItem.setUnitPrice(unitPrice);
+    orderItem.setQuantity(cartItem.getQuantity());
+    orderItem.setLineTotal(lineTotal);
+
+    order.getItems().add(orderItem);
+
+    vppItem.setStockQuantity(
+            vppItem.getStockQuantity()
+                    - cartItem.getQuantity()
+    );
+
+    vppItemRepository.save(vppItem);
+
+    continue;
+}
+
+if (cartItem.getBook() == null) {
+    throw new IllegalArgumentException(
+            "An item in your cart is invalid."
+    );
+}
+
 
             Book book = bookRepository
                     .findById(
@@ -446,6 +508,7 @@ public class OrderService {
 
             orderItem.setOrder(order);
             orderItem.setBook(book);
+            orderItem.setVppItem(null);
 
             /*
              * Store the book title and effective unit price directly in the
@@ -609,9 +672,8 @@ public class OrderService {
 
     public List<String> validateCartItemsForOrder(
             Cart cart) {
-
-        List<String> errors =
-                new ArrayList<>();
+                
+        List<String> errors = new ArrayList<>();
 
         if (cart == null
                 || cart.getItems().isEmpty()) {
@@ -626,6 +688,46 @@ public class OrderService {
         int validItemCount = 0;
 
         for (CartItem item : cart.getItems()) {
+                 if (item.getBook() == null && item.getVppItem() != null) {
+
+            VppItem vppItem = vppItemRepository
+                    .findById(item.getVppItem().getId())
+                    .orElse(null);
+
+            if (vppItem == null) {
+                errors.add("A stationery item in your cart no longer exists.");
+                continue;
+            }
+
+            if (vppItem.isDeleted() || !vppItem.isActive()) {
+                errors.add("\"" + vppItem.getName() + "\" is no longer available.");
+                continue;
+            }
+
+            if (vppItem.getStockQuantity() == null || vppItem.getStockQuantity() <= 0) {
+                errors.add("\"" + vppItem.getName() + "\" — " + CartService.MSG_OUT_OF_STOCK);
+                continue;
+            }
+
+            if (item.getQuantity() > vppItem.getStockQuantity()) {
+                errors.add("\"" + vppItem.getName() + "\" — "
+                        + String.format(CartService.MSG_EXCEED_STOCK, vppItem.getStockQuantity()));
+                continue;
+            }
+
+            if (vppItem.getPrice() == null || vppItem.getPrice().compareTo(BigDecimal.ZERO) < 0) {
+                errors.add("\"" + vppItem.getName() + "\" has an invalid selling price.");
+                continue;
+            }
+
+            validItemCount++;
+            continue;
+        }
+
+        if (item.getBook() == null) {
+            errors.add("An item in your cart is invalid.");
+            continue;
+        }
 
             Book book = bookRepository
                     .findById(
@@ -816,6 +918,53 @@ public class OrderService {
             );
         }
     }
+    private void validateVppLine(
+        VppItem item,
+        int quantity) {
+
+    if (item.isDeleted() || !item.isActive()) {
+
+        throw new IllegalArgumentException(
+                "\""
+                        + item.getName()
+                        + "\" is no longer available."
+        );
+    }
+
+    if (item.getStockQuantity() == null
+            || item.getStockQuantity() <= 0) {
+
+        throw new IllegalArgumentException(
+                "\""
+                        + item.getName()
+                        + "\" — "
+                        + CartService.MSG_OUT_OF_STOCK
+        );
+    }
+
+    if (quantity > item.getStockQuantity()) {
+
+        throw new IllegalArgumentException(
+                "\""
+                        + item.getName()
+                        + "\" — "
+                        + String.format(
+                        CartService.MSG_EXCEED_STOCK,
+                        item.getStockQuantity()
+                )
+        );
+    }
+
+    if (item.getPrice() == null
+            || item.getPrice().compareTo(BigDecimal.ZERO) < 0) {
+
+        throw new IllegalArgumentException(
+                "\""
+                        + item.getName()
+                        + "\" has an invalid selling price."
+        );
+    }
+}
 
     private BigDecimal resolveDiscount(
             String voucherCode,
@@ -1002,6 +1151,18 @@ public class OrderService {
                     item.getBook().getImageUrl()
             );
         }
+        if (item.getVppItem() != null) {
+
+    dto.setBookId(
+            item.getVppItem().getId()
+    );
+
+    dto.setBookImageUrl(
+            "/uploads/vpp/"
+                    + item.getVppItem().getId()
+                    + "/image"
+    );
+}
 
         return dto;
     }
