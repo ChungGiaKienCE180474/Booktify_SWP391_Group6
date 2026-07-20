@@ -27,8 +27,12 @@ public class OrderItem {
     private Order order;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "book_id", nullable = false)
+    @JoinColumn(name = "book_id")
     private Book book;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "vpp_item_id")
+    private VppItem vppItem;
 
     @Column(name = "book_title", nullable = false, length = 200)
     private String bookTitle;
@@ -72,6 +76,14 @@ public class OrderItem {
 
     public void setBookTitle(String bookTitle) {
         this.bookTitle = bookTitle;
+    }
+
+    public VppItem getVppItem() {
+    return vppItem;
+    }
+
+    public void setVppItem(VppItem vppItem) {
+    this.vppItem = vppItem;
     }
 
     public BigDecimal getUnitPrice() {

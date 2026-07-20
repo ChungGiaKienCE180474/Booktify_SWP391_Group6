@@ -89,6 +89,21 @@
                                             <i class="fa-solid fa-user-tie"></i>
                                             Staff
                                         </a>
+                                        <a href="/admin/suppliers"
+                                            class="admin-sidebar__item ${fn:contains(pageContext.request.requestURI, '/admin/suppliers') ? 'active' : ''}">
+                                            <i class="fa-solid fa-truck"></i>
+                                            Suppliers
+                                        </a>
+                                        <a href="/admin/vpp"
+                                            class="admin-sidebar__item ${fn:contains(pageContext.request.requestURI, '/admin/vpp') ? 'active' : ''}">
+                                            <i class="fa-solid fa-pen-ruler"></i>
+                                            Stationery Mangement VPP
+                                        </a>
+                                        <a href="/admin/contacts"
+                                            class="admin-sidebar__item ${fn:contains(pageContext.request.requestURI, '/admin/contacts') ? 'active' : ''}">
+                                            <i class="fa-solid fa-headset"></i>
+                                            Contact Requests
+                                        </a>
 
 
                                     </div> <%-- Đóng thẻ chuẩn cho khối Management --%>
