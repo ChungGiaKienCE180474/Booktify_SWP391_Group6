@@ -88,6 +88,7 @@ public class SecurityConfiguration {
                                 "/authors", "/authors/**", "/logout", "/logout/**")
                         .permitAll()
                         .requestMatchers("/admin/**").hasRole("ADMIN")
+                        .requestMatchers("/staff/**").hasRole("STAFF")
                         .requestMatchers("/changepass", "/profile", "/profile/**", "/cart", "/cart/**",
                                 "/orders", "/orders/**").authenticated()
                         .requestMatchers("/stationery/**").authenticated()
