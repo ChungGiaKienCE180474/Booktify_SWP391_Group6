@@ -15,6 +15,46 @@
                 <link rel="stylesheet" href="/css/cart.css" />
                 <link rel="stylesheet" href="/css/voucher.css" />
 
+                <style>
+                    .cart-promotion-price {
+                        display: flex;
+                        flex-direction: column;
+                        gap: 4px;
+                    }
+
+                    .cart-promotion-line {
+                        display: flex;
+                        align-items: center;
+                        gap: 7px;
+                        flex-wrap: wrap;
+                    }
+
+                    .cart-old-price {
+                        color: #94a3b8;
+                        font-size: .78rem;
+                        font-weight: 700;
+                        text-decoration: line-through;
+                    }
+
+                    .cart-discount-badge {
+                        display: inline-flex;
+                        align-items: center;
+                        padding: 3px 7px;
+                        border-radius: 999px;
+                        background: #fee2e2;
+                        color: #dc2626;
+                        font-size: .7rem;
+                        font-weight: 800;
+                        white-space: nowrap;
+                    }
+
+                    .cart-sale-price {
+                        color: #dc2626;
+                        font-size: 1rem;
+                        font-weight: 800;
+                    }
+                </style>
+
                 <title>Cart — Booktify</title>
             </head>
 
@@ -92,9 +132,28 @@
                                                             </div>
                                                         </td>
                                                         <td>
-                                                            <span class="cart-price">
-                                                                ${item.bookPriceFormatted} &#8363;
-                                                            </span>
+                                                            <c:choose>
+                                                                <c:when test="${item.promotionApplied}">
+                                                                    <div class="cart-promotion-price">
+                                                                        <div class="cart-promotion-line">
+                                                                            <span class="cart-old-price">
+                                                                                ${item.originalPriceFormatted} &#8363;
+                                                                            </span>
+                                                                            <span class="cart-discount-badge">
+                                                                                ${item.promotionLabel}
+                                                                            </span>
+                                                                        </div>
+                                                                        <span class="cart-sale-price">
+                                                                            ${item.effectivePriceFormatted} &#8363;
+                                                                        </span>
+                                                                    </div>
+                                                                </c:when>
+                                                                <c:otherwise>
+                                                                    <span class="cart-price">
+                                                                        ${item.bookPriceFormatted} &#8363;
+                                                                    </span>
+                                                                </c:otherwise>
+                                                            </c:choose>
                                                         </td>
                                                         <td>
                                                             <form class="cart-qty-form" method="post"
@@ -110,9 +169,23 @@
                                                             </form>
                                                         </td>
                                                         <td>
-                                                            <span class="cart-price">
-                                                                ${item.subtotalFormatted} &#8363;
-                                                            </span>
+                                                            <c:choose>
+                                                                <c:when test="${item.promotionApplied}">
+                                                                    <div class="cart-promotion-price">
+                                                                        <span class="cart-old-price">
+                                                                            ${item.originalSubtotalFormatted} &#8363;
+                                                                        </span>
+                                                                        <span class="cart-sale-price">
+                                                                            ${item.subtotalFormatted} &#8363;
+                                                                        </span>
+                                                                    </div>
+                                                                </c:when>
+                                                                <c:otherwise>
+                                                                    <span class="cart-price">
+                                                                        ${item.subtotalFormatted} &#8363;
+                                                                    </span>
+                                                                </c:otherwise>
+                                                            </c:choose>
                                                         </td>
                                                         <td>
                                                             <form method="post" action="/cart/remove">
@@ -258,7 +331,7 @@
                 <jsp:include page="/WEB-INF/view/layout/footer.jsp" />
 
 
-                <!--Voucher details-->
+
                 <div id="voucherModal" class="voucher-modal">
 
                     <div class="voucher-modal-content">

@@ -37,9 +37,6 @@ public class AuthorController {
             throw new RuntimeException("Author not found");
         }
         model.addAttribute("author", author);
-        model.addAttribute(
-                "books",
-                authorService.getBooksByAuthor(id));
         return "author/detail";
     }
 
