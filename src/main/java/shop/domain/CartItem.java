@@ -17,7 +17,8 @@ import jakarta.persistence.UniqueConstraint;
 
 @Entity
 @Table(name = "cart_items", uniqueConstraints = {
-        @UniqueConstraint(name = "uk_cart_book", columnNames = { "cart_id", "book_id" })
+        @UniqueConstraint(name = "uk_cart_book", columnNames = { "cart_id", "book_id" }),
+        @UniqueConstraint(name = "uk_cart_vpp", columnNames = { "cart_id", "vpp_item_id" })
 })
 public class CartItem {
 
@@ -30,7 +31,7 @@ public class CartItem {
     private Cart cart;
 
     @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "book_id", nullable = false)
+    @JoinColumn(name = "book_id")
     private Book book;
     
     @ManyToOne
@@ -81,8 +82,16 @@ public class CartItem {
 
     /** Subtotal formatted as xxx.xxx (German locale, no decimals) */
     public String getSubtotalFormatted() {
-        if (book == null || book.getPrice() == null) return "0";
-        BigDecimal subtotal = book.getPrice().multiply(BigDecimal.valueOf(quantity));
+        BigDecimal unitPrice = null;
+        if (book != null) {
+            unitPrice = book.getPrice();
+        } else if (vppItem != null) {
+            unitPrice = vppItem.getPrice();
+        }
+        if (unitPrice == null) {
+            return "0";
+        }
+        BigDecimal subtotal = unitPrice.multiply(BigDecimal.valueOf(quantity));
         return NumberFormat.getIntegerInstance(Locale.GERMANY).format(subtotal.longValue());
     }
 }

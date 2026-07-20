@@ -632,38 +632,53 @@
 
                             </div>
 
-                            <form method="post" action="${pageContext.request.contextPath}/cart/add-vpp">
+                            <c:choose>
+                                <c:when test="${item.inStock}">
+                                    <c:choose>
+                                        <c:when test="${not empty sessionScope.username}">
+                                            <form method="post" action="${pageContext.request.contextPath}/cart/add-vpp">
+                                                <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}" />
+                                                <input type="hidden" name="vppItemId" value="${item.id}" />
+                                                <input type="hidden" name="redirect" value="/customer/vpp/${item.id}" />
 
-                                <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}" />
+                                                <div class="vpp-purchase-row">
+                                                    <label for="quantity" class="vpp-qty-label">Số lượng</label>
+                                                    <input id="quantity" type="number" name="quantity"
+                                                        class="vpp-quantity-input" min="1"
+                                                        max="${item.stockQuantity}" value="1" required />
 
-                                <input type="hidden" name="vppItemId" value="${item.id}" />
+                                                    <button type="submit" class="vpp-add-cart-btn">
+                                                        <i class="fa-solid fa-cart-shopping"></i>
+                                                        Thêm vào giỏ hàng
+                                                    </button>
 
-                                <input type="hidden" name="redirect" value="/customer/vpp/${item.id}" />
-
-                                <div class="vpp-purchase-row">
-
-                                    <label for="quantity" class="vpp-qty-label">
-                                        Số lượng
-                                    </label>
-
-                                    <input id="quantity" type="number" name="quantity" class="vpp-quantity-input"
-                                        min="1" max="${item.stockQuantity}" value="1" <c:if
-                                        test="${not item.inStock}">disabled</c:if>/>
-
-                                    <button type="submit" class="vpp-add-cart-btn" <c:if
-                                        test="${not item.inStock}">disabled</c:if>>
-                                        <i class="fa-solid fa-cart-shopping"></i>
-                                        Thêm vào giỏ hàng
-                                    </button>
-
-                                    <a href="${pageContext.request.contextPath}/cart" class="vpp-view-cart-btn">
-                                        <i class="fa-solid fa-basket-shopping"></i>
-                                        Xem giỏ hàng
-                                    </a>
-
-                                </div>
-
-                            </form>
+                                                    <a href="${pageContext.request.contextPath}/cart" class="vpp-view-cart-btn">
+                                                        <i class="fa-solid fa-basket-shopping"></i>
+                                                        Xem giỏ hàng
+                                                    </a>
+                                                </div>
+                                            </form>
+                                        </c:when>
+                                        <c:otherwise>
+                                            <div class="vpp-purchase-row">
+                                                <a href="${pageContext.request.contextPath}/login" class="vpp-add-cart-btn"
+                                                    style="text-decoration:none;">
+                                                    <i class="fa-solid fa-right-to-bracket"></i>
+                                                    Đăng nhập để mua
+                                                </a>
+                                            </div>
+                                        </c:otherwise>
+                                    </c:choose>
+                                </c:when>
+                                <c:otherwise>
+                                    <div class="vpp-purchase-row">
+                                        <button type="button" class="vpp-add-cart-btn" disabled>
+                                            <i class="fa-solid fa-cart-shopping"></i>
+                                            Hết hàng
+                                        </button>
+                                    </div>
+                                </c:otherwise>
+                            </c:choose>
 
                             <div class="vpp-meta-list">
 
