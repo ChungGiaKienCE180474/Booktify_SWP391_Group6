@@ -537,6 +537,7 @@
             </c:choose>
         </div>
     </div>
+    
     <%-- Reviews --%>
     <section class="rating-section">
         <h2 class="rating-title">Product reviews</h2>

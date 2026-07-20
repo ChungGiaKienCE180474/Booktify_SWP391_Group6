@@ -92,4 +92,82 @@ public class RatingController {
 
         return "redirect:/books/" + bookId;
     }
+
+    // ==============VPP=================
+
+    @PostMapping("/vpp/create")
+    public String createVppRating(
+            @RequestParam("vppItemId") Long vppItemId,
+            @RequestParam("ratingValue") Integer ratingValue,
+            @RequestParam("reviewText") String reviewText,
+            Authentication authentication) {
+
+        if (authentication == null) {
+            return "redirect:/login";
+        }
+
+        User user = userRepository
+                .findByEmail(authentication.getName());
+
+        if (user == null) {
+            return "redirect:/login";
+        }
+        ratingService.createVppRating(
+                vppItemId,
+                user.getId(),
+                ratingValue,
+                reviewText);
+
+        return "redirect:/customer/vpp/" + vppItemId;
+    }
+
+    // UPDATE
+    @PostMapping("/vpp/update")
+    public String updateVppRating(
+            @RequestParam("vppItemId") Long vppItemId,
+            @RequestParam("ratingValue") Integer ratingValue,
+            @RequestParam("reviewText") String reviewText,
+            Authentication authentication) {
+
+        if (authentication == null) {
+            return "redirect:/login";
+        }
+
+        User user = userRepository
+                .findByEmail(authentication.getName());
+
+        if (user == null) {
+            return "redirect:/login";
+        }
+        ratingService.updateVppRating(
+                vppItemId,
+                user.getId(),
+                ratingValue,
+                reviewText);
+
+        return "redirect:/customer/vpp/" + vppItemId;
+    }
+
+    // DELETE
+    @PostMapping("/vpp/delete")
+    public String deleteVppRating(
+            @RequestParam("vppItemId") Long vppItemId,
+            Authentication authentication) {
+
+        if (authentication == null) {
+            return "redirect:/login";
+        }
+
+        User user = userRepository
+                .findByEmail(authentication.getName());
+
+        if (user == null) {
+            return "redirect:/login";
+        }
+        ratingService.deleteVppRating(
+                vppItemId,
+                user.getId());
+
+        return "redirect:/customer/vpp/" + vppItemId;
+    }
 }

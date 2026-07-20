@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 
 import jakarta.persistence.*;
 import java.time.format.DateTimeFormatter;
+import shop.domain.VppItem;
 
 @Entity
 @Table(name = "ratings")
@@ -17,6 +18,10 @@ public class Rating {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "book_id", nullable = false)
     private Book book;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "vpp_item_id")
+    private VppItem vppItem;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "customer_id", nullable = false)
@@ -77,6 +82,14 @@ public class Rating {
 
     public User getCustomer() {
         return customer;
+    }
+
+    public VppItem getVppItem() {
+        return vppItem;
+    }
+
+    public void setVppItem(VppItem vppItem) {
+        this.vppItem = vppItem;
     }
 
     public void setCustomer(User customer) {

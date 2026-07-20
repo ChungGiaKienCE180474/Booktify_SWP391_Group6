@@ -105,4 +105,24 @@
 
                         <%-- Action Buttons --%>
                         <div class="admin-form__actions">
-                            <a href="/admin/categories" class="admin-button admin-button
+                            <a href="/admin/categories" class="admin-button admin-button--ghost">
+                                <i class="fa-solid fa-xmark"></i> Cancel
+                            </a>
+                            <button type="submit" class="admin-button">
+                                <i class="fa-solid fa-floppy-disk"></i>
+                                <c:choose>
+                                    <c:when test="${formMode=='edit'}">Update Category</c:when>
+                                    <c:otherwise>Create Category</c:otherwise>
+                                </c:choose>
+                            </button>
+                        </div>
+
+                    </form:form>
+                </div>
+            </div>
+
+        </section>
+    </main>
+</body>
+
+</html>

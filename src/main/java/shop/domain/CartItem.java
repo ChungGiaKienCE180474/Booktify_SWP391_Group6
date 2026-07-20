@@ -32,6 +32,10 @@ public class CartItem {
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "book_id", nullable = false)
     private Book book;
+    
+    @ManyToOne
+    @JoinColumn(name = "vpp_item_id")
+    private VppItem vppItem;
 
     @Column(nullable = false)
     private int quantity;
@@ -67,6 +71,13 @@ public class CartItem {
     public void setQuantity(int quantity) {
         this.quantity = quantity;
     }
+    
+    public VppItem getVppItem() {
+        return vppItem;
+    }
+    public void setVppItem(VppItem vppItem) {
+    this.vppItem = vppItem;
+}
 
     /** Subtotal formatted as xxx.xxx (German locale, no decimals) */
     public String getSubtotalFormatted() {

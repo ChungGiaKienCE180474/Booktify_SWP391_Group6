@@ -40,8 +40,7 @@
                                 <%-- Search bar --%>
                                     <form class="header-search" action="/books" method="get">
                                         <input type="text" name="q" class="header-search__input"
-                                            value="${not empty q ? q : ''}"
-                                            placeholder="Search books, authors, ..." />
+                                            value="${not empty q ? q : ''}" placeholder="Search books, authors, ..." />
                                         <button type="submit" class="header-search__btn">
                                             <i class="fa-solid fa-magnifying-glass"></i> Search
                                         </button>
@@ -90,7 +89,8 @@
                                                         <c:otherwise>
                                                             <div class="hdr-auth-btns">
                                                                 <a href="/login" class="btn-hdr btn-hdr-ghost">Login</a>
-                                                                <a href="/register" class="btn-hdr btn-hdr-solid">Register</a>
+                                                                <a href="/register"
+                                                                    class="btn-hdr btn-hdr-solid">Register</a>
                                                             </div>
                                                         </c:otherwise>
                                                     </c:choose>
@@ -102,16 +102,24 @@
                                 <div class="header-catbar-inner">
 
                                     <a href="/books" class="catbar-link catbar-all">
-                                        <i class="fa-solid fa-book"></i> Book 
+                                        <i class="fa-solid fa-book"></i> Book
                                     </a>
 
                                     <a href="/authors" class="catbar-link">
                                         Author
-                                    <%-- Stationery module belongs to a teammate; left as a
-                                         non-functional placeholder until it's wired up. --%>
-                                    <a href="#" class="catbar-link catbar-disabled" title="Coming soon" onclick="return false;">
-                                        <i class="fa-solid fa-pen-ruler"></i> Stationery 
-                                    </a>
+                                        <%-- Stationery module belongs to a teammate; left as a non-functional
+                                            placeholder until it's wired up. --%>
+
+                                            <%-- Stationery module belongs to a teammate; left as a non-functional
+                                                placeholder until it's wired up. --%>
+                                                <a href="${pageContext.request.contextPath}/customer/vpp"
+                                                    class="catbar-link">
+                                                    <i class="fa-solid fa-pen-ruler"></i> Stationery
+                                                </a>
+                                                <a href="${pageContext.request.contextPath}/contact"
+                                                    class="catbar-link">
+                                                    <i class="fa-solid fa-headset"></i> Contact Support
+                                                </a>
 
                                 </div>
                             </nav>

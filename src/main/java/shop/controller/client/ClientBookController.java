@@ -133,8 +133,6 @@ public class ClientBookController {
         return "book/detail";
     }
 
-    
-
     /** View List Of Products — alias */
     @GetMapping("/products")
     public String products(Model model) {

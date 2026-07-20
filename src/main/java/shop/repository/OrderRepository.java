@@ -36,4 +36,9 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
             Long userId,
             Long bookId,
             String status);
+
+    boolean existsByUser_IdAndItems_VppItem_IdAndStatus(
+            Long userId,
+            Long vppItemId,
+            String status);
 }
