@@ -264,8 +264,7 @@ public class UserService {
                 user.getPhone(),
                 user.getAddress(),
                 user.isStatus(),
-                user.isDeleted(),
-                user.getStaffRole()
+                user.isDeleted()
         );
     }
 
@@ -278,7 +277,7 @@ public class UserService {
         return u.getRole() != null && "STAFF".equalsIgnoreCase(u.getRole().getName());
     }
 
-    public Page<StaffDTO> getStaffPage(String keyword, String status, String staffRole, Pageable pageable) {
+    public Page<StaffDTO> getStaffPage(String keyword, String status, Pageable pageable) {
         List<StaffDTO> staffList = userRepository.findAll()
                 .stream()
                 .filter(this::isStaff)
@@ -298,10 +297,6 @@ public class UserService {
                     if ("inactive".equalsIgnoreCase(status)) return !u.isStatus();
                     return true;
                 })
-                .filter(u -> {
-                    if (staffRole == null || "all".equalsIgnoreCase(staffRole)) return true;
-                    return u.getStaffRole() != null && u.getStaffRole().equalsIgnoreCase(staffRole);
-                })
                 .map(this::toStaffDTO)
                 .collect(Collectors.toList());
 
@@ -315,7 +310,7 @@ public class UserService {
         return new PageImpl<>(pageContent, pageable, staffList.size());
     }
 
-    public Page<StaffDTO> getDeletedStaffPage(String keyword, String staffRole, Pageable pageable) {
+    public Page<StaffDTO> getDeletedStaffPage(String keyword, Pageable pageable) {
         List<StaffDTO> staffList = userRepository.findAll()
                 .stream()
                 .filter(this::isStaff)
@@ -328,10 +323,6 @@ public class UserService {
                             || (u.getFullName() != null && u.getFullName().toLowerCase().contains(key))
                             || (u.getPhone() != null && u.getPhone().toLowerCase().contains(key))
                             || (u.getAddress() != null && u.getAddress().toLowerCase().contains(key));
-                })
-                .filter(u -> {
-                    if (staffRole == null || "all".equalsIgnoreCase(staffRole)) return true;
-                    return u.getStaffRole() != null && u.getStaffRole().equalsIgnoreCase(staffRole);
                 })
                 .map(this::toStaffDTO)
                 .collect(Collectors.toList());
@@ -354,14 +345,13 @@ public class UserService {
     }
 
     public User createStaff(String fullName, String email, String password,
-                            String phone, String address, String staffRole) {
+                            String phone, String address) {
         User staff = new User();
         staff.setFullName(fullName);
-        staff.setEmail(email);
+        staff.setEmail(normalizeEmail(email));
         staff.setPassword(passwordEncoder.encode(password));
         staff.setPhone(phone);
         staff.setAddress(address);
-        staff.setStaffRole(staffRole);
         staff.setStatus(true);
         staff.setDeleted(false);
         staff.setAuthProvider(AuthProvider.LOCAL.name());
@@ -370,12 +360,11 @@ public class UserService {
         return userRepository.save(staff);
     }
 
-    public void updateStaff(Long id, String fullName, String phone, String address, String staffRole) {
+    public void updateStaff(Long id, String fullName, String phone, String address) {
         userRepository.findById(id).ifPresent(staff -> {
             staff.setFullName(fullName);
             staff.setPhone(phone);
             staff.setAddress(address);
-            staff.setStaffRole(staffRole);
             userRepository.save(staff);
         });
     }
