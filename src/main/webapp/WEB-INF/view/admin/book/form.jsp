@@ -18,131 +18,15 @@
                 <link rel="stylesheet"
                     href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" />
                 <link rel="stylesheet" href="/css/admin-dashboard.css?v=4" />
+                <link rel="stylesheet" href="/css/book.css" />
+
                 <title>
                     <c:choose>
                         <c:when test="${formMode=='edit'}">Edit Book</c:when>
                         <c:otherwise>Create Book</c:otherwise>
                     </c:choose> — Booktify Admin
                 </title>
-                <style>
-                    /* ── Author Combobox ────────────────────────────────────────────── */
-                    .ac-wrap {
-                        position: relative;
-                    }
-
-                    .ac-control {
-                        display: flex !important;
-                        align-items: center !important;
-                        padding: 0 !important;
-                        cursor: pointer;
-                        overflow: hidden;
-                    }
-
-                    .ac-control:focus-within {
-                        outline: none;
-                        border-color: #006B5E !important;
-                        box-shadow: 0 0 0 3px rgba(0, 107, 94, .15);
-                    }
-
-                    .ac-wrap.is-open .ac-control {
-                        border-color: #006B5E !important;
-                        box-shadow: 0 0 0 3px rgba(0, 107, 94, .15);
-                        border-bottom-left-radius: 0;
-                        border-bottom-right-radius: 0;
-                    }
-
-                    .ac-input {
-                        flex: 1;
-                        min-width: 0;
-                        border: none;
-                        outline: none;
-                        background: transparent;
-                        padding: 0 0 0 12px;
-                        height: 44px;
-                        font-size: .875rem;
-                        color: #111827;
-                        cursor: text;
-                        line-height: 44px;
-                    }
-
-                    .ac-input::placeholder {
-                        color: #9CA3AF;
-                    }
-
-                    .ac-chevron {
-                        padding: 0 12px;
-                        color: #9CA3AF;
-                        font-size: .72rem;
-                        flex-shrink: 0;
-                        pointer-events: none;
-                        transition: transform .18s ease;
-                    }
-
-                    .ac-wrap.is-open .ac-chevron {
-                        transform: rotate(180deg);
-                    }
-
-                    .ac-dropdown {
-                        display: none;
-                        position: absolute;
-                        top: 100%;
-                        left: 0;
-                        right: 0;
-                        background: #fff;
-                        border: 1px solid #006B5E;
-                        border-top: none;
-                        border-bottom-left-radius: 8px;
-                        border-bottom-right-radius: 8px;
-                        box-shadow: 0 8px 24px rgba(0, 0, 0, .10);
-                        z-index: 1050;
-                        max-height: 224px;
-                        overflow-y: auto;
-                        padding: 4px 0;
-                    }
-
-                    .ac-wrap.is-open .ac-dropdown {
-                        display: block;
-                    }
-
-                    .ac-option {
-                        padding: 8px 14px;
-                        cursor: pointer;
-                        border-radius: 4px;
-                        margin: 1px 4px;
-                    }
-
-                    .ac-option:hover,
-                    .ac-option.is-highlighted {
-                        background: #E3F4F1;
-                    }
-
-                    .ac-option.is-selected {
-                        background: #D3EEE9;
-                    }
-
-                    .ac-opt-name {
-                        display: block;
-                        font-size: .875rem;
-                        font-weight: 600;
-                        color: #111827;
-                        line-height: 1.3;
-                    }
-
-                    .ac-opt-nat {
-                        display: block;
-                        font-size: .72rem;
-                        color: #6B7280;
-                        margin-top: 1px;
-                        line-height: 1.3;
-                    }
-
-                    .ac-empty {
-                        padding: 12px 14px;
-                        color: #9CA3AF;
-                        font-size: .83rem;
-                        text-align: center;
-                    }
-                </style>
+               
             </head>
 
             <body class="admin-shell">

@@ -69,12 +69,12 @@
                             </thead>
 
                             <tbody>
-                                <%-- Books List --%>
-                                    <c:set var="index" value="0" />
-                                    <c:forEach items="${books}" var="book" varStatus="vs">
-                                        <tr>
-                                            <c:set var="index" value="${index + 1}" />
+                                <c:set var="index" value="0" />
 
+                                <%-- Books List --%>
+                                    <c:forEach items="${books}" var="book">
+                                        <c:set var="index" value="${index + 1}" />
+                                        <tr>
                                             <td style="text-align: center; color: #9CA3AF; font-weight: 600;">
                                                 ${index}
                                             </td>
@@ -96,6 +96,7 @@
                                                             <div class="review-count">
                                                                 ${reviewCounts[book.id]} Reviews
                                                             </div>
+
                                                             <div class="review-star">
                                                                 <c:forEach begin="1" end="5" var="i">
                                                                     <c:choose>
@@ -104,11 +105,13 @@
                                                                         <c:otherwise>☆</c:otherwise>
                                                                     </c:choose>
                                                                 </c:forEach>
-                                                                <span style="color: #374151; margin-left: 5px;">
+
+                                                                <span style="color:#374151;margin-left:5px;">
                                                                     ${averageRatings[book.id]}
                                                                 </span>
                                                             </div>
                                                         </c:when>
+
                                                         <c:otherwise>
                                                             <div class="review-count">0 Reviews</div>
                                                             <div class="no-rating">No ratings</div>
@@ -128,21 +131,16 @@
 
                                     <%-- VPP Items List --%>
                                         <c:forEach items="${vppItems}" var="item">
+                                            <c:set var="index" value="${index + 1}" />
                                             <tr>
-                                                <c:set var="index" value="${index + 1}" />
-
                                                 <td style="text-align: center; color: #9CA3AF; font-weight: 600;">
                                                     ${index}
                                                 </td>
-
-
 
                                                 <td>
                                                     <div class="book-title">
                                                         <c:out value="${item.name}" />
                                                     </div>
-
-
                                                     <c:if test="${not empty item.supplier}">
                                                         <div class="book-author">
                                                             <c:out value="${item.supplier}" />
@@ -152,21 +150,33 @@
 
                                                 <td>
                                                     <div class="review-summary">
-                                                        <div class="review-count">
-                                                            ${vppReviewCounts[item.id]} Reviews
-                                                        </div>
-                                                        <div class="review-star">
-                                                            <c:forEach begin="1" end="5" var="i">
-                                                                <c:choose>
-                                                                    <c:when test="${i <= vppAverageRatings[item.id]}">★
-                                                                    </c:when>
-                                                                    <c:otherwise>☆</c:otherwise>
-                                                                </c:choose>
-                                                            </c:forEach>
-                                                            <span style="color: #374151; margin-left: 5px;">
-                                                                ${averageRatings[item.id]}
-                                                            </span>
-                                                        </div>
+                                                        <c:choose>
+                                                            <c:when test="${vppReviewCounts[item.id] > 0}">
+                                                                <div class="review-count">
+                                                                    ${vppReviewCounts[item.id]} Reviews
+                                                                </div>
+
+                                                                <div class="review-star">
+                                                                    <c:forEach begin="1" end="5" var="i">
+                                                                        <c:choose>
+                                                                            <c:when
+                                                                                test="${i <= vppAverageRatings[item.id]}">
+                                                                                ★</c:when>
+                                                                            <c:otherwise>☆</c:otherwise>
+                                                                        </c:choose>
+                                                                    </c:forEach>
+
+                                                                    <span style="color:#374151;margin-left:5px;">
+                                                                        ${vppAverageRatings[item.id]}
+                                                                    </span>
+                                                                </div>
+                                                            </c:when>
+
+                                                            <c:otherwise>
+                                                                <div class="review-count">0 Reviews</div>
+                                                                <div class="no-rating">No ratings</div>
+                                                            </c:otherwise>
+                                                        </c:choose>
                                                     </div>
                                                 </td>
 
@@ -182,7 +192,7 @@
                                         <%-- Empty State --%>
                                             <c:if test="${empty books && empty vppItems}">
                                                 <tr>
-                                                    <td colspan="5"
+                                                    <td colspan="4"
                                                         style="text-align: center; padding: 56px 20px; color: #9CA3AF;">
                                                         <i class="fa-solid fa-star"
                                                             style="font-size: 2.2rem; display: block; margin-bottom: 10px; opacity: .3;"></i>

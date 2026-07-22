@@ -80,18 +80,39 @@
 
                             <div class="review-summary">
 
-                                <span class="stars">
-                                    <c:forEach begin="1" end="5" var="i">
-                                        <c:choose>
-                                            <c:when test="${i <= averageRating}">★</c:when>
-                                            <c:otherwise>☆</c:otherwise>
-                                        </c:choose>
-                                    </c:forEach>
-                                </span>
+                                <c:choose>
 
-                                <span class="review-count">
-                                    ${averageRating} / 5 - ${reviewCount} Reviews
-                                </span>
+                                    <c:when test="${reviewCount > 0}">
+
+                                        <span class="stars">
+                                            <c:forEach begin="1" end="5" var="i">
+                                                <c:choose>
+                                                    <c:when test="${i <= averageRating}">
+                                                        ★
+                                                    </c:when>
+                                                    <c:otherwise>
+                                                        ☆
+                                                    </c:otherwise>
+                                                </c:choose>
+                                            </c:forEach>
+                                        </span>
+
+                                        <span class="review-count">
+                                            ${averageRating} / 5 - ${reviewCount} Reviews
+                                        </span>
+
+                                    </c:when>
+
+
+                                    <c:otherwise>
+
+                                        <span class="review-count">
+                                            No ratings
+                                        </span>
+
+                                    </c:otherwise>
+
+                                </c:choose>
 
                             </div>
 

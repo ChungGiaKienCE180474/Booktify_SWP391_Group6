@@ -504,20 +504,22 @@ public class RatingService {
         public Long getReviewCountVpp(Long vppItemId) {
 
                 return (long) ratingRepository
-                                .findByVppItem_IdAndStatus(
-                                                vppItemId,
-                                                "ACTIVE")
-                                .size();
+                                .findByVppItem_Id(vppItemId)
+                                .stream()
+                                .filter(r -> !"DELETED".equals(r.getStatus()))
+                                .count();
         }
 
         public Double getAverageRatingVpp(Long vppItemId) {
 
-                List<Rating> ratings = ratingRepository.findByVppItem_IdAndStatus(
-                                vppItemId,
-                                "ACTIVE");
+                List<Rating> ratings = ratingRepository
+                                .findByVppItem_Id(vppItemId)
+                                .stream()
+                                .filter(r -> !"DELETED".equals(r.getStatus()))
+                                .toList();
 
                 if (ratings.isEmpty()) {
-                        return 0.0;
+                        return null;
                 }
 
                 return ratings.stream()
@@ -537,4 +539,6 @@ public class RatingService {
                                 .findVppItemsHasReview(
                                                 keyword.trim());
         }
+
+        
 }
