@@ -67,6 +67,8 @@ public class AdminOrderController {
                 .map(order -> {
                     model.addAttribute("order", order);
                     model.addAttribute("orderStatuses", OrderStatus.values());
+                    OrderStatus currentStatus = OrderStatus.fromValue(order.getStatus());
+                    model.addAttribute("allowedNextStatuses", currentStatus.allowedTransitions());
                     return "admin/order/detail";
                 })
                 .orElseGet(() -> {

@@ -1,7 +1,10 @@
 package shop.controller.client;
 
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -10,6 +13,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
+import jakarta.servlet.http.HttpServletRequest;
 
 import shop.domain.User;
 import shop.domain.dto.CartRefreshResult;
@@ -50,57 +55,59 @@ public class CartController {
     }
 
     @PostMapping("/add")
-    public String addToCart(
+    public Object addToCart(
             Authentication authentication,
             @RequestParam Long bookId,
             @RequestParam(required = false) String quantity,
             @RequestParam(required = false) String redirect,
+            HttpServletRequest request,
             RedirectAttributes redirectAttributes) {
 
         User user = getCurrentUser(authentication);
         Integer parsedQuantity = cartService.parsePositiveIntegerQuantity(
                 quantity != null ? quantity : "1");
         if (parsedQuantity == null) {
-            redirectAttributes.addFlashAttribute("errorMessage", CartService.MSG_QUANTITY_INVALID);
-            return redirectAfterAdd(bookId, redirect);
+            return handleAddResponse(request, redirectAttributes, false, CartService.MSG_QUANTITY_INVALID, user,
+                    redirectAfterAdd(bookId, redirect));
         }
 
         try {
             cartService.addBook(user.getId(), bookId, parsedQuantity);
-            redirectAttributes.addFlashAttribute("successMessage", "Book added to your cart.");
+            return handleAddResponse(request, redirectAttributes, true, "Book added to your cart.", user,
+                    redirectAfterAdd(bookId, redirect));
         } catch (IllegalArgumentException ex) {
-            redirectAttributes.addFlashAttribute("errorMessage", ex.getMessage());
+            return handleAddResponse(request, redirectAttributes, false, ex.getMessage(), user,
+                    redirectAfterAdd(bookId, redirect));
+        }
+    }
+
+    @PostMapping("/add-vpp")
+    public Object addVppToCart(
+            Authentication authentication,
+            @RequestParam Long vppItemId,
+            @RequestParam(required = false) String quantity,
+            @RequestParam(required = false) String redirect,
+            HttpServletRequest request,
+            RedirectAttributes redirectAttributes) {
+
+        User user = getCurrentUser(authentication);
+        Integer parsedQuantity = cartService.parsePositiveIntegerQuantity(
+                quantity != null ? quantity : "1");
+
+        if (parsedQuantity == null) {
+            return handleAddResponse(request, redirectAttributes, false, CartService.MSG_QUANTITY_INVALID, user,
+                    redirectAfterAddVpp(redirect));
         }
 
-        return redirectAfterAdd(bookId, redirect);
+        try {
+            cartService.addVppItem(user.getId(), vppItemId, parsedQuantity);
+            return handleAddResponse(request, redirectAttributes, true, "Stationery item added to your cart.", user,
+                    redirectAfterAddVpp(redirect));
+        } catch (IllegalArgumentException ex) {
+            return handleAddResponse(request, redirectAttributes, false, ex.getMessage(), user,
+                    redirectAfterAddVpp(redirect));
+        }
     }
-    @PostMapping("/add-vpp")
-public String addVppToCart(
-        Authentication authentication,
-        @RequestParam Long vppItemId,
-        @RequestParam(required = false) String quantity,
-        @RequestParam(required = false) String redirect,
-        RedirectAttributes redirectAttributes) {
-
-    User user = getCurrentUser(authentication);
-
-    Integer parsedQuantity = cartService.parsePositiveIntegerQuantity(
-            quantity != null ? quantity : "1");
-
-    if (parsedQuantity == null) {
-        redirectAttributes.addFlashAttribute("errorMessage", CartService.MSG_QUANTITY_INVALID);
-        return redirectAfterAddVpp(redirect);
-    }
-
-    try {
-        cartService.addVppItem(user.getId(), vppItemId, parsedQuantity);
-        redirectAttributes.addFlashAttribute("successMessage", "Stationery item added to your cart.");
-    } catch (IllegalArgumentException ex) {
-        redirectAttributes.addFlashAttribute("errorMessage", ex.getMessage());
-    }
-
-    return redirectAfterAddVpp(redirect);
-}
 
     @PostMapping("/update")
     public String updateQuantity(
@@ -176,6 +183,38 @@ public String addVppToCart(
 
     return "redirect:/customer/vpp";
 }
+
+    private Object handleAddResponse(
+            HttpServletRequest request,
+            RedirectAttributes redirectAttributes,
+            boolean success,
+            String message,
+            User user,
+            String redirectTarget) {
+
+        if (isAjaxRequest(request)) {
+            return cartAddJsonResponse(success, message, user.getId());
+        }
+
+        if (success) {
+            redirectAttributes.addFlashAttribute("cartSuccessMessage", message);
+        } else {
+            redirectAttributes.addFlashAttribute("cartErrorMessage", message);
+        }
+        return redirectTarget;
+    }
+
+    private ResponseEntity<Map<String, Object>> cartAddJsonResponse(boolean success, String message, long userId) {
+        Map<String, Object> body = new LinkedHashMap<>();
+        body.put("success", success);
+        body.put("message", message);
+        body.put("cartItemCount", cartService.getCartItemCount(userId));
+        return ResponseEntity.status(success ? 200 : 400).body(body);
+    }
+
+    private boolean isAjaxRequest(HttpServletRequest request) {
+        return "XMLHttpRequest".equals(request.getHeader("X-Requested-With"));
+    }
 
     private User getCurrentUser(Authentication authentication) {
         if (authentication == null || !authentication.isAuthenticated()) {

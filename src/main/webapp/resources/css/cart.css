@@ -84,13 +84,56 @@ body.home-page {
 .cart-table {
     width: 100%;
     border-collapse: collapse;
+    table-layout: fixed;
+}
+
+.cart-table .col-product {
+    width: auto;
+}
+
+.cart-table .col-price {
+    width: 108px;
+}
+
+.cart-table .col-qty {
+    width: 118px;
+}
+
+.cart-table .col-subtotal {
+    width: 108px;
+}
+
+.cart-table .col-remove {
+    width: 48px;
 }
 
 .cart-table th,
 .cart-table td {
-    padding: 1rem;
+    padding: .75rem .5rem;
     border-bottom: 1px solid var(--cart-border);
     vertical-align: middle;
+    overflow: hidden;
+}
+
+.cart-table th.col-remove,
+.cart-table td.col-remove {
+    width: 48px;
+    min-width: 48px;
+    max-width: 48px;
+    padding-left: .35rem;
+    padding-right: .35rem;
+    text-align: center;
+    box-sizing: border-box;
+}
+
+.cart-table td.col-price,
+.cart-table td.col-subtotal {
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.cart-table td.col-qty {
+    white-space: nowrap;
 }
 
 .cart-table th {
@@ -104,13 +147,19 @@ body.home-page {
 
 .cart-book {
     display: flex;
-    gap: 1rem;
+    gap: .75rem;
     align-items: center;
+    min-width: 0;
+}
+
+.cart-book__info {
+    min-width: 0;
+    flex: 1;
 }
 
 .cart-book__thumb {
-    width: 64px;
-    height: 84px;
+    width: 52px;
+    height: 68px;
     border-radius: 8px;
     overflow: hidden;
     background: #f1f5f9;
@@ -130,6 +179,10 @@ body.home-page {
     font-weight: 700;
     color: var(--cart-text);
     text-decoration: none;
+    display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .cart-book__title:hover {
@@ -137,28 +190,89 @@ body.home-page {
 }
 
 .cart-book__author {
-    font-size: .85rem;
+    font-size: .8rem;
     color: var(--cart-muted);
     margin-top: .2rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .cart-price {
     font-weight: 700;
     color: var(--cart-primary);
+    font-size: .82rem;
     white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: block;
+}
+
+.cart-promotion-price {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    min-width: 0;
+    white-space: nowrap;
+    overflow: hidden;
+}
+
+.cart-promotion-line {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    flex-shrink: 1;
+    min-width: 0;
+    overflow: hidden;
+}
+
+.cart-old-price {
+    color: #94a3b8;
+    font-size: .72rem;
+    font-weight: 700;
+    text-decoration: line-through;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.cart-discount-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 2px 5px;
+    border-radius: 999px;
+    background: #fee2e2;
+    color: #dc2626;
+    font-size: .62rem;
+    font-weight: 800;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+.cart-sale-price {
+    color: #dc2626;
+    font-size: .82rem;
+    font-weight: 800;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    flex-shrink: 1;
+    min-width: 0;
 }
 
 .cart-qty-form {
     display: flex;
     align-items: center;
-    gap: .5rem;
+    gap: .35rem;
+    flex-wrap: nowrap;
 }
 
 .cart-qty-form input[type="number"] {
-    width: 72px;
-    padding: .45rem .5rem;
+    width: 52px;
+    padding: .35rem .4rem;
     border: 1px solid var(--cart-border);
     border-radius: 8px;
+    font-size: .82rem;
 }
 
 .cart-btn {
@@ -184,6 +298,26 @@ body.home-page {
     background: transparent;
     color: #dc2626;
     border: 1px solid #fecaca;
+}
+
+.cart-btn--remove {
+    width: 34px;
+    height: 34px;
+    padding: 0;
+    flex-shrink: 0;
+}
+
+.cart-btn--icon {
+    width: 34px;
+    height: 34px;
+    padding: 0;
+    flex-shrink: 0;
+}
+
+.cart-table td.col-remove form {
+    display: flex;
+    justify-content: center;
+    margin: 0;
 }
 
 .cart-btn--outline {
@@ -273,6 +407,15 @@ body.home-page {
         border: none;
         padding: .35rem 0;
     }
+
+    .cart-table td.col-remove {
+        display: flex;
+        justify-content: flex-end;
+        padding-top: .75rem;
+        max-width: none;
+        width: 100%;
+    }
+}
 
 .voucher-box {
     margin-bottom: 20px;

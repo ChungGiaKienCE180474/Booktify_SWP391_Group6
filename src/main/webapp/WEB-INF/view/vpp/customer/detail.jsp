@@ -531,20 +531,6 @@
 
                 <main class="vpp-detail-page">
 
-                    <c:if test="${not empty successMessage}">
-                        <div class="vpp-alert vpp-alert-success">
-                            <i class="fa-solid fa-circle-check"></i>
-                            <c:out value="${successMessage}" />
-                        </div>
-                    </c:if>
-
-                    <c:if test="${not empty errorMessage}">
-                        <div class="vpp-alert vpp-alert-error">
-                            <i class="fa-solid fa-circle-xmark"></i>
-                            <c:out value="${errorMessage}" />
-                        </div>
-                    </c:if>
-
                     <div class="vpp-breadcrumb">
                         <a href="${pageContext.request.contextPath}/">Home</a>
                         <span>›</span>
@@ -632,76 +618,75 @@
 
                             </div>
 
-                            <form method="post" action="${pageContext.request.contextPath}/cart/add-vpp">
-
-                                <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}" />
-
-                                <input type="hidden" name="vppItemId" value="${item.id}" />
-
-                                <input type="hidden" name="redirect" value="/customer/vpp/${item.id}" />
-
-                                <div class="vpp-purchase-row">
-
-                                    <label for="quantity" class="vpp-qty-label">
-                                        Quantity
-                                    </label>
-
-                                    <input id="quantity" type="number" name="quantity" class="vpp-quantity-input"
-                                        min="1" max="${item.stockQuantity}" value="1" <c:if
-                                        test="${not item.inStock}">disabled</c:if> />
-
-                                    <button type="submit" class="vpp-add-cart-btn" <c:if
-                                        test="${not item.inStock}">disabled</c:if>>
-                                        <i class="fa-solid fa-cart-shopping"></i>
-                                        Add to Cart
-                                    </button>
-
-
-
-                                </div>
-
-                            </form>
-
-                            <div class="vpp-meta-list">
-
-                                <div class="vpp-meta-item">
-                                    <i class="fa-solid fa-layer-group"></i>
-                                    <c:out value="${item.categoryName}" />
-                                </div>
-
-                                <div class="vpp-meta-item">
-                                    <i class="fa-solid fa-boxes-stacked"></i>
-                                    Stock:
-                                    <c:out value="${item.stockQuantity}" />
-                                </div>
-
-                                <c:if test="${not empty item.supplier}">
-                                    <div class="vpp-meta-item">
-                                        <i class="fa-solid fa-truck-field"></i>
-                                        <c:out value="${item.supplier}" />
-                                    </div>
-                                </c:if>
-
-                            </div>
-
-                            <div class="vpp-description-section">
-
-                                <h2 class="vpp-section-title">
-                                    Product Description
-                                </h2>
-
-                                <div class="vpp-description">
+                            <c:choose>
+                                <c:when test="${item.inStock}">
                                     <c:choose>
-                                        <c:when test="${not empty item.description}">
-                                            <c:out value="${item.description}" />
-                                        </c:when>
-                                        <c:otherwise>
-                                            No description available.
-                                        </c:otherwise>
-                                    </c:choose>
-                                </div>
+                                        <c:when test="${not empty sessionScope.username}">
+                                            <form method="post" action="${pageContext.request.contextPath}/cart/add-vpp"
+                                                class="js-cart-add-form">
+                                                <input type="hidden" name="${_csrf.parameterName}"
+                                                    value="${_csrf.token}" />
+                                                <input type="hidden" name="vppItemId" value="${item.id}" />
+                                                <input type="hidden" name="redirect" value="/customer/vpp/${item.id}" />
+                                                <div class="vpp-purchase-row">
+                                                    <label for="quantity" class="vpp-qty-label">
+                                                        Quantity
+                                                    </label>
+                                                    <input id="quantity" type="number" name="quantity"
+                                                        class="vpp-quantity-input" min="1" max="${item.stockQuantity}"
+                                                        value="1" <c:if test="${not item.inStock}">disabled</c:if> />
+                                                    <button type="submit" class="vpp-add-cart-btn" <c:if
+                                                        test="${not item.inStock}">disabled</c:if>>
+                                                        <i class="fa-solid fa-cart-shopping"></i>
+                                                        Add to Cart
+                                                    </button>
 
-                            </div>
+
+
+                                                </div>
+
+                                            </form>
+
+                                            <div class="vpp-meta-list">
+
+                                                <div class="vpp-meta-item">
+                                                    <i class="fa-solid fa-layer-group"></i>
+                                                    <c:out value="${item.categoryName}" />
+                                                </div>
+
+                                                <div class="vpp-meta-item">
+                                                    <i class="fa-solid fa-boxes-stacked"></i>
+                                                    Stock:
+                                                    <c:out value="${item.stockQuantity}" />
+                                                </div>
+
+                                                <c:if test="${not empty item.supplier}">
+                                                    <div class="vpp-meta-item">
+                                                        <i class="fa-solid fa-truck-field"></i>
+                                                        <c:out value="${item.supplier}" />
+                                                    </div>
+                                                </c:if>
+
+                                            </div>
+
+                                            <div class="vpp-description-section">
+
+                                                <h2 class="vpp-section-title">
+                                                    Product Description
+                                                </h2>
+
+                                                <div class="vpp-description">
+                                                    <c:choose>
+                                                        <c:when test="${not empty item.description}">
+                                                            <c:out value="${item.description}" />
+                                                        </c:when>
+                                                        <c:otherwise>
+                                                            No description available.
+                                                        </c:otherwise>
+                                                    </c:choose>
+                                                </div>
+
+                                            </div>
 
                         </div>
 
