@@ -509,13 +509,6 @@
                    value="${keyword}"
                    placeholder="Search by name, email, phone, address..."/>
 
-            <select name="staffRole">
-                <option value="all" ${staffRole == 'all' ? 'selected' : ''}>All Roles</option>
-                <option value="Sales Staff" ${staffRole == 'Sales Staff' ? 'selected' : ''}>Sales Staff</option>
-                <option value="Warehouse Staff" ${staffRole == 'Warehouse Staff' ? 'selected' : ''}>Warehouse Staff</option>
-                <option value="Customer Support" ${staffRole == 'Customer Support' ? 'selected' : ''}>Customer Support</option>
-            </select>
-
             <select name="sort">
                 <option value="default" ${sort == 'default' ? 'selected' : ''}>Default</option>
                 <option value="id_desc" ${sort == 'id_desc' ? 'selected' : ''}>Newest</option>
@@ -567,9 +560,7 @@
                                 <td><span class="staff-email">${staff.email}</span></td>
                                 <td><strong>${staff.fullName}</strong></td>
                                 <td>
-                                    <span class="role-pill">
-                                        ${empty staff.staffRole ? 'N/A' : staff.staffRole}
-                                    </span>
+                                    <span class="role-pill">Staff</span>
                                 </td>
                                 <td>${empty staff.phone ? 'N/A' : staff.phone}</td>
                                 <td>${empty staff.address ? 'N/A' : staff.address}</td>
@@ -597,7 +588,6 @@
                                                 onclick="openUpdateModal(
                                                         '${staff.id}',
                                                         '${staff.fullName}',
-                                                        '${empty staff.staffRole ? '' : staff.staffRole}',
                                                         '${empty staff.phone ? '' : staff.phone}',
                                                         '${empty staff.address ? '' : staff.address}'
                                                         )">
@@ -650,21 +640,21 @@
                     <div class="pagination-actions">
                         <c:if test="${currentPage > 0}">
                             <a class="btn-small btn-reset"
-                               href="/admin/staff?page=${currentPage - 1}&keyword=${keyword}&staffRole=${staffRole}&status=${status}&sort=${sort}">
+                               href="/admin/staff?page=${currentPage - 1}&keyword=${keyword}&status=${status}&sort=${sort}">
                                 Previous
                             </a>
                         </c:if>
 
                         <c:forEach begin="0" end="${totalPages - 1}" var="i">
                             <a class="btn-small page-btn ${i == currentPage ? 'page-active' : 'btn-reset'}"
-                               href="/admin/staff?page=${i}&keyword=${keyword}&staffRole=${staffRole}&status=${status}&sort=${sort}">
+                               href="/admin/staff?page=${i}&keyword=${keyword}&status=${status}&sort=${sort}">
                                 ${i + 1}
                             </a>
                         </c:forEach>
 
                         <c:if test="${currentPage < totalPages - 1}">
                             <a class="btn-small btn-reset"
-                               href="/admin/staff?page=${currentPage + 1}&keyword=${keyword}&staffRole=${staffRole}&status=${status}&sort=${sort}">
+                               href="/admin/staff?page=${currentPage + 1}&keyword=${keyword}&status=${status}&sort=${sort}">
                                 Next
                             </a>
                         </c:if>
@@ -695,16 +685,6 @@
                     <div class="form-group">
                         <label>Email *</label>
                         <input type="email" name="email" required/>
-                    </div>
-
-                    <div class="form-group">
-                        <label>Staff Role *</label>
-                        <select name="staffRole" required>
-                            <option value="">Select Role</option>
-                            <option value="Sales Staff">Sales Staff</option>
-                            <option value="Warehouse Staff">Warehouse Staff</option>
-                            <option value="Customer Support">Customer Support</option>
-                        </select>
                     </div>
 
                     <div class="form-group">
@@ -748,15 +728,6 @@
                     <div class="form-group">
                         <label>Full Name *</label>
                         <input type="text" id="updateFullName" name="fullName" required/>
-                    </div>
-
-                    <div class="form-group">
-                        <label>Staff Role *</label>
-                        <select id="updateStaffRole" name="staffRole" required>
-                            <option value="Sales Staff">Sales Staff</option>
-                            <option value="Warehouse Staff">Warehouse Staff</option>
-                            <option value="Customer Support">Customer Support</option>
-                        </select>
                     </div>
 
                     <div class="form-group">
@@ -807,8 +778,10 @@
                 </div>
 
                 <div class="detail-item">
-                    <div class="detail-label">Staff Role</div>
-                    <div id="detailRole" class="detail-value"></div>
+                    <div class="detail-label">Role</div>
+                    <div id="detailRole" class="detail-value">
+                        <span class="role-pill">Staff</span>
+                    </div>
                 </div>
 
                 <div class="detail-item">
@@ -876,10 +849,9 @@
         document.getElementById("createModal").classList.remove("show");
     }
 
-    function openUpdateModal(id, fullName, staffRole, phone, address) {
+    function openUpdateModal(id, fullName, phone, address) {
         document.getElementById("updateStaffId").value = id;
         document.getElementById("updateFullName").value = fullName || "";
-        document.getElementById("updateStaffRole").value = staffRole || "Sales Staff";
         document.getElementById("updatePhone").value = phone || "";
         document.getElementById("updateAddress").value = address || "";
         document.getElementById("updateModal").classList.add("show");
@@ -889,12 +861,11 @@
         document.getElementById("updateModal").classList.remove("show");
     }
 
-    function openDetailModal(code, initial, fullName, email, staffRole, phone, address, status) {
+    function openDetailModal(code, initial, fullName, email, phone, address, status) {
         document.getElementById("detailCode").innerText = code || "N/A";
         document.getElementById("detailInitial").innerText = initial || "S";
         document.getElementById("detailFullName").innerText = fullName || "N/A";
         document.getElementById("detailEmail").innerText = email || "N/A";
-        document.getElementById("detailRole").innerHTML = '<span class="role-pill">' + (staffRole || "N/A") + '</span>';
         document.getElementById("detailPhone").innerText = phone || "N/A";
         document.getElementById("detailAddress").innerText = address || "N/A";
 

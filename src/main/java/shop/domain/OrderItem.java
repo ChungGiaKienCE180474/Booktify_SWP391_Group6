@@ -79,11 +79,11 @@ public class OrderItem {
     }
 
     public VppItem getVppItem() {
-    return vppItem;
+        return vppItem;
     }
 
     public void setVppItem(VppItem vppItem) {
-    this.vppItem = vppItem;
+        this.vppItem = vppItem;
     }
 
     public BigDecimal getUnitPrice() {

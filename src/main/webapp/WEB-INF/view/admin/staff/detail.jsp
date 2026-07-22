@@ -251,7 +251,7 @@
 
                                     <span class="detail-badge detail-badge--role">
                                         <i class="fa-solid fa-briefcase"></i>
-                                        <c:out value="${empty staff.staffRole ? 'N/A' : staff.staffRole}" />
+                                        Staff
                                     </span>
 
                                     <c:choose>
@@ -304,11 +304,11 @@
                                 <div class="staff-detail-item">
                                     <div class="staff-detail-label">
                                         <i class="fa-solid fa-briefcase"></i>
-                                        Staff Role
+                                        Role
                                     </div>
 
                                     <div class="staff-detail-value">
-                                        <c:out value="${empty staff.staffRole ? 'N/A' : staff.staffRole}" />
+                                        Staff
                                     </div>
                                 </div>
 
