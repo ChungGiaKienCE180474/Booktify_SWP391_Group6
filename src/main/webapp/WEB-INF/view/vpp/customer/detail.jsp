@@ -1,6 +1,7 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
     <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
         <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
+        <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 
             <!DOCTYPE html>
             <html lang="vi">
@@ -632,38 +633,52 @@
 
                             </div>
 
-                            <form method="post" action="${pageContext.request.contextPath}/cart/add-vpp">
+                            <c:choose>
+                                <c:when test="${item.inStock}">
+                                    <c:choose>
+                                        <c:when test="${not empty sessionScope.username}">
+                                            <form method="post"
+                                                action="${pageContext.request.contextPath}/cart/add-vpp">
+                                                <input type="hidden" name="${_csrf.parameterName}"
+                                                    value="${_csrf.token}" />
+                                                <input type="hidden" name="vppItemId" value="${item.id}" />
+                                                <input type="hidden" name="redirect" value="/customer/vpp/${item.id}" />
 
-                                <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}" />
+                                                <div class="vpp-purchase-row">
+                                                    <label for="quantity" class="vpp-qty-label">Số lượng</label>
+                                                    <input id="quantity" type="number" name="quantity"
+                                                        class="vpp-quantity-input" min="1" max="${item.stockQuantity}"
+                                                        value="1" required />
 
-                                <input type="hidden" name="vppItemId" value="${item.id}" />
+                                                    <button type="submit" class="vpp-add-cart-btn">
+                                                        <i class="fa-solid fa-cart-shopping"></i>
+                                                        Add to cart
+                                                    </button>
 
-                                <input type="hidden" name="redirect" value="/customer/vpp/${item.id}" />
 
-                                <div class="vpp-purchase-row">
-
-                                    <label for="quantity" class="vpp-qty-label">
-                                        Quanlity
-                                    </label>
-
-                                    <input id="quantity" type="number" name="quantity" class="vpp-quantity-input"
-                                        min="1" max="${item.stockQuantity}" value="1" <c:if
-                                        test="${not item.inStock}">disabled</c:if>/>
-
-                                    <button type="submit" class="vpp-add-cart-btn" <c:if
-                                        test="${not item.inStock}">disabled</c:if>>
-                                        <i class="fa-solid fa-cart-shopping"></i>
-                                        Add to cart
-                                    </button>
-
-                                    <a href="${pageContext.request.contextPath}/cart" class="vpp-view-cart-btn">
-                                        <i class="fa-solid fa-basket-shopping"></i>
-                                        View to Cart
-                                    </a>
-
-                                </div>
-
-                            </form>
+                                                </div>
+                                            </form>
+                                        </c:when>
+                                        <c:otherwise>
+                                            <div class="vpp-purchase-row">
+                                                <a href="${pageContext.request.contextPath}/login"
+                                                    class="vpp-add-cart-btn" style="text-decoration:none;">
+                                                    <i class="fa-solid fa-right-to-bracket"></i>
+                                                    Đăng nhập để mua
+                                                </a>
+                                            </div>
+                                        </c:otherwise>
+                                    </c:choose>
+                                </c:when>
+                                <c:otherwise>
+                                    <div class="vpp-purchase-row">
+                                        <button type="button" class="vpp-add-cart-btn" disabled>
+                                            <i class="fa-solid fa-cart-shopping"></i>
+                                            Hết hàng
+                                        </button>
+                                    </div>
+                                </c:otherwise>
+                            </c:choose>
 
                             <div class="vpp-meta-list">
 
@@ -701,16 +716,24 @@
 
                             </div>
 
-                            <section class="rating-section">
 
-                                <h2 class="rating-title">Product reviews</h2>
 
+                        </div>
+
+
+
+                    </section>
+
+                    <%-- REVIEWS --%>
+                        <section class="rating-section vpp-rating-section">
+                            <h2 class="rating-title">Product reviews</h2>
+
+                            <%-- Form Creation & State Section --%>
                                 <div class="rating-create">
                                     <c:choose>
-
                                         <%-- TH 1: Được phép viết đánh giá mới --%>
                                             <c:when test="${canReviewVpp}">
-                                                <form id="ratingForm"
+                                                <form id="vppCreateRatingForm"
                                                     action="${pageContext.request.contextPath}/ratings/vpp/create"
                                                     method="post">
                                                     <input type="hidden" name="${_csrf.parameterName}"
@@ -720,7 +743,8 @@
                                                     <label>Rating</label>
 
                                                     <div class="rating-stars-select">
-                                                        <input id="star5" type="radio" name="ratingValue" value="5">
+                                                        <input id="star5" type="radio" name="ratingValue" value="5"
+                                                            required>
                                                         <label for="star5">★</label>
 
                                                         <input id="star4" type="radio" name="ratingValue" value="4">
@@ -746,19 +770,39 @@
 
                                             <%-- TH 2: Đã đánh giá trước đó -> Hiển thị form cập nhật --%>
                                                 <c:when test="${not empty myRating}">
-                                                    <div class="vpp-alert vpp-alert-success">
+                                                    <div class="vpp-alert">
                                                         You have already reviewed this book.
-
                                                     </div>
 
-                                                    <form action="${pageContext.request.contextPath}/ratings/vpp/update"
-                                                        method="post">
+                                                    <form id="vppRatingForm"
+                                                        action="${pageContext.request.contextPath}/ratings/vpp/update"
+                                                        method="post" style="display:none;">
                                                         <input type="hidden" name="${_csrf.parameterName}"
                                                             value="${_csrf.token}" />
                                                         <input type="hidden" name="vppItemId" value="${item.id}" />
 
-                                                        <input type="number" name="ratingValue" min="1" max="5"
-                                                            value="${myRating.ratingValue}">
+                                                        <div class="rating-stars-select">
+                                                            <input id="update-star5" type="radio" name="ratingValue"
+                                                                value="5">
+                                                            <label for="update-star5">★</label>
+
+                                                            <input id="update-star4" type="radio" name="ratingValue"
+                                                                value="4">
+                                                            <label for="update-star4">★</label>
+
+                                                            <input id="update-star3" type="radio" name="ratingValue"
+                                                                value="3">
+                                                            <label for="update-star3">★</label>
+
+                                                            <input id="update-star2" type="radio" name="ratingValue"
+                                                                value="2">
+                                                            <label for="update-star2">★</label>
+
+                                                            <input id="update-star1" type="radio" name="ratingValue"
+                                                                value="1">
+                                                            <label for="update-star1">★</label>
+                                                        </div>
+
                                                         <textarea name="reviewText">${myRating.review}</textarea>
 
                                                         <button type="submit" class="vpp-add-cart-btn">Update
@@ -780,141 +824,166 @@
                                                                 Please login to leave a review.
                                                             </div>
                                                         </c:otherwise>
-
                                     </c:choose>
                                 </div>
-                                <section class="rating-list-section">
-                                    <c:choose>
-                                        <%-- TH 1: Có danh sách đánh giá --%>
-                                            <c:when test="${not empty ratings}">
-                                                <c:forEach items="${ratings}" var="rating">
-                                                    <div class="rating-item">
 
-                                                        <div class="rating-user">
-                                                            ${rating.customer.fullName}
+                                <%-- Review List Section --%>
+                                    <section class="rating-list-section">
+                                        <c:choose>
+                                            <%-- TH 1: Có danh sách đánh giá --%>
+                                                <c:when test="${not empty vppRatings}">
+                                                    <c:forEach items="${vppRatings}" var="rating">
+                                                        <div class="rating-item">
+
+                                                            <div class="rating-header">
+                                                                <div class="rating-user">
+                                                                    ${rating.customer.fullName}
+                                                                </div>
+
+                                                                <div class="rating-actions">
+                                                                    <c:if
+                                                                        test="${not empty currentUser && currentUser.id == rating.customer.id}">
+                                                                        <button type="button" class="rating-edit-btn"
+                                                                            onclick="editVppRating('${rating.ratingValue}', '${fn:escapeXml(rating.review)}')">
+                                                                            <i class="fa-solid fa-pen"></i>
+                                                                        </button>
+
+                                                                        <form
+                                                                            action="${pageContext.request.contextPath}/ratings/vpp/delete"
+                                                                            method="post" style="display:inline;">
+                                                                            <input type="hidden"
+                                                                                name="${_csrf.parameterName}"
+                                                                                value="${_csrf.token}" />
+                                                                            <input type="hidden" name="vppItemId"
+                                                                                value="${item.id}" />
+
+                                                                            <button type="submit"
+                                                                                class="rating-delete-btn"
+                                                                                onclick="return confirm('Delete this review?')">
+                                                                                <i class="fa-solid fa-trash-can"></i>
+                                                                            </button>
+                                                                        </form>
+                                                                    </c:if>
+                                                                </div>
+                                                            </div>
+
+                                                            <div class="rating-stars">
+                                                                <c:forEach begin="1" end="5" var="i">
+                                                                    <c:choose>
+                                                                        <c:when test="${i <= rating.ratingValue}">
+                                                                            <i class="fa-solid fa-star star-filled"></i>
+                                                                        </c:when>
+                                                                        <c:otherwise>
+                                                                            <i
+                                                                                class="fa-regular fa-star star-empty"></i>
+                                                                        </c:otherwise>
+                                                                    </c:choose>
+                                                                </c:forEach>
+                                                            </div>
+
+                                                            <div class="rating-date">
+                                                                ${rating.createdAtFormatted}
+                                                            </div>
+
+                                                            <div class="rating-content">
+                                                                ${rating.review}
+                                                            </div>
+
                                                         </div>
-
-                                                        <div class="rating-stars">
-                                                            <c:forEach begin="1" end="5" var="i">
-                                                                <c:choose>
-                                                                    <c:when test="${i <= rating.ratingValue}">
-                                                                        <i class="fa-solid fa-star star-filled"></i>
-                                                                    </c:when>
-                                                                    <c:otherwise>
-                                                                        <i class="fa-regular fa-star star-empty"></i>
-                                                                    </c:otherwise>
-                                                                </c:choose>
-                                                            </c:forEach>
-                                                        </div>
-
-                                                        <div class="rating-date">
-                                                            ${rating.createdAtFormatted}
-                                                        </div>
-
-                                                        <div class="rating-content">
-                                                            ${rating.review}
-                                                        </div>
-
-                                                    </div>
-                                                </c:forEach>
-                                            </c:when>
-
-                                            <%-- TH 2: Chưa có đánh giá nào --%>
-                                                <c:otherwise>
-                                                    <div class="no-rating">
-                                                        No reviews yet for this product.
-                                                    </div>
-                                                </c:otherwise>
-                                    </c:choose>
-                                </section>
-                            </section>
-
-
-                        </div>
-
-                    </section>
-
-                    <c:if test="${not empty relatedItems}">
-
-                        <section class="vpp-related-section">
-
-                            <div class="vpp-related-header">
-
-                                <div class="vpp-related-title">
-                                    <span class="vpp-related-icon">
-                                        <i class="fa-solid fa-wand-magic-sparkles"></i>
-                                    </span>
-                                    Có thể bạn quan tâm
-                                </div>
-
-                                <a href="${pageContext.request.contextPath}/customer/vpp" class="vpp-related-more">
-                                    Xem thêm
-                                    <i class="fa-solid fa-chevron-right"></i>
-                                </a>
-
-                            </div>
-
-                            <div class="vpp-related-grid">
-
-                                <c:forEach items="${relatedItems}" var="related">
-
-                                    <a href="${pageContext.request.contextPath}/customer/vpp/${related.id}"
-                                        class="vpp-related-card">
-
-                                        <div class="vpp-related-image-box">
-                                            <c:choose>
-                                                <c:when test="${not empty related.imagePath}">
-                                                    <img src="${pageContext.request.contextPath}${related.imagePath}"
-                                                        alt="${related.name}">
+                                                    </c:forEach>
                                                 </c:when>
 
-                                                <c:otherwise>
-                                                    <div class="vpp-related-no-image">
-                                                        <i class="fa-solid fa-box"></i>
-                                                        <span>NO IMAGE</span>
-                                                    </div>
-                                                </c:otherwise>
-                                            </c:choose>
-                                        </div>
-
-                                        <div class="vpp-related-body">
-
-                                            <div class="vpp-related-name">
-                                                <c:out value="${related.name}" />
-                                            </div>
-
-                                            <div class="vpp-related-desc">
-                                                <c:if test="${not empty related.description}">
-                                                    <c:out value="${related.description}" />
-                                                </c:if>
-                                            </div>
-
-                                            <div class="vpp-related-price">
-                                                <fmt:formatNumber value="${related.price}" type="number"
-                                                    groupingUsed="true" />
-                                                đ
-                                            </div>
-
-                                        </div>
-
-                                    </a>
-
-                                </c:forEach>
-
-                            </div>
-
+                                                <%-- TH 2: Chưa có đánh giá nào --%>
+                                                    <c:otherwise>
+                                                        <div class="no-rating">
+                                                            No reviews yet for this product.
+                                                        </div>
+                                                    </c:otherwise>
+                                        </c:choose>
+                                    </section>
                         </section>
 
-                    </c:if>
+                        <c:if test="${not empty relatedItems}">
+
+                            <section class="vpp-related-section">
+
+                                <div class="vpp-related-header">
+
+                                    <div class="vpp-related-title">
+                                        <span class="vpp-related-icon">
+                                            <i class="fa-solid fa-wand-magic-sparkles"></i>
+                                        </span>
+                                        Có thể bạn quan tâm
+                                    </div>
+
+                                    <a href="${pageContext.request.contextPath}/customer/vpp" class="vpp-related-more">
+                                        Xem thêm
+                                        <i class="fa-solid fa-chevron-right"></i>
+                                    </a>
+
+                                </div>
+
+                                <div class="vpp-related-grid">
+
+                                    <c:forEach items="${relatedItems}" var="related">
+
+                                        <a href="${pageContext.request.contextPath}/customer/vpp/${related.id}"
+                                            class="vpp-related-card">
+
+                                            <div class="vpp-related-image-box">
+                                                <c:choose>
+                                                    <c:when test="${not empty related.imagePath}">
+                                                        <img src="${pageContext.request.contextPath}${related.imagePath}"
+                                                            alt="${related.name}">
+                                                    </c:when>
+
+                                                    <c:otherwise>
+                                                        <div class="vpp-related-no-image">
+                                                            <i class="fa-solid fa-box"></i>
+                                                            <span>NO IMAGE</span>
+                                                        </div>
+                                                    </c:otherwise>
+                                                </c:choose>
+                                            </div>
+
+                                            <div class="vpp-related-body">
+
+                                                <div class="vpp-related-name">
+                                                    <c:out value="${related.name}" />
+                                                </div>
+
+                                                <div class="vpp-related-desc">
+                                                    <c:if test="${not empty related.description}">
+                                                        <c:out value="${related.description}" />
+                                                    </c:if>
+                                                </div>
+
+                                                <div class="vpp-related-price">
+                                                    <fmt:formatNumber value="${related.price}" type="number"
+                                                        groupingUsed="true" />
+                                                    đ
+                                                </div>
+
+                                            </div>
+
+                                        </a>
+
+                                    </c:forEach>
+
+                                </div>
+
+                            </section>
+
+                        </c:if>
 
                 </main>
 
                 <jsp:include page="/WEB-INF/view/layout/footer.jsp" />
 
                 <script>
-                    function editRating(value, review) {
+                    function editVppRating(value, review) {
 
-                        const form = document.getElementById("ratingForm");
+                        const form = document.getElementById("vppRatingForm");
 
                         if (!form) return;
 
@@ -922,12 +991,24 @@
                         form.style.display = "block";
 
 
-                        document.querySelector(
+                        // chọn số sao cũ
+                        const star = form.querySelector(
                             'input[name="ratingValue"][value="' + value + '"]'
-                        ).checked = true;
+                        );
+
+                        if (star) {
+                            star.checked = true;
+                        }
 
 
-                        document.getElementById("reviewText").value = review;
+                        // load nội dung review cũ
+                        const textarea = form.querySelector(
+                            'textarea[name="reviewText"]'
+                        );
+
+                        if (textarea) {
+                            textarea.value = review;
+                        }
 
 
                         form.scrollIntoView({

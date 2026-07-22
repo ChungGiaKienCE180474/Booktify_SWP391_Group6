@@ -243,6 +243,13 @@ public class VoucherService {
                                         "Your order has not reached the minimum value required to use the voucher.");
                 }
 
+                if (voucher.getMaxOrderAmount() != null
+                                && subtotal.compareTo(voucher.getMaxOrderAmount()) > 0) {
+
+                        throw new IllegalArgumentException(
+                                        "Your order exceeds the maximum value required to use the voucher.");
+                }
+
                 BigDecimal discount = BigDecimal.ZERO;
 
                 switch (voucher.getDiscountType()) {

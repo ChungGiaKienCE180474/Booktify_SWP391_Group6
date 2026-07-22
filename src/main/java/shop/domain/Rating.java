@@ -4,7 +4,6 @@ import java.time.LocalDateTime;
 
 import jakarta.persistence.*;
 import java.time.format.DateTimeFormatter;
-import shop.domain.VppItem;
 
 @Entity
 @Table(name = "ratings")
@@ -16,7 +15,7 @@ public class Rating {
     private Integer ratingId;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "book_id", nullable = false)
+    @JoinColumn(name = "book_id")
     private Book book;
 
     @ManyToOne(fetch = FetchType.LAZY)

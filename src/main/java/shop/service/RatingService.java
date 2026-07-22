@@ -150,6 +150,11 @@ public class RatingService {
                         Integer ratingValue,
                         String reviewText) {
 
+                System.out.println("==========");
+                System.out.println("reviewText = " + reviewText);
+                System.out.println("length = " + reviewText.length());
+                System.out.println("==========");
+
                 // Validate số sao
                 if (ratingValue == null || ratingValue < 1 || ratingValue > 5) {
                         throw new IllegalArgumentException(
@@ -486,11 +491,14 @@ public class RatingService {
         }
 
         public List<Rating> getVppRatings(Long vppItemId) {
+                return ratingRepository.findByVppItem_Id(vppItemId);
+        }
 
-                return ratingRepository
-                                .findByVppItem_IdAndStatus(
-                                                vppItemId,
-                                                "ACTIVE");
+        public List<Rating> getVppRatingsForCustomer(Long vppItemId) {
+
+                return ratingRepository.findByVppItem_IdAndStatus(
+                                vppItemId,
+                                "ACTIVE");
         }
 
         public Long getReviewCountVpp(Long vppItemId) {

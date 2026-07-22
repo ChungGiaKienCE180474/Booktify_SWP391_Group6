@@ -9,12 +9,10 @@
             <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
             <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" />
-
             <link rel="stylesheet" href="/css/admin-dashboard.css" />
             <link rel="stylesheet" href="/css/rating.css" />
 
             <title>Reviews — Booktify Admin</title>
-
         </head>
 
         <body class="admin-shell">
@@ -33,30 +31,18 @@
                                 <i class="fa-solid fa-star"></i>
                                 Review Management
                             </p>
-
                             <h2>Products</h2>
                         </div>
                     </div>
 
-                    <div class="admin-panel" style="padding:14px 22px;">
-
-                        <form method="get" action="/admin/reviews" class="admin-search-form" style="flex-wrap:wrap;">
-
-                            <div style="position:relative;flex:1;max-width:380px;">
-
-                                <i class="fa-solid fa-magnifying-glass" style="position:absolute;
-                      left:13px;
-                      top:50%;
-                      transform:translateY(-50%);
-                      color:#9CA3AF;
-                      font-size:.82rem;
-                      pointer-events:none;">
-                                </i>
-
+                    <div class="admin-panel" style="padding: 14px 22px;">
+                        <form method="get" action="/admin/reviews" class="admin-search-form" style="flex-wrap: wrap;">
+                            <div style="position: relative; flex: 1; max-width: 380px;">
+                                <i class="fa-solid fa-magnifying-glass"
+                                    style="position: absolute; left: 13px; top: 50%; transform: translateY(-50%); color: #9CA3AF; font-size: .82rem; pointer-events: none;"></i>
                                 <input type="text" name="keyword" value="${keyword}"
                                     placeholder="Search by book title or author..." class="admin-input"
-                                    style="padding-left:38px;">
-
+                                    style="padding-left: 38px;">
                             </div>
 
                             <button type="submit" class="admin-button">
@@ -65,153 +51,147 @@
                             </button>
 
                             <a href="/admin/reviews" class="admin-button admin-button--ghost">
-
                                 <i class="fa-solid fa-rotate-right"></i>
                                 Reset
-
                             </a>
-
                         </form>
-
                     </div>
 
                     <div class="admin-table-wrap">
-
                         <table class="admin-table">
-
                             <thead>
                                 <tr>
-                                    <th style="width:60px;text-align:center;">#</th>
-                                    <th style="width:90px;text-align:center;">Cover</th>
-                                    <th style="width:45%;">Book</th>
-                                    <th style="width:220px;">Reviews</th>
-                                    <th style="width:120px;text-align:center;">Action</th>
+                                    <th style="width: 60px; text-align: center;">#</th>
+                                    <th style="width: 45%;">Product</th>
+                                    <th style="width: 220px;">Reviews</th>
+                                    <th style="width: 120px; text-align: center;">Action</th>
                                 </tr>
                             </thead>
 
                             <tbody>
+                                <%-- Books List --%>
+                                    <c:set var="index" value="0" />
+                                    <c:forEach items="${books}" var="book" varStatus="vs">
+                                        <tr>
+                                            <c:set var="index" value="${index + 1}" />
 
-                                <c:forEach items="${books}" var="book" varStatus="vs">
-
-                                    <tr>
-
-                                        <td style="text-align:center;color:#9CA3AF;font-weight:600;">
-                                            ${vs.index + 1}
-                                        </td>
-
-                                        <td style="text-align:center;">
-                                            <c:choose>
-                                                <c:when test="${not empty book.imageUrl}">
-                                                    <img class="book-cover" src="<c:out value='${book.imageUrl}'/>"
-                                                        alt="Book Cover">
-                                                </c:when>
-
-                                                <c:otherwise>
-                                                    <span style="color:#9CA3AF;">&#8212;</span>
-                                                </c:otherwise>
-                                            </c:choose>
-                                        </td>
-
-                                        <td>
-                                            <div class="book-title">
-                                                <c:out value="${book.title}" />
-                                            </div>
-
-                                            <c:if test="${not empty book.author}">
-                                                <div class="book-author">
-                                                    <c:out value="${book.author}" />
+                                            <td style="text-align: center; color: #9CA3AF; font-weight: 600;">
+                                                ${index}
+                                            </td>
+                                            <td>
+                                                <div class="book-title">
+                                                    <c:out value="${book.title}" />
                                                 </div>
-                                            </c:if>
-                                        </td>
+                                                <c:if test="${not empty book.author}">
+                                                    <div class="book-author">
+                                                        <c:out value="${book.author}" />
+                                                    </div>
+                                                </c:if>
+                                            </td>
 
-                                        <td>
-                                            <div class="review-summary">
+                                            <td>
+                                                <div class="review-summary">
+                                                    <c:choose>
+                                                        <c:when test="${reviewCounts[book.id] > 0}">
+                                                            <div class="review-count">
+                                                                ${reviewCounts[book.id]} Reviews
+                                                            </div>
+                                                            <div class="review-star">
+                                                                <c:forEach begin="1" end="5" var="i">
+                                                                    <c:choose>
+                                                                        <c:when test="${i <= averageRatings[book.id]}">★
+                                                                        </c:when>
+                                                                        <c:otherwise>☆</c:otherwise>
+                                                                    </c:choose>
+                                                                </c:forEach>
+                                                                <span style="color: #374151; margin-left: 5px;">
+                                                                    ${averageRatings[book.id]}
+                                                                </span>
+                                                            </div>
+                                                        </c:when>
+                                                        <c:otherwise>
+                                                            <div class="review-count">0 Reviews</div>
+                                                            <div class="no-rating">No ratings</div>
+                                                        </c:otherwise>
+                                                    </c:choose>
+                                                </div>
+                                            </td>
 
-                                                <c:choose>
+                                            <td class="admin-table__actions">
+                                                <a href="/admin/reviews/${book.id}" class="icon-link"
+                                                    title="View Reviews">
+                                                    <i class="fa-solid fa-comments"></i>
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    </c:forEach>
 
-                                                    <c:when test="${reviewCounts[book.id] > 0}">
+                                    <%-- VPP Items List --%>
+                                        <c:forEach items="${vppItems}" var="item">
+                                            <tr>
+                                                <c:set var="index" value="${index + 1}" />
 
-                                                        <div class="review-count">
-                                                            ${reviewCounts[book.id]} Reviews
+                                                <td style="text-align: center; color: #9CA3AF; font-weight: 600;">
+                                                    ${index}
+                                                </td>
+
+
+
+                                                <td>
+                                                    <div class="book-title">
+                                                        <c:out value="${item.name}" />
+                                                    </div>
+
+
+                                                    <c:if test="${not empty item.supplier}">
+                                                        <div class="book-author">
+                                                            <c:out value="${item.supplier}" />
                                                         </div>
+                                                    </c:if>
+                                                </td>
 
+                                                <td>
+                                                    <div class="review-summary">
+                                                        <div class="review-count">
+                                                            ${vppReviewCounts[item.id]} Reviews
+                                                        </div>
                                                         <div class="review-star">
-
                                                             <c:forEach begin="1" end="5" var="i">
                                                                 <c:choose>
-                                                                    <c:when test="${i <= averageRatings[book.id]}">
-                                                                        ★
+                                                                    <c:when test="${i <= vppAverageRatings[item.id]}">★
                                                                     </c:when>
-                                                                    <c:otherwise>
-                                                                        ☆
-                                                                    </c:otherwise>
+                                                                    <c:otherwise>☆</c:otherwise>
                                                                 </c:choose>
                                                             </c:forEach>
-
-                                                            <span style="color:#374151;margin-left:5px;">
-                                                                ${averageRatings[book.id]}
+                                                            <span style="color: #374151; margin-left: 5px;">
+                                                                ${averageRatings[item.id]}
                                                             </span>
-
                                                         </div>
+                                                    </div>
+                                                </td>
 
-                                                    </c:when>
+                                                <td class="admin-table__actions">
+                                                    <a href="/admin/reviews/vpp/${item.id}" class="icon-link"
+                                                        title="View Reviews">
+                                                        <i class="fa-solid fa-comments"></i>
+                                                    </a>
+                                                </td>
+                                            </tr>
+                                        </c:forEach>
 
-                                                    <c:otherwise>
-
-                                                        <div class="review-count">
-                                                            0 Reviews
-                                                        </div>
-
-                                                        <div class="no-rating">
-                                                            No ratings
-                                                        </div>
-
-                                                    </c:otherwise>
-
-                                                </c:choose>
-
-                                            </div>
-                                        </td>
-
-                                        <td class="admin-table__actions">
-
-
-                                            <a href="/admin/reviews/${book.id}" class="icon-link" title="View Reviews">
-
-                                                <i class="fa-solid fa-comments"></i>
-
-                                            </a>
-
-
-                                        </td>
-
-                                    </tr>
-
-                                </c:forEach>
-
-
-                                <c:if test="${empty books}">
-
-                                    <tr>
-
-                                        <td colspan="5" style="text-align:center;padding:56px 20px;color:#9CA3AF;">
-
-                                            <i class="fa-solid fa-star"
-                                                style="font-size:2.2rem;display:block;margin-bottom:10px;opacity:.3;">
-                                            </i>
-
-                                            No review data found.
-
-                                        </td>
-
-                                    </tr>
-
-                                </c:if>
-
+                                        <%-- Empty State --%>
+                                            <c:if test="${empty books && empty vppItems}">
+                                                <tr>
+                                                    <td colspan="5"
+                                                        style="text-align: center; padding: 56px 20px; color: #9CA3AF;">
+                                                        <i class="fa-solid fa-star"
+                                                            style="font-size: 2.2rem; display: block; margin-bottom: 10px; opacity: .3;"></i>
+                                                        No review data found.
+                                                    </td>
+                                                </tr>
+                                            </c:if>
                             </tbody>
-
                         </table>
-
                     </div>
 
                 </section>

@@ -205,14 +205,16 @@ public class AdminVoucherController {
                     "Percentage discount cannot exceed 100.");
         }
 
-        bindingResult.rejectValue(
-                "endDate",
-                "voucher.expired",
-                "End date cannot be in the past.");
+        if (voucherDTO.getEndDate() != null
+                && voucherDTO.getEndDate().isBefore(java.time.LocalDate.now())) {
+
+            bindingResult.rejectValue(
+                    "endDate",
+                    "voucher.expired",
+                    "End date cannot be in the past.");
+        }
 
     }
-
-    
 
     // =====================
     // VIEW DETAIL

@@ -116,16 +116,18 @@ public class CustomerVppController {
                         model.addAttribute("relatedItems", relatedItems);
 
                         // ================= REVIEW VPP =================
-                        model.addAttribute("vppRatings", ratingService.getVppRatings(id));
+                        model.addAttribute("vppRatings", ratingService.getVppRatingsForCustomer(id));
                         model.addAttribute("reviewCount", ratingService.getReviewCountVpp(id));
                         model.addAttribute("averageRating", ratingService.getAverageRatingVpp(id));
 
                         if (authentication != null) {
                                 User user = userRepository.findByEmail(authentication.getName());
                                 if (user != null) {
-                                        model.addAttribute("customerRating",
-                                                        ratingService.getCustomerVppRating(id, user.getId()));
-                                        model.addAttribute("canReview",
+                                        model.addAttribute("currentUser", user);
+                                        model.addAttribute("myRating",
+                                                        ratingService.getCustomerVppRating(id, user.getId())
+                                                                        .orElse(null));
+                                        model.addAttribute("canReviewVpp",
                                                         ratingService.canCustomerReviewVpp(id, user.getId()));
                                 }
                         }

@@ -3,6 +3,7 @@ package shop.controller.client;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import shop.domain.User;
 import shop.repository.UserRepository;
@@ -29,10 +30,20 @@ public class RatingController {
             @RequestParam Long bookId,
             @RequestParam Integer ratingValue,
             @RequestParam String reviewText,
-            Authentication authentication) {
+            Authentication authentication,
+            RedirectAttributes redirectAttributes) {
 
         if (authentication == null) {
             return "redirect:/login";
+        }
+
+        if (ratingValue == null) {
+
+            redirectAttributes.addFlashAttribute(
+                    "ratingError",
+                    "Please select the number of stars.");
+
+            return "redirect:/books/" + bookId;
         }
 
         User user = userRepository
