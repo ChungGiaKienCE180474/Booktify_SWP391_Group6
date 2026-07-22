@@ -531,20 +531,6 @@
 
                 <main class="vpp-detail-page">
 
-                    <c:if test="${not empty successMessage}">
-                        <div class="vpp-alert vpp-alert-success">
-                            <i class="fa-solid fa-circle-check"></i>
-                            <c:out value="${successMessage}" />
-                        </div>
-                    </c:if>
-
-                    <c:if test="${not empty errorMessage}">
-                        <div class="vpp-alert vpp-alert-error">
-                            <i class="fa-solid fa-circle-xmark"></i>
-                            <c:out value="${errorMessage}" />
-                        </div>
-                    </c:if>
-
                     <div class="vpp-breadcrumb">
                         <a href="${pageContext.request.contextPath}/">Trang chủ</a>
                         <span>›</span>
@@ -636,7 +622,8 @@
                                 <c:when test="${item.inStock}">
                                     <c:choose>
                                         <c:when test="${not empty sessionScope.username}">
-                                            <form method="post" action="${pageContext.request.contextPath}/cart/add-vpp">
+                                            <form method="post" action="${pageContext.request.contextPath}/cart/add-vpp"
+                                                class="js-cart-add-form">
                                                 <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}" />
                                                 <input type="hidden" name="vppItemId" value="${item.id}" />
                                                 <input type="hidden" name="redirect" value="/customer/vpp/${item.id}" />
