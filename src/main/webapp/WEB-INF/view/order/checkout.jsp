@@ -103,7 +103,6 @@
                                         <p class="order-static-value">
                                             <i class="fa-solid fa-money-bill-wave"></i> ${paymentLabel}
                                         </p>
-                                        <p class="order-static-hint">Shipping fee: ${shippingFeeFormatted} &#8363;</p>
                                     </div>
 
                                     <div class="order-field">
@@ -182,10 +181,6 @@
                                 <div class="cart-summary-row">
                                     <span>Subtotal</span>
                                     <span>${cart.totalAmountFormatted} &#8363;</span>
-                                </div>
-                                <div class="cart-summary-row">
-                                    <span>Shipping fee</span>
-                                    <span>${shippingFeeFormatted} &#8363;</span>
                                 </div>
 
                                 <div class="cart-summary-row">

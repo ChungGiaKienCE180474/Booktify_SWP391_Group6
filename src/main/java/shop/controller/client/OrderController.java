@@ -15,6 +15,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import jakarta.validation.Valid;
 import shop.domain.CheckoutForm;
+import shop.domain.OrderStatus;
 import shop.domain.PaymentMethod;
 import shop.domain.User;
 import shop.domain.dto.CartDTO;
@@ -66,7 +67,6 @@ public class OrderController {
 
         if (bindingResult.hasErrors()) {
             BigDecimal discount = BigDecimal.ZERO;
-            BigDecimal shippingFee = OrderService.COD_SHIPPING_FEE;
 
             if (checkoutForm.getVoucherCode() != null
                     && !checkoutForm.getVoucherCode().isBlank()) {
@@ -79,8 +79,7 @@ public class OrderController {
                     model,
                     cart,
                     refreshedCart.getTotalAmount(),
-                    discount,
-                    shippingFee);
+                    discount);
             return "order/checkout";
         }
 
@@ -91,7 +90,6 @@ public class OrderController {
             return "redirect:/orders/" + order.getId();
         } catch (IllegalArgumentException ex) {
             BigDecimal discount = BigDecimal.ZERO;
-            BigDecimal shippingFee = OrderService.COD_SHIPPING_FEE;
 
             if (checkoutForm.getVoucherCode() != null
                     && !checkoutForm.getVoucherCode().isBlank()) {
@@ -104,8 +102,7 @@ public class OrderController {
                     model,
                     cart,
                     refreshedCart.getTotalAmount(),
-                    discount,
-                    shippingFee);
+                    discount);
             model.addAttribute("errorMessage", ex.getMessage());
             return "order/checkout";
         }
@@ -122,8 +119,6 @@ public class OrderController {
         CartRefreshResult refreshResult = cartService.refreshCartResult(user.getId());
         CartDTO cart = cartService.toCartDTO(refreshResult.getCart());
 
-        BigDecimal shippingFee = OrderService.COD_SHIPPING_FEE;
-
         try {
 
             BigDecimal discount = voucherService.calculateDiscount(
@@ -132,8 +127,7 @@ public class OrderController {
 
             BigDecimal total = refreshResult.getCart()
                     .getTotalAmount()
-                    .subtract(discount)
-                    .add(shippingFee);
+                    .subtract(discount);
 
             model.addAttribute(
                     "discountAmountFormatted",
@@ -157,10 +151,7 @@ public class OrderController {
 
             model.addAttribute(
                     "checkoutTotalFormatted",
-                    orderService.formatMoney(
-                            refreshResult.getCart()
-                                    .getTotalAmount()
-                                    .add(shippingFee)));
+                    orderService.formatMoney(refreshResult.getCart().getTotalAmount()));
         }
 
         model.addAttribute("checkoutForm", checkoutForm);
@@ -169,10 +160,6 @@ public class OrderController {
         model.addAttribute(
                 "paymentLabel",
                 PaymentMethod.COD.getLabel());
-
-        model.addAttribute(
-                "shippingFeeFormatted",
-                orderService.formatMoney(shippingFee));
 
         return "order/checkout";
     }
@@ -196,16 +183,11 @@ public class OrderController {
                 "paymentLabel",
                 PaymentMethod.COD.getLabel());
         model.addAttribute(
-                "shippingFeeFormatted",
-                orderService.getCodShippingFeeFormatted());
-        model.addAttribute(
                 "discountAmountFormatted",
                 "0");
         model.addAttribute(
                 "checkoutTotalFormatted",
-                orderService.formatMoney(
-                        refreshResult.getCart().getTotalAmount()
-                                .add(OrderService.COD_SHIPPING_FEE)));
+                orderService.formatMoney(refreshResult.getCart().getTotalAmount()));
         return "order/checkout";
     }
 
@@ -227,6 +209,8 @@ public class OrderController {
         return orderService.getOrderForUser(user.getId(), id)
                 .map(order -> {
                     model.addAttribute("order", order);
+                    model.addAttribute("canCancelOrder",
+                            OrderStatus.fromValue(order.getStatus()).canBeCancelled());
                     return "order/detail";
                 })
                 .orElseGet(() -> {
@@ -235,22 +219,33 @@ public class OrderController {
                 });
     }
 
+    @PostMapping("/{id}/cancel")
+    public String cancelOrder(
+            Authentication authentication,
+            @PathVariable Long id,
+            RedirectAttributes redirectAttributes) {
+
+        User user = getCurrentUser(authentication);
+        try {
+            orderService.cancelOrderForUser(user.getId(), id);
+            redirectAttributes.addFlashAttribute("successMessage", "Order cancelled successfully.");
+        } catch (IllegalArgumentException ex) {
+            redirectAttributes.addFlashAttribute("errorMessage", ex.getMessage());
+        }
+        return "redirect:/orders/" + id;
+    }
+
     private void populateCheckoutModel(
             Model model,
             CartDTO cart,
             BigDecimal subtotal,
-            BigDecimal discountAmount,
-            BigDecimal shippingFee) {
+            BigDecimal discountAmount) {
 
         model.addAttribute("cart", cart);
 
         model.addAttribute(
                 "paymentLabel",
                 PaymentMethod.COD.getLabel());
-
-        model.addAttribute(
-                "shippingFeeFormatted",
-                orderService.formatMoney(shippingFee));
 
         model.addAttribute(
                 "discountAmountFormatted",
@@ -260,8 +255,7 @@ public class OrderController {
                 "checkoutTotalFormatted",
                 orderService.getCheckoutTotalFormatted(
                         subtotal,
-                        discountAmount,
-                        shippingFee));
+                        discountAmount));
     }
 
     private User getCurrentUser(Authentication authentication) {

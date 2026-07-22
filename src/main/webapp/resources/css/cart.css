@@ -21,7 +21,7 @@ body.home-page {
 }
 
 .cart-wrap {
-    max-width: 1100px;
+    max-width: 1200px;
     margin: 0 auto;
     padding: 2rem 1.5rem 3rem;
 }
@@ -68,7 +68,7 @@ body.home-page {
 
 .cart-layout {
     display: grid;
-    grid-template-columns: 1fr 400px;
+    grid-template-columns: minmax(0, 1fr) 340px;
     gap: 1.5rem;
     align-items: start;
 }
@@ -78,41 +78,54 @@ body.home-page {
     border: 1px solid var(--cart-border);
     border-radius: var(--cart-radius);
     box-shadow: var(--cart-shadow);
-    overflow: hidden;
+    overflow-x: auto;
 }
 
 .cart-table {
     width: 100%;
     border-collapse: collapse;
-    table-layout: fixed;
+    table-layout: auto;
+    min-width: 760px;
 }
 
 .cart-table .col-product {
     width: auto;
+    min-width: 220px;
 }
 
 .cart-table .col-price {
-    width: 108px;
+    width: auto;
+    min-width: 160px;
 }
 
 .cart-table .col-qty {
     width: 118px;
+    min-width: 118px;
 }
 
 .cart-table .col-subtotal {
-    width: 108px;
+    width: auto;
+    min-width: 150px;
 }
 
 .cart-table .col-remove {
     width: 48px;
+    min-width: 48px;
 }
 
 .cart-table th,
 .cart-table td {
-    padding: .75rem .5rem;
+    padding: .75rem .75rem;
     border-bottom: 1px solid var(--cart-border);
     vertical-align: middle;
-    overflow: hidden;
+}
+
+.cart-table th.col-price,
+.cart-table td.col-price,
+.cart-table th.col-subtotal,
+.cart-table td.col-subtotal {
+    text-align: right;
+    white-space: nowrap;
 }
 
 .cart-table th.col-remove,
@@ -124,12 +137,6 @@ body.home-page {
     padding-right: .35rem;
     text-align: center;
     box-sizing: border-box;
-}
-
-.cart-table td.col-price,
-.cart-table td.col-subtotal {
-    white-space: nowrap;
-    text-overflow: ellipsis;
 }
 
 .cart-table td.col-qty {
@@ -201,38 +208,32 @@ body.home-page {
 .cart-price {
     font-weight: 700;
     color: var(--cart-primary);
-    font-size: .82rem;
+    font-size: .9rem;
     white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    display: block;
+    display: inline-block;
 }
 
 .cart-promotion-price {
     display: flex;
-    align-items: center;
-    gap: 5px;
-    min-width: 0;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 4px;
     white-space: nowrap;
-    overflow: hidden;
 }
 
 .cart-promotion-line {
     display: inline-flex;
     align-items: center;
+    justify-content: flex-end;
     gap: 4px;
-    flex-shrink: 1;
-    min-width: 0;
-    overflow: hidden;
+    flex-wrap: wrap;
 }
 
 .cart-old-price {
     color: #94a3b8;
-    font-size: .72rem;
+    font-size: .75rem;
     font-weight: 700;
     text-decoration: line-through;
-    overflow: hidden;
-    text-overflow: ellipsis;
     white-space: nowrap;
 }
 
@@ -251,13 +252,9 @@ body.home-page {
 
 .cart-sale-price {
     color: #dc2626;
-    font-size: .82rem;
+    font-size: .9rem;
     font-weight: 800;
-    overflow: hidden;
-    text-overflow: ellipsis;
     white-space: nowrap;
-    flex-shrink: 1;
-    min-width: 0;
 }
 
 .cart-qty-form {
@@ -344,9 +341,15 @@ body.home-page {
 .cart-summary-row {
     display: flex;
     justify-content: space-between;
+    gap: 1rem;
     margin-bottom: .75rem;
     color: var(--cart-muted);
     font-size: .9rem;
+}
+
+.cart-summary-row span:last-child {
+    white-space: nowrap;
+    flex-shrink: 0;
 }
 
 .cart-summary-row.total {
@@ -390,6 +393,10 @@ body.home-page {
 
     .cart-summary {
         position: static;
+    }
+
+    .cart-table {
+        min-width: 680px;
     }
 
     .cart-table thead {

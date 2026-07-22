@@ -140,7 +140,6 @@
                         <dl>
                             <div class="order-info-row"><dt>Subtotal</dt><dd>${order.subtotalFormatted} &#8363;</dd></div>
                             <div class="order-info-row"><dt>Discount</dt><dd>-${order.discountAmountFormatted} &#8363;</dd></div>
-                            <div class="order-info-row"><dt>Shipping fee</dt><dd>${order.shippingFeeFormatted} &#8363;</dd></div>
                             <div class="order-info-row"><dt><strong>Total</strong></dt><dd><strong>${order.totalAmountFormatted} &#8363;</strong></dd></div>
                         </dl>
 
