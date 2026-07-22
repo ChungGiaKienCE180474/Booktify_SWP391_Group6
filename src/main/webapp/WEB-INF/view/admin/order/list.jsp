@@ -76,8 +76,7 @@
                 </form>
             </div>
 
-            <div class="admin-card">
-                <div class="admin-table-wrap">
+            <div class="admin-table-wrap">
                     <table class="admin-table">
                         <thead>
                             <tr>
@@ -158,7 +157,6 @@
                         </c:if>
                     </div>
                 </div>
-            </div>
         </section>
     </main>
 </body>

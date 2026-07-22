@@ -83,7 +83,7 @@
                     <tbody>
                         <c:forEach items="${genres}" var="genre" varStatus="vs">
                             <tr>
-                                <td style="color:#9CA3AF;font-weight:600;">${vs.index + 1}</td>
+                                <td style="color:#9CA3AF;font-weight:600;">${fromItem + vs.index}</td>
                                 <td>
                                     <div style="font-weight:700;color:#111827;">
                                         <c:out value="${genre.name}"/>

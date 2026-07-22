@@ -1264,9 +1264,9 @@
                                                 </span>
                                             </div>
 
-                                            <div class="chat-bubble"><span class="chat-bubble-text">
-                                                    <c:out value="${msg.message}" />
-                                                </span></div>
+                                            <div class="chat-bubble">
+                                                <c:out value="${msg.message}" />
+                                            </div>
                                         </div>
                                     </c:forEach>
                                 </c:when>

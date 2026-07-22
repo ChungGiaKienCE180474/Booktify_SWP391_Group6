@@ -43,6 +43,12 @@
             text-transform: uppercase;
             white-space: nowrap;
             font-weight: 800;
+            text-align: left;
+        }
+
+        /* Cột "#" căn giữa cho cả header lẫn dữ liệu. */
+        .vpp-table th.vpp-id-cell {
+            text-align: center;
         }
 
         .vpp-table td {
@@ -108,7 +114,7 @@
 
         .vpp-price {
             font-weight: 800;
-            color: #DC2626;
+            color: #040202;
             white-space: nowrap;
         }
 
@@ -450,7 +456,7 @@
                                                               type="number"
                                                               groupingUsed="true"
                                                               maxFractionDigits="0" />
-                                            VND
+                                            đ
                                         </span>
                                     </td>
 

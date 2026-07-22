@@ -87,7 +87,27 @@ public class StaffController {
 
         return "admin/staff/list";
     }
+    @GetMapping("/{id}")
+    public String viewStaffDetail(
+            @PathVariable Long id,
+            Model model,
+            RedirectAttributes redirectAttributes) {
 
+        StaffDTO staff = userService.getStaffDTOById(id);
+
+        if (staff == null) {
+            redirectAttributes.addFlashAttribute(
+                    "errorMessage",
+                    "Staff not found."
+            );
+
+            return "redirect:/admin/staff";
+        }
+
+        model.addAttribute("staff", staff);
+
+        return "admin/staff/detail";
+    }
     @GetMapping("/deleted")
     public String deletedStaff(
             @RequestParam(required = false) String keyword,

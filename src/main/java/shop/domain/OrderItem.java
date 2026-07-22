@@ -29,10 +29,6 @@ public class OrderItem {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "book_id")
     private Book book;
-    
-@ManyToOne(fetch = FetchType.LAZY)
-@JoinColumn(name = "vpp_item_id")
-private VppItem vppItem;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "vpp_item_id")

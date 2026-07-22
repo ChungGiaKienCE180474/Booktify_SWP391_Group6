@@ -3,7 +3,7 @@
         <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 
             <!DOCTYPE html>
-            <html lang="vi">
+            <html lang="en">
 
             <head>
                 <meta charset="UTF-8" />
@@ -546,9 +546,9 @@
                     </c:if>
 
                     <div class="vpp-breadcrumb">
-                        <a href="${pageContext.request.contextPath}/">Trang chủ</a>
+                        <a href="${pageContext.request.contextPath}/">Home</a>
                         <span>›</span>
-                        <a href="${pageContext.request.contextPath}/customer/vpp">Văn phòng phẩm</a>
+                        <a href="${pageContext.request.contextPath}/customer/vpp">Stationery</a>
                         <span>›</span>
                         <span>
                             <c:out value="${item.name}" />
@@ -563,7 +563,7 @@
                                 <div class="vpp-image-box">
                                     <c:choose>
                                         <c:when test="${not empty item.imagePath}">
-                                            <img src="${pageContext.request.contextPath}${item.imagePath}"
+                                            <img src="${pageContext.request.contextPath}${item.imagePath}?v=${item.updatedAt}"
                                                 alt="${item.name}">
                                         </c:when>
 
@@ -579,7 +579,7 @@
 
                             <a href="${pageContext.request.contextPath}/customer/vpp" class="vpp-back-link">
                                 <i class="fa-solid fa-arrow-left"></i>
-                                Quay lại danh sách
+                                Back to stationery list
                             </a>
 
                         </div>
@@ -596,13 +596,13 @@
                             </h1>
 
                             <div class="vpp-supplier">
-                                Nhà cung cấp:
+                                Supplier:
                                 <strong>
                                     <c:choose>
                                         <c:when test="${not empty item.supplier}">
                                             <c:out value="${item.supplier}" />
                                         </c:when>
-                                        <c:otherwise>Đang cập nhật</c:otherwise>
+                                        <c:otherwise>Updating</c:otherwise>
                                     </c:choose>
                                 </strong>
                             </div>
@@ -611,74 +611,56 @@
 
                                 <div class="vpp-price">
                                     <fmt:formatNumber value="${item.price}" type="number" groupingUsed="true" />
-                                    đ
+                                    VND
                                 </div>
 
                                 <c:choose>
                                     <c:when test="${item.inStock}">
                                         <div class="vpp-stock-pill">
                                             <i class="fa-solid fa-circle-check"></i>
-                                            Còn hàng (${item.stockQuantity})
+                                            In Stock (${item.stockQuantity})
                                         </div>
                                     </c:when>
 
                                     <c:otherwise>
                                         <div class="vpp-stock-pill out">
                                             <i class="fa-solid fa-circle-xmark"></i>
-                                            Hết hàng
+                                            Out of Stock
                                         </div>
                                     </c:otherwise>
                                 </c:choose>
 
                             </div>
 
-                            <c:choose>
-                                <c:when test="${item.inStock}">
-                                    <c:choose>
-                                        <c:when test="${not empty sessionScope.username}">
-                                            <form method="post" action="${pageContext.request.contextPath}/cart/add-vpp">
-                                                <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}" />
-                                                <input type="hidden" name="vppItemId" value="${item.id}" />
-                                                <input type="hidden" name="redirect" value="/customer/vpp/${item.id}" />
+                            <form method="post" action="${pageContext.request.contextPath}/cart/add-vpp">
 
-                                                <div class="vpp-purchase-row">
-                                                    <label for="quantity" class="vpp-qty-label">Số lượng</label>
-                                                    <input id="quantity" type="number" name="quantity"
-                                                        class="vpp-quantity-input" min="1"
-                                                        max="${item.stockQuantity}" value="1" required />
+                                <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}" />
 
-                                                    <button type="submit" class="vpp-add-cart-btn">
-                                                        <i class="fa-solid fa-cart-shopping"></i>
-                                                        Thêm vào giỏ hàng
-                                                    </button>
+                                <input type="hidden" name="vppItemId" value="${item.id}" />
 
-                                                    <a href="${pageContext.request.contextPath}/cart" class="vpp-view-cart-btn">
-                                                        <i class="fa-solid fa-basket-shopping"></i>
-                                                        Xem giỏ hàng
-                                                    </a>
-                                                </div>
-                                            </form>
-                                        </c:when>
-                                        <c:otherwise>
-                                            <div class="vpp-purchase-row">
-                                                <a href="${pageContext.request.contextPath}/login" class="vpp-add-cart-btn"
-                                                    style="text-decoration:none;">
-                                                    <i class="fa-solid fa-right-to-bracket"></i>
-                                                    Đăng nhập để mua
-                                                </a>
-                                            </div>
-                                        </c:otherwise>
-                                    </c:choose>
-                                </c:when>
-                                <c:otherwise>
-                                    <div class="vpp-purchase-row">
-                                        <button type="button" class="vpp-add-cart-btn" disabled>
-                                            <i class="fa-solid fa-cart-shopping"></i>
-                                            Hết hàng
-                                        </button>
-                                    </div>
-                                </c:otherwise>
-                            </c:choose>
+                                <input type="hidden" name="redirect" value="/customer/vpp/${item.id}" />
+
+                                <div class="vpp-purchase-row">
+
+                                    <label for="quantity" class="vpp-qty-label">
+                                        Quantity
+                                    </label>
+
+                                    <input id="quantity" type="number" name="quantity" class="vpp-quantity-input"
+                                        min="1" max="${item.stockQuantity}" value="1" <c:if
+                                        test="${not item.inStock}">disabled</c:if> />
+
+                                    <button type="submit" class="vpp-add-cart-btn" <c:if
+                                        test="${not item.inStock}">disabled</c:if>>
+                                        <i class="fa-solid fa-cart-shopping"></i>
+                                        Add to Cart
+                                    </button>
+
+
+
+                                </div>
+
+                            </form>
 
                             <div class="vpp-meta-list">
 
@@ -689,7 +671,7 @@
 
                                 <div class="vpp-meta-item">
                                     <i class="fa-solid fa-boxes-stacked"></i>
-                                    Tồn kho:
+                                    Stock:
                                     <c:out value="${item.stockQuantity}" />
                                 </div>
 
@@ -705,13 +687,18 @@
                             <div class="vpp-description-section">
 
                                 <h2 class="vpp-section-title">
-                                    Giới thiệu sản phẩm
+                                    Product Description
                                 </h2>
 
                                 <div class="vpp-description">
-                                    <c:if test="${not empty item.description}">
-                                        <c:out value="${item.description}" />
-                                    </c:if>
+                                    <c:choose>
+                                        <c:when test="${not empty item.description}">
+                                            <c:out value="${item.description}" />
+                                        </c:when>
+                                        <c:otherwise>
+                                            No description available.
+                                        </c:otherwise>
+                                    </c:choose>
                                 </div>
 
                             </div>
@@ -730,11 +717,11 @@
                                     <span class="vpp-related-icon">
                                         <i class="fa-solid fa-wand-magic-sparkles"></i>
                                     </span>
-                                    Có thể bạn quan tâm
+                                    You May Also Like
                                 </div>
 
                                 <a href="${pageContext.request.contextPath}/customer/vpp" class="vpp-related-more">
-                                    Xem thêm
+                                    View More
                                     <i class="fa-solid fa-chevron-right"></i>
                                 </a>
 
@@ -750,7 +737,7 @@
                                         <div class="vpp-related-image-box">
                                             <c:choose>
                                                 <c:when test="${not empty related.imagePath}">
-                                                    <img src="${pageContext.request.contextPath}${related.imagePath}"
+                                                    <img src="${pageContext.request.contextPath}${related.imagePath}?v=${related.updatedAt}"
                                                         alt="${related.name}">
                                                 </c:when>
 
@@ -770,15 +757,20 @@
                                             </div>
 
                                             <div class="vpp-related-desc">
-                                                <c:if test="${not empty related.description}">
-                                                    <c:out value="${related.description}" />
-                                                </c:if>
+                                                <c:choose>
+                                                    <c:when test="${not empty related.description}">
+                                                        <c:out value="${related.description}" />
+                                                    </c:when>
+                                                    <c:otherwise>
+                                                        No description available.
+                                                    </c:otherwise>
+                                                </c:choose>
                                             </div>
 
                                             <div class="vpp-related-price">
                                                 <fmt:formatNumber value="${related.price}" type="number"
                                                     groupingUsed="true" />
-                                                đ
+                                                VND
                                             </div>
 
                                         </div>

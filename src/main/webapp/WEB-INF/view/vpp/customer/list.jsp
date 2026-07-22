@@ -627,7 +627,7 @@
                             <div class="product-card__thumb">
                                 <c:choose>
                                     <c:when test="${item.hasImage}">
-                                        <img src="${ctx}/uploads/vpp/${item.id}/image"
+                                        <img src="${ctx}/uploads/vpp/${item.id}/image?v=${item.updatedAt}"
                                              alt="${item.name}" />
                                     </c:when>
 
