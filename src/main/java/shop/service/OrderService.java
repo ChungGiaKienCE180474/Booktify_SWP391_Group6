@@ -614,27 +614,62 @@ if (cartItem.getBook() == null) {
             String newStatus) {
 
         Order order = orderRepository
-                .findById(orderId)
+                .findByIdWithUserAndItems(orderId)
                 .orElseThrow(() ->
                         new IllegalArgumentException(
                                 "Order not found."
                         )
                 );
 
-        try {
+        OrderStatus targetStatus = OrderStatus.fromValue(newStatus);
+        OrderStatus currentStatus = OrderStatus.fromValue(order.getStatus());
 
-            OrderStatus.valueOf(newStatus);
-
-        } catch (IllegalArgumentException exception) {
-
-            throw new IllegalArgumentException(
-                    "Invalid order status."
-            );
+        if (targetStatus == currentStatus) {
+            return;
         }
 
-        order.setStatus(newStatus);
+        if (!currentStatus.canTransitionTo(targetStatus)) {
+            throw new IllegalArgumentException(
+                    "Cannot change order status from "
+                            + currentStatus.getLabel()
+                            + " to "
+                            + targetStatus.getLabel()
+                            + ".");
+        }
 
+        if (targetStatus == OrderStatus.CANCELLED) {
+            restoreOrderStock(order);
+        }
+
+        order.setStatus(targetStatus.name());
         orderRepository.save(order);
+    }
+
+    private void restoreOrderStock(Order order) {
+        for (OrderItem item : order.getItems()) {
+            if (item.getVppItem() != null) {
+                VppItem vppItem = vppItemRepository
+                        .findById(item.getVppItem().getId())
+                        .orElse(null);
+                if (vppItem != null && vppItem.getStockQuantity() != null) {
+                    vppItem.setStockQuantity(
+                            vppItem.getStockQuantity() + item.getQuantity());
+                    vppItemRepository.save(vppItem);
+                }
+                continue;
+            }
+
+            if (item.getBook() != null) {
+                Book book = bookRepository
+                        .findById(item.getBook().getId())
+                        .orElse(null);
+                if (book != null) {
+                    book.setStockQuantity(
+                            book.getStockQuantity() + item.getQuantity());
+                    bookRepository.save(book);
+                }
+            }
+        }
     }
 
     public void validateCheckoutForm(
