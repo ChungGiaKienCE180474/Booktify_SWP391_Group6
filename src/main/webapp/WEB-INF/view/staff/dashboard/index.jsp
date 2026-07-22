@@ -1,89 +1,58 @@
 <%@ page contentType="text/html" pageEncoding="UTF-8" %>
-<%@ taglib prefix="c" uri="jakarta.tags.core" %>
+    <%@ taglib prefix="c" uri="jakarta.tags.core" %>
 
-<c:set var="ctx" value="${pageContext.request.contextPath}" />
+        <c:set var="ctx" value="${pageContext.request.contextPath}" />
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8" />
+        <!DOCTYPE html>
+        <html lang="en">
 
-    <title>Dashboard — Booktify Staff</title>
+        <head>
+            <meta charset="UTF-8" />
 
-    <link rel="stylesheet" href="${ctx}/css/admin-dashboard.css" />
-    <link rel="stylesheet"
-          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" />
-</head>
+            <title>Dashboard — Booktify Staff</title>
 
-<body class="admin-shell">
+            <link rel="stylesheet" href="${ctx}/css/admin-dashboard.css" />
+            <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" />
+        </head>
 
-<jsp:include page="/WEB-INF/view/layout/staff/sidebar.jsp" />
+        <body class="admin-shell">
 
-<main class="admin-main">
+            <jsp:include page="/WEB-INF/view/layout/staff/sidebar.jsp" />
 
-    <jsp:include page="/WEB-INF/view/layout/staff/header.jsp" />
+            <main class="admin-main">
 
-    <section class="admin-content">
+                <jsp:include page="/WEB-INF/view/layout/staff/header.jsp" />
 
-        <div class="admin-hero">
-            <div>
-                <p class="admin-kicker">Welcome Back</p>
+                <section class="admin-content">
 
-                <h2>Dashboard Overview</h2>
+                    <div class="admin-hero">
+                        <div>
+                            <p class="admin-kicker">Welcome Back</p>
 
-                <p>
-                    Monitor staff modules including customer contact requests,
-                    stationery VPP items, and supplier management from one place.
-                </p>
-            </div>
-        </div>
+                            <h2>Dashboard Overview</h2>
 
-        <section class="admin-cards">
+                            <p>
+                                Monitor staff modules including customer contact requests,
+                                stationery VPP items, and supplier management from one place.
+                            </p>
+                        </div>
+                    </div>
 
-            <div class="admin-card">
-                <div class="admin-card__icon">
-                    <i class="fa-solid fa-headset"></i>
-                </div>
+                    <section class="admin-cards">
 
-                <div class="admin-card__body">
-                    <span>Contact Requests</span>
-                    <strong>
-                        <c:out value="${totalContacts}" default="0" />
-                    </strong>
-                </div>
-            </div>
+                        
 
-            <div class="admin-card">
-                <div class="admin-card__icon">
-                    <i class="fa-solid fa-pen-ruler"></i>
-                </div>
 
-                <div class="admin-card__body">
-                    <span>Stationery VPP</span>
-                    <strong>
-                        <c:out value="${totalVppItems}" default="0" />
-                    </strong>
-                </div>
-            </div>
+                        
 
-            <div class="admin-card">
-                <div class="admin-card__icon">
-                    <i class="fa-solid fa-truck-field"></i>
-                </div>
+                       
 
-                <div class="admin-card__body">
-                    <span>Suppliers</span>
-                    <strong>
-                        <c:out value="${totalSuppliers}" default="0" />
-                    </strong>
-                </div>
-            </div>
+                    </section>
 
-        </section>
+                </section>
 
-    </section>
+            </main>
 
-</main>
+        </body>
 
-</body>
-</html>
+        </html>

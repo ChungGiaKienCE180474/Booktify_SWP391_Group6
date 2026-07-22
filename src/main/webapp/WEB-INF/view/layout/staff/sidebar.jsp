@@ -32,23 +32,7 @@
                     <div class="admin-sidebar__section">
                         <div class="admin-sidebar__label">Operations</div>
 
-                        <a href="${ctx}/staff/contact"
-                            class="admin-sidebar__item ${fn:contains(uri, '/staff/contact') ? 'active' : ''}">
-                            <i class="fa-solid fa-headset"></i>
-                            <span>Contacts</span>
-                        </a>
-
-                        <a href="${ctx}/staff/vpp"
-                            class="admin-sidebar__item ${fn:contains(uri, '/staff/vpp') ? 'active' : ''}">
-                            <i class="fa-solid fa-pen-ruler"></i>
-                            <span>Stationery VPP</span>
-                        </a>
-
-                        <a href="${ctx}/staff/suppliers"
-                            class="admin-sidebar__item ${fn:contains(uri, '/staff/suppliers') ? 'active' : ''}">
-                            <i class="fa-solid fa-truck-field"></i>
-                            <span>Suppliers</span>
-                        </a>
+                       
                     </div>
 
                 </nav>

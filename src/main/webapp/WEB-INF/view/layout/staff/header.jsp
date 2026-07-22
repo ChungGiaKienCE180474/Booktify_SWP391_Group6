@@ -27,7 +27,7 @@
 
         <a href="${pageContext.request.contextPath}/" class="admin-topbar__link">
             <i class="fa-solid fa-arrow-up-right-from-square"></i>
-            Customer View
+            Customer Views
         </a>
     </div>
 
