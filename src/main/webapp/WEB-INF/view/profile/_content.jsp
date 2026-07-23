@@ -190,115 +190,65 @@
                     <i class="fa-solid fa-shield-halved"></i>
                     <c:choose>
                         <c:when test="${profile.googleAccount}">
-                            This account signs in with Google. You can set a password to log in by email — just verify with OTP.
+                            This account signs in with Google. You can set a password to log in by email.
                         </c:when>
                         <c:otherwise>
-                            Changing your password requires OTP verification via your registered email.
+                            Enter your current password to change to a new one.
                         </c:otherwise>
                     </c:choose>
                 </p>
             </c:if>
 
             <c:if test="${passwordEditMode}">
-                <c:if test="${not empty otpSentMessage}">
-                    <div class="profile-alert profile-alert-success profile-alert-inline">
-                        <i class="fa-solid fa-envelope-circle-check"></i> ${otpSentMessage}
-                    </div>
-                </c:if>
-                <c:if test="${not empty otpVerifiedMessage}">
-                    <div class="profile-alert profile-alert-success profile-alert-inline">
-                        <i class="fa-solid fa-circle-check"></i> ${otpVerifiedMessage}
-                    </div>
-                </c:if>
                 <c:if test="${not empty passwordErrorMessage}">
                     <div class="profile-alert profile-alert-error profile-alert-inline">
                         <i class="fa-solid fa-circle-exclamation"></i> ${passwordErrorMessage}
                     </div>
                 </c:if>
 
-                <c:if test="${!otpSent}">
+                <c:if test="${profile.googleAccount}">
                     <p class="profile-hint profile-hint-block">
-                        Click the button below to receive an OTP code at <strong>${profile.email}</strong>
+                        Enter a new password — no current password needed since you sign in with Google.
                     </p>
-                    <form method="post" action="${profileBase}/password/send-otp" class="profile-form">
-                        <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}" />
-                        <div class="profile-form-actions profile-form-actions--split">
-                            <a href="${profileBase}" class="profile-btn profile-btn-outline">Cancel</a>
-                            <button type="submit" class="profile-btn profile-btn-primary">
-                                <i class="fa-solid fa-paper-plane"></i> Send OTP code
-                            </button>
-                        </div>
-                    </form>
                 </c:if>
 
-                <c:if test="${otpSent && !otpVerified}">
-                    <p class="profile-hint profile-hint-block">
-                        An OTP code has been sent to <strong>${profile.email}</strong>.
-                    </p>
-                    <form method="post" action="${profileBase}/password/verify-otp" class="profile-form">
-                        <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}" />
+                <form:form method="post" action="${profileBase}/password" modelAttribute="passwordChangeForm"
+                    cssClass="profile-form">
+
+                    <c:if test="${!profile.googleAccount}">
                         <div class="profile-form-group">
-                            <label for="otp">OTP code <span class="required">*</span></label>
-                            <input type="number" name="otp" id="otp" class="profile-input profile-otp-input"
-                                   placeholder="Enter 6 digits" min="100000" max="999999" required />
+                            <label for="currentPassword">Current password <span class="required">*</span></label>
+                            <form:password path="currentPassword" id="currentPassword"
+                                cssClass="profile-input" placeholder="Enter your current password" />
+                            <form:errors path="currentPassword" cssClass="profile-field-error" />
                         </div>
-                        <div class="profile-form-actions profile-form-actions--split">
-                            <a href="${profileBase}" class="profile-btn profile-btn-outline">Cancel</a>
-                            <button type="submit" class="profile-btn profile-btn-primary">
-                                <i class="fa-solid fa-shield-check"></i> Confirm OTP
-                            </button>
-                        </div>
-                    </form>
-                    <form method="post" action="${profileBase}/password/send-otp" class="profile-resend-otp">
-                        <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}" />
-                        <button type="submit" class="profile-link-btn">Resend OTP code</button>
-                    </form>
-                </c:if>
-
-                <c:if test="${otpVerified}">
-                    <c:if test="${profile.googleAccount}">
-                        <p class="profile-hint profile-hint-block">
-                            OTP verified. Enter a new password — no current password needed since you sign in with Google.
-                        </p>
                     </c:if>
-                    <form:form method="post" action="${profileBase}/password" modelAttribute="passwordChangeForm"
-                        cssClass="profile-form">
 
-                        <c:if test="${!profile.googleAccount}">
-                            <div class="profile-form-group">
-                                <label for="currentPassword">Current password <span class="required">*</span></label>
-                                <form:password path="currentPassword" id="currentPassword"
-                                    cssClass="profile-input" placeholder="Enter your current password" />
-                                <form:errors path="currentPassword" cssClass="profile-field-error" />
-                            </div>
-                        </c:if>
+                    <div class="profile-form-group">
+                        <label for="newPassword">New password <span class="required">*</span></label>
+                        <form:password path="newPassword" id="newPassword" cssClass="profile-input"
+                            placeholder="At least 3 characters" />
+                        <form:errors path="newPassword" cssClass="profile-field-error" />
+                    </div>
 
-                        <div class="profile-form-group">
-                            <label for="newPassword">New password <span class="required">*</span></label>
-                            <form:password path="newPassword" id="newPassword" cssClass="profile-input"
-                                placeholder="At least 3 characters" />
-                            <form:errors path="newPassword" cssClass="profile-field-error" />
-                        </div>
+                    <div class="profile-form-group">
+                        <label for="confirmPassword">Confirm new password <span class="required">*</span></label>
+                        <form:password path="confirmPassword" id="confirmPassword"
+                            cssClass="profile-input" placeholder="Re-enter your new password" />
+                        <form:errors path="confirmPassword" cssClass="profile-field-error" />
+                    </div>
 
-                        <div class="profile-form-group">
-                            <label for="confirmPassword">Confirm new password <span class="required">*</span></label>
-                            <form:password path="confirmPassword" id="confirmPassword"
-                                cssClass="profile-input" placeholder="Re-enter your new password" />
-                            <form:errors path="confirmPassword" cssClass="profile-field-error" />
-                        </div>
-
-                        <div class="profile-form-actions profile-form-actions--split">
-                            <a href="${profileBase}" class="profile-btn profile-btn-outline">Cancel</a>
-                            <button type="submit" class="profile-btn profile-btn-primary">
-                                <i class="fa-solid fa-check"></i>
-                                <c:choose>
-                                    <c:when test="${profile.googleAccount}">Confirm set password</c:when>
-                                    <c:otherwise>Confirm change password</c:otherwise>
-                                </c:choose>
-                            </button>
-                        </div>
-                    </form:form>
-                </c:if>
+                    <div class="profile-form-actions profile-form-actions--split">
+                        <a href="${profileBase}" class="profile-btn profile-btn-outline">Cancel</a>
+                        <button type="submit" class="profile-btn profile-btn-primary">
+                            <i class="fa-solid fa-check"></i>
+                            <c:choose>
+                                <c:when test="${profile.googleAccount}">Confirm set password</c:when>
+                                <c:otherwise>Confirm change password</c:otherwise>
+                            </c:choose>
+                        </button>
+                    </div>
+                </form:form>
             </c:if>
         </div>
     </div>
