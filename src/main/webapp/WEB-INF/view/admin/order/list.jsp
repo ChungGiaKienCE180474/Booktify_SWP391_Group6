@@ -141,7 +141,6 @@
                         </div>
                     </c:if>
                 </div>
-            </div>
         </section>
     </main>
 </body>

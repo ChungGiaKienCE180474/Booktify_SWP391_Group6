@@ -15,6 +15,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import jakarta.validation.Valid;
 import shop.domain.Category;
 import shop.service.CategoryService;
+import shop.service.VppCategoryService;
 
 @Controller
 @RequestMapping("/admin/categories")
@@ -22,9 +23,11 @@ import shop.service.CategoryService;
 public class CategoryController {
 
     private final CategoryService categoryService;
+    private final VppCategoryService vppCategoryService;
 
-    public CategoryController(CategoryService categoryService) {
+    public CategoryController(CategoryService categoryService, VppCategoryService vppCategoryService) {
         this.categoryService = categoryService;
+        this.vppCategoryService = vppCategoryService;
     }
 
     private static final int PAGE_SIZE = 10;
@@ -60,6 +63,11 @@ public class CategoryController {
         model.addAttribute("fromItem", totalItems == 0 ? 0 : from + 1);
         model.addAttribute("toItem", to);
         model.addAttribute("viewingAll", all);
+
+        // Stationery categories are a small, fixed set (see VppCategoryService),
+        // so no search/pagination needed — just render them in the second tab.
+        model.addAttribute("vppCategories", vppCategoryService.getAllCategories());
+
         return "admin/category/list";
     }
 

@@ -840,6 +840,8 @@
     </div>
 </div>
 
+<jsp:include page="/WEB-INF/view/layout/admin/toast.jsp" />
+
 <script>
     function openCreateModal() {
         document.getElementById("createModal").classList.add("show");

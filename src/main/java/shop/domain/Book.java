@@ -90,6 +90,11 @@ public class Book {
     @JoinColumn(name = "category_id")
     private Category category;
 
+    // Optional — which managed Supplier this book is sourced from.
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "supplier_id")
+    private Supplier supplier;
+
     // Genres are secondary tags, independent from category — a book can carry
     // several, and a genre doesn't need to match the book's category.
     @ManyToMany(fetch = FetchType.LAZY)
@@ -225,6 +230,14 @@ public class Book {
 
     public void setCategory(Category category) {
         this.category = category;
+    }
+
+    public Supplier getSupplier() {
+        return supplier;
+    }
+
+    public void setSupplier(Supplier supplier) {
+        this.supplier = supplier;
     }
 
     public Set<Genre> getGenres() {

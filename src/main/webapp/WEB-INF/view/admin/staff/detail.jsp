@@ -1,406 +1,405 @@
 <%@ page contentType="text/html" pageEncoding="UTF-8" %>
-<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+    <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8"/>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+        <!DOCTYPE html>
+        <html lang="en">
 
-    <title>Staff Details — Booktify Admin</title>
+        <head>
+            <meta charset="UTF-8" />
+            <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-    <link rel="stylesheet"
-          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css"/>
-    <link rel="stylesheet" href="/css/admin-dashboard.css"/>
+            <title>Staff Details — Booktify Admin</title>
 
-    <style>
-        .staff-detail-card {
-            overflow: hidden;
-            border: 1px solid #e5e7eb;
-            border-radius: 16px;
-            background: #ffffff;
-            box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
-        }
+            <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" />
+            <link rel="stylesheet" href="/css/admin-dashboard.css" />
 
-        .staff-profile {
-            display: flex;
-            align-items: center;
-            gap: 20px;
-            padding: 28px;
-            border-bottom: 1px solid #e5e7eb;
-            background: #f9fafb;
-        }
+            <style>
+                .staff-detail-card {
+                    overflow: hidden;
+                    border: 1px solid #e5e7eb;
+                    border-radius: 16px;
+                    background: #ffffff;
+                    box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
+                }
 
-        .staff-avatar {
-            width: 76px;
-            height: 76px;
-            flex: 0 0 76px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 18px;
-            background: #ecfdf5;
-            color: #047857;
-            font-size: 30px;
-            font-weight: 900;
-        }
+                .staff-profile {
+                    display: flex;
+                    align-items: center;
+                    gap: 20px;
+                    padding: 28px;
+                    border-bottom: 1px solid #e5e7eb;
+                    background: #f9fafb;
+                }
 
-        .staff-profile__content {
-            min-width: 0;
-            flex: 1;
-        }
+                .staff-avatar {
+                    width: 76px;
+                    height: 76px;
+                    flex: 0 0 76px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    border-radius: 18px;
+                    background: #ecfdf5;
+                    color: #047857;
+                    font-size: 30px;
+                    font-weight: 900;
+                }
 
-        .staff-profile__content h3 {
-            margin: 0 0 6px;
-            color: #111827;
-            font-size: 24px;
-            font-weight: 900;
-        }
+                .staff-profile__content {
+                    min-width: 0;
+                    flex: 1;
+                }
 
-        .staff-profile__email {
-            color: #6b7280;
-            font-size: 14px;
-            word-break: break-word;
-        }
+                .staff-profile__content h3 {
+                    margin: 0 0 6px;
+                    color: #111827;
+                    font-size: 24px;
+                    font-weight: 900;
+                }
 
-        .staff-profile__badges {
-            display: flex;
-            gap: 8px;
-            margin-top: 12px;
-            flex-wrap: wrap;
-        }
+                .staff-profile__email {
+                    color: #6b7280;
+                    font-size: 14px;
+                    word-break: break-word;
+                }
 
-        .detail-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            padding: 6px 11px;
-            border-radius: 999px;
-            font-size: 12px;
-            font-weight: 800;
-        }
+                .staff-profile__badges {
+                    display: flex;
+                    gap: 8px;
+                    margin-top: 12px;
+                    flex-wrap: wrap;
+                }
 
-        .detail-badge--role {
-            border: 1px solid #fed7aa;
-            background: #fff7ed;
-            color: #c2410c;
-        }
+                .detail-badge {
+                    display: inline-flex;
+                    align-items: center;
+                    gap: 6px;
+                    padding: 6px 11px;
+                    border-radius: 999px;
+                    font-size: 12px;
+                    font-weight: 800;
+                }
 
-        .detail-badge--active {
-            border: 1px solid #bbf7d0;
-            background: #dcfce7;
-            color: #15803d;
-        }
+                .detail-badge--role {
+                    border: 1px solid #fed7aa;
+                    background: #fff7ed;
+                    color: #c2410c;
+                }
 
-        .detail-badge--inactive {
-            border: 1px solid #fecaca;
-            background: #fee2e2;
-            color: #b91c1c;
-        }
+                .detail-badge--active {
+                    border: 1px solid #bbf7d0;
+                    background: #dcfce7;
+                    color: #15803d;
+                }
 
-        .detail-badge--deleted {
-            border: 1px solid #cbd5e1;
-            background: #f1f5f9;
-            color: #475569;
-        }
+                .detail-badge--inactive {
+                    border: 1px solid #fecaca;
+                    background: #fee2e2;
+                    color: #b91c1c;
+                }
 
-        .staff-detail-body {
-            padding: 28px;
-        }
+                .detail-badge--deleted {
+                    border: 1px solid #cbd5e1;
+                    background: #f1f5f9;
+                    color: #475569;
+                }
 
-        .detail-section-title {
-            display: flex;
-            align-items: center;
-            gap: 9px;
-            margin: 0 0 18px;
-            color: #111827;
-            font-size: 18px;
-            font-weight: 900;
-        }
+                .staff-detail-body {
+                    padding: 28px;
+                }
 
-        .detail-section-title i {
-            color: #f97316;
-        }
+                .detail-section-title {
+                    display: flex;
+                    align-items: center;
+                    gap: 9px;
+                    margin: 0 0 18px;
+                    color: #111827;
+                    font-size: 18px;
+                    font-weight: 900;
+                }
 
-        .staff-detail-grid {
-            display: grid;
-            grid-template-columns: repeat(2, minmax(0, 1fr));
-            gap: 16px;
-        }
+                .detail-section-title i {
+                    color: #f97316;
+                }
 
-        .staff-detail-item {
-            padding: 18px;
-            border: 1px solid #e5e7eb;
-            border-radius: 14px;
-            background: #ffffff;
-        }
+                .staff-detail-grid {
+                    display: grid;
+                    grid-template-columns: repeat(2, minmax(0, 1fr));
+                    gap: 16px;
+                }
 
-        .staff-detail-item--full {
-            grid-column: 1 / -1;
-        }
+                .staff-detail-item {
+                    padding: 18px;
+                    border: 1px solid #e5e7eb;
+                    border-radius: 14px;
+                    background: #ffffff;
+                }
 
-        .staff-detail-label {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            margin-bottom: 8px;
-            color: #6b7280;
-            font-size: 12px;
-            font-weight: 800;
-            letter-spacing: .06em;
-            text-transform: uppercase;
-        }
+                .staff-detail-item--full {
+                    grid-column: 1 / -1;
+                }
 
-        .staff-detail-label i {
-            width: 16px;
-            color: #f97316;
-            text-align: center;
-        }
+                .staff-detail-label {
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                    margin-bottom: 8px;
+                    color: #6b7280;
+                    font-size: 12px;
+                    font-weight: 800;
+                    letter-spacing: .06em;
+                    text-transform: uppercase;
+                }
 
-        .staff-detail-value {
-            color: #111827;
-            font-size: 15px;
-            font-weight: 700;
-            line-height: 1.6;
-            word-break: break-word;
-        }
+                .staff-detail-label i {
+                    width: 16px;
+                    color: #f97316;
+                    text-align: center;
+                }
 
-        .staff-detail-footer {
-            display: flex;
-            justify-content: flex-end;
-            gap: 12px;
-            padding: 20px 28px;
-            border-top: 1px solid #e5e7eb;
-            background: #f9fafb;
-        }
+                .staff-detail-value {
+                    color: #111827;
+                    font-size: 15px;
+                    font-weight: 700;
+                    line-height: 1.6;
+                    word-break: break-word;
+                }
 
-        @media (max-width: 700px) {
-            .staff-profile {
-                align-items: flex-start;
-                flex-direction: column;
-            }
+                .staff-detail-footer {
+                    display: flex;
+                    justify-content: flex-end;
+                    gap: 12px;
+                    padding: 20px 28px;
+                    border-top: 1px solid #e5e7eb;
+                    background: #f9fafb;
+                }
 
-            .staff-detail-grid {
-                grid-template-columns: 1fr;
-            }
+                @media (max-width: 700px) {
+                    .staff-profile {
+                        align-items: flex-start;
+                        flex-direction: column;
+                    }
 
-            .staff-detail-item--full {
-                grid-column: auto;
-            }
+                    .staff-detail-grid {
+                        grid-template-columns: 1fr;
+                    }
 
-            .staff-detail-footer {
-                flex-direction: column;
-            }
+                    .staff-detail-item--full {
+                        grid-column: auto;
+                    }
 
-            .staff-detail-footer .admin-button {
-                width: 100%;
-                justify-content: center;
-            }
-        }
-    </style>
-</head>
+                    .staff-detail-footer {
+                        flex-direction: column;
+                    }
 
-<body class="admin-shell">
+                    .staff-detail-footer .admin-button {
+                        width: 100%;
+                        justify-content: center;
+                    }
+                }
+            </style>
+        </head>
 
-<jsp:include page="/WEB-INF/view/layout/admin/sidebar.jsp"/>
+        <body class="admin-shell">
 
-<main class="admin-main">
+            <jsp:include page="/WEB-INF/view/layout/admin/sidebar.jsp" />
 
-    <jsp:include page="/WEB-INF/view/layout/admin/header.jsp"/>
+            <main class="admin-main">
 
-    <section class="admin-content">
+                <jsp:include page="/WEB-INF/view/layout/admin/header.jsp" />
 
-        <div class="admin-toolbar">
-            <div>
-                <p class="admin-kicker">
-                    <i class="fa-solid fa-user-tie"></i>
-                    Staff Management
-                </p>
+                <section class="admin-content">
 
-                <h2>Staff Details</h2>
-                <p>View complete staff account information.</p>
-            </div>
+                    <div class="admin-toolbar">
+                        <div>
+                            <p class="admin-kicker">
+                                <i class="fa-solid fa-user-tie"></i>
+                                Staff Management
+                            </p>
 
-            <a href="/admin/staff"
-               class="admin-button admin-button--ghost">
+                            <h2>Staff Details</h2>
+                            <p>View complete staff account information.</p>
+                        </div>
 
-                <i class="fa-solid fa-arrow-left"></i>
-                Back to Staff
-            </a>
-        </div>
+                        <a href="/admin/staff" class="admin-button admin-button--ghost">
 
-        <div class="staff-detail-card">
-
-            <div class="staff-profile">
-
-                <div class="staff-avatar">
-                    <c:out value="${staff.initial}"/>
-                </div>
-
-                <div class="staff-profile__content">
-
-                    <h3>
-                        <c:out value="${empty staff.fullName ? 'N/A' : staff.fullName}"/>
-                    </h3>
-
-                    <div class="staff-profile__email">
-                        <i class="fa-solid fa-envelope"></i>
-                        <c:out value="${empty staff.email ? 'N/A' : staff.email}"/>
+                            <i class="fa-solid fa-arrow-left"></i>
+                            Back to Staff
+                        </a>
                     </div>
 
-                    <div class="staff-profile__badges">
+                    <div class="staff-detail-card">
 
-                        <span class="detail-badge detail-badge--role">
-                            <i class="fa-solid fa-briefcase"></i>
-                            Staff
-                        </span>
+                        <div class="staff-profile">
 
-                        <c:choose>
-                            <c:when test="${staff.status}">
-                                <span class="detail-badge detail-badge--active">
-                                    <i class="fa-solid fa-circle-check"></i>
-                                    Active
-                                </span>
-                            </c:when>
+                            <div class="staff-avatar">
+                                <c:out value="${staff.initial}" />
+                            </div>
 
-                            <c:otherwise>
-                                <span class="detail-badge detail-badge--inactive">
-                                    <i class="fa-solid fa-circle-xmark"></i>
-                                    Inactive
-                                </span>
-                            </c:otherwise>
-                        </c:choose>
+                            <div class="staff-profile__content">
 
-                        <c:if test="${staff.deleted}">
-                            <span class="detail-badge detail-badge--deleted">
-                                <i class="fa-solid fa-trash-can"></i>
-                                Deleted
-                            </span>
-                        </c:if>
+                                <h3>
+                                    <c:out value="${empty staff.fullName ? 'N/A' : staff.fullName}" />
+                                </h3>
 
+                                <div class="staff-profile__email">
+                                    <i class="fa-solid fa-envelope"></i>
+                                    <c:out value="${empty staff.email ? 'N/A' : staff.email}" />
+                                </div>
+
+                                <div class="staff-profile__badges">
+
+                                    <span class="detail-badge detail-badge--role">
+                                        <i class="fa-solid fa-briefcase"></i>
+                                        Staff
+                                    </span>
+
+                                    <c:choose>
+                                        <c:when test="${staff.status}">
+                                            <span class="detail-badge detail-badge--active">
+                                                <i class="fa-solid fa-circle-check"></i>
+                                                Active
+                                            </span>
+                                        </c:when>
+
+                                        <c:otherwise>
+                                            <span class="detail-badge detail-badge--inactive">
+                                                <i class="fa-solid fa-circle-xmark"></i>
+                                                Inactive
+                                            </span>
+                                        </c:otherwise>
+                                    </c:choose>
+
+                                    <c:if test="${staff.deleted}">
+                                        <span class="detail-badge detail-badge--deleted">
+                                            <i class="fa-solid fa-trash-can"></i>
+                                            Deleted
+                                        </span>
+                                    </c:if>
+
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="staff-detail-body">
+
+                            <h3 class="detail-section-title">
+                                <i class="fa-solid fa-address-card"></i>
+                                Account Information
+                            </h3>
+
+                            <div class="staff-detail-grid">
+
+                                <div class="staff-detail-item">
+                                    <div class="staff-detail-label">
+                                        <i class="fa-solid fa-id-badge"></i>
+                                        Staff Code
+                                    </div>
+
+                                    <div class="staff-detail-value">
+                                        <c:out value="${empty staff.staffCode ? 'N/A' : staff.staffCode}" />
+                                    </div>
+                                </div>
+
+                                <div class="staff-detail-item">
+                                    <div class="staff-detail-label">
+                                        <i class="fa-solid fa-briefcase"></i>
+                                        Role
+                                    </div>
+
+                                    <div class="staff-detail-value">
+                                        Staff
+                                    </div>
+                                </div>
+
+                                <div class="staff-detail-item">
+                                    <div class="staff-detail-label">
+                                        <i class="fa-solid fa-envelope"></i>
+                                        Email
+                                    </div>
+
+                                    <div class="staff-detail-value">
+                                        <c:out value="${empty staff.email ? 'N/A' : staff.email}" />
+                                    </div>
+                                </div>
+
+                                <div class="staff-detail-item">
+                                    <div class="staff-detail-label">
+                                        <i class="fa-solid fa-phone"></i>
+                                        Phone
+                                    </div>
+
+                                    <div class="staff-detail-value">
+                                        <c:out value="${empty staff.phone ? 'N/A' : staff.phone}" />
+                                    </div>
+                                </div>
+
+                                <div class="staff-detail-item">
+                                    <div class="staff-detail-label">
+                                        <i class="fa-solid fa-toggle-on"></i>
+                                        Account Status
+                                    </div>
+
+                                    <div class="staff-detail-value">
+                                        <c:choose>
+                                            <c:when test="${staff.status}">
+                                                Active
+                                            </c:when>
+
+                                            <c:otherwise>
+                                                Inactive
+                                            </c:otherwise>
+                                        </c:choose>
+                                    </div>
+                                </div>
+
+                                <div class="staff-detail-item">
+                                    <div class="staff-detail-label">
+                                        <i class="fa-solid fa-trash-can"></i>
+                                        Deleted Status
+                                    </div>
+
+                                    <div class="staff-detail-value">
+                                        <c:choose>
+                                            <c:when test="${staff.deleted}">
+                                                Deleted
+                                            </c:when>
+
+                                            <c:otherwise>
+                                                Not Deleted
+                                            </c:otherwise>
+                                        </c:choose>
+                                    </div>
+                                </div>
+
+                                <div class="staff-detail-item staff-detail-item--full">
+                                    <div class="staff-detail-label">
+                                        <i class="fa-solid fa-location-dot"></i>
+                                        Address
+                                    </div>
+
+                                    <div class="staff-detail-value">
+                                        <c:out value="${empty staff.address ? 'N/A' : staff.address}" />
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+
+                        <div class="staff-detail-footer">
+
+                            <a href="/admin/staff" class="admin-button admin-button--ghost">
+
+                                <i class="fa-solid fa-arrow-left"></i>
+                                Back
+                            </a>
+
+                        </div>
                     </div>
-                </div>
-            </div>
 
-            <div class="staff-detail-body">
+                </section>
+            </main>
 
-                <h3 class="detail-section-title">
-                    <i class="fa-solid fa-address-card"></i>
-                    Account Information
-                </h3>
+        </body>
 
-                <div class="staff-detail-grid">
-
-                    <div class="staff-detail-item">
-                        <div class="staff-detail-label">
-                            <i class="fa-solid fa-id-badge"></i>
-                            Staff Code
-                        </div>
-
-                        <div class="staff-detail-value">
-                            <c:out value="${empty staff.staffCode ? 'N/A' : staff.staffCode}"/>
-                        </div>
-                    </div>
-
-                    <div class="staff-detail-item">
-                        <div class="staff-detail-label">
-                            <i class="fa-solid fa-briefcase"></i>
-                            Role
-                        </div>
-
-                        <div class="staff-detail-value">
-                            Staff
-                        </div>
-                    </div>
-
-                    <div class="staff-detail-item">
-                        <div class="staff-detail-label">
-                            <i class="fa-solid fa-envelope"></i>
-                            Email
-                        </div>
-
-                        <div class="staff-detail-value">
-                            <c:out value="${empty staff.email ? 'N/A' : staff.email}"/>
-                        </div>
-                    </div>
-
-                    <div class="staff-detail-item">
-                        <div class="staff-detail-label">
-                            <i class="fa-solid fa-phone"></i>
-                            Phone
-                        </div>
-
-                        <div class="staff-detail-value">
-                            <c:out value="${empty staff.phone ? 'N/A' : staff.phone}"/>
-                        </div>
-                    </div>
-
-                    <div class="staff-detail-item">
-                        <div class="staff-detail-label">
-                            <i class="fa-solid fa-toggle-on"></i>
-                            Account Status
-                        </div>
-
-                        <div class="staff-detail-value">
-                            <c:choose>
-                                <c:when test="${staff.status}">
-                                    Active
-                                </c:when>
-
-                                <c:otherwise>
-                                    Inactive
-                                </c:otherwise>
-                            </c:choose>
-                        </div>
-                    </div>
-
-                    <div class="staff-detail-item">
-                        <div class="staff-detail-label">
-                            <i class="fa-solid fa-trash-can"></i>
-                            Deleted Status
-                        </div>
-
-                        <div class="staff-detail-value">
-                            <c:choose>
-                                <c:when test="${staff.deleted}">
-                                    Deleted
-                                </c:when>
-
-                                <c:otherwise>
-                                    Not Deleted
-                                </c:otherwise>
-                            </c:choose>
-                        </div>
-                    </div>
-
-                    <div class="staff-detail-item staff-detail-item--full">
-                        <div class="staff-detail-label">
-                            <i class="fa-solid fa-location-dot"></i>
-                            Address
-                        </div>
-
-                        <div class="staff-detail-value">
-                            <c:out value="${empty staff.address ? 'N/A' : staff.address}"/>
-                        </div>
-                    </div>
-
-                </div>
-            </div>
-
-            <div class="staff-detail-footer">
-
-                <a href="/admin/staff"
-                   class="admin-button admin-button--ghost">
-
-                    <i class="fa-solid fa-arrow-left"></i>
-                    Back
-                </a>
-
-            </div>
-        </div>
-
-    </section>
-</main>
-
-</body>
-</html>
+        </html>

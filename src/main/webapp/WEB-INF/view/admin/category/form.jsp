@@ -1,6 +1,3 @@
-<%-- Form tạo/sửa Category — dùng chung cho cả 2 mode (formMode="create"|"edit"),
-     action đổi theo mode: POST /admin/categories (create) hoặc POST /admin/categories/{id} (edit).
-     Layout đồng nhất với Book management (admin-form-card + admin-field + admin-form__actions). --%>
 <%@ page contentType="text/html" pageEncoding="UTF-8" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="form" uri="http://www.springframework.org/tags/form" %>
@@ -43,7 +40,7 @@
                         <i class="fa-solid fa-tag"></i>
                         <c:choose>
                             <c:when test="${formMode=='edit'}">Edit Category</c:when>
-                            <c:otherwise>Create Category</c:otherwise>
+                            <c:otherwise>Create Book Category</c:otherwise>
                         </c:choose>
                     </p>
                     <h2>
@@ -105,4 +102,24 @@
 
                         <%-- Action Buttons --%>
                         <div class="admin-form__actions">
-                            <a href="/admin/categories" class="admin-button admin-button
+                            <a href="/admin/categories" class="admin-button admin-button--ghost">
+                                <i class="fa-solid fa-xmark"></i> Cancel
+                            </a>
+                            <button type="submit" class="admin-button">
+                                <i class="fa-solid fa-floppy-disk"></i>
+                                <c:choose>
+                                    <c:when test="${formMode=='edit'}">Update Category</c:when>
+                                    <c:otherwise>Create Category</c:otherwise>
+                                </c:choose>
+                            </button>
+                        </div>
+
+                    </form:form>
+                </div>
+            </div>
+
+        </section>
+    </main>
+</body>
+
+</html>

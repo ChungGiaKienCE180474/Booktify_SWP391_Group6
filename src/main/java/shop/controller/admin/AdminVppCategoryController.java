@@ -61,7 +61,9 @@ public class AdminVppCategoryController {
                     "VPP category created successfully."
             );
 
-            return "redirect:/admin/vpp/categories";
+            // Category management now lives on the combined Categories page
+        // (Book / Stationery tabs); send admins back to the Stationery tab.
+        return "redirect:/admin/categories?tab=stationery";
 
         } catch (IllegalArgumentException ex) {
             bindingResult.rejectValue("name", "duplicate", ex.getMessage());
@@ -114,7 +116,9 @@ public class AdminVppCategoryController {
                     "VPP category updated successfully."
             );
 
-            return "redirect:/admin/vpp/categories";
+            // Category management now lives on the combined Categories page
+        // (Book / Stationery tabs); send admins back to the Stationery tab.
+        return "redirect:/admin/categories?tab=stationery";
 
         } catch (IllegalArgumentException ex) {
             bindingResult.rejectValue("name", "duplicate", ex.getMessage());
@@ -136,7 +140,9 @@ public class AdminVppCategoryController {
                 "VPP category hidden successfully."
         );
 
-        return "redirect:/admin/vpp/categories";
+        // Category management now lives on the combined Categories page
+        // (Book / Stationery tabs); send admins back to the Stationery tab.
+        return "redirect:/admin/categories?tab=stationery";
     }
 
     @PostMapping("/{id}/restore")
@@ -149,6 +155,8 @@ public class AdminVppCategoryController {
                 "VPP category restored successfully."
         );
 
-        return "redirect:/admin/vpp/categories";
+        // Category management now lives on the combined Categories page
+        // (Book / Stationery tabs); send admins back to the Stationery tab.
+        return "redirect:/admin/categories?tab=stationery";
     }
 }

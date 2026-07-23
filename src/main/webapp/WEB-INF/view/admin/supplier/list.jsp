@@ -221,18 +221,6 @@
                         </a>
                     </div>
 
-                    <c:if test="${not empty successMessage}">
-                        <div class="admin-alert admin-alert--success">
-                            ${successMessage}
-                        </div>
-                    </c:if>
-
-                    <c:if test="${not empty errorMessage}">
-                        <div class="admin-alert admin-alert--danger">
-                            ${errorMessage}
-                        </div>
-                    </c:if>
-
                     <div class="admin-panel" style="padding:14px 22px; margin-bottom:18px;">
                         <form action="${pageContext.request.contextPath}/admin/suppliers" method="get"
                             class="admin-search-form">
@@ -388,53 +376,21 @@
 
                                                         <c:choose>
                                                             <c:when test="${supplier.active}">
-                                                                <form
-                                                                    action="${pageContext.request.contextPath}/admin/suppliers/${supplier.id}/delete"
-                                                                    method="post" class="supplier-action-form"
-                                                                    onsubmit="return confirm('Hide this supplier? You can restore it later.');">
-
-                                                                    <c:if test="${not empty _csrf}">
-                                                                        <input type="hidden"
-                                                                            name="${_csrf.parameterName}"
-                                                                            value="${_csrf.token}" />
-                                                                    </c:if>
-
-                                                                    <input type="hidden" name="q" value="${q}" />
-
-                                                                    <input type="hidden" name="status"
-                                                                        value="${status}" />
-
-                                                                    <button type="submit"
-                                                                        class="supplier-action-button supplier-action-button--danger"
-                                                                        title="Hide supplier">
-                                                                        <i class="fa-solid fa-trash"></i>
-                                                                    </button>
-                                                                </form>
+                                                                <button type="button"
+                                                                    class="supplier-action-button supplier-action-button--danger"
+                                                                    title="Delete supplier"
+                                                                    onclick="openConfirmModal('${pageContext.request.contextPath}/admin/suppliers/${supplier.id}/delete','delete','Are you sure you want to delete this supplier? It will be hidden, not permanently deleted.','<c:out value="${q}"/>','<c:out value="${status}"/>')">
+                                                                    <i class="fa-solid fa-trash"></i>
+                                                                </button>
                                                             </c:when>
 
                                                             <c:otherwise>
-                                                                <form
-                                                                    action="${pageContext.request.contextPath}/admin/suppliers/${supplier.id}/restore"
-                                                                    method="post" class="supplier-action-form"
-                                                                    onsubmit="return confirm('Restore this supplier?');">
-
-                                                                    <c:if test="${not empty _csrf}">
-                                                                        <input type="hidden"
-                                                                            name="${_csrf.parameterName}"
-                                                                            value="${_csrf.token}" />
-                                                                    </c:if>
-
-                                                                    <input type="hidden" name="q" value="${q}" />
-
-                                                                    <input type="hidden" name="status"
-                                                                        value="${status}" />
-
-                                                                    <button type="submit"
-                                                                        class="supplier-action-button supplier-action-button--restore"
-                                                                        title="Restore supplier">
-                                                                        <i class="fa-solid fa-rotate-left"></i>
-                                                                    </button>
-                                                                </form>
+                                                                <button type="button"
+                                                                    class="supplier-action-button supplier-action-button--restore"
+                                                                    title="Restore supplier"
+                                                                    onclick="openConfirmModal('${pageContext.request.contextPath}/admin/suppliers/${supplier.id}/restore','restore','Are you sure you want to restore this supplier?','<c:out value="${q}"/>','<c:out value="${status}"/>')">
+                                                                    <i class="fa-solid fa-rotate-left"></i>
+                                                                </button>
                                                             </c:otherwise>
                                                         </c:choose>
 
@@ -519,7 +475,62 @@
                     </div>
                 </div>
 
+                <%-- Unified Confirm Modal (Delete / Restore) --%>
+                <div id="confirmModal" class="modal-overlay" style="display:none;" onclick="closeConfirmModal()">
+                    <div class="modal-box" style="max-width:420px;" onclick="event.stopPropagation()">
+                        <div class="modal-header">
+                            <h3 id="confirmModalTitle">
+                                <i class="fa-solid fa-circle-exclamation" style="color:#EF4444;"></i>
+                                Confirm Delete
+                            </h3>
+                        </div>
+                        <div class="modal-body" style="display:block;">
+                            <p id="confirmModalMsg" style="margin:0;font-size:.9rem;color:#374151;line-height:1.65;"></p>
+                        </div>
+                        <div class="modal-footer">
+                            <button onclick="closeConfirmModal()" class="admin-button admin-button--ghost">
+                                <i class="fa-solid fa-xmark"></i> Cancel
+                            </button>
+                            <form id="confirmForm" method="post" style="display:inline;">
+                                <c:if test="${not empty _csrf}">
+                                    <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}" />
+                                </c:if>
+                                <input type="hidden" name="q" id="confirmQ" value="" />
+                                <input type="hidden" name="status" id="confirmStatus" value="" />
+                                <button type="submit" id="confirmSubmitBtn" class="admin-button admin-button--danger">
+                                    <i class="fa-solid fa-trash"></i> Delete
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <jsp:include page="/WEB-INF/view/layout/admin/toast.jsp" />
+
                 <script>
+                    function openConfirmModal(action, type, msg, q, status) {
+                        document.getElementById('confirmModalMsg').textContent = msg;
+                        document.getElementById('confirmForm').action = action;
+                        document.getElementById('confirmQ').value = q || '';
+                        document.getElementById('confirmStatus').value = status || '';
+                        var title = document.getElementById('confirmModalTitle');
+                        var btn = document.getElementById('confirmSubmitBtn');
+                        if (type === 'restore') {
+                            title.innerHTML = '<i class="fa-solid fa-rotate-left" style="color:#059669;"></i> Confirm Restore';
+                            btn.className = 'admin-button';
+                            btn.innerHTML = '<i class="fa-solid fa-rotate-left"></i> Restore';
+                        } else {
+                            title.innerHTML = '<i class="fa-solid fa-circle-exclamation" style="color:#EF4444;"></i> Confirm Delete';
+                            btn.className = 'admin-button admin-button--danger';
+                            btn.innerHTML = '<i class="fa-solid fa-trash"></i> Delete';
+                        }
+                        document.getElementById('confirmModal').style.display = 'flex';
+                    }
+
+                    function closeConfirmModal() {
+                        document.getElementById('confirmModal').style.display = 'none';
+                    }
+
                     document.addEventListener('click', function (e) {
                         var btn = e.target.closest('.js-view-supplier');
                         if (!btn) return;

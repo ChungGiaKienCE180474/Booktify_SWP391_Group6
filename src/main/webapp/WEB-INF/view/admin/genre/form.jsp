@@ -119,7 +119,26 @@
                             </div>
                         </c:if>
 
-                        <%-- Action Buttons --%>
+<%-- Action Buttons --%>
                         <div class="admin-form__actions">
                             <a href="/admin/genres" class="admin-button admin-button--ghost">
-                                <i cl
+                                <i class="fa-solid fa-xmark"></i> Cancel
+                            </a>
+                            <button type="submit" class="admin-button">
+                                <i class="fa-solid fa-floppy-disk"></i>
+                                <c:choose>
+                                    <c:when test="${formMode=='edit'}">Update Genre</c:when>
+                                    <c:otherwise>Create Genre</c:otherwise>
+                                </c:choose>
+                            </button>
+                        </div>
+
+                    </form:form>
+                </div>
+            </div>
+
+        </section>
+    </main>
+</body>
+
+</html>

@@ -83,7 +83,7 @@
                     <tbody>
                         <c:forEach items="${genres}" var="genre" varStatus="vs">
                             <tr>
-                                <td style="color:#9CA3AF;font-weight:600;">${vs.index + 1}</td>
+                                <td style="color:#9CA3AF;font-weight:600;">${fromItem + vs.index}</td>
                                 <td>
                                     <div style="font-weight:700;color:#111827;">
                                         <c:out value="${genre.name}"/>
@@ -235,30 +235,9 @@
         </div>
     </div>
 
-    <%-- Toast --%>
-    <div id="toastContainer" class="toast-container"></div>
-    <c:if test="${not empty successMessage}">
-        <div id="toastSuccessMessage" style="display:none;"><c:out value="${successMessage}"/></div>
-    </c:if>
-    <c:if test="${not empty errorMessage}">
-        <div id="toastErrorMessage" style="display:none;"><c:out value="${errorMessage}"/></div>
-    </c:if>
+    <jsp:include page="/WEB-INF/view/layout/admin/toast.jsp" />
 
     <script>
-        function showToast(msg, type) {
-            var tc = document.getElementById('toastContainer');
-            var t = document.createElement('div');
-            t.className = 'toast toast--' + type;
-            t.innerHTML = '<i class="fa-solid ' + (type === 'success' ? 'fa-circle-check' : 'fa-circle-exclamation') + '"></i> ' + msg;
-            tc.appendChild(t);
-            setTimeout(function () { t.classList.add('toast--show'); }, 10);
-            setTimeout(function () { t.classList.remove('toast--show'); setTimeout(function () { t.remove(); }, 320); }, 3500);
-        }
-        var s = document.getElementById('toastSuccessMessage');
-        if (s) showToast(s.textContent.trim(), 'success');
-        var e = document.getElementById('toastErrorMessage');
-        if (e) showToast(e.textContent.trim(), 'error');
-
         function openConfirmModal(action, type, msg) {
             document.getElementById('confirmModalMsg').textContent = msg;
             document.getElementById('confirmForm').action = action;

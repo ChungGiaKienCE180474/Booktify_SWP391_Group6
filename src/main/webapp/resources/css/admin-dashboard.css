@@ -392,6 +392,31 @@ body.admin-shell {
     letter-spacing: -.02em;
 }
 
+/* ── Tabs (e.g. Category Management: Book vs Stationery) ─────── */
+.admin-tabs {
+    display: flex;
+    gap: 6px;
+    border-bottom: 1px solid #E5E7EB;
+    margin-bottom: 20px;
+}
+.admin-tab {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 18px;
+    border: none;
+    background: none;
+    cursor: pointer;
+    font-size: .88rem;
+    font-weight: 700;
+    color: #6B7280;
+    border-bottom: 2px solid transparent;
+    transition: var(--ease);
+}
+.admin-tab:hover { color: var(--text); }
+.admin-tab.active { color: var(--primary); border-bottom-color: var(--primary); }
+.tab-pane.active { display: block; }
+
 /* ── Hero ─────────────────────────────────────────────────────── */
 .admin-hero {
     display: flex;
@@ -1097,6 +1122,12 @@ select.admin-input option { background: var(--white); color: var(--text); }
     background: var(--danger-lt);
     border-color: var(--danger-bd);
     color: var(--danger);
+}
+
+.toast--warning {
+    background: var(--warn-lt);
+    border-color: #FDE68A;
+    color: var(--warn);
 }
 
 /* ══════════════════════════════════════════════════════════════════
