@@ -3,6 +3,7 @@ package shop.controller.client;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import shop.domain.User;
 import shop.repository.UserRepository;
@@ -29,10 +30,20 @@ public class RatingController {
             @RequestParam Long bookId,
             @RequestParam Integer ratingValue,
             @RequestParam String reviewText,
-            Authentication authentication) {
+            Authentication authentication,
+            RedirectAttributes redirectAttributes) {
 
         if (authentication == null) {
             return "redirect:/login";
+        }
+
+        if (ratingValue == null) {
+
+            redirectAttributes.addFlashAttribute(
+                    "ratingError",
+                    "Please select the number of stars.");
+
+            return "redirect:/books/" + bookId;
         }
 
         User user = userRepository
@@ -91,5 +102,83 @@ public class RatingController {
                 user.getId());
 
         return "redirect:/books/" + bookId;
+    }
+
+    // ==============VPP=================
+
+    @PostMapping("/vpp/create")
+    public String createVppRating(
+            @RequestParam("vppItemId") Long vppItemId,
+            @RequestParam("ratingValue") Integer ratingValue,
+            @RequestParam("reviewText") String reviewText,
+            Authentication authentication) {
+
+        if (authentication == null) {
+            return "redirect:/login";
+        }
+
+        User user = userRepository
+                .findByEmail(authentication.getName());
+
+        if (user == null) {
+            return "redirect:/login";
+        }
+        ratingService.createVppRating(
+                vppItemId,
+                user.getId(),
+                ratingValue,
+                reviewText);
+
+        return "redirect:/customer/vpp/" + vppItemId;
+    }
+
+    // UPDATE
+    @PostMapping("/vpp/update")
+    public String updateVppRating(
+            @RequestParam("vppItemId") Long vppItemId,
+            @RequestParam("ratingValue") Integer ratingValue,
+            @RequestParam("reviewText") String reviewText,
+            Authentication authentication) {
+
+        if (authentication == null) {
+            return "redirect:/login";
+        }
+
+        User user = userRepository
+                .findByEmail(authentication.getName());
+
+        if (user == null) {
+            return "redirect:/login";
+        }
+        ratingService.updateVppRating(
+                vppItemId,
+                user.getId(),
+                ratingValue,
+                reviewText);
+
+        return "redirect:/customer/vpp/" + vppItemId;
+    }
+
+    // DELETE
+    @PostMapping("/vpp/delete")
+    public String deleteVppRating(
+            @RequestParam("vppItemId") Long vppItemId,
+            Authentication authentication) {
+
+        if (authentication == null) {
+            return "redirect:/login";
+        }
+
+        User user = userRepository
+                .findByEmail(authentication.getName());
+
+        if (user == null) {
+            return "redirect:/login";
+        }
+        ratingService.deleteVppRating(
+                vppItemId,
+                user.getId());
+
+        return "redirect:/customer/vpp/" + vppItemId;
     }
 }

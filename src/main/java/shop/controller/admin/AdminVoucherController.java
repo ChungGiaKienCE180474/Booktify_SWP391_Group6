@@ -1,7 +1,6 @@
 package shop.controller.admin;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
 
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
@@ -15,6 +14,7 @@ import jakarta.validation.Valid;
 import shop.domain.Voucher;
 import shop.domain.dto.VoucherDTO;
 import shop.service.VoucherService;
+import java.util.List;
 
 @Controller
 @RequestMapping("/admin/vouchers")
@@ -32,9 +32,16 @@ public class AdminVoucherController {
     // =====================
 
     @GetMapping
-    public String list(Model model) {
+    public String list(
+            @RequestParam(required = false) String keyword,
+            @RequestParam(required = false) String status,
+            Model model) {
 
-        model.addAttribute("vouchers", voucherService.getAllVouchers());
+        List<Voucher> vouchers = voucherService.getFilteredVouchers(keyword, status);
+
+        model.addAttribute("vouchers", vouchers);
+        model.addAttribute("keyword", keyword);
+        model.addAttribute("status", status);
 
         return "admin/voucher/list";
     }
@@ -198,17 +205,15 @@ public class AdminVoucherController {
                     "Percentage discount cannot exceed 100.");
         }
 
-        // Only check when CREATE
-        if (id == null &&
-                voucherDTO.getEndDate() != null &&
-                voucherDTO.getEndDate()
-                        .isBefore(LocalDate.now())) {
+        if (voucherDTO.getEndDate() != null
+                && voucherDTO.getEndDate().isBefore(java.time.LocalDate.now())) {
 
             bindingResult.rejectValue(
                     "endDate",
                     "voucher.expired",
                     "End date cannot be in the past.");
         }
+
     }
 
     // =====================

@@ -15,8 +15,12 @@ public class Rating {
     private Integer ratingId;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "book_id", nullable = false)
+    @JoinColumn(name = "book_id")
     private Book book;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "vpp_item_id")
+    private VppItem vppItem;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "customer_id", nullable = false)
@@ -77,6 +81,14 @@ public class Rating {
 
     public User getCustomer() {
         return customer;
+    }
+
+    public VppItem getVppItem() {
+        return vppItem;
+    }
+
+    public void setVppItem(VppItem vppItem) {
+        this.vppItem = vppItem;
     }
 
     public void setCustomer(User customer) {

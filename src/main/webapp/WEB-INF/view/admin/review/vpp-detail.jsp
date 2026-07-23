@@ -51,8 +51,8 @@
 
                         <c:choose>
 
-                            <c:when test="${not empty book.imageUrl}">
-                                <img class="book-cover" src="<c:out value='${book.imageUrl}'/>" alt="Book">
+                            <c:when test="${not empty item.imagePath}"> <img class="book-cover"
+                                    src="<c:out value='${item.imagePath}'/>" alt="Book">
                             </c:when>
 
                             <c:otherwise>
@@ -68,28 +68,51 @@
                         <div>
 
                             <div class="book-title">
-                                <c:out value="${book.title}" />
+                                <c:out value="${item.name}" />
                             </div>
 
-                            <div class="book-author">
-                                Author:
-                                <c:out value="${book.author}" />
-                            </div>
+                            <c:if test="${not empty item.supplier}">
+                                <div class="book-author">
+                                    Supplier:
+                                    <c:out value="${item.supplier}" />
+                                </div>
+                            </c:if>
 
                             <div class="review-summary">
 
-                                <span class="stars">
-                                    <c:forEach begin="1" end="5" var="i">
-                                        <c:choose>
-                                            <c:when test="${i <= averageRating}">★</c:when>
-                                            <c:otherwise>☆</c:otherwise>
-                                        </c:choose>
-                                    </c:forEach>
-                                </span>
+                                <c:choose>
 
-                                <span class="review-count">
-                                    ${averageRating} / 5 - ${reviewCount} Reviews
-                                </span>
+                                    <c:when test="${reviewCount > 0}">
+
+                                        <span class="stars">
+                                            <c:forEach begin="1" end="5" var="i">
+                                                <c:choose>
+                                                    <c:when test="${i <= averageRating}">
+                                                        ★
+                                                    </c:when>
+                                                    <c:otherwise>
+                                                        ☆
+                                                    </c:otherwise>
+                                                </c:choose>
+                                            </c:forEach>
+                                        </span>
+
+                                        <span class="review-count">
+                                            ${averageRating} / 5 - ${reviewCount} Reviews
+                                        </span>
+
+                                    </c:when>
+
+
+                                    <c:otherwise>
+
+                                        <span class="review-count">
+                                            No ratings
+                                        </span>
+
+                                    </c:otherwise>
+
+                                </c:choose>
 
                             </div>
 
@@ -192,13 +215,12 @@
                                                     <c:when test="${rating.status == 'ACTIVE'}">
 
                                                         <form method="post"
-                                                            action="/admin/reviews/book/${rating.ratingId}/hide">
+                                                            action="/admin/reviews/vpp/${rating.ratingId}/hide">
 
                                                             <input type="hidden" name="${_csrf.parameterName}"
                                                                 value="${_csrf.token}" />
 
-                                                            <input type="hidden" name="bookId" value="${book.id}" />
-
+                                                            <input type="hidden" name="vppItemId" value="${item.id}" />
                                                             <button type="submit" class="icon-link icon-link--hide"
                                                                 title="Hide Review">
 
@@ -212,16 +234,15 @@
 
 
                                                     <%-- Review Hidden nhưng do ADMIN hide thì cho Visible lại --%>
-                                                        <c:when test="${rating.deletedBy == 'ADMIN'}">
-
+                                                        <c:when test="${rating.status == 'HIDDEN'}">
                                                             <form method="post"
-                                                                action="/admin/reviews/book/${rating.ratingId}/visible">
+                                                                action="/admin/reviews/vpp/${rating.ratingId}/visible">
 
                                                                 <input type="hidden" name="${_csrf.parameterName}"
                                                                     value="${_csrf.token}" />
 
-                                                                <input type="hidden" name="bookId" value="${book.id}" />
-
+                                                                <input type="hidden" name="vppItemId"
+                                                                    value="${item.id}" />
                                                                 <button type="submit"
                                                                     class="icon-link icon-link--visible"
                                                                     title="Visible Review">

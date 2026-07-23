@@ -123,9 +123,10 @@
                                                     class="catbar-link">
                                                     <i class="fa-solid fa-pen-ruler"></i> Stationery
                                                 </a>
-                                                <a href="${pageContext.request.contextPath}/contact" class="catbar-link">
-    <i class="fa-solid fa-headset"></i> Contact Support
-</a>
+                                                <a href="${pageContext.request.contextPath}/contact"
+                                                    class="catbar-link">
+                                                    <i class="fa-solid fa-headset"></i> Contact Support
+                                                </a>
 
                                 </div>
                             </nav>

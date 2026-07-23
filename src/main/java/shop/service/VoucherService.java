@@ -65,6 +65,47 @@ public class VoucherService {
                 return vouchers;
         }
 
+        public List<Voucher> getFilteredVouchers(
+                        String keyword,
+                        String status) {
+
+                List<Voucher> vouchers = getAllVouchers();
+
+                return vouchers.stream()
+                                .filter(voucher -> {
+
+                                        boolean matchKeyword = true;
+                                        boolean matchStatus = true;
+
+                                        // SEARCH
+                                        if (keyword != null && !keyword.isBlank()) {
+
+                                                String search = keyword.trim().toLowerCase();
+
+                                                matchKeyword = voucher.getVoucherName()
+                                                                .toLowerCase()
+                                                                .contains(search)
+
+                                                                ||
+
+                                                                voucher.getVoucherCode()
+                                                                                .toLowerCase()
+                                                                                .contains(search);
+                                        }
+
+                                        // STATUS
+                                        if (status != null && !status.isBlank()) {
+
+                                                matchStatus = voucher.getStatus()
+                                                                .equals(status);
+                                        }
+
+                                        return matchKeyword && matchStatus;
+
+                                })
+                                .collect(Collectors.toList());
+        }
+
         // =====================
         // GET ACTIVE VOUCHERS FOR CUSTOMER CART
         // =====================
@@ -200,6 +241,13 @@ public class VoucherService {
                                 && subtotal.compareTo(voucher.getMinOrderAmount()) < 0) {
                         throw new IllegalArgumentException(
                                         "Your order has not reached the minimum value required to use the voucher.");
+                }
+
+                if (voucher.getMaxOrderAmount() != null
+                                && subtotal.compareTo(voucher.getMaxOrderAmount()) > 0) {
+
+                        throw new IllegalArgumentException(
+                                        "Your order exceeds the maximum value required to use the voucher.");
                 }
 
                 BigDecimal discount = BigDecimal.ZERO;

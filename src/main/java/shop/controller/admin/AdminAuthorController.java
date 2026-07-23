@@ -28,9 +28,18 @@ public class AdminAuthorController {
 
     // ================= LIST =================
     @GetMapping
-    public String list(Model model) {
-        // Lấy toàn bộ author từ DB thông qua service
-        model.addAttribute("authors", authorService.getAllAuthors());
+    public String list(
+            @RequestParam(required = false) String keyword,
+            @RequestParam(required = false) String status,
+            Model model) {
+
+        model.addAttribute(
+                "authors",
+                authorService.searchAuthors(keyword, status));
+
+        model.addAttribute("keyword", keyword);
+        model.addAttribute("status", status);
+
         return "admin/author/list";
     }
 

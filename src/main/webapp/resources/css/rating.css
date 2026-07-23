@@ -94,7 +94,8 @@
 }
 
 .rating-stars-select input {
-    display: none;
+    position: absolute;
+    opacity: 0;
 }
 
 .rating-stars-select label {
@@ -361,4 +362,21 @@
 
 .icon-link--visible:hover {
     background: #D1FAE5;
+}
+
+.rating-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 5px;
+    margin-bottom: 8px;
+}
+
+.vpp-alert {
+    display: inline-block;
+    width: fit-content;
+}
+
+.vpp-rating-section {
+    max-width: 1300px;
+    width: 100%;
 }
