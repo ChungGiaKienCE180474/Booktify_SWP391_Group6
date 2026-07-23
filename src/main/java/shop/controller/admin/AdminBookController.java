@@ -22,6 +22,8 @@ import jakarta.validation.Valid;
 import shop.domain.Book;
 import shop.domain.Category;
 import shop.domain.Genre;
+import shop.domain.Supplier;
+import shop.repository.SupplierRepository;
 import shop.service.AuthorService;
 import shop.service.BookService;
 import shop.service.CategoryService;
@@ -41,17 +43,20 @@ public class AdminBookController {
     private final GenreService genreService;
     private final FileStorageService fileStorageService;
     private final AuthorService authorService;
+    private final SupplierRepository supplierRepository;
 
     public AdminBookController(BookService bookService,
             CategoryService categoryService,
             GenreService genreService,
             FileStorageService fileStorageService,
-            AuthorService authorService) {
+            AuthorService authorService,
+            SupplierRepository supplierRepository) {
         this.bookService = bookService;
         this.categoryService = categoryService;
         this.genreService = genreService;
         this.fileStorageService = fileStorageService;
         this.authorService = authorService;
+        this.supplierRepository = supplierRepository;
     }
 
     private static final int PAGE_SIZE = 10;
@@ -104,6 +109,7 @@ public class AdminBookController {
         model.addAttribute("categories", categoryService.getAllCategories());
         model.addAttribute("authors", authorService.getAllAuthors());
         model.addAttribute("genres", genreService.getActiveGenres());
+        model.addAttribute("suppliers", supplierRepository.findAllByOrderByActiveDescIdDesc());
         model.addAttribute("selectedGenreIds", List.of());
         model.addAttribute("formMode", "create");
         return "admin/book/form";
@@ -113,6 +119,7 @@ public class AdminBookController {
     public String create(@ModelAttribute("book") @Valid Book book, BindingResult bindingResult,
             @RequestParam(name = "categoryId", required = false) Long categoryId,
             @RequestParam(name = "genreIds", required = false) List<Long> genreIds,
+            @RequestParam(name = "supplierId", required = false) Long supplierId,
             @RequestParam(name = "imageFile", required = false) MultipartFile imageFile,
             Model model, RedirectAttributes redirectAttributes) {
 
@@ -147,6 +154,7 @@ public class AdminBookController {
             model.addAttribute("categories", categoryService.getAllCategories());
             model.addAttribute("authors", authorService.getAllAuthors());
             model.addAttribute("genres", genreService.getActiveGenres());
+            model.addAttribute("suppliers", supplierRepository.findAllByOrderByActiveDescIdDesc());
             model.addAttribute("selectedGenreIds", distinctGenreIds);
             model.addAttribute("formMode", "create");
             return "admin/book/form";
@@ -160,6 +168,7 @@ public class AdminBookController {
                 model.addAttribute("categories", categoryService.getAllCategories());
                 model.addAttribute("authors", authorService.getAllAuthors());
                 model.addAttribute("genres", genreService.getActiveGenres());
+                model.addAttribute("suppliers", supplierRepository.findAllByOrderByActiveDescIdDesc());
                 model.addAttribute("selectedGenreIds", distinctGenreIds);
                 model.addAttribute("formMode", "create");
                 return "admin/book/form";
@@ -168,6 +177,7 @@ public class AdminBookController {
 
         book.setCategory(selectedCategory);
         book.setGenres(new LinkedHashSet<>(validGenres));
+        book.setSupplier(supplierId == null ? null : supplierRepository.findById(supplierId).orElse(null));
         if (!StringUtils.hasText(book.getIsbn()))
             book.setIsbn(null);
         if (!StringUtils.hasText(book.getAuthor()))
@@ -186,6 +196,7 @@ public class AdminBookController {
         model.addAttribute("categories", categoryService.getAllCategories());
         model.addAttribute("authors", authorService.getAllAuthors());
         model.addAttribute("genres", genreService.getActiveGenres());
+        model.addAttribute("suppliers", supplierRepository.findAllByOrderByActiveDescIdDesc());
         model.addAttribute("selectedGenreIds",
                 book.getGenres().stream().map(Genre::getId).toList());
         model.addAttribute("formMode", "edit");
@@ -197,6 +208,7 @@ public class AdminBookController {
             @ModelAttribute("book") @Valid Book book, BindingResult bindingResult,
             @RequestParam(name = "categoryId", required = false) Long categoryId,
             @RequestParam(name = "genreIds", required = false) List<Long> genreIds,
+            @RequestParam(name = "supplierId", required = false) Long supplierId,
             @RequestParam(name = "imageFile", required = false) MultipartFile imageFile,
             Model model, RedirectAttributes redirectAttributes) {
 
@@ -230,6 +242,7 @@ public class AdminBookController {
             model.addAttribute("categories", categoryService.getAllCategories());
             model.addAttribute("authors", authorService.getAllAuthors());
             model.addAttribute("genres", genreService.getActiveGenres());
+            model.addAttribute("suppliers", supplierRepository.findAllByOrderByActiveDescIdDesc());
             model.addAttribute("selectedGenreIds", distinctGenreIds);
             model.addAttribute("formMode", "edit");
             return "admin/book/form";
@@ -244,6 +257,7 @@ public class AdminBookController {
         // active is intentionally left untouched — toggling it is only done
         // through the Remove/Restore actions on the list page.
         existing.setCategory(selectedCategory);
+        existing.setSupplier(supplierId == null ? null : supplierRepository.findById(supplierId).orElse(null));
         // Replacing the whole Set lets Hibernate diff old vs new genres itself
         // and rewrite book_genres accordingly, instead of us doing it by hand.
         existing.setGenres(new LinkedHashSet<>(validGenres));
@@ -259,6 +273,7 @@ public class AdminBookController {
                 model.addAttribute("categories", categoryService.getAllCategories());
                 model.addAttribute("authors", authorService.getAllAuthors());
                 model.addAttribute("genres", genreService.getActiveGenres());
+                model.addAttribute("suppliers", supplierRepository.findAllByOrderByActiveDescIdDesc());
                 model.addAttribute("selectedGenreIds", distinctGenreIds);
                 model.addAttribute("formMode", "edit");
                 return "admin/book/form";

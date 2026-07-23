@@ -640,53 +640,51 @@
                                                         <i class="fa-solid fa-cart-shopping"></i>
                                                         Add to Cart
                                                     </button>
-
-
-
                                                 </div>
-
                                             </form>
-
-                                            <div class="vpp-meta-list">
-
-                                                <div class="vpp-meta-item">
-                                                    <i class="fa-solid fa-layer-group"></i>
-                                                    <c:out value="${item.categoryName}" />
-                                                </div>
-
-                                                <div class="vpp-meta-item">
-                                                    <i class="fa-solid fa-boxes-stacked"></i>
-                                                    Stock:
-                                                    <c:out value="${item.stockQuantity}" />
-                                                </div>
-
-                                                <c:if test="${not empty item.supplier}">
-                                                    <div class="vpp-meta-item">
-                                                        <i class="fa-solid fa-truck-field"></i>
-                                                        <c:out value="${item.supplier}" />
-                                                    </div>
-                                                </c:if>
-
+                                        </c:when>
+                                        <c:otherwise>
+                                            <div class="vpp-alert vpp-alert-error" style="margin-bottom:22px;">
+                                                <i class="fa-solid fa-circle-info"></i>
+                                                Please <a href="${pageContext.request.contextPath}/login">log in</a> to purchase this item.
                                             </div>
+                                        </c:otherwise>
+                                    </c:choose>
+                                </c:when>
+                            </c:choose>
 
-                                            <div class="vpp-description-section">
-
-                                                <h2 class="vpp-section-title">
-                                                    Product Description
-                                                </h2>
-
-                                                <div class="vpp-description">
-                                                    <c:choose>
-                                                        <c:when test="${not empty item.description}">
-                                                            <c:out value="${item.description}" />
-                                                        </c:when>
-                                                        <c:otherwise>
-                                                            No description available.
-                                                        </c:otherwise>
-                                                    </c:choose>
-                                                </div>
-
-                                            </div>
+                            <div class="vpp-meta-list">
+                                <div class="vpp-meta-item">
+                                    <i class="fa-solid fa-layer-group"></i>
+                                    <c:out value="${item.categoryName}" />
+                                </div>
+                                <div class="vpp-meta-item">
+                                    <i class="fa-solid fa-boxes-stacked"></i>
+                                    Stock:
+                                    <c:out value="${item.stockQuantity}" />
+                                </div>
+                                <c:if test="${not empty item.supplier}">
+                                    <div class="vpp-meta-item">
+                                        <i class="fa-solid fa-truck-field"></i>
+                                        <c:out value="${item.supplier}" />
+                                    </div>
+                                </c:if>
+                            </div>
+                            <div class="vpp-description-section">
+                                <h2 class="vpp-section-title">
+                                    Product Description
+                                </h2>
+                                <div class="vpp-description">
+                                    <c:choose>
+                                        <c:when test="${not empty item.description}">
+                                            <c:out value="${item.description}" />
+                                        </c:when>
+                                        <c:otherwise>
+                                            No description available.
+                                        </c:otherwise>
+                                    </c:choose>
+                                </div>
+                            </div>
 
                         </div>
 

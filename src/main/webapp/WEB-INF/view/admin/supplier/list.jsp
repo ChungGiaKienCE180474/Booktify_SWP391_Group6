@@ -378,7 +378,7 @@
                                                             <c:when test="${supplier.active}">
                                                                 <button type="button"
                                                                     class="supplier-action-button supplier-action-button--danger"
-                                                                    title="Hide supplier"
+                                                                    title="Delete supplier"
                                                                     onclick="openConfirmModal('${pageContext.request.contextPath}/admin/suppliers/${supplier.id}/delete','delete','Are you sure you want to delete this supplier? It will be hidden, not permanently deleted.','<c:out value="${q}"/>','<c:out value="${status}"/>')">
                                                                     <i class="fa-solid fa-trash"></i>
                                                                 </button>

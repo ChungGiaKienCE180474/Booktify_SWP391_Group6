@@ -308,6 +308,54 @@
                                                         </div>
                                                     </div>
 
+                                                    <%-- Supplier --%>
+                                                        <div class="admin-form-grid">
+                                                            <div class="admin-field">
+                                                                <label>SUPPLIER
+                                                                    <span
+                                                                        style="color:#9CA3AF;font-size:.78rem;font-weight:500;">—
+                                                                        Optional</span>
+                                                                </label>
+                                                                <c:choose>
+                                                                    <c:when test="${empty suppliers}">
+                                                                        <div class="admin-input"
+                                                                            style="display:flex;align-items:center;color:#9CA3AF;cursor:not-allowed;height:44px;">
+                                                                            <i class="fa-solid fa-truck"
+                                                                                style="margin-right:8px;font-size:.8rem;"></i>
+                                                                            No suppliers available
+                                                                        </div>
+                                                                        <span
+                                                                            style="font-size:.75rem;color:#9CA3AF;margin-top:4px;display:flex;align-items:center;gap:4px;">
+                                                                            <i class="fa-solid fa-circle-info"></i>
+                                                                            No suppliers yet — you can still save this
+                                                                            book, or
+                                                                            <a href="/admin/suppliers/create"
+                                                                                target="_blank"
+                                                                                style="color:#006B5E;text-decoration:underline;">add
+                                                                                a supplier</a> first.
+                                                                        </span>
+                                                                    </c:when>
+                                                                    <c:otherwise>
+                                                                        <select name="supplierId" id="supplierId"
+                                                                            class="admin-input">
+                                                                            <option value="">— No supplier —</option>
+                                                                            <c:forEach items="${suppliers}"
+                                                                                var="sup">
+                                                                                <option value="${sup.id}" <c:if
+                                                                                    test="${not empty book.supplier and book.supplier.id == sup.id}">
+                                                                                    selected</c:if>>
+                                                                                    <c:out
+                                                                                        value="${sup.supplierName}" />
+                                                                                    <c:if test="${not sup.active}">
+                                                                                        (Hidden)</c:if>
+                                                                                </option>
+                                                                            </c:forEach>
+                                                                        </select>
+                                                                    </c:otherwise>
+                                                                </c:choose>
+                                                            </div>
+                                                        </div>
+
                                                     <%-- Pricing & Stock --%>
                                                         <div class="admin-form-grid">
                                                             <div class="admin-field">

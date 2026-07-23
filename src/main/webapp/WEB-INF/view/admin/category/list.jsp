@@ -253,8 +253,8 @@
                                             <c:when test="${vcat.active}">
                                                 <form method="post" action="/admin/vpp/categories/${vcat.id}/hide" style="display:inline;">
                                                     <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}" />
-                                                    <button type="submit" class="icon-link" title="Hide">
-                                                        <i class="fa-solid fa-eye-slash"></i>
+                                                    <button type="submit" class="icon-link" title="Delete">
+                                                        <i class="fa-solid fa-trash"></i>
                                                     </button>
                                                 </form>
                                             </c:when>

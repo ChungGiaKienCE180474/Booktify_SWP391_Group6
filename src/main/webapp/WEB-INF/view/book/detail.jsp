@@ -414,6 +414,13 @@
                 </c:choose>
             </p>
 
+            <c:if test="${not empty book.supplier}">
+                <p class="detail-info__author">
+                    Supplier:
+                    <strong>${book.supplier.supplierName}</strong>
+                </p>
+            </c:if>
+
             <div class="detail-price-row">
                 <c:choose>
                     <c:when test="${not empty bestPromotion}">

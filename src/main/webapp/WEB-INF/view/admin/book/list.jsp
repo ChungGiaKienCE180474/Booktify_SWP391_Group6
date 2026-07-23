@@ -241,6 +241,7 @@
                                             data-author="<c:out value='${book.author}'/>"
                                             data-isbn="<c:out value='${book.isbn}'/>"
                                             data-category="<c:out value='${not empty book.category ? book.category.name : &quot;&quot;}'/>"
+                                            data-supplier="<c:out value='${not empty book.supplier ? book.supplier.supplierName : &quot;&quot;}'/>"
                                             data-genre="<c:out value='${book.genreNames}'/>"
                                             data-price="<c:out value='${book.priceFormatted}'/>"
                                             data-stock="${book.stockQuantity}"
@@ -365,6 +366,7 @@
                         <div class="modal-row"><span class="modal-label">Author</span><span id="mBAuthor" class="modal-value"></span></div>
                         <div class="modal-row"><span class="modal-label">ISBN</span><span id="mBIsbn" class="modal-value"></span></div>
                         <div class="modal-row"><span class="modal-label">Category</span><span id="mBCategory" class="modal-value"></span></div>
+                        <div class="modal-row"><span class="modal-label">Supplier</span><span id="mBSupplier" class="modal-value"></span></div>
                         <div class="modal-row"><span class="modal-label">Genre</span><span id="mBGenre" class="modal-value"></span></div>
                         <div class="modal-row"><span class="modal-label">Price</span><span id="mBPrice" class="modal-value"></span></div>
                         <div class="modal-row"><span class="modal-label">Stock</span><span id="mBStock" class="modal-value"></span></div>
@@ -424,6 +426,7 @@
             document.getElementById('mBAuthor').textContent   = d.author   || '—';
             document.getElementById('mBIsbn').textContent     = d.isbn     || '—';
             document.getElementById('mBCategory').textContent = d.category || '—';
+            document.getElementById('mBSupplier').textContent = d.supplier || '—';
             document.getElementById('mBGenre').textContent    = d.genre    || '—';
             document.getElementById('mBPrice').textContent    = (d.price   || '0') + ' ₫';
             document.getElementById('mBStock').textContent    = d.stock    || '0';
