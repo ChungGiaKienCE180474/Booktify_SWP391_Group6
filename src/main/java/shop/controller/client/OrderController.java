@@ -15,6 +15,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import jakarta.validation.Valid;
 import shop.domain.CheckoutForm;
+import shop.domain.OrderStatus;
 import shop.domain.PaymentMethod;
 import shop.domain.User;
 import shop.domain.dto.CartDTO;
@@ -128,6 +129,48 @@ public class OrderController {
                         Authentication authentication,
                         @ModelAttribute("checkoutForm") CheckoutForm checkoutForm,
                         Model model) {
+        if (bindingResult.hasErrors()) {
+            BigDecimal discount = BigDecimal.ZERO;
+
+            if (checkoutForm.getVoucherCode() != null
+                    && !checkoutForm.getVoucherCode().isBlank()) {
+                discount = voucherService.calculateDiscount(
+                        checkoutForm.getVoucherCode(),
+                        refreshedCart.getTotalAmount());
+            }
+
+            populateCheckoutModel(
+                    model,
+                    cart,
+                    refreshedCart.getTotalAmount(),
+                    discount);
+            return "order/checkout";
+        }
+
+        try {
+            var order = orderService.createOrderFromCart(user.getId(), checkoutForm);
+            redirectAttributes.addFlashAttribute("successMessage",
+                    "Order placed successfully! Order code: " + order.getOrderCode());
+            return "redirect:/orders/" + order.getId();
+        } catch (IllegalArgumentException ex) {
+            BigDecimal discount = BigDecimal.ZERO;
+
+            if (checkoutForm.getVoucherCode() != null
+                    && !checkoutForm.getVoucherCode().isBlank()) {
+
+                discount = voucherService.calculateDiscount(
+                        checkoutForm.getVoucherCode(),
+                        refreshedCart.getTotalAmount());
+            }
+            populateCheckoutModel(
+                    model,
+                    cart,
+                    refreshedCart.getTotalAmount(),
+                    discount);
+            model.addAttribute("errorMessage", ex.getMessage());
+            return "order/checkout";
+        }
+    }
 
                 User user = getCurrentUser(authentication);
                 CartRefreshResult refreshResult = cartService.refreshCartResult(user.getId());
@@ -140,6 +183,7 @@ public class OrderController {
                         BigDecimal discount = voucherService.calculateDiscount(
                                         checkoutForm.getVoucherCode(),
                                         refreshResult.getCart().getTotalAmount());
+       
 
                         BigDecimal total = refreshResult.getCart()
                                         .getTotalAmount()
@@ -273,9 +317,53 @@ public class OrderController {
                                                 subtotal,
                                                 discountAmount,
                                                 shippingFee));
-        }
+        
+        return "order/checkout";
+    }
 
-        private User getCurrentUser(Authentication authentication) {
+   
+
+    @PostMapping("/{id}/cancel")
+    public String cancelOrder(
+            Authentication authentication,
+            @PathVariable Long id,
+            RedirectAttributes redirectAttributes) {
+
+        User user = getCurrentUser(authentication);
+        try {
+            orderService.cancelOrderForUser(user.getId(), id);
+            redirectAttributes.addFlashAttribute("successMessage", "Order cancelled successfully.");
+        } catch (IllegalArgumentException ex) {
+            redirectAttributes.addFlashAttribute("errorMessage", ex.getMessage());
+        }
+        return "redirect:/orders/" + id;
+    }
+
+    private void populateCheckoutModel(
+            Model model,
+            CartDTO cart,
+            BigDecimal subtotal,
+            BigDecimal discountAmount) {
+
+        model.addAttribute("cart", cart);
+
+        model.addAttribute(
+                "paymentLabel",
+                PaymentMethod.COD.getLabel());
+
+        model.addAttribute(
+                "discountAmountFormatted",
+                orderService.formatMoney(discountAmount));
+
+        model.addAttribute(
+                "checkoutTotalFormatted",
+                orderService.getCheckoutTotalFormatted(
+                        subtotal,
+                        discountAmount));
+    }
+
+    private User getCurrentUser(Authentication authentication) {
+       
                 if (authentication == null || !authentication.isAuthenticated()) {
                         throw new IllegalStateException("You need to log in to place an order.");
                 }

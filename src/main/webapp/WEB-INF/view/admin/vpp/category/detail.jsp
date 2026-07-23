@@ -40,7 +40,7 @@
 
             <div style="display:flex; gap:10px; flex-wrap:wrap;">
 
-                <a href="${pageContext.request.contextPath}/admin/vpp/categories"
+                <a href="${pageContext.request.contextPath}/admin/categories?tab=stationery"
                    class="admin-button admin-button--ghost">
                     <i class="fa-solid fa-arrow-left"></i>
                     Back
@@ -97,14 +97,7 @@
                     </strong>
                 </div>
 
-                <div style="background:#F9FAFB; border:1px solid #E5E7EB; border-radius:14px; padding:14px;">
-                    <span style="display:block; color:#6B7280; font-size:.82rem; font-weight:700; margin-bottom:5px;">
-                        Products
-                    </span>
-                    <strong>${category.itemCount}</strong>
-                </div>
-
-                <div style="grid-column:1 / -1; background:#F9FAFB; border:1px solid #E5E7EB; border-radius:14px; padding:14px;">
+<div style="grid-column:1 / -1; background:#F9FAFB; border:1px solid #E5E7EB; border-radius:14px; padding:14px;">
                     <span style="display:block; color:#6B7280; font-size:.82rem; font-weight:700; margin-bottom:5px;">
                         Description
                     </span>

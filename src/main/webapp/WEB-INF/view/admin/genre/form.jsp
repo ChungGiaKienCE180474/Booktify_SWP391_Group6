@@ -119,7 +119,7 @@
                             </div>
                         </c:if>
 
-                        <%-- Action Buttons --%>
+<%-- Action Buttons --%>
                         <div class="admin-form__actions">
                             <a href="/admin/genres" class="admin-button admin-button--ghost">
                                 <i class="fa-solid fa-xmark"></i> Cancel

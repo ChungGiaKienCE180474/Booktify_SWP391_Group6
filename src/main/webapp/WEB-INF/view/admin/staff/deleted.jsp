@@ -125,13 +125,6 @@
                    value="${keyword}"
                    placeholder="Search deleted staff..."/>
 
-            <select name="staffRole">
-                <option value="all" ${staffRole == 'all' ? 'selected' : ''}>All Roles</option>
-                <option value="Sales Staff" ${staffRole == 'Sales Staff' ? 'selected' : ''}>Sales Staff</option>
-                <option value="Warehouse Staff" ${staffRole == 'Warehouse Staff' ? 'selected' : ''}>Warehouse Staff</option>
-                <option value="Customer Support" ${staffRole == 'Customer Support' ? 'selected' : ''}>Customer Support</option>
-            </select>
-
             <button type="submit" class="admin-button">
                 <i class="fa-solid fa-filter"></i>
                 Filter
@@ -169,9 +162,7 @@
                                 <td>${staff.email}</td>
                                 <td><strong>${staff.fullName}</strong></td>
                                 <td>
-                                    <span class="role-pill">
-                                        ${empty staff.staffRole ? 'N/A' : staff.staffRole}
-                                    </span>
+                                    <span class="role-pill">Staff</span>
                                 </td>
                                 <td>${empty staff.phone ? 'N/A' : staff.phone}</td>
                                 <td>${empty staff.address ? 'N/A' : staff.address}</td>
@@ -195,5 +186,8 @@
         </div>
     </section>
 </main>
+
+<jsp:include page="/WEB-INF/view/layout/admin/toast.jsp" />
+
 </body>
 </html>

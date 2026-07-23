@@ -4,7 +4,7 @@
         <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 
             <!DOCTYPE html>
-            <html lang="vi">
+            <html lang="en">
 
             <head>
                 <meta charset="UTF-8" />
@@ -532,20 +532,6 @@
 
                 <main class="vpp-detail-page">
 
-                    <c:if test="${not empty successMessage}">
-                        <div class="vpp-alert vpp-alert-success">
-                            <i class="fa-solid fa-circle-check"></i>
-                            <c:out value="${successMessage}" />
-                        </div>
-                    </c:if>
-
-                    <c:if test="${not empty errorMessage}">
-                        <div class="vpp-alert vpp-alert-error">
-                            <i class="fa-solid fa-circle-xmark"></i>
-                            <c:out value="${errorMessage}" />
-                        </div>
-                    </c:if>
-
                     <div class="vpp-breadcrumb">
                         <a href="${pageContext.request.contextPath}/">Home</a>
                         <span>›</span>
@@ -564,7 +550,7 @@
                                 <div class="vpp-image-box">
                                     <c:choose>
                                         <c:when test="${not empty item.imagePath}">
-                                            <img src="${pageContext.request.contextPath}${item.imagePath}"
+                                            <img src="${pageContext.request.contextPath}${item.imagePath}?v=${item.updatedAt}"
                                                 alt="${item.name}">
                                         </c:when>
 
@@ -612,7 +598,7 @@
 
                                 <div class="vpp-price">
                                     <fmt:formatNumber value="${item.price}" type="number" groupingUsed="true" />
-                                    đ
+                                    VND
                                 </div>
 
                                 <c:choose>
@@ -643,9 +629,10 @@
                                                     value="${_csrf.token}" />
                                                 <input type="hidden" name="vppItemId" value="${item.id}" />
                                                 <input type="hidden" name="redirect" value="/customer/vpp/${item.id}" />
-
                                                 <div class="vpp-purchase-row">
-                                                    <label for="quantity" class="vpp-qty-label">Số lượng</label>
+                                                    <label for="quantity" class="vpp-qty-label">
+                                                        Quantity
+                                                    </label>
                                                     <input id="quantity" type="number" name="quantity"
                                                         class="vpp-quantity-input" min="1" max="${item.stockQuantity}"
                                                         value="1" required />
@@ -670,50 +657,39 @@
                                         </c:otherwise>
                                     </c:choose>
                                 </c:when>
-                                <c:otherwise>
-                                    <div class="vpp-purchase-row">
-                                        <button type="button" class="vpp-add-cart-btn" disabled>
-                                            <i class="fa-solid fa-cart-shopping"></i>
-                                            Hết hàng
-                                        </button>
-                                    </div>
-                                </c:otherwise>
                             </c:choose>
 
                             <div class="vpp-meta-list">
-
                                 <div class="vpp-meta-item">
                                     <i class="fa-solid fa-layer-group"></i>
                                     <c:out value="${item.categoryName}" />
                                 </div>
-
                                 <div class="vpp-meta-item">
                                     <i class="fa-solid fa-boxes-stacked"></i>
                                     Stock:
                                     <c:out value="${item.stockQuantity}" />
                                 </div>
-
                                 <c:if test="${not empty item.supplier}">
                                     <div class="vpp-meta-item">
                                         <i class="fa-solid fa-truck-field"></i>
                                         <c:out value="${item.supplier}" />
                                     </div>
                                 </c:if>
-
                             </div>
-
                             <div class="vpp-description-section">
-
                                 <h2 class="vpp-section-title">
                                     ABOUT THIS PRODUCT
                                 </h2>
-
                                 <div class="vpp-description">
-                                    <c:if test="${not empty item.description}">
-                                        <c:out value="${item.description}" />
-                                    </c:if>
+                                    <c:choose>
+                                        <c:when test="${not empty item.description}">
+                                            <c:out value="${item.description}" />
+                                        </c:when>
+                                        <c:otherwise>
+                                            No description available.
+                                        </c:otherwise>
+                                    </c:choose>
                                 </div>
-
                             </div>
 
 

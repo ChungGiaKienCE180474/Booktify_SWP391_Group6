@@ -43,6 +43,12 @@
             text-transform: uppercase;
             white-space: nowrap;
             font-weight: 800;
+            text-align: left;
+        }
+
+        /* Cột "#" căn giữa cho cả header lẫn dữ liệu. */
+        .vpp-table th.vpp-id-cell {
+            text-align: center;
         }
 
         .vpp-table td {
@@ -108,7 +114,7 @@
 
         .vpp-price {
             font-weight: 800;
-            color: #DC2626;
+            color: #040202;
             white-space: nowrap;
         }
 
@@ -295,18 +301,6 @@
 
         </div>
 
-        <c:if test="${not empty successMessage}">
-            <div class="admin-alert admin-alert--success">
-                <c:out value="${successMessage}" />
-            </div>
-        </c:if>
-
-        <c:if test="${not empty errorMessage}">
-            <div class="admin-alert admin-alert--danger">
-                <c:out value="${errorMessage}" />
-            </div>
-        </c:if>
-
         <div class="admin-panel" style="padding:14px 22px; margin-bottom:18px;">
             <form method="get"
                   action="${ctx}/admin/vpp"
@@ -450,7 +444,7 @@
                                                               type="number"
                                                               groupingUsed="true"
                                                               maxFractionDigits="0" />
-                                            VND
+                                            đ
                                         </span>
                                     </td>
 
@@ -507,38 +501,21 @@
                                             <c:choose>
 
                                                 <c:when test="${item.active}">
-                                                    <form method="post"
-                                                          action="${ctx}/admin/vpp/${item.id}/delete">
-
-                                                        <input type="hidden"
-                                                               name="${_csrf.parameterName}"
-                                                               value="${_csrf.token}" />
-
-                                                        <button type="submit"
-                                                                class="icon-link icon-link--danger"
-                                                                title="Delete"
-                                                                onclick="return confirm('Delete this product? It will be changed to Hidden status.')">
-                                                            <i class="fa-solid fa-trash"></i>
-                                                        </button>
-
-                                                    </form>
+                                                    <button type="button"
+                                                            class="icon-link icon-link--danger"
+                                                            title="Delete"
+                                                            onclick="openConfirmModal('${ctx}/admin/vpp/${item.id}/delete','delete','Are you sure you want to delete this product? It will be changed to Hidden status.')">
+                                                        <i class="fa-solid fa-trash"></i>
+                                                    </button>
                                                 </c:when>
 
                                                 <c:otherwise>
-                                                    <form method="post"
-                                                          action="${ctx}/admin/vpp/${item.id}/restore">
-
-                                                        <input type="hidden"
-                                                               name="${_csrf.parameterName}"
-                                                               value="${_csrf.token}" />
-
-                                                        <button type="submit"
-                                                                class="icon-link"
-                                                                title="Restore">
-                                                            <i class="fa-solid fa-rotate-left"></i>
-                                                        </button>
-
-                                                    </form>
+                                                    <button type="button"
+                                                            class="icon-link"
+                                                            title="Restore"
+                                                            onclick="openConfirmModal('${ctx}/admin/vpp/${item.id}/restore','restore','Are you sure you want to restore this product?')">
+                                                        <i class="fa-solid fa-rotate-left"></i>
+                                                    </button>
                                                 </c:otherwise>
 
                                             </c:choose>
@@ -681,7 +658,56 @@
     </div>
 </div>
 
+<%-- Unified Confirm Modal (Delete / Restore) --%>
+<div id="confirmModal" class="modal-overlay" style="display:none;" onclick="closeConfirmModal()">
+    <div class="modal-box" style="max-width:420px;" onclick="event.stopPropagation()">
+        <div class="modal-header">
+            <h3 id="confirmModalTitle">
+                <i class="fa-solid fa-circle-exclamation" style="color:#EF4444;"></i>
+                Confirm Delete
+            </h3>
+        </div>
+        <div class="modal-body" style="display:block;">
+            <p id="confirmModalMsg" style="margin:0;font-size:.9rem;color:#374151;line-height:1.65;"></p>
+        </div>
+        <div class="modal-footer">
+            <button onclick="closeConfirmModal()" class="admin-button admin-button--ghost">
+                <i class="fa-solid fa-xmark"></i> Cancel
+            </button>
+            <form id="confirmForm" method="post" style="display:inline;">
+                <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}" />
+                <button type="submit" id="confirmSubmitBtn" class="admin-button admin-button--danger">
+                    <i class="fa-solid fa-trash"></i> Delete
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<jsp:include page="/WEB-INF/view/layout/admin/toast.jsp" />
+
 <script>
+    function openConfirmModal(action, type, msg) {
+        document.getElementById('confirmModalMsg').textContent = msg;
+        document.getElementById('confirmForm').action = action;
+        var title = document.getElementById('confirmModalTitle');
+        var btn = document.getElementById('confirmSubmitBtn');
+        if (type === 'restore') {
+            title.innerHTML = '<i class="fa-solid fa-rotate-left" style="color:#059669;"></i> Confirm Restore';
+            btn.className = 'admin-button';
+            btn.innerHTML = '<i class="fa-solid fa-rotate-left"></i> Restore';
+        } else {
+            title.innerHTML = '<i class="fa-solid fa-circle-exclamation" style="color:#EF4444;"></i> Confirm Delete';
+            btn.className = 'admin-button admin-button--danger';
+            btn.innerHTML = '<i class="fa-solid fa-trash"></i> Delete';
+        }
+        document.getElementById('confirmModal').style.display = 'flex';
+    }
+
+    function closeConfirmModal() {
+        document.getElementById('confirmModal').style.display = 'none';
+    }
+
     document.addEventListener('click', function (e) {
         var btn = e.target.closest('.js-view-vpp');
 

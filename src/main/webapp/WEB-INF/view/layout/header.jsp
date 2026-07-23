@@ -48,9 +48,16 @@
 
                                     <%-- Right icons --%>
                                         <div class="header-icons">
-                                            <%-- Cart (placeholder) --%>
-                                                <a href="/cart" class="hdr-icon-btn" title="Cart">
+                                            <%-- Cart --%>
+                                                <a href="/cart" class="hdr-icon-btn hdr-icon-btn--cart" title="Cart">
                                                     <i class="fa-solid fa-cart-shopping"></i>
+                                                    <span id="hdrCartBadge" class="hdr-cart-badge"
+                                                        <c:if test="${cartItemCount <= 0}">hidden</c:if>>
+                                                        <c:choose>
+                                                            <c:when test="${cartItemCount > 99}">99+</c:when>
+                                                            <c:otherwise>${cartItemCount}</c:otherwise>
+                                                        </c:choose>
+                                                    </span>
                                                     <span class="hdr-icon-label">Cart</span>
                                                 </a>
 
@@ -125,6 +132,16 @@
                             </nav>
 
                 </header>
+
+                <c:if test="${not empty cartSuccessMessage}">
+                    <div id="cartFlashSuccess" hidden><c:out value="${cartSuccessMessage}" /></div>
+                </c:if>
+                <c:if test="${not empty cartErrorMessage}">
+                    <div id="cartFlashError" hidden><c:out value="${cartErrorMessage}" /></div>
+                </c:if>
+
+                <link rel="stylesheet" href="/css/cart-toast.css" />
+                <script src="/js/cart-toast.js"></script>
 
                 <script>
                     (function () {

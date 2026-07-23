@@ -25,7 +25,6 @@ import shop.domain.OrderItem;
 import shop.domain.OrderStatus;
 import shop.domain.PaymentMethod;
 import shop.domain.User;
-import shop.domain.Voucher;
 import shop.domain.dto.OrderDTO;
 import shop.domain.dto.OrderItemDTO;
 import shop.repository.BookRepository;
@@ -36,9 +35,6 @@ import shop.repository.VppItemRepository;
 
 @Service
 public class OrderService {
-
-    public static final BigDecimal COD_SHIPPING_FEE =
-            new BigDecimal("30000");
 
     private final OrderRepository orderRepository;
     private final BookRepository bookRepository;
@@ -358,8 +354,7 @@ public class OrderService {
             );
         }
 
-        BigDecimal shippingFee =
-                COD_SHIPPING_FEE;
+        BigDecimal shippingFee = BigDecimal.ZERO;
 
         Order order = new Order();
 
@@ -549,37 +544,15 @@ if (cartItem.getBook() == null) {
                         subtotal
                 );
 
-        BigDecimal finalShippingFee =
-                shippingFee;
-
-        if (form.getVoucherCode() != null
-                && !form.getVoucherCode().isBlank()) {
-
-            Voucher voucher =
-                    voucherService.findValidVoucher(
-                            form.getVoucherCode()
-                    );
-
-            if ("FREESHIP".equals(
-                    voucher.getDiscountType())) {
-
-                finalShippingFee =
-                        BigDecimal.ZERO;
-            }
-        }
-
         order.setDiscountAmount(
                 discountAmount
         );
 
-        order.setShippingFee(
-                finalShippingFee
-        );
+        order.setShippingFee(shippingFee);
 
         BigDecimal total =
                 subtotal
-                        .subtract(discountAmount)
-                        .add(finalShippingFee);
+                        .subtract(discountAmount);
 
         if (total.compareTo(BigDecimal.ZERO) < 0) {
             total = BigDecimal.ZERO;
@@ -614,27 +587,75 @@ if (cartItem.getBook() == null) {
             String newStatus) {
 
         Order order = orderRepository
-                .findById(orderId)
+                .findByIdWithUserAndItems(orderId)
                 .orElseThrow(() ->
                         new IllegalArgumentException(
                                 "Order not found."
                         )
                 );
 
-        try {
+        OrderStatus targetStatus = OrderStatus.fromValue(newStatus);
+        OrderStatus currentStatus = OrderStatus.fromValue(order.getStatus());
 
-            OrderStatus.valueOf(newStatus);
-
-        } catch (IllegalArgumentException exception) {
-
-            throw new IllegalArgumentException(
-                    "Invalid order status."
-            );
+        if (targetStatus == currentStatus) {
+            return;
         }
 
-        order.setStatus(newStatus);
+        if (!currentStatus.canTransitionTo(targetStatus)) {
+            throw new IllegalArgumentException(
+                    "Cannot change order status from "
+                            + currentStatus.getLabel()
+                            + " to "
+                            + targetStatus.getLabel()
+                            + ".");
+        }
 
+        if (targetStatus == OrderStatus.CANCELLED) {
+            restoreOrderStock(order);
+        }
+
+        order.setStatus(targetStatus.name());
         orderRepository.save(order);
+    }
+
+    @Transactional
+    public void cancelOrderForUser(long userId, long orderId) {
+        Order order = orderRepository.findByIdAndUserIdWithItems(orderId, userId)
+                .orElseThrow(() -> new IllegalArgumentException("Order not found."));
+
+        OrderStatus currentStatus = OrderStatus.fromValue(order.getStatus());
+        if (!currentStatus.canBeCancelled()) {
+            throw new IllegalArgumentException("Only pending orders can be cancelled.");
+        }
+
+        updateOrderStatus(orderId, OrderStatus.CANCELLED.name());
+    }
+
+    private void restoreOrderStock(Order order) {
+        for (OrderItem item : order.getItems()) {
+            if (item.getVppItem() != null) {
+                VppItem vppItem = vppItemRepository
+                        .findById(item.getVppItem().getId())
+                        .orElse(null);
+                if (vppItem != null && vppItem.getStockQuantity() != null) {
+                    vppItem.setStockQuantity(
+                            vppItem.getStockQuantity() + item.getQuantity());
+                    vppItemRepository.save(vppItem);
+                }
+                continue;
+            }
+
+            if (item.getBook() != null) {
+                Book book = bookRepository
+                        .findById(item.getBook().getId())
+                        .orElse(null);
+                if (book != null) {
+                    book.setStockQuantity(
+                            book.getStockQuantity() + item.getQuantity());
+                    bookRepository.save(book);
+                }
+            }
+        }
     }
 
     public void validateCheckoutForm(
@@ -833,17 +854,9 @@ if (cartItem.getBook() == null) {
         return form;
     }
 
-    public String getCodShippingFeeFormatted() {
-
-        return formatMoney(
-                COD_SHIPPING_FEE
-        );
-    }
-
     public String getCheckoutTotalFormatted(
             BigDecimal subtotal,
-            BigDecimal discountAmount,
-            BigDecimal shippingFee) {
+            BigDecimal discountAmount) {
 
         BigDecimal base =
                 subtotal == null
@@ -855,14 +868,8 @@ if (cartItem.getBook() == null) {
                         ? BigDecimal.ZERO
                         : discountAmount;
 
-        BigDecimal shipping =
-                shippingFee == null
-                        ? BigDecimal.ZERO
-                        : shippingFee;
-
         BigDecimal total =
-                base.subtract(discount)
-                        .add(shipping);
+                base.subtract(discount);
 
         if (total.compareTo(BigDecimal.ZERO) < 0) {
             total = BigDecimal.ZERO;

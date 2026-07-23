@@ -269,31 +269,27 @@
                             <label>Stock Quantity</label>
 
                             <div class="admin-qty-stepper">
-                                <button type="button"
-                                        class="admin-qty-btn"
-                                        id="stockDecBtn"
-                                        aria-label="Decrease quantity">
-                                    <i class="fa-solid fa-minus"></i>
-                                </button>
-
+                                <%-- readonly, not disabled: stockQuantity is @NotNull on the DTO,
+                                     so a disabled (unsubmitted) field would fail validation on save. --%>
                                 <form:input path="stockQuantity"
                                             id="stockQuantityInput"
                                             type="number"
                                             min="0"
                                             step="1"
-                                            cssClass="admin-qty-input" />
-
-                                <button type="button"
-                                        class="admin-qty-btn"
-                                        id="stockIncBtn"
-                                        aria-label="Increase quantity">
-                                    <i class="fa-solid fa-plus"></i>
-                                </button>
+                                            cssClass="admin-qty-input"
+                                            readonly="${formMode == 'edit'}"
+                                            style="${formMode == 'edit' ? 'background:#F3F4F6;color:#6B7280;cursor:not-allowed;' : ''}" />
                             </div>
-
-                            <span class="admin-hint">
-                                Press + / − to increase or decrease the quantity of products in stock.
-                            </span>
+                            <c:choose>
+                                <c:when test="${formMode == 'edit'}">
+                                    <span class="admin-hint">                                        
+                                    </span>
+                                </c:when>
+                                <c:otherwise>
+                                    <span class="admin-hint">
+                                    </span>
+                                </c:otherwise>
+                            </c:choose>
 
                             <form:errors path="stockQuantity" cssClass="admin-error" />
                         </div>

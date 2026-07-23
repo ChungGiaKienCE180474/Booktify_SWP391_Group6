@@ -1,7 +1,6 @@
 package shop.service;
 
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import jakarta.annotation.PostConstruct;
@@ -17,16 +16,13 @@ import shop.repository.VppCategoryRepository;
 @Service
 public class VppCategoryService {
 
+    // Starter categories seeded once at startup — not an exclusive list,
+    // admins can add/hide/rename freely afterwards.
     private static final List<String> DEFAULT_VPP_CATEGORIES = List.of(
             "Pens",
             "Note-taking Tools",
             "Other"
     );
-
-    private static final Set<String> DEFAULT_VPP_CATEGORY_SET = DEFAULT_VPP_CATEGORIES
-            .stream()
-            .map(String::toLowerCase)
-            .collect(Collectors.toSet());
 
     private final VppCategoryRepository categoryRepository;
 
@@ -40,8 +36,6 @@ public class VppCategoryService {
     }
 
     public List<VppCategoryDTO> getAllCategories() {
-        ensureDefaultCategories();
-
         return categoryRepository.findAllByOrderByActiveDescNameAsc()
                 .stream()
                 .map(this::toDto)
@@ -49,19 +43,8 @@ public class VppCategoryService {
     }
 
     public List<VppCategoryDTO> getActiveCategories() {
-        ensureDefaultCategories();
-
         return categoryRepository.findAllByActiveTrueOrderByNameAsc()
                 .stream()
-                .map(this::toDto)
-                .collect(Collectors.toList());
-    }
-
-    public List<VppCategoryDTO> getFixedVppCategories() {
-        ensureDefaultCategories();
-
-        return DEFAULT_VPP_CATEGORIES.stream()
-                .map(this::findByRequiredName)
                 .map(this::toDto)
                 .collect(Collectors.toList());
     }
@@ -75,7 +58,7 @@ public class VppCategoryService {
 
     @Transactional
     public VppCategoryDTO create(VppCategoryDTO dto) {
-        String normalizedName = normalizeDefaultCategoryName(dto.getName());
+        String normalizedName = normalizeName(dto.getName());
 
         if (categoryRepository.existsByNameIgnoreCase(normalizedName)) {
             throw new IllegalArgumentException("VPP category already exists.");
@@ -95,7 +78,7 @@ public class VppCategoryService {
         VppCategory category = categoryRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("VPP category not found."));
 
-        String normalizedName = normalizeDefaultCategoryName(dto.getName());
+        String normalizedName = normalizeName(dto.getName());
 
         if (categoryRepository.existsByNameIgnoreCaseAndIdNot(normalizedName, id)) {
             throw new IllegalArgumentException("VPP category already exists.");
@@ -129,7 +112,7 @@ public class VppCategoryService {
 
     @Transactional
     public VppCategory findOrCreateByName(String rawName) {
-        String normalizedName = normalizeDefaultCategoryName(rawName);
+        String normalizedName = normalizeName(rawName);
 
         return categoryRepository.findByNameIgnoreCase(normalizedName)
                 .orElseGet(() -> {
@@ -163,31 +146,15 @@ public class VppCategoryService {
         }
     }
 
-    private VppCategory findByRequiredName(String name) {
-        return categoryRepository.findByNameIgnoreCase(name)
-                .orElseThrow(() -> new IllegalStateException("VPP category not found: " + name));
-    }
-
-    private String normalizeDefaultCategoryName(String rawName) {
+    // Free-form name now (only non-blank required) — Pens / Note-taking Tools /
+    // Other are just starter categories seeded by ensureDefaultCategories(),
+    // not an exclusive list anymore.
+    private String normalizeName(String rawName) {
         if (!StringUtils.hasText(rawName)) {
             throw new IllegalArgumentException("Category is required.");
         }
 
-        String value = rawName.trim();
-
-        if (!DEFAULT_VPP_CATEGORY_SET.contains(value.toLowerCase())) {
-            throw new IllegalArgumentException(
-                    "VPP category must be one of: Pens, Note-taking Tools, Other."
-            );
-        }
-
-        for (String categoryName : DEFAULT_VPP_CATEGORIES) {
-            if (categoryName.equalsIgnoreCase(value)) {
-                return categoryName;
-            }
-        }
-
-        return value;
+        return rawName.trim();
     }
 
     private String normalizeNullable(String value) {

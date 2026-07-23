@@ -15,46 +15,6 @@
                 <link rel="stylesheet" href="/css/cart.css" />
                 <link rel="stylesheet" href="/css/voucher.css" />
 
-                <style>
-                    .cart-promotion-price {
-                        display: flex;
-                        flex-direction: column;
-                        gap: 4px;
-                    }
-
-                    .cart-promotion-line {
-                        display: flex;
-                        align-items: center;
-                        gap: 7px;
-                        flex-wrap: wrap;
-                    }
-
-                    .cart-old-price {
-                        color: #94a3b8;
-                        font-size: .78rem;
-                        font-weight: 700;
-                        text-decoration: line-through;
-                    }
-
-                    .cart-discount-badge {
-                        display: inline-flex;
-                        align-items: center;
-                        padding: 3px 7px;
-                        border-radius: 999px;
-                        background: #fee2e2;
-                        color: #dc2626;
-                        font-size: .7rem;
-                        font-weight: 800;
-                        white-space: nowrap;
-                    }
-
-                    .cart-sale-price {
-                        color: #dc2626;
-                        font-size: 1rem;
-                        font-weight: 800;
-                    }
-                </style>
-
                 <title>Cart — Booktify</title>
             </head>
 
@@ -94,19 +54,26 @@
                                 <div class="cart-layout">
                                     <div class="cart-table-wrap">
                                         <table class="cart-table">
+                                            <colgroup>
+                                                <col class="col-product" />
+                                                <col class="col-price" />
+                                                <col class="col-qty" />
+                                                <col class="col-subtotal" />
+                                                <col class="col-remove" />
+                                            </colgroup>
                                             <thead>
                                                 <tr>
-                                                    <th>Product</th>
-                                                    <th>Unit price</th>
-                                                    <th>Quantity</th>
-                                                    <th>Subtotal</th>
-                                                    <th></th>
+                                                    <th class="col-product">Product</th>
+                                                    <th class="col-price">Unit price</th>
+                                                    <th class="col-qty">Quantity</th>
+                                                    <th class="col-subtotal">Subtotal</th>
+                                                    <th class="col-remove" aria-label="Remove"></th>
                                                 </tr>
                                             </thead>
                                             <tbody>
                                                 <c:forEach items="${cart.items}" var="item">
                                                     <tr>
-                                                        <td>
+                                                        <td class="col-product">
                                                             <div class="cart-book">
                                                                 <div class="cart-book__thumb">
                                                                     <c:choose>
@@ -120,7 +87,7 @@
                                                                         </c:otherwise>
                                                                     </c:choose>
                                                                 </div>
-                                                                <div>
+                                                                <div class="cart-book__info">
                                                                     <a href="/books/${item.bookId}"
                                                                         class="cart-book__title">${item.bookTitle}</a>
                                                                     <div class="cart-book__author">${item.bookAuthor}
@@ -131,7 +98,7 @@
                                                                 </div>
                                                             </div>
                                                         </td>
-                                                        <td>
+                                                        <td class="col-price">
                                                             <c:choose>
                                                                 <c:when test="${item.promotionApplied}">
                                                                     <div class="cart-promotion-price">
@@ -155,7 +122,7 @@
                                                                 </c:otherwise>
                                                             </c:choose>
                                                         </td>
-                                                        <td>
+                                                        <td class="col-qty">
                                                             <form class="cart-qty-form" method="post"
                                                                 action="/cart/update">
                                                                 <input type="hidden" name="${_csrf.parameterName}"
@@ -165,10 +132,13 @@
                                                                     value="${item.quantity}" min="1"
                                                                     max="${item.bookStockQuantity}" step="1" required />
                                                                 <button type="submit"
-                                                                    class="cart-btn cart-btn--outline">Update</button>
+                                                                    class="cart-btn cart-btn--outline cart-btn--icon"
+                                                                    title="Update" aria-label="Update quantity">
+                                                                    <i class="fa-solid fa-check"></i>
+                                                                </button>
                                                             </form>
                                                         </td>
-                                                        <td>
+                                                        <td class="col-subtotal">
                                                             <c:choose>
                                                                 <c:when test="${item.promotionApplied}">
                                                                     <div class="cart-promotion-price">
@@ -187,13 +157,14 @@
                                                                 </c:otherwise>
                                                             </c:choose>
                                                         </td>
-                                                        <td>
+                                                        <td class="col-remove">
                                                             <form method="post" action="/cart/remove">
                                                                 <input type="hidden" name="${_csrf.parameterName}"
                                                                     value="${_csrf.token}" />
                                                                 <input type="hidden" name="itemId" value="${item.id}" />
-                                                                <button type="submit" class="cart-btn cart-btn--ghost"
-                                                                    title="Remove">
+                                                                <button type="submit"
+                                                                    class="cart-btn cart-btn--ghost cart-btn--remove"
+                                                                    title="Remove" aria-label="Remove item">
                                                                     <i class="fa-solid fa-trash"></i>
                                                                 </button>
                                                             </form>

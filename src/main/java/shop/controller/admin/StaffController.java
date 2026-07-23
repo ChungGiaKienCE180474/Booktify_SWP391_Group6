@@ -31,7 +31,6 @@ public class StaffController {
     public String viewStaff(
             @RequestParam(required = false) String keyword,
             @RequestParam(required = false, defaultValue = "all") String status,
-            @RequestParam(required = false, defaultValue = "all") String staffRole,
             @RequestParam(required = false, defaultValue = "default") String sort,
             @RequestParam(defaultValue = "0") int page,
             Model model) {
@@ -64,7 +63,6 @@ public class StaffController {
                 userService.getStaffPage(
                         keyword,
                         status,
-                        staffRole,
                         pageable
                 );
 
@@ -82,16 +80,34 @@ public class StaffController {
 
         model.addAttribute("keyword", keyword);
         model.addAttribute("status", status);
-        model.addAttribute("staffRole", staffRole);
         model.addAttribute("sort", sort);
 
         return "admin/staff/list";
     }
+    @GetMapping("/{id}")
+    public String viewStaffDetail(
+            @PathVariable Long id,
+            Model model,
+            RedirectAttributes redirectAttributes) {
 
+        StaffDTO staff = userService.getStaffDTOById(id);
+
+        if (staff == null) {
+            redirectAttributes.addFlashAttribute(
+                    "errorMessage",
+                    "Staff not found."
+            );
+
+            return "redirect:/admin/staff";
+        }
+
+        model.addAttribute("staff", staff);
+
+        return "admin/staff/detail";
+    }
     @GetMapping("/deleted")
     public String deletedStaff(
             @RequestParam(required = false) String keyword,
-            @RequestParam(required = false, defaultValue = "all") String staffRole,
             @RequestParam(defaultValue = "0") int page,
             Model model) {
 
@@ -100,7 +116,6 @@ public class StaffController {
         Page<StaffDTO> deletedPage =
                 userService.getDeletedStaffPage(
                         keyword,
-                        staffRole,
                         pageable
                 );
 
@@ -117,7 +132,6 @@ public class StaffController {
             @RequestParam String fullName,
             @RequestParam String email,
             @RequestParam String password,
-            @RequestParam String staffRole,
             @RequestParam(required = false) String phone,
             @RequestParam(required = false) String address,
             RedirectAttributes redirectAttributes) {
@@ -137,8 +151,7 @@ public class StaffController {
                 email,
                 password,
                 phone,
-                address,
-                staffRole
+                address
         );
 
         redirectAttributes.addFlashAttribute(
@@ -153,7 +166,6 @@ public class StaffController {
     public String updateStaff(
             @RequestParam Long staffId,
             @RequestParam String fullName,
-            @RequestParam String staffRole,
             @RequestParam(required = false) String phone,
             @RequestParam(required = false) String address,
             @RequestParam(required = false) String newPassword,
@@ -173,8 +185,7 @@ public class StaffController {
                 staffId,
                 fullName,
                 phone,
-                address,
-                staffRole
+                address
         );
 
         if (newPassword != null

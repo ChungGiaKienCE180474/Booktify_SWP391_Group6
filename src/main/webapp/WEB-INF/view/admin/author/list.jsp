@@ -176,17 +176,14 @@
             <div id="deleteModal" class="modal-overlay" style="display:none;">
                 <div class="modal-box" onclick="event.stopPropagation()">
                     <div class="modal-header">
-                        <h3>
+                        <h3 id="confirmModalTitle">
                             <i class="fa-solid fa-circle-exclamation" style="color:#EF4444;"></i>
                             Confirm Delete
                         </h3>
                     </div>
 
                     <div class="modal-body" style="display:block;">
-                        <p id="deleteModalMsg"></p>
-                        <p style="font-size:.8rem;color:#9CA3AF;">
-                            Author will be hidden, not permanently deleted.
-                        </p>
+                        <p id="confirmModalMsg" style="margin:0;font-size:.9rem;color:#374151;line-height:1.65;"></p>
                     </div>
 
                     <div class="modal-footer">
