@@ -6,65 +6,8 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" />
-    <link rel="stylesheet" href="/css/admin-dashboard.css?v=4" />
+    <link rel="stylesheet" href="/css/admin-dashboard.css?v=5" />
     <title>Order ${order.orderCode} — Booktify Admin</title>
-    <style>
-        .order-detail-grid {
-            display: grid;
-            grid-template-columns: 1.4fr 1fr;
-            gap: 20px;
-            align-items: start;
-        }
-        .order-panel {
-            background: #fff;
-            border: 1px solid #E5E7EB;
-            border-radius: 18px;
-            padding: 20px;
-        }
-        .order-panel h3 {
-            margin: 0 0 14px;
-            font-size: 1rem;
-        }
-        .order-info-row {
-            display: flex;
-            justify-content: space-between;
-            gap: 12px;
-            padding: 8px 0;
-            border-bottom: 1px solid #F3F4F6;
-            font-size: .9rem;
-        }
-        .order-info-row:last-child { border-bottom: none; }
-        .order-info-row dt { color: #6B7280; margin: 0; }
-        .order-info-row dd { margin: 0; font-weight: 600; text-align: right; }
-        .order-status-badge {
-            display: inline-flex;
-            padding: 6px 12px;
-            border-radius: 999px;
-            font-size: .78rem;
-            font-weight: 700;
-        }
-        .order-status-badge--PENDING { background: #FEF3C7; color: #92400E; }
-        .order-status-badge--CONFIRMED { background: #DBEAFE; color: #1D4ED8; }
-        .order-status-badge--SHIPPING { background: #E0E7FF; color: #4338CA; }
-        .order-status-badge--DELIVERED { background: #D1FAE5; color: #047857; }
-        .order-status-badge--CANCELLED { background: #FEE2E2; color: #B91C1C; }
-        .status-form {
-            display: flex;
-            gap: 10px;
-            margin-top: 16px;
-            flex-wrap: wrap;
-        }
-        .status-form select {
-            flex: 1;
-            min-width: 160px;
-            padding: 10px 12px;
-            border: 1px solid #D1D5DB;
-            border-radius: 10px;
-        }
-        @media (max-width: 900px) {
-            .order-detail-grid { grid-template-columns: 1fr; }
-        }
-    </style>
 </head>
 <body class="admin-shell">
     <jsp:include page="/WEB-INF/view/layout/admin/sidebar.jsp" />
@@ -73,11 +16,11 @@
         <section class="admin-content">
             <div class="admin-toolbar">
                 <div>
-                    <p class="admin-kicker"><i class="fa-solid fa-receipt"></i> Order Detail</p>
-                    <h2>${order.orderCode}</h2>
-                    <p>${order.createdAtFormatted}</p>
+                    <p class="admin-kicker"><i class="fa-solid fa-receipt"></i> Order Management</p>
+                    <h2>Order Details</h2>
+                    <p>Review order items, customer information, and update status.</p>
                 </div>
-                <a href="/admin/orders" class="admin-button">
+                <a href="/admin/orders" class="admin-button admin-button--ghost">
                     <i class="fa-solid fa-arrow-left"></i> Back to Orders
                 </a>
             </div>
@@ -89,85 +32,145 @@
                 <div class="admin-alert admin-alert--error">${errorMessage}</div>
             </c:if>
 
-            <div class="order-detail-grid">
-                <div class="order-panel">
-                    <h3><i class="fa-solid fa-box"></i> Items</h3>
-                    <div class="admin-table-wrap">
-                        <table class="admin-table">
-                            <thead>
-                                <tr>
-                                    <th>Book</th>
-                                    <th>Unit Price</th>
-                                    <th>Qty</th>
-                                    <th>Line Total</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <c:forEach items="${order.items}" var="item">
-                                    <tr>
-                                        <td>${item.bookTitle}</td>
-                                        <td>${item.unitPriceFormatted} &#8363;</td>
-                                        <td>${item.quantity}</td>
-                                        <td>${item.lineTotalFormatted} &#8363;</td>
-                                    </tr>
-                                </c:forEach>
-                            </tbody>
-                        </table>
+            <div class="admin-order-card">
+                <div class="admin-order-header">
+                    <div class="admin-order-header__main">
+                        <h3>${order.orderCode}</h3>
+                        <p class="admin-order-header__meta">
+                            <i class="fa-regular fa-clock"></i> Placed on ${order.createdAtFormatted}
+                        </p>
                     </div>
+                    <span class="order-status-badge order-status-badge--${order.status}">
+                        ${order.statusLabel}
+                    </span>
                 </div>
 
-                <div>
-                    <div class="order-panel" style="margin-bottom:20px;">
-                        <h3><i class="fa-solid fa-user"></i> Customer</h3>
-                        <dl>
-                            <div class="order-info-row"><dt>Name</dt><dd>${order.customerName}</dd></div>
-                            <div class="order-info-row"><dt>Email</dt><dd>${order.customerEmail}</dd></div>
-                        </dl>
-                    </div>
-
-                    <div class="order-panel" style="margin-bottom:20px;">
-                        <h3><i class="fa-solid fa-truck"></i> Shipping</h3>
-                        <dl>
-                            <div class="order-info-row"><dt>Recipient</dt><dd>${order.recipientName}</dd></div>
-                            <div class="order-info-row"><dt>Phone</dt><dd>${order.recipientPhone}</dd></div>
-                            <div class="order-info-row"><dt>Address</dt><dd>${order.shippingAddress}</dd></div>
-                            <div class="order-info-row"><dt>Payment</dt><dd>${order.paymentMethodLabel}</dd></div>
-                        </dl>
-                    </div>
-
-                    <div class="order-panel">
-                        <h3><i class="fa-solid fa-circle-info"></i> Summary</h3>
-                        <dl>
-                            <div class="order-info-row"><dt>Subtotal</dt><dd>${order.subtotalFormatted} &#8363;</dd></div>
-                            <div class="order-info-row"><dt>Discount</dt><dd>-${order.discountAmountFormatted} &#8363;</dd></div>
-                            <div class="order-info-row"><dt>Shipping fee</dt><dd>${order.shippingFeeFormatted} &#8363;</dd></div>
-                            <div class="order-info-row"><dt><strong>Total</strong></dt><dd><strong>${order.totalAmountFormatted} &#8363;</strong></dd></div>
-                        </dl>
-
-                        <div style="margin-top:14px;">
-                            <span class="order-status-badge order-status-badge--${order.status}">${order.statusLabel}</span>
+                <div class="admin-order-body">
+                    <div class="admin-order-layout">
+                        <div>
+                            <div class="admin-panel" style="padding:0;overflow:hidden;">
+                                <div style="padding:18px 22px;border-bottom:1px solid var(--border);">
+                                    <h3 style="margin:0;"><i class="fa-solid fa-box"></i> Order Items</h3>
+                                </div>
+                                <div class="admin-table-wrap" style="border:none;border-radius:0;box-shadow:none;">
+                                    <table class="admin-table">
+                                        <thead>
+                                            <tr>
+                                                <th>Product</th>
+                                                <th class="col-money">Unit Price</th>
+                                                <th style="width:80px;text-align:center;">Qty</th>
+                                                <th class="col-money">Line Total</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <c:forEach items="${order.items}" var="item">
+                                                <tr>
+                                                    <td><strong>${item.bookTitle}</strong></td>
+                                                    <td class="col-money">${item.unitPriceFormatted} &#8363;</td>
+                                                    <td style="text-align:center;">${item.quantity}</td>
+                                                    <td class="col-money"><strong>${item.lineTotalFormatted} &#8363;</strong></td>
+                                                </tr>
+                                            </c:forEach>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
                         </div>
 
-                        <form class="status-form" method="post" action="/admin/orders/${order.id}/status">
-                            <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}" />
-                            <c:choose>
-                                <c:when test="${empty allowedNextStatuses}">
-                                    <p style="margin:0;color:#6B7280;font-size:.88rem;">
-                                        This order is in a final status and cannot be changed.
-                                    </p>
-                                </c:when>
-                                <c:otherwise>
-                                    <select name="status" required>
-                                        <c:forEach items="${allowedNextStatuses}" var="st">
-                                            <option value="${st}">${st.label}</option>
-                                        </c:forEach>
-                                    </select>
-                                    <button type="submit" class="admin-button admin-button--primary">
-                                        <i class="fa-solid fa-rotate"></i> Update Status
-                                    </button>
-                                </c:otherwise>
-                            </c:choose>
-                        </form>
+                        <div class="admin-order-side">
+                            <div class="admin-panel">
+                                <h3><i class="fa-solid fa-user"></i> Customer</h3>
+                                <dl class="admin-kv-list">
+                                    <div class="admin-kv-row">
+                                        <dt>Name</dt>
+                                        <dd>${order.customerName}</dd>
+                                    </div>
+                                    <div class="admin-kv-row">
+                                        <dt>Email</dt>
+                                        <dd>${order.customerEmail}</dd>
+                                    </div>
+                                </dl>
+                            </div>
+
+                            <div class="admin-panel">
+                                <h3><i class="fa-solid fa-truck"></i> Shipping</h3>
+                                <dl class="admin-kv-list">
+                                    <div class="admin-kv-row">
+                                        <dt>Recipient</dt>
+                                        <dd>${order.recipientName}</dd>
+                                    </div>
+                                    <div class="admin-kv-row">
+                                        <dt>Phone</dt>
+                                        <dd>${order.recipientPhone}</dd>
+                                    </div>
+                                    <div class="admin-kv-row">
+                                        <dt>Address</dt>
+                                        <dd>${order.shippingAddress}</dd>
+                                    </div>
+                                    <div class="admin-kv-row">
+                                        <dt>Payment</dt>
+                                        <dd>${order.paymentMethodLabel}</dd>
+                                    </div>
+                                </dl>
+                            </div>
+
+                            <div class="admin-panel">
+                                <h3><i class="fa-solid fa-circle-info"></i> Payment Summary</h3>
+                                <dl class="admin-kv-list">
+                                    <div class="admin-kv-row">
+                                        <dt>Subtotal</dt>
+                                        <dd>${order.subtotalFormatted} &#8363;</dd>
+                                    </div>
+                                    <div class="admin-kv-row">
+                                        <dt>Discount</dt>
+                                        <dd>-${order.discountAmountFormatted} &#8363;</dd>
+                                    </div>
+                                    <c:if test="${not empty order.voucherCode}">
+                                        <div class="admin-kv-row">
+                                            <dt>Voucher</dt>
+                                            <dd>${order.voucherCode}</dd>
+                                        </div>
+                                    </c:if>
+                                    <div class="admin-kv-row admin-kv-row--total">
+                                        <dt><strong>Total</strong></dt>
+                                        <dd><strong>${order.totalAmountFormatted} &#8363;</strong></dd>
+                                    </div>
+                                </dl>
+
+                                <c:if test="${not empty order.note}">
+                                    <div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--border);">
+                                        <div style="font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--text-muted);margin-bottom:6px;">
+                                            Note
+                                        </div>
+                                        <p class="admin-order-status-note">${order.note}</p>
+                                    </div>
+                                </c:if>
+                            </div>
+
+                            <div class="admin-panel">
+                                <h3><i class="fa-solid fa-rotate"></i> Update Status</h3>
+                                <form class="admin-order-status-form" method="post" action="/admin/orders/${order.id}/status">
+                                    <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}" />
+                                    <c:choose>
+                                        <c:when test="${empty allowedNextStatuses}">
+                                            <p class="admin-order-status-note">
+                                                This order is in a final status and cannot be changed.
+                                            </p>
+                                        </c:when>
+                                        <c:otherwise>
+                                            <select name="status" class="admin-input" required>
+                                                <c:forEach items="${allowedNextStatuses}" var="st">
+                                                    <option value="${st}">${st.label}</option>
+                                                </c:forEach>
+                                            </select>
+                                            <button type="submit" class="admin-button">
+                                                <i class="fa-solid fa-check"></i> Update
+                                            </button>
+                                        </c:otherwise>
+                                    </c:choose>
+                                </form>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>

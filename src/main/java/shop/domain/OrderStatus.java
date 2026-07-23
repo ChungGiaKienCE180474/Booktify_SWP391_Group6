@@ -55,6 +55,10 @@ public enum OrderStatus {
         };
     }
 
+    public boolean canBeCancelled() {
+        return this == PENDING;
+    }
+
     public static OrderStatus fromValue(String value) {
         if (value == null || value.isBlank()) {
             throw new IllegalArgumentException("Invalid order status.");
