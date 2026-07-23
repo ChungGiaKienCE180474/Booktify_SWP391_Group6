@@ -676,18 +676,6 @@
             </button>
         </div>
 
-        <c:if test="${not empty successMessage}">
-            <div class="alert alert-success">
-                <c:out value="${successMessage}"/>
-            </div>
-        </c:if>
-
-        <c:if test="${not empty errorMessage}">
-            <div class="alert alert-danger">
-                <c:out value="${errorMessage}"/>
-            </div>
-        </c:if>
-
         <div class="promotion-toolbar">
             <h3>Promotion List</h3>
         </div>
@@ -1206,6 +1194,7 @@
 
 </div>
 
+<jsp:include page="/WEB-INF/view/layout/admin/toast.jsp" />
 
 <script>
     const contextPath = '${pageContext.request.contextPath}';

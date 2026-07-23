@@ -132,7 +132,7 @@
                                                 <c:when test="${author.status}">
 
                                                     <button type="button" class="icon-link icon-link--danger"
-                                                        onclick="openDeleteModal('/admin/authors/${author.authorId}/delete','Delete this author?')">
+                                                        onclick="openConfirmModal('/admin/authors/${author.authorId}/delete','delete','Are you sure you want to delete this author? The author will be hidden, not permanently deleted.')">
 
                                                         <i class="fa-solid fa-trash"></i>
 
@@ -143,7 +143,7 @@
                                                 <c:otherwise>
 
                                                     <button type="button" class="icon-link" style="color:#16A34A;"
-                                                        onclick="restoreAuthor('/admin/authors/${author.authorId}/restore')">
+                                                        onclick="openConfirmModal('/admin/authors/${author.authorId}/restore','restore','Are you sure you want to restore this author?')">
 
                                                         <i class="fa-solid fa-rotate-left"></i>
 
@@ -187,55 +187,32 @@
                 </section>
 
             </main>
-            <!-- DELETE MODAL -->
 
-            <div id="deleteModal" class="modal-overlay" style="display:none;">
-
-                <div class="modal-box" onclick="event.stopPropagation()">
-
+            <%-- Unified Confirm Modal (Delete / Restore) --%>
+            <div id="confirmModal" class="modal-overlay" style="display:none;" onclick="closeConfirmModal()">
+                <div class="modal-box" style="max-width:420px;" onclick="event.stopPropagation()">
                     <div class="modal-header">
-                        <h3>
+                        <h3 id="confirmModalTitle">
                             <i class="fa-solid fa-circle-exclamation" style="color:#EF4444;"></i>
                             Confirm Delete
                         </h3>
                     </div>
-
-
                     <div class="modal-body" style="display:block;">
-                        <p id="deleteModalMsg"></p>
-                        <p style="font-size:.8rem;color:#9CA3AF;">
-                            Author will be hidden, not permanently deleted.
-                        </p>
+                        <p id="confirmModalMsg" style="margin:0;font-size:.9rem;color:#374151;line-height:1.65;"></p>
                     </div>
-
-
                     <div class="modal-footer">
-
-                        <button onclick="closeDeleteModal()" class="admin-button admin-button--ghost">
-                            Cancel
+                        <button onclick="closeConfirmModal()" class="admin-button admin-button--ghost">
+                            <i class="fa-solid fa-xmark"></i> Cancel
                         </button>
-
-                        <form id="deleteForm" method="post">
+                        <form id="confirmForm" method="post" style="display:inline;">
                             <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}" />
-
-                            <button class="admin-button admin-button--danger">
-                                Delete
+                            <button type="submit" id="confirmSubmitBtn" class="admin-button admin-button--danger">
+                                <i class="fa-solid fa-trash"></i> Delete
                             </button>
                         </form>
-
                     </div>
-
                 </div>
-
             </div>
-
-
-
-            <!-- RESTORE FORM -->
-
-            <form id="restoreForm" method="post">
-                <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}" />
-            </form>
 
 
 
@@ -298,34 +275,29 @@
 
             </div>
 
-
+            <jsp:include page="/WEB-INF/view/layout/admin/toast.jsp" />
 
             <script>
-
-                function openDeleteModal(action, msg) {
-                    document.getElementById("deleteForm").action = action;
-                    document.getElementById("deleteModalMsg").textContent = msg;
-                    document.getElementById("deleteModal").style.display = "flex";
-                }
-
-
-                function closeDeleteModal() {
-                    document.getElementById("deleteModal").style.display = "none";
-                }
-
-
-                function restoreAuthor(action) {
-
-                    if (confirm("Restore this author?")) {
-
-                        let form = document.getElementById("restoreForm");
-                        form.action = action;
-                        form.submit();
-
+                function openConfirmModal(action, type, msg) {
+                    document.getElementById('confirmModalMsg').textContent = msg;
+                    document.getElementById('confirmForm').action = action;
+                    var title = document.getElementById('confirmModalTitle');
+                    var btn = document.getElementById('confirmSubmitBtn');
+                    if (type === 'restore') {
+                        title.innerHTML = '<i class="fa-solid fa-rotate-left" style="color:#059669;"></i> Confirm Restore';
+                        btn.className = 'admin-button';
+                        btn.innerHTML = '<i class="fa-solid fa-rotate-left"></i> Restore';
+                    } else {
+                        title.innerHTML = '<i class="fa-solid fa-circle-exclamation" style="color:#EF4444;"></i> Confirm Delete';
+                        btn.className = 'admin-button admin-button--danger';
+                        btn.innerHTML = '<i class="fa-solid fa-trash"></i> Delete';
                     }
-
+                    document.getElementById('confirmModal').style.display = 'flex';
                 }
 
+                function closeConfirmModal() {
+                    document.getElementById('confirmModal').style.display = 'none';
+                }
 
                 function closeModal(id) {
                     document.getElementById(id).style.display = "none";

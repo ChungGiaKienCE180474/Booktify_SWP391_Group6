@@ -326,7 +326,14 @@
                                                                 <label>Stock Quantity <span
                                                                         style="color:#EF4444;">*</span></label>
                                                                 <form:input path="stockQuantity" cssClass="admin-input"
-                                                                    type="number" min="0" step="1" placeholder="0" />
+                                                                    type="number" min="0" step="1" placeholder="0"
+                                                                    disabled="${formMode == 'edit'}" />
+                                                                <c:if test="${formMode == 'edit'}">
+                                                                    <span style="color:#9CA3AF;font-size:.78rem;">
+                                                                        Stock is updated automatically from orders and
+                                                                        can't be edited here.
+                                                                    </span>
+                                                                </c:if>
                                                                 <form:errors path="stockQuantity"
                                                                     cssClass="admin-error" />
                                                             </div>

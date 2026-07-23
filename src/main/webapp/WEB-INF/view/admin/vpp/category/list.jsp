@@ -54,18 +54,6 @@
 
         </div>
 
-        <c:if test="${not empty successMessage}">
-            <div class="admin-alert admin-alert--success">
-                <c:out value="${successMessage}"/>
-            </div>
-        </c:if>
-
-        <c:if test="${not empty errorMessage}">
-            <div class="admin-alert admin-alert--danger">
-                <c:out value="${errorMessage}"/>
-            </div>
-        </c:if>
-
         <div class="admin-panel">
 
             <table class="admin-table">
@@ -75,7 +63,6 @@
                     <th style="width:48px;">#</th>
                     <th>Category Name</th>
                     <th>Description</th>
-                    <th>Products</th>
                     <th>Status</th>
                     <th style="width:220px;">Actions</th>
                 </tr>
@@ -87,7 +74,7 @@
 
                     <c:when test="${empty categories}">
                         <tr>
-                            <td colspan="6"
+                            <td colspan="5"
                                 style="text-align:center; padding:56px 20px; color:#9CA3AF;">
                                 No VPP categories found.
                             </td>
@@ -118,10 +105,6 @@
                                         </c:when>
                                         <c:otherwise>—</c:otherwise>
                                     </c:choose>
-                                </td>
-
-                                <td>
-                                    <strong>${category.itemCount}</strong>
                                 </td>
 
                                 <td>
@@ -157,35 +140,21 @@
                                     <c:choose>
 
                                         <c:when test="${category.active}">
-                                            <form method="post"
-                                                  action="${pageContext.request.contextPath}/admin/vpp/categories/${category.id}/hide"
-                                                  style="display:inline;">
-                                                <input type="hidden"
-                                                       name="${_csrf.parameterName}"
-                                                       value="${_csrf.token}"/>
-
-                                                <button type="submit"
-                                                        class="icon-link"
-                                                        title="Hide">
-                                                    <i class="fa-solid fa-eye-slash"></i>
-                                                </button>
-                                            </form>
+                                            <button type="button"
+                                                    class="icon-link"
+                                                    title="Hide"
+                                                    onclick="openConfirmModal('${pageContext.request.contextPath}/admin/vpp/categories/${category.id}/hide','delete','Are you sure you want to delete this category? It will be hidden, not permanently deleted.')">
+                                                <i class="fa-solid fa-eye-slash"></i>
+                                            </button>
                                         </c:when>
 
                                         <c:otherwise>
-                                            <form method="post"
-                                                  action="${pageContext.request.contextPath}/admin/vpp/categories/${category.id}/restore"
-                                                  style="display:inline;">
-                                                <input type="hidden"
-                                                       name="${_csrf.parameterName}"
-                                                       value="${_csrf.token}"/>
-
-                                                <button type="submit"
-                                                        class="icon-link"
-                                                        title="Restore">
-                                                    <i class="fa-solid fa-rotate-left"></i>
-                                                </button>
-                                            </form>
+                                            <button type="button"
+                                                    class="icon-link"
+                                                    title="Restore"
+                                                    onclick="openConfirmModal('${pageContext.request.contextPath}/admin/vpp/categories/${category.id}/restore','restore','Are you sure you want to restore this category?')">
+                                                <i class="fa-solid fa-rotate-left"></i>
+                                            </button>
                                         </c:otherwise>
 
                                     </c:choose>
@@ -208,6 +177,57 @@
     </section>
 
 </main>
+
+<%-- Unified Confirm Modal (Delete / Restore) --%>
+<div id="confirmModal" class="modal-overlay" style="display:none;" onclick="closeConfirmModal()">
+    <div class="modal-box" style="max-width:420px;" onclick="event.stopPropagation()">
+        <div class="modal-header">
+            <h3 id="confirmModalTitle">
+                <i class="fa-solid fa-circle-exclamation" style="color:#EF4444;"></i>
+                Confirm Delete
+            </h3>
+        </div>
+        <div class="modal-body" style="display:block;">
+            <p id="confirmModalMsg" style="margin:0;font-size:.9rem;color:#374151;line-height:1.65;"></p>
+        </div>
+        <div class="modal-footer">
+            <button onclick="closeConfirmModal()" class="admin-button admin-button--ghost">
+                <i class="fa-solid fa-xmark"></i> Cancel
+            </button>
+            <form id="confirmForm" method="post" style="display:inline;">
+                <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}" />
+                <button type="submit" id="confirmSubmitBtn" class="admin-button admin-button--danger">
+                    <i class="fa-solid fa-trash"></i> Delete
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<jsp:include page="/WEB-INF/view/layout/admin/toast.jsp" />
+
+<script>
+    function openConfirmModal(action, type, msg) {
+        document.getElementById('confirmModalMsg').textContent = msg;
+        document.getElementById('confirmForm').action = action;
+        var title = document.getElementById('confirmModalTitle');
+        var btn = document.getElementById('confirmSubmitBtn');
+        if (type === 'restore') {
+            title.innerHTML = '<i class="fa-solid fa-rotate-left" style="color:#059669;"></i> Confirm Restore';
+            btn.className = 'admin-button';
+            btn.innerHTML = '<i class="fa-solid fa-rotate-left"></i> Restore';
+        } else {
+            title.innerHTML = '<i class="fa-solid fa-circle-exclamation" style="color:#EF4444;"></i> Confirm Delete';
+            btn.className = 'admin-button admin-button--danger';
+            btn.innerHTML = '<i class="fa-solid fa-trash"></i> Delete';
+        }
+        document.getElementById('confirmModal').style.display = 'flex';
+    }
+
+    function closeConfirmModal() {
+        document.getElementById('confirmModal').style.display = 'none';
+    }
+</script>
 
 </body>
 </html>

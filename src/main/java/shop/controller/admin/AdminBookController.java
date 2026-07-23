@@ -240,7 +240,7 @@ public class AdminBookController {
         existing.setIsbn(StringUtils.hasText(book.getIsbn()) ? book.getIsbn() : null);
         existing.setDescription(book.getDescription());
         existing.setPrice(book.getPrice());
-        existing.setStockQuantity(book.getStockQuantity());
+
         // active is intentionally left untouched — toggling it is only done
         // through the Remove/Restore actions on the list page.
         existing.setCategory(selectedCategory);

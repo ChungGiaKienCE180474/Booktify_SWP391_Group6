@@ -186,5 +186,8 @@
         </div>
     </section>
 </main>
+
+<jsp:include page="/WEB-INF/view/layout/admin/toast.jsp" />
+
 </body>
 </html>
