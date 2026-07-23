@@ -65,7 +65,21 @@
                                         <tbody>
                                             <c:forEach items="${order.items}" var="item">
                                                 <tr>
-                                                    <td><strong>${item.bookTitle}</strong></td>
+                                                    <td>
+                                                        <div class="admin-order-product">
+                                                            <div class="admin-order-product__thumb">
+                                                                <c:choose>
+                                                                    <c:when test="${not empty item.bookImageUrl}">
+                                                                        <img src="${item.bookImageUrl}" alt="${item.bookTitle}" />
+                                                                    </c:when>
+                                                                    <c:otherwise>
+                                                                        <i class="fa-solid fa-book"></i>
+                                                                    </c:otherwise>
+                                                                </c:choose>
+                                                            </div>
+                                                            <strong>${item.bookTitle}</strong>
+                                                        </div>
+                                                    </td>
                                                     <td class="col-money">${item.unitPriceFormatted} &#8363;</td>
                                                     <td style="text-align:center;">${item.quantity}</td>
                                                     <td class="col-money"><strong>${item.lineTotalFormatted} &#8363;</strong></td>

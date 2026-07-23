@@ -20,6 +20,7 @@ import shop.domain.PaymentMethod;
 import shop.domain.User;
 import shop.domain.dto.CartDTO;
 import shop.domain.dto.CartRefreshResult;
+import shop.domain.dto.OrderDTO;
 import shop.service.CartService;
 import shop.service.OrderService;
 import shop.service.UserService;
@@ -29,121 +30,46 @@ import shop.service.VoucherService;
 @RequestMapping("/orders")
 public class OrderController {
 
-        private final OrderService orderService;
-        private final CartService cartService;
-        private final UserService userService;
-        private final VoucherService voucherService;
+    private final OrderService orderService;
+    private final CartService cartService;
+    private final UserService userService;
+    private final VoucherService voucherService;
 
-        public OrderController(OrderService orderService, CartService cartService, UserService userService,
-                        VoucherService voucherService) {
-                this.orderService = orderService;
-                this.cartService = cartService;
-                this.userService = userService;
-                this.voucherService = voucherService;
+    public OrderController(OrderService orderService, CartService cartService, UserService userService,
+            VoucherService voucherService) {
+        this.orderService = orderService;
+        this.cartService = cartService;
+        this.userService = userService;
+        this.voucherService = voucherService;
+    }
+
+    @PostMapping("/checkout")
+    public String placeOrder(
+            Authentication authentication,
+            @Valid @ModelAttribute("checkoutForm") CheckoutForm checkoutForm,
+            BindingResult bindingResult,
+            Model model,
+            RedirectAttributes redirectAttributes) {
+
+        User user = getCurrentUser(authentication);
+        var refreshedCart = cartService.refreshCart(user.getId());
+        CartDTO cart = cartService.toCartDTO(refreshedCart);
+
+        if (cart.isEmpty()) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Cannot create an order with an empty cart.");
+            return "redirect:/cart";
         }
 
-        @PostMapping("/checkout")
-        public String placeOrder(
-                        Authentication authentication,
-                        @Valid @ModelAttribute("checkoutForm") CheckoutForm checkoutForm,
-                        BindingResult bindingResult,
-                        Model model,
-                        RedirectAttributes redirectAttributes) {
-
-                User user = getCurrentUser(authentication);
-                var refreshedCart = cartService.refreshCart(user.getId());
-                CartDTO cart = cartService.toCartDTO(refreshedCart);
-
-                if (cart.isEmpty()) {
-                        redirectAttributes.addFlashAttribute("errorMessage",
-                                        "Cannot create an order with an empty cart.");
-                        return "redirect:/cart";
-                }
-
-                try {
-                        orderService.validateCheckoutForm(checkoutForm);
-                } catch (IllegalArgumentException ex) {
-                        bindingResult.reject("checkout.invalid", ex.getMessage());
-                }
-
-                if (bindingResult.hasErrors()) {
-
-                        BigDecimal discount = BigDecimal.ZERO;
-                        BigDecimal shippingFee = OrderService.COD_SHIPPING_FEE;
-
-                        try {
-
-                                if (checkoutForm.getVoucherCode() != null
-                                                && !checkoutForm.getVoucherCode().isBlank()) {
-
-                                        discount = voucherService.calculateDiscount(
-                                                        checkoutForm.getVoucherCode(),
-                                                        refreshedCart.getTotalAmount());
-                                }
-
-                        } catch (IllegalArgumentException ex) {
-
-                                model.addAttribute(
-                                                "errorMessage",
-                                                ex.getMessage());
-                        }
-
-                        populateCheckoutModel(
-                                        model,
-                                        cart,
-                                        refreshedCart.getTotalAmount(),
-                                        discount,
-                                        shippingFee);
-
-                        return "order/checkout";
-                }
-
-                try {
-                        var order = orderService.createOrderFromCart(user.getId(), checkoutForm);
-                        redirectAttributes.addFlashAttribute("successMessage",
-                                        "Order placed successfully! Order code: " + order.getOrderCode());
-                        return "redirect:/orders/" + order.getId();
-                } catch (IllegalArgumentException ex) {
-
-                        BigDecimal discount = BigDecimal.ZERO;
-                        BigDecimal shippingFee = OrderService.COD_SHIPPING_FEE;
-
-                        populateCheckoutModel(
-                                        model,
-                                        cart,
-                                        refreshedCart.getTotalAmount(),
-                                        discount,
-                                        shippingFee);
-
-                        model.addAttribute(
-                                        "errorMessage",
-                                        ex.getMessage());
-
-                        return "order/checkout";
-                }
+        try {
+            orderService.validateCheckoutForm(checkoutForm);
+        } catch (IllegalArgumentException ex) {
+            bindingResult.reject("checkout.invalid", ex.getMessage());
         }
 
-        // Apply Voucher
-        @PostMapping("/apply-voucher")
-        public String applyVoucher(
-                        Authentication authentication,
-                        @ModelAttribute("checkoutForm") CheckoutForm checkoutForm,
-                        Model model) {
         if (bindingResult.hasErrors()) {
-            BigDecimal discount = BigDecimal.ZERO;
-
-            if (checkoutForm.getVoucherCode() != null
-                    && !checkoutForm.getVoucherCode().isBlank()) {
-                discount = voucherService.calculateDiscount(
-                        checkoutForm.getVoucherCode(),
-                        refreshedCart.getTotalAmount());
-            }
-
-            populateCheckoutModel(
-                    model,
-                    cart,
-                    refreshedCart.getTotalAmount(),
-                    discount);
+            BigDecimal discount = resolveDiscount(checkoutForm, refreshedCart.getTotalAmount(), model);
+            populateCheckoutModel(model, cart, refreshedCart.getTotalAmount(), discount);
+            model.addAttribute("checkoutForm", checkoutForm);
             return "order/checkout";
         }
 
@@ -153,175 +79,90 @@ public class OrderController {
                     "Order placed successfully! Order code: " + order.getOrderCode());
             return "redirect:/orders/" + order.getId();
         } catch (IllegalArgumentException ex) {
-            BigDecimal discount = BigDecimal.ZERO;
-
-            if (checkoutForm.getVoucherCode() != null
-                    && !checkoutForm.getVoucherCode().isBlank()) {
-
-                discount = voucherService.calculateDiscount(
-                        checkoutForm.getVoucherCode(),
-                        refreshedCart.getTotalAmount());
-            }
-            populateCheckoutModel(
-                    model,
-                    cart,
-                    refreshedCart.getTotalAmount(),
-                    discount);
+            BigDecimal discount = resolveDiscount(checkoutForm, refreshedCart.getTotalAmount(), model);
+            populateCheckoutModel(model, cart, refreshedCart.getTotalAmount(), discount);
+            model.addAttribute("checkoutForm", checkoutForm);
             model.addAttribute("errorMessage", ex.getMessage());
             return "order/checkout";
         }
     }
 
-                User user = getCurrentUser(authentication);
-                CartRefreshResult refreshResult = cartService.refreshCartResult(user.getId());
-                CartDTO cart = cartService.toCartDTO(refreshResult.getCart());
+    @PostMapping("/apply-voucher")
+    public String applyVoucher(
+            Authentication authentication,
+            @ModelAttribute("checkoutForm") CheckoutForm checkoutForm,
+            Model model) {
 
-                BigDecimal shippingFee = OrderService.COD_SHIPPING_FEE;
+        User user = getCurrentUser(authentication);
+        CartRefreshResult refreshResult = cartService.refreshCartResult(user.getId());
+        CartDTO cart = cartService.toCartDTO(refreshResult.getCart());
+        BigDecimal subtotal = refreshResult.getCart().getTotalAmount();
 
-                try {
-
-                        BigDecimal discount = voucherService.calculateDiscount(
-                                        checkoutForm.getVoucherCode(),
-                                        refreshResult.getCart().getTotalAmount());
-       
-
-                        BigDecimal total = refreshResult.getCart()
-                                        .getTotalAmount()
-                                        .subtract(discount)
-                                        .add(shippingFee);
-
-                        model.addAttribute(
-                                        "discountAmountFormatted",
-                                        orderService.formatMoney(discount));
-
-                        model.addAttribute(
-                                        "checkoutTotalFormatted",
-                                        orderService.formatMoney(total));
-
-                        model.addAttribute(
-                                        "successMessage",
-                                        "Voucher applied successfully!");
-
-                } catch (IllegalArgumentException e) {
-
-                        model.addAttribute("errorMessage", e.getMessage());
-
-                        model.addAttribute(
-                                        "discountAmountFormatted",
-                                        "0");
-
-                        model.addAttribute(
-                                        "checkoutTotalFormatted",
-                                        orderService.formatMoney(
-                                                        refreshResult.getCart()
-                                                                        .getTotalAmount()
-                                                                        .add(shippingFee)));
-                }
-
-                model.addAttribute("checkoutForm", checkoutForm);
-                model.addAttribute("cart", cart);
-
-                model.addAttribute(
-                                "paymentLabel",
-                                PaymentMethod.COD.getLabel());
-
-                model.addAttribute(
-                                "shippingFeeFormatted",
-                                orderService.formatMoney(shippingFee));
-
-                return "order/checkout";
+        try {
+            BigDecimal discount = voucherService.calculateDiscount(checkoutForm.getVoucherCode(), subtotal);
+            model.addAttribute("discountAmountFormatted", orderService.formatMoney(discount));
+            model.addAttribute("checkoutTotalFormatted", orderService.getCheckoutTotalFormatted(subtotal, discount));
+            model.addAttribute("successMessage", "Voucher applied successfully!");
+        } catch (IllegalArgumentException e) {
+            model.addAttribute("errorMessage", e.getMessage());
+            model.addAttribute("discountAmountFormatted", "0");
+            model.addAttribute("checkoutTotalFormatted", orderService.getCheckoutTotalFormatted(subtotal, BigDecimal.ZERO));
         }
 
-        @GetMapping("/checkout")
-        public String checkoutForm(Authentication authentication, Model model) {
-
-                User user = getCurrentUser(authentication);
-                CartRefreshResult refreshResult = cartService.refreshCartResult(user.getId());
-                CartDTO cart = cartService.toCartDTO(refreshResult.getCart());
-                if (cart.isEmpty()) {
-                        return "redirect:/cart";
-                }
-                if (!model.containsAttribute("checkoutForm")) {
-                        model.addAttribute(
-                                        "checkoutForm",
-                                        orderService.buildCheckoutFormFromUser(user));
-                }
-                model.addAttribute("cart", cart);
-                model.addAttribute(
-                                "paymentLabel",
-                                PaymentMethod.COD.getLabel());
-                model.addAttribute(
-                                "shippingFeeFormatted",
-                                orderService.getCodShippingFeeFormatted());
-                model.addAttribute(
-                                "discountAmountFormatted",
-                                "0");
-                model.addAttribute(
-                                "checkoutTotalFormatted",
-                                orderService.formatMoney(
-                                                refreshResult.getCart().getTotalAmount()
-                                                                .add(OrderService.COD_SHIPPING_FEE)));
-                return "order/checkout";
-        }
-
-        @GetMapping
-        public String orderHistory(Authentication authentication, Model model) {
-                User user = getCurrentUser(authentication);
-                model.addAttribute("orders", orderService.getOrdersForUser(user.getId()));
-                return "order/list";
-        }
-
-        @GetMapping("/{id}")
-        public String orderDetail(
-                        Authentication authentication,
-                        @PathVariable Long id,
-                        Model model,
-                        RedirectAttributes redirectAttributes) {
-
-                User user = getCurrentUser(authentication);
-                return orderService.getOrderForUser(user.getId(), id)
-                                .map(order -> {
-                                        model.addAttribute("order", order);
-                                        return "order/detail";
-                                })
-                                .orElseGet(() -> {
-                                        redirectAttributes.addFlashAttribute("errorMessage", "Order not found.");
-                                        return "redirect:/orders";
-                                });
-        }
-
-        private void populateCheckoutModel(
-                        Model model,
-                        CartDTO cart,
-                        BigDecimal subtotal,
-                        BigDecimal discountAmount,
-                        BigDecimal shippingFee) {
-
-                model.addAttribute("cart", cart);
-
-                model.addAttribute(
-                                "paymentLabel",
-                                PaymentMethod.COD.getLabel());
-
-                model.addAttribute(
-                                "shippingFeeFormatted",
-                                orderService.formatMoney(shippingFee));
-
-                model.addAttribute(
-                                "discountAmountFormatted",
-                                orderService.formatMoney(discountAmount));
-
-                model.addAttribute(
-                                "checkoutTotalFormatted",
-                                orderService.getCheckoutTotalFormatted(
-                                                subtotal,
-                                                discountAmount,
-                                                shippingFee));
-        
+        model.addAttribute("checkoutForm", checkoutForm);
+        model.addAttribute("cart", cart);
+        model.addAttribute("paymentLabel", PaymentMethod.COD.getLabel());
         return "order/checkout";
     }
 
-   
+    @GetMapping("/checkout")
+    public String checkoutForm(Authentication authentication, Model model) {
+        User user = getCurrentUser(authentication);
+        CartRefreshResult refreshResult = cartService.refreshCartResult(user.getId());
+        CartDTO cart = cartService.toCartDTO(refreshResult.getCart());
+
+        if (cart.isEmpty()) {
+            return "redirect:/cart";
+        }
+
+        if (!model.containsAttribute("checkoutForm")) {
+            model.addAttribute("checkoutForm", orderService.buildCheckoutFormFromUser(user));
+        }
+
+        BigDecimal subtotal = refreshResult.getCart().getTotalAmount();
+        model.addAttribute("cart", cart);
+        model.addAttribute("paymentLabel", PaymentMethod.COD.getLabel());
+        model.addAttribute("discountAmountFormatted", "0");
+        model.addAttribute("checkoutTotalFormatted", orderService.getCheckoutTotalFormatted(subtotal, BigDecimal.ZERO));
+        return "order/checkout";
+    }
+
+    @GetMapping
+    public String orderHistory(Authentication authentication, Model model) {
+        User user = getCurrentUser(authentication);
+        model.addAttribute("orders", orderService.getOrdersForUser(user.getId()));
+        return "order/list";
+    }
+
+    @GetMapping("/{id}")
+    public String orderDetail(
+            Authentication authentication,
+            @PathVariable Long id,
+            Model model,
+            RedirectAttributes redirectAttributes) {
+
+        User user = getCurrentUser(authentication);
+        return orderService.getOrderForUser(user.getId(), id)
+                .map(order -> {
+                    model.addAttribute("order", order);
+                    model.addAttribute("canCancelOrder", canCancelOrder(order));
+                    return "order/detail";
+                })
+                .orElseGet(() -> {
+                    redirectAttributes.addFlashAttribute("errorMessage", "Order not found.");
+                    return "redirect:/orders";
+                });
+    }
 
     @PostMapping("/{id}/cancel")
     public String cancelOrder(
@@ -339,6 +180,18 @@ public class OrderController {
         return "redirect:/orders/" + id;
     }
 
+    private BigDecimal resolveDiscount(CheckoutForm checkoutForm, BigDecimal subtotal, Model model) {
+        if (checkoutForm.getVoucherCode() == null || checkoutForm.getVoucherCode().isBlank()) {
+            return BigDecimal.ZERO;
+        }
+        try {
+            return voucherService.calculateDiscount(checkoutForm.getVoucherCode(), subtotal);
+        } catch (IllegalArgumentException ex) {
+            model.addAttribute("errorMessage", ex.getMessage());
+            return BigDecimal.ZERO;
+        }
+    }
+
     private void populateCheckoutModel(
             Model model,
             CartDTO cart,
@@ -346,31 +199,31 @@ public class OrderController {
             BigDecimal discountAmount) {
 
         model.addAttribute("cart", cart);
+        model.addAttribute("paymentLabel", PaymentMethod.COD.getLabel());
+        model.addAttribute("discountAmountFormatted", orderService.formatMoney(discountAmount));
+        model.addAttribute("checkoutTotalFormatted",
+                orderService.getCheckoutTotalFormatted(subtotal, discountAmount));
+    }
 
-        model.addAttribute(
-                "paymentLabel",
-                PaymentMethod.COD.getLabel());
-
-        model.addAttribute(
-                "discountAmountFormatted",
-                orderService.formatMoney(discountAmount));
-
-        model.addAttribute(
-                "checkoutTotalFormatted",
-                orderService.getCheckoutTotalFormatted(
-                        subtotal,
-                        discountAmount));
+    private boolean canCancelOrder(OrderDTO order) {
+        if (order == null || order.getStatus() == null) {
+            return false;
+        }
+        try {
+            return OrderStatus.valueOf(order.getStatus()).canBeCancelled();
+        } catch (IllegalArgumentException ex) {
+            return false;
+        }
     }
 
     private User getCurrentUser(Authentication authentication) {
-       
-                if (authentication == null || !authentication.isAuthenticated()) {
-                        throw new IllegalStateException("You need to log in to place an order.");
-                }
-                User user = userService.getUserByEmail(authentication.getName());
-                if (user == null) {
-                        throw new IllegalStateException("User not found.");
-                }
-                return user;
+        if (authentication == null || !authentication.isAuthenticated()) {
+            throw new IllegalStateException("You need to log in to place an order.");
         }
+        User user = userService.getUserByEmail(authentication.getName());
+        if (user == null) {
+            throw new IllegalStateException("User not found.");
+        }
+        return user;
+    }
 }

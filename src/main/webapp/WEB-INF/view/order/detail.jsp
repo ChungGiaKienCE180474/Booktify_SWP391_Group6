@@ -48,7 +48,21 @@
                             <c:forEach items="${order.items}" var="item">
                                 <tr>
                                     <td>
-                                        <a href="/books/${item.bookId}" class="cart-book__title">${item.bookTitle}</a>
+                                        <div class="cart-book">
+                                            <div class="cart-book__thumb">
+                                                <c:choose>
+                                                    <c:when test="${not empty item.bookImageUrl}">
+                                                        <img src="${item.bookImageUrl}" alt="${item.bookTitle}" />
+                                                    </c:when>
+                                                    <c:otherwise>
+                                                        <i class="fa-solid fa-book" style="color:#94a3b8;"></i>
+                                                    </c:otherwise>
+                                                </c:choose>
+                                            </div>
+                                            <div class="cart-book__info">
+                                                <a href="/books/${item.bookId}" class="cart-book__title">${item.bookTitle}</a>
+                                            </div>
+                                        </div>
                                     </td>
                                     <td>${item.unitPriceFormatted} &#8363;</td>
                                     <td>${item.quantity}</td>

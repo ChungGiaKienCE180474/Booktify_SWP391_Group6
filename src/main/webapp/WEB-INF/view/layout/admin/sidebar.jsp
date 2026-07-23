@@ -36,16 +36,22 @@
                                             Categories
                                         </a>
 
-                                        <a href="/admin/genres"
-                                            class="admin-sidebar__item ${fn:contains(pageContext.request.requestURI, '/admin/genres') ? 'active' : ''}">
-                                            <i class="fa-solid fa-layer-group"></i>
-                                            Genres
-                                        </a>
+                                       
 
                                         <a href="/admin/books"
                                             class="admin-sidebar__item ${fn:contains(pageContext.request.requestURI, '/admin/books') ? 'active' : ''}">
                                             <i class="fa-solid fa-book"></i>
                                             Books
+                                        </a>
+                                        <a href="/admin/vpp"
+                                            class="admin-sidebar__item ${fn:contains(pageContext.request.requestURI, '/admin/vpp') ? 'active' : ''}">
+                                            <i class="fa-solid fa-pen-ruler"></i>
+                                            Stationery 
+                                        </a>
+                                         <a href="/admin/genres"
+                                            class="admin-sidebar__item ${fn:contains(pageContext.request.requestURI, '/admin/genres') ? 'active' : ''}">
+                                            <i class="fa-solid fa-layer-group"></i>
+                                            Genres
                                         </a>
 
                                         <a href="/admin/reviews"
@@ -94,16 +100,12 @@
                                             <i class="fa-solid fa-truck"></i>
                                             Suppliers
                                         </a>
-                                        <a href="/admin/vpp"
-                                            class="admin-sidebar__item ${fn:contains(pageContext.request.requestURI, '/admin/vpp') ? 'active' : ''}">
-                                            <i class="fa-solid fa-pen-ruler"></i>
-                                            Stationery Mangement VPP
-                                        </a>
-                                        <a href="/admin/contacts"
+                                        
+                                        <!-- <a href="/admin/contacts"
                                             class="admin-sidebar__item ${fn:contains(pageContext.request.requestURI, '/admin/contacts') ? 'active' : ''}">
                                             <i class="fa-solid fa-headset"></i>
                                             Contact Requests
-                                        </a>
+                                        </a> -->
 
 
                                     </div> <%-- Đóng thẻ chuẩn cho khối Management --%>
