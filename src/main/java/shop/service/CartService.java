@@ -503,92 +503,47 @@ public class CartService {
     private CartItemDTO toCartItemDTO(CartItem item) {
 
         CartItemDTO dto = new CartItemDTO();
-
         dto.setId(item.getId());
         dto.setQuantity(item.getQuantity());
 
         Book book = item.getBook();
-
         if (book != null) {
-
-            BigDecimal originalPrice =
-                    book.getPrice() == null
-                            ? BigDecimal.ZERO
-                            : book.getPrice();
-
-            Promotion bestPromotion =
-                    promotionService
-                            .getBestPromotionForBook(book)
-                            .orElse(null);
-
-            BigDecimal effectivePrice =
-                    bestPromotion == null
-                            ? originalPrice
-                            : promotionService.calculateDiscountedPrice(originalPrice, bestPromotion);
-
-            BigDecimal originalSubtotal =
-                    originalPrice.multiply(BigDecimal.valueOf(item.getQuantity()));
-
-            BigDecimal effectiveSubtotal =
-                    effectivePrice.multiply(BigDecimal.valueOf(item.getQuantity()));
+            BigDecimal price = book.getPrice() == null ? BigDecimal.ZERO : book.getPrice();
+            BigDecimal subtotal = price.multiply(BigDecimal.valueOf(item.getQuantity()));
 
             dto.setBookId(book.getId());
             dto.setBookTitle(book.getTitle());
             dto.setBookAuthor(book.getAuthor());
             dto.setBookImageUrl(book.getImageUrl());
-
-            dto.setBookPriceFormatted(promotionService.formatMoney(effectivePrice));
-            dto.setOriginalPriceFormatted(promotionService.formatMoney(originalPrice));
-            dto.setEffectivePriceFormatted(promotionService.formatMoney(effectivePrice));
-            dto.setOriginalSubtotalFormatted(promotionService.formatMoney(originalSubtotal));
-            dto.setSubtotalFormatted(promotionService.formatMoney(effectiveSubtotal));
-
-            dto.setPromotionApplied(bestPromotion != null);
-
-            dto.setPromotionLabel(
-                    bestPromotion == null
-                            ? ""
-                            : promotionService.getDiscountLabel(book, bestPromotion)
-            );
-
-            dto.setBookStockQuantity(book.getStockQuantity());
-            dto.setBookActive(book.isActive());
-
-            return dto;
-        }
-
-        VppItem vppItem = item.getVppItem();
-
-        if (vppItem != null) {
-
-            BigDecimal price =
-                    vppItem.getPrice() == null
-                            ? BigDecimal.ZERO
-                            : vppItem.getPrice();
-
-            BigDecimal subtotal =
-                    price.multiply(BigDecimal.valueOf(item.getQuantity()));
-
-            dto.setBookId(vppItem.getId());
-            dto.setBookTitle(vppItem.getName());
-            dto.setBookAuthor("Stationery");
-            dto.setBookImageUrl("/uploads/vpp/" + vppItem.getId() + "/image");
-
             dto.setBookPriceFormatted(promotionService.formatMoney(price));
             dto.setOriginalPriceFormatted(promotionService.formatMoney(price));
             dto.setEffectivePriceFormatted(promotionService.formatMoney(price));
             dto.setOriginalSubtotalFormatted(promotionService.formatMoney(subtotal));
             dto.setSubtotalFormatted(promotionService.formatMoney(subtotal));
-
             dto.setPromotionApplied(false);
             dto.setPromotionLabel("");
+            dto.setBookStockQuantity(book.getStockQuantity());
+            dto.setBookActive(book.isActive());
+            return dto;
+        }
 
-            dto.setBookStockQuantity(
-                    vppItem.getStockQuantity() == null ? 0 : vppItem.getStockQuantity()
-            );
-
+        VppItem vppItem = item.getVppItem();
+        if (vppItem != null) {
+            BigDecimal price = vppItem.getPrice() == null ? BigDecimal.ZERO : vppItem.getPrice();
+            BigDecimal subtotal = price.multiply(BigDecimal.valueOf(item.getQuantity()));
+            dto.setBookId(vppItem.getId());
+            dto.setBookTitle(vppItem.getName());
+            dto.setBookAuthor("Stationery");
+            dto.setBookImageUrl("/uploads/vpp/" + vppItem.getId() + "/image");
+            dto.setBookPriceFormatted(promotionService.formatMoney(price));
+            dto.setOriginalPriceFormatted(promotionService.formatMoney(price));
+            dto.setEffectivePriceFormatted(promotionService.formatMoney(price));
+            dto.setOriginalSubtotalFormatted(promotionService.formatMoney(subtotal));
+            dto.setSubtotalFormatted(promotionService.formatMoney(subtotal));
+            dto.setPromotionApplied(false);
+            dto.setPromotionLabel("");
+            dto.setBookStockQuantity(vppItem.getStockQuantity() == null ? 0 : vppItem.getStockQuantity());
             dto.setBookActive(vppItem.isActive() && !vppItem.isDeleted());
-
             return dto;
         }
 
@@ -602,7 +557,6 @@ public class CartService {
         dto.setPromotionLabel("");
         dto.setBookStockQuantity(0);
         dto.setBookActive(false);
-
         return dto;
     }
 
@@ -704,30 +658,23 @@ public class CartService {
     }
 
     private void recalculateTotal(Cart cart) {
-
         if (cart == null || cart.getItems() == null || cart.getItems().isEmpty()) {
-
             if (cart != null) {
                 cart.setTotalAmount(BigDecimal.ZERO);
             }
-
             return;
         }
 
-        BigDecimal total = cart.getItems()
-                .stream()
+        BigDecimal total = cart.getItems().stream()
                 .filter(item -> item != null)
                 .map(item -> {
-
-                    BigDecimal effectivePrice = BigDecimal.ZERO;
-
-                    if (item.getBook() != null) {
-                        effectivePrice = promotionService.getEffectivePrice(item.getBook());
+                    BigDecimal unitPrice = BigDecimal.ZERO;
+                    if (item.getBook() != null && item.getBook().getPrice() != null) {
+                        unitPrice = item.getBook().getPrice();
                     } else if (item.getVppItem() != null && item.getVppItem().getPrice() != null) {
-                        effectivePrice = item.getVppItem().getPrice();
+                        unitPrice = item.getVppItem().getPrice();
                     }
-
-                    return effectivePrice.multiply(BigDecimal.valueOf(item.getQuantity()));
+                    return unitPrice.multiply(BigDecimal.valueOf(item.getQuantity()));
                 })
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
 

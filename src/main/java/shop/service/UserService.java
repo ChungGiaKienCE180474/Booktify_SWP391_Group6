@@ -1,6 +1,7 @@
 package shop.service;
 
 import java.util.List;
+import java.util.Locale;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -9,6 +10,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import shop.domain.dto.StaffDTO;
 import shop.domain.Role;
 import shop.domain.RoleName;
@@ -22,6 +24,12 @@ import shop.repository.UserRepository;
 
 @Service
 public class UserService {
+
+    private static final int MAX_NAME_LENGTH = 150;
+    private static final int MAX_ADDRESS_LENGTH = 500;
+    private static final String PHONE_PATTERN = "^(0[35789])[0-9]{8}$";
+    private static final String PASSWORD_PATTERN =
+            "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d).{8,72}$";
 
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
@@ -43,11 +51,27 @@ public class UserService {
         return user;
     }
 
+    @Transactional
     public User registerNewUser(RegisterDTO registerDTO, RoleName roleName) {
+        if (registerDTO == null) {
+            throw new IllegalArgumentException("Registration information is required.");
+        }
+
+        String normalizedEmail = normalizeEmail(registerDTO.getEmail());
+        if (normalizedEmail == null || normalizedEmail.isBlank()) {
+            throw new IllegalArgumentException("Email is required.");
+        }
+        if (userRepository.existsByEmailIgnoreCase(normalizedEmail)) {
+            throw new IllegalArgumentException(
+                    "This email address is already used by another customer or staff account."
+            );
+        }
+
         User user = registerDTOtoUser(registerDTO);
         user.setPassword(passwordEncoder.encode(registerDTO.getPassword()));
         user.setRole(getRoleByName(roleName));
         user.setStatus(true);
+        user.setDeleted(false);
         user.setAuthProvider(AuthProvider.LOCAL.name());
         return userRepository.save(user);
     }
@@ -73,6 +97,7 @@ public class UserService {
         user.setAvatar(avatarUrl);
         user.setRole(getRoleByName(RoleName.CUSTOMER));
         user.setStatus(true);
+        user.setDeleted(false);
         user.setAuthProvider(AuthProvider.GOOGLE.name());
         return userRepository.save(user);
     }
@@ -88,7 +113,7 @@ public class UserService {
         if (email == null) {
             return null;
         }
-        return email.trim().toLowerCase();
+        return email.trim().toLowerCase(Locale.ROOT);
     }
 
     public Role getRoleByName(String name) {
@@ -168,6 +193,13 @@ public class UserService {
 
     // ================= CUSTOMER MANAGEMENT =================
 
+    private boolean isCustomer(User user) {
+        return user.getRole() != null
+                && "CUSTOMER".equalsIgnoreCase(
+                user.getRole().getName()
+        );
+    }
+
     private CustomerDTO toCustomerDTO(User user) {
         return new CustomerDTO(
                 user.getId(),
@@ -181,8 +213,13 @@ public class UserService {
     }
 
     private String generateCustomerCode(Long id) {
-        return String.format("CUS-%06d",
-                Math.abs((id * 7919 + 104729) % 1000000));
+        return String.format(
+                "CUS-%06d",
+                Math.abs(
+                        (id * 7919 + 104729)
+                                % 1000000
+                )
+        );
     }
 
     public Page<CustomerDTO> getCustomersPage(
@@ -190,69 +227,168 @@ public class UserService {
             String status,
             Pageable pageable) {
 
-        List<CustomerDTO> customers = userRepository.findAll()
-                .stream()
-                .filter(u -> u.getRole() != null
-                        && "CUSTOMER".equalsIgnoreCase(u.getRole().getName()))
-                .map(this::toCustomerDTO)
-                .collect(Collectors.toList());
+        String normalizedKeyword =
+                keyword == null
+                        ? ""
+                        : keyword.trim().toLowerCase();
 
-        int start = (int) pageable.getOffset();
-        int end = Math.min(start + pageable.getPageSize(), customers.size());
+        List<CustomerDTO> customers =
+                userRepository.findAll()
+                        .stream()
+                        .filter(this::isCustomer)
+                        .filter(user -> !user.isDeleted())
+                        .filter(user -> {
+
+                            if (normalizedKeyword.isEmpty()) {
+                                return true;
+                            }
+
+                            return containsIgnoreCase(
+                                    user.getEmail(),
+                                    normalizedKeyword
+                            )
+                                    || containsIgnoreCase(
+                                    user.getFullName(),
+                                    normalizedKeyword
+                            )
+                                    || containsIgnoreCase(
+                                    user.getPhone(),
+                                    normalizedKeyword
+                            )
+                                    || containsIgnoreCase(
+                                    user.getAddress(),
+                                    normalizedKeyword
+                            );
+                        })
+                        .filter(user -> {
+
+                            if (status == null
+                                    || "all".equalsIgnoreCase(status)) {
+                                return true;
+                            }
+
+                            if ("active".equalsIgnoreCase(status)) {
+                                return user.isStatus();
+                            }
+
+                            if ("inactive".equalsIgnoreCase(status)) {
+                                return !user.isStatus();
+                            }
+
+                            return true;
+                        })
+                        .map(this::toCustomerDTO)
+                        .collect(Collectors.toList());
+
+        int start =
+                (int) pageable.getOffset();
+
+        int end =
+                Math.min(
+                        start + pageable.getPageSize(),
+                        customers.size()
+                );
 
         List<CustomerDTO> pageContent =
                 start >= customers.size()
                         ? List.of()
                         : customers.subList(start, end);
 
-        return new PageImpl<>(pageContent, pageable, customers.size());
+        return new PageImpl<>(
+                pageContent,
+                pageable,
+                customers.size()
+        );
+    }
+
+    private boolean containsIgnoreCase(
+            String value,
+            String normalizedKeyword) {
+
+        return value != null
+                && value.toLowerCase()
+                .contains(normalizedKeyword);
     }
 
     public CustomerDTO getCustomerDTOById(Long id) {
+
+        if (id == null) {
+            return null;
+        }
+
         return userRepository.findById(id)
+                .filter(this::isCustomer)
+                .filter(user -> !user.isDeleted())
                 .map(this::toCustomerDTO)
                 .orElse(null);
     }
 
     public long countCustomers() {
+
         return userRepository.findAll()
                 .stream()
-                .filter(u -> u.getRole() != null
-                        && "CUSTOMER".equalsIgnoreCase(u.getRole().getName()))
+                .filter(this::isCustomer)
+                .filter(user -> !user.isDeleted())
                 .count();
     }
 
     public long countActiveCustomers() {
+
         return userRepository.findAll()
                 .stream()
-                .filter(u -> u.getRole() != null
-                        && "CUSTOMER".equalsIgnoreCase(u.getRole().getName()))
+                .filter(this::isCustomer)
+                .filter(user -> !user.isDeleted())
                 .filter(User::isStatus)
                 .count();
     }
 
     public long countInactiveCustomers() {
+
         return userRepository.findAll()
                 .stream()
-                .filter(u -> u.getRole() != null
-                        && "CUSTOMER".equalsIgnoreCase(u.getRole().getName()))
-                .filter(u -> !u.isStatus())
+                .filter(this::isCustomer)
+                .filter(user -> !user.isDeleted())
+                .filter(user -> !user.isStatus())
                 .count();
     }
 
     public void banUser(Long userId) {
-        userRepository.findById(userId).ifPresent(user -> {
-            user.setStatus(false);
-            userRepository.save(user);
-        });
+
+        userRepository.findById(userId)
+                .filter(this::isCustomer)
+                .filter(user -> !user.isDeleted())
+                .ifPresent(user -> {
+
+                    user.setStatus(false);
+                    userRepository.save(user);
+                });
     }
 
     public void unbanUser(Long userId) {
-        userRepository.findById(userId).ifPresent(user -> {
-            user.setStatus(true);
-            userRepository.save(user);
-        });
+
+        userRepository.findById(userId)
+                .filter(this::isCustomer)
+                .filter(user -> !user.isDeleted())
+                .ifPresent(user -> {
+
+                    user.setStatus(true);
+                    userRepository.save(user);
+                });
     }
+
+    public void softDeleteCustomer(Long userId) {
+
+        userRepository.findById(userId)
+                .filter(this::isCustomer)
+                .filter(user -> !user.isDeleted())
+                .ifPresent(user -> {
+
+                    user.setDeleted(true);
+                    user.setStatus(false);
+                    userRepository.save(user);
+                });
+    }
+
     // ================= STAFF MANAGEMENT =================
 
     private StaffDTO toStaffDTO(User user) {
@@ -310,100 +446,86 @@ public class UserService {
         return new PageImpl<>(pageContent, pageable, staffList.size());
     }
 
-    public Page<StaffDTO> getDeletedStaffPage(String keyword, Pageable pageable) {
-        List<StaffDTO> staffList = userRepository.findAll()
-                .stream()
-                .filter(this::isStaff)
-                .filter(User::isDeleted)
-                .filter(u -> {
-                    if (keyword == null || keyword.trim().isEmpty()) return true;
-                    String key = keyword.toLowerCase();
 
-                    return (u.getEmail() != null && u.getEmail().toLowerCase().contains(key))
-                            || (u.getFullName() != null && u.getFullName().toLowerCase().contains(key))
-                            || (u.getPhone() != null && u.getPhone().toLowerCase().contains(key))
-                            || (u.getAddress() != null && u.getAddress().toLowerCase().contains(key));
-                })
-                .map(this::toStaffDTO)
-                .collect(Collectors.toList());
-
-        int start = (int) pageable.getOffset();
-        int end = Math.min(start + pageable.getPageSize(), staffList.size());
-
-        List<StaffDTO> pageContent = start >= staffList.size()
-                ? List.of()
-                : staffList.subList(start, end);
-
-        return new PageImpl<>(pageContent, pageable, staffList.size());
-    }
 
     public StaffDTO getStaffDTOById(Long id) {
+        if (id == null) {
+            return null;
+        }
         return userRepository.findById(id)
                 .filter(this::isStaff)
+                .filter(user -> !user.isDeleted())
                 .map(this::toStaffDTO)
                 .orElse(null);
     }
 
+    @Transactional
     public User createStaff(String fullName, String email, String password,
                             String phone, String address) {
+        String normalizedFullName = validateAndNormalizeFullName(fullName);
+        String normalizedEmail = normalizeEmail(email);
+        String normalizedPhone = validateAndNormalizePhone(phone);
+        String normalizedAddress = validateAndNormalizeAddress(address);
+        validatePassword(password, "Password");
+
+        if (normalizedEmail == null || normalizedEmail.isBlank()) {
+            throw new IllegalArgumentException("Email is required.");
+        }
+
+        if (userRepository.existsByEmailIgnoreCase(normalizedEmail)) {
+            throw new IllegalArgumentException(
+                    "This email address is already used by another customer or staff account."
+            );
+        }
+
+        Role staffRole = getRoleByName(RoleName.STAFF);
+        if (staffRole == null) {
+            throw new IllegalStateException("The STAFF role is not configured.");
+        }
+
         User staff = new User();
-        staff.setFullName(fullName);
-        staff.setEmail(normalizeEmail(email));
+        staff.setFullName(normalizedFullName);
+        staff.setEmail(normalizedEmail);
         staff.setPassword(passwordEncoder.encode(password));
-        staff.setPhone(phone);
-        staff.setAddress(address);
+        staff.setPhone(normalizedPhone);
+        staff.setAddress(normalizedAddress);
         staff.setStatus(true);
         staff.setDeleted(false);
         staff.setAuthProvider(AuthProvider.LOCAL.name());
-        staff.setRole(getRoleByName(RoleName.STAFF));
+        staff.setRole(staffRole);
 
         return userRepository.save(staff);
     }
 
+    @Transactional
     public void updateStaff(Long id, String fullName, String phone, String address) {
-        userRepository.findById(id).ifPresent(staff -> {
-            staff.setFullName(fullName);
-            staff.setPhone(phone);
-            staff.setAddress(address);
-            userRepository.save(staff);
-        });
+        User staff = findActiveStaffOrThrow(id);
+        staff.setFullName(validateAndNormalizeFullName(fullName));
+        staff.setPhone(validateAndNormalizePhone(phone));
+        staff.setAddress(validateAndNormalizeAddress(address));
+        userRepository.save(staff);
     }
 
+    @Transactional
     public void updateStaffPassword(Long id, String newPassword) {
-        userRepository.findById(id).ifPresent(staff -> {
-            staff.setPassword(passwordEncoder.encode(newPassword));
-            userRepository.save(staff);
-        });
+        validatePassword(newPassword, "New password");
+        User staff = findActiveStaffOrThrow(id);
+        staff.setPassword(passwordEncoder.encode(newPassword));
+        userRepository.save(staff);
     }
 
-    public void softDeleteStaff(Long id) {
-        userRepository.findById(id).ifPresent(staff -> {
-            staff.setDeleted(true);
-            staff.setStatus(false);
-            userRepository.save(staff);
-        });
-    }
-
-    public void restoreStaff(Long id) {
-        userRepository.findById(id).ifPresent(staff -> {
-            staff.setDeleted(false);
-            staff.setStatus(true);
-            userRepository.save(staff);
-        });
-    }
-
+    @Transactional
     public void banStaff(Long id) {
-        userRepository.findById(id).ifPresent(staff -> {
-            staff.setStatus(false);
-            userRepository.save(staff);
-        });
+        User staff = findActiveStaffOrThrow(id);
+        staff.setStatus(false);
+        userRepository.save(staff);
     }
 
+    @Transactional
     public void unbanStaff(Long id) {
-        userRepository.findById(id).ifPresent(staff -> {
-            staff.setStatus(true);
-            userRepository.save(staff);
-        });
+        User staff = findActiveStaffOrThrow(id);
+        staff.setStatus(true);
+        userRepository.save(staff);
     }
 
     public long countStaff() {
@@ -434,5 +556,72 @@ public class UserService {
                 .filter(this::isStaff)
                 .filter(User::isDeleted)
                 .count();
+    }
+
+    private User findActiveStaffOrThrow(Long id) {
+        if (id == null) {
+            throw new IllegalArgumentException("Staff ID is required.");
+        }
+
+        return userRepository.findById(id)
+                .filter(this::isStaff)
+                .filter(user -> !user.isDeleted())
+                .orElseThrow(() -> new IllegalArgumentException("Staff not found."));
+    }
+
+    private String validateAndNormalizeFullName(String fullName) {
+        if (fullName == null || fullName.isBlank()) {
+            throw new IllegalArgumentException("Full name is required.");
+        }
+
+        String normalized = fullName.trim().replaceAll("\\s+", " ");
+        if (normalized.length() < 3 || normalized.length() > MAX_NAME_LENGTH) {
+            throw new IllegalArgumentException(
+                    "Full name must be between 3 and 150 characters."
+            );
+        }
+        return normalized;
+    }
+
+    private String validateAndNormalizePhone(String phone) {
+        if (phone == null || phone.isBlank()) {
+            throw new IllegalArgumentException("Phone number is required.");
+        }
+
+        String normalized = phone.trim();
+        if (!normalized.matches(PHONE_PATTERN)) {
+            throw new IllegalArgumentException(
+                    "Please enter a valid Vietnamese phone number."
+            );
+        }
+        return normalized;
+    }
+
+    private String validateAndNormalizeAddress(String address) {
+        if (address == null || address.isBlank()) {
+            throw new IllegalArgumentException("Address is required.");
+        }
+
+        String normalized = address.trim().replaceAll("\\s+", " ");
+        if (normalized.length() > MAX_ADDRESS_LENGTH) {
+            throw new IllegalArgumentException(
+                    "Address must not exceed 500 characters."
+            );
+        }
+        return normalized;
+    }
+
+    private void validatePassword(String password, String fieldName) {
+        if (password == null || password.isBlank()) {
+            throw new IllegalArgumentException(fieldName + " is required.");
+        }
+
+        if (!password.matches(PASSWORD_PATTERN)) {
+            throw new IllegalArgumentException(
+                    fieldName
+                            + " must be between 8 and 72 characters and contain "
+                            + "an uppercase letter, a lowercase letter, and a number."
+            );
+        }
     }
 }

@@ -437,17 +437,6 @@
             font-size: 14px;
         }
 
-        .status-modal input {
-            width: 100%;
-            padding: 12px;
-            border: 1px solid #d1d5db;
-            border-radius: 10px;
-            margin-top: 10px;
-            outline: none;
-            color: #111827;
-            background: #ffffff;
-        }
-
         .status-modal-actions {
             display: flex;
             gap: 12px;
@@ -659,6 +648,34 @@
             .order-view-link i {
                 font-size: 12px;
             }
+        }
+        .customer-confirm-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 14px;
+        }
+
+        .customer-confirm-title i {
+            color: #ef4444;
+            font-size: 20px;
+        }
+
+        .customer-confirm-title h3 {
+            margin: 0;
+        }
+
+        .status-cancel,
+        .status-confirm {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 7px;
+        }
+
+        .status-confirm {
+            opacity: 1;
+            cursor: pointer;
         }
     </style>
 </head>
@@ -944,45 +961,78 @@
     </div>
 </div>
 
-<div id="statusModal" class="status-modal-overlay">
+<div id="statusModal"
+     class="status-modal-overlay">
+
     <div class="status-modal">
-        <h3 id="statusModalTitle">Confirm Account Action</h3>
 
-        <p>You are about to change the account status of customer:</p>
+        <div class="customer-confirm-title">
 
-        <p>
-            <strong>Name:</strong> <span id="statusCustomerName"></span><br>
-            <strong>Email:</strong> <span id="statusCustomerEmail"></span>
+            <i id="statusModalIcon"
+               class="fa-solid fa-circle-exclamation"></i>
+
+            <h3 id="statusModalTitle">
+                Confirm Account Action
+            </h3>
+
+        </div>
+
+        <p id="statusModalDescription">
+            Are you sure you want to change this customer account?
         </p>
 
-        <div class="status-warning" id="statusWarningText">
+        <p>
+            <strong>Name:</strong>
+            <span id="statusCustomerName"></span>
+            <br>
+
+            <strong>Email:</strong>
+            <span id="statusCustomerEmail"></span>
+        </p>
+
+        <div class="status-warning"
+             id="statusWarningText">
+
             This action will change customer account status.
         </div>
 
-        <p>
-            To confirm, type <strong id="statusConfirmWord">BAN</strong> below:
-        </p>
+        <form id="statusForm"
+              method="post">
 
-        <form id="statusForm" method="post">
-            <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}" />
-            <input type="hidden" id="statusUserId" name="userId" />
+            <input type="hidden"
+                   name="${_csrf.parameterName}"
+                   value="${_csrf.token}"/>
 
-            <input type="text"
-                   id="statusInput"
-                   placeholder="Type to confirm"
-                   oninput="checkStatusInput()" />
+            <input type="hidden"
+                   id="statusUserId"
+                   name="userId"/>
 
             <div class="status-modal-actions">
-                <button type="button" class="status-cancel" onclick="closeStatusModal()">
-                    Cancel
+
+                <button type="button"
+                        class="status-cancel"
+                        onclick="closeStatusModal()">
+
+                    <i class="fa-solid fa-xmark"></i>
+                    No
                 </button>
 
-                <button type="submit" id="statusSubmit" class="status-confirm" disabled>
-                    Confirm
+                <button type="submit"
+                        id="statusSubmit"
+                        class="status-confirm enabled">
+
+                    <i id="statusSubmitIcon"
+                       class="fa-solid fa-check"></i>
+
+                    Yes
                 </button>
+
             </div>
+
         </form>
+
     </div>
+
 </div>
 
 <jsp:include page="/WEB-INF/view/layout/admin/toast.jsp" />
@@ -1087,66 +1137,112 @@
         }
     }
 
-    let requiredStatusWord = "BAN";
 
-    function openStatusModal(userId, fullName, email, action) {
-        requiredStatusWord = action;
+    function openStatusModal(
+            userId,
+            fullName,
+            email,
+            action) {
 
-        document.getElementById("statusUserId").value = userId;
-        document.getElementById("statusCustomerName").innerText = fullName || "N/A";
-        document.getElementById("statusCustomerEmail").innerText = email || "N/A";
-        document.getElementById("statusConfirmWord").innerText = action;
-        document.getElementById("statusInput").value = "";
+        document.getElementById(
+            "statusUserId"
+        ).value = userId;
 
-        const title = document.getElementById("statusModalTitle");
-        const warning = document.getElementById("statusWarningText");
-        const form = document.getElementById("statusForm");
-        const submit = document.getElementById("statusSubmit");
+        document.getElementById(
+            "statusCustomerName"
+        ).innerText = fullName || "N/A";
+
+        document.getElementById(
+            "statusCustomerEmail"
+        ).innerText = email || "N/A";
+
+        const title =
+            document.getElementById(
+                "statusModalTitle"
+            );
+
+        const description =
+            document.getElementById(
+                "statusModalDescription"
+            );
+
+        const warning =
+            document.getElementById(
+                "statusWarningText"
+            );
+
+        const form =
+            document.getElementById(
+                "statusForm"
+            );
+
+        const submit =
+            document.getElementById(
+                "statusSubmit"
+            );
+
+        const submitIcon =
+            document.getElementById(
+                "statusSubmitIcon"
+            );
 
         if (action === "BAN") {
-            title.innerText = "⚠️ Confirm Account Deactivation";
-            warning.innerHTML =
-                "This action will:<br>" +
-                "- Prevent the customer from logging in<br>" +
-                "- Send notification email to customer<br>" +
-                "- Can be undone later";
 
-            form.action = "/admin/customers/ban";
-            submit.innerText = "Deactivate Account";
-            submit.classList.remove("unban");
+            title.innerText =
+                "Confirm Account Deactivation";
+
+            description.innerText =
+                "Are you sure you want to deactivate this customer account?";
+
+            warning.innerHTML =
+                "The customer will be unable to log in.<br>"
+                + "A notification email will be sent.<br>"
+                + "This action can be undone later.";
+
+            form.action =
+                "/admin/customers/ban";
+
+            submit.className =
+                "status-confirm enabled";
+
+            submitIcon.className =
+                "fa-solid fa-ban";
+
         } else {
-            title.innerText = "✅ Confirm Account Activation";
-            warning.innerHTML =
-                "This action will:<br>" +
-                "- Allow the customer to log in again<br>" +
-                "- Send notification email to customer<br>" +
-                "- Can be changed later";
 
-            form.action = "/admin/customers/unban";
-            submit.innerText = "Activate Account";
-            submit.classList.add("unban");
+            title.innerText =
+                "Confirm Account Activation";
+
+            description.innerText =
+                "Are you sure you want to activate this customer account?";
+
+            warning.innerHTML =
+                "The customer will be allowed to log in again.<br>"
+                + "A notification email will be sent.<br>"
+                + "This action can be changed later.";
+
+            form.action =
+                "/admin/customers/unban";
+
+            submit.className =
+                "status-confirm unban enabled";
+
+            submitIcon.className =
+                "fa-solid fa-circle-check";
         }
 
-        checkStatusInput();
-        document.getElementById("statusModal").classList.add("show");
+        document.getElementById(
+            "statusModal"
+        ).classList.add("show");
     }
 
     function closeStatusModal() {
-        document.getElementById("statusModal").classList.remove("show");
+
+        document.getElementById(
+            "statusModal"
+        ).classList.remove("show");
     }
 
-    function checkStatusInput() {
-        const input = document.getElementById("statusInput").value.trim();
-        const submit = document.getElementById("statusSubmit");
-
-        if (input === requiredStatusWord) {
-            submit.disabled = false;
-            submit.classList.add("enabled");
-        } else {
-            submit.disabled = true;
-            submit.classList.remove("enabled");
-        }
-    }
 
     document.addEventListener("keydown", function (event) {
         if (event.key === "Escape") {

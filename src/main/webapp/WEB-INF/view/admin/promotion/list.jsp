@@ -644,6 +644,98 @@
                 width: 100%;
             }
         }
+        .simple-confirm-modal {
+            width: 440px;
+            max-width: 94vw;
+            overflow: hidden;
+            border-radius: 18px;
+            background: #ffffff;
+            box-shadow: 0 30px 90px rgba(15, 23, 42, 0.4);
+            animation: modalFade 0.2s ease;
+        }
+
+        .simple-confirm-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 20px 22px;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .simple-confirm-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .simple-confirm-title i {
+            color: #ef4444;
+            font-size: 19px;
+        }
+
+        .simple-confirm-title h3 {
+            margin: 0;
+            color: #111827;
+            font-size: 19px;
+            font-weight: 800;
+        }
+
+        .simple-confirm-body {
+            padding: 22px;
+            color: #4b5563;
+            line-height: 1.6;
+        }
+
+        .simple-confirm-body p {
+            margin: 0;
+        }
+
+        .simple-confirm-name {
+            margin-top: 12px !important;
+            color: #111827;
+        }
+
+        .simple-confirm-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+            padding: 16px 22px;
+            border-top: 1px solid #e5e7eb;
+            background: #f9fafb;
+        }
+
+        .simple-confirm-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 7px;
+            min-width: 92px;
+            padding: 10px 17px;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 800;
+            cursor: pointer;
+        }
+
+        .simple-confirm-btn.no {
+            border: 1px solid #d1d5db;
+            background: #ffffff;
+            color: #374151;
+        }
+
+        .simple-confirm-btn.yes {
+            border: none;
+            background: #ef4444;
+            color: #ffffff;
+        }
+
+        .simple-confirm-btn.no:hover {
+            background: #f3f4f6;
+        }
+
+        .simple-confirm-btn.yes:hover {
+            background: #dc2626;
+        }
     </style>
 </head>
 
@@ -789,27 +881,16 @@
                                     Edit
                                 </button>
 
-                                <form action="${pageContext.request.contextPath}/admin/promotions/${p.id}/delete"
-                                      method="post"
-                                      style="display:inline;">
+                                <button type="button"
+                                        class="card-btn delete"
+                                        onclick="openPromotionDeleteModal(
+                                                '${p.id}',
+                                                '<c:out value="${p.name}"/>'
+                                                )">
 
-                                    <c:if test="${not empty _csrf}">
-
-                                        <input type="hidden"
-                                               name="${_csrf.parameterName}"
-                                               value="${_csrf.token}"/>
-
-                                    </c:if>
-
-                                    <button type="submit"
-                                            class="card-btn delete"
-                                            onclick="return confirm('Are you sure you want to delete this promotion?')">
-
-                                        <i class="fa-solid fa-trash"></i>
-                                        Delete
-                                    </button>
-
-                                </form>
+                                    <i class="fa-solid fa-trash"></i>
+                                    Delete
+                                </button>
 
                             </div>
 
@@ -1193,7 +1274,72 @@
     </div>
 
 </div>
+<div id="promotionDeleteModal" class="modal-overlay">
 
+    <div class="simple-confirm-modal">
+
+        <div class="simple-confirm-header">
+
+            <div class="simple-confirm-title">
+                <i class="fa-solid fa-circle-exclamation"></i>
+                <h3>Confirm Delete Promotion</h3>
+            </div>
+
+            <button type="button"
+                    class="modal-close"
+                    onclick="closePromotionDeleteModal()">
+
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+
+        </div>
+
+        <div class="simple-confirm-body">
+
+            <p>
+                Are you sure you want to delete this promotion?
+            </p>
+
+            <p class="simple-confirm-name">
+                <strong>Promotion:</strong>
+                <span id="promotionDeleteName"></span>
+            </p>
+
+        </div>
+
+        <form id="promotionDeleteForm"
+              method="post">
+
+            <c:if test="${not empty _csrf}">
+                <input type="hidden"
+                       name="${_csrf.parameterName}"
+                       value="${_csrf.token}"/>
+            </c:if>
+
+            <div class="simple-confirm-actions">
+
+                <button type="button"
+                        class="simple-confirm-btn no"
+                        onclick="closePromotionDeleteModal()">
+
+                    <i class="fa-solid fa-xmark"></i>
+                    No
+                </button>
+
+                <button type="submit"
+                        class="simple-confirm-btn yes">
+
+                    <i class="fa-solid fa-trash"></i>
+                    Yes
+                </button>
+
+            </div>
+
+        </form>
+
+    </div>
+
+</div>
 <jsp:include page="/WEB-INF/view/layout/admin/toast.jsp" />
 
 <script>
@@ -1242,6 +1388,7 @@
 
                 if (event.key === 'Escape') {
                     closeModal();
+                    closePromotionDeleteModal();
                 }
             });
 
@@ -1651,7 +1798,31 @@
 
         return true;
     }
+    function openPromotionDeleteModal(promotionId, promotionName) {
 
+        document.getElementById(
+            'promotionDeleteName'
+        ).innerText = promotionName || 'N/A';
+
+        document.getElementById(
+            'promotionDeleteForm'
+        ).action =
+            contextPath
+            + '/admin/promotions/'
+            + promotionId
+            + '/delete';
+
+        document.getElementById(
+            'promotionDeleteModal'
+        ).classList.add('show');
+    }
+
+    function closePromotionDeleteModal() {
+
+        document.getElementById(
+            'promotionDeleteModal'
+        ).classList.remove('show');
+    }
     function closeModal() {
 
         document.getElementById(
