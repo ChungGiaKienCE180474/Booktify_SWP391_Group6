@@ -70,7 +70,7 @@ public class AdminVppItemController {
         int toItem = Math.min((page + 1) * PAGE_SIZE, (int) totalItems);
 
         model.addAttribute("items", itemPage.getContent());
-        model.addAttribute("categories", categoryService.getFixedVppCategories());
+        model.addAttribute("categories", categoryService.getActiveCategories());
 
         model.addAttribute("q", q);
         model.addAttribute("selectedCategoryId", categoryId);
@@ -239,7 +239,7 @@ public class AdminVppItemController {
     }
 
     private void loadFormData(Model model, String formMode) {
-        model.addAttribute("categories", categoryService.getFixedVppCategories());
+        model.addAttribute("categories", categoryService.getActiveCategories());
         model.addAttribute("activeSuppliers", supplierService.getAllActive());
         model.addAttribute("formMode", formMode);
     }

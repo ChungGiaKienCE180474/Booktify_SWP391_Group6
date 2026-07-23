@@ -985,6 +985,8 @@
     </div>
 </div>
 
+<jsp:include page="/WEB-INF/view/layout/admin/toast.jsp" />
+
 <script>
     function openCustomerModal(customerId, customerCode, initial, fullName, email, phone, address, status) {
         document.getElementById("modalCustomerId").innerText = customerCode || customerId;

@@ -144,7 +144,11 @@ public class VppItemService {
             throw new IllegalArgumentException("Product name already exists.");
         }
 
+        // Stock is intentionally left untouched here — same rule as Book:
+        // it only ever changes via order placement, not through this edit form.
+        int currentStock = item.getStockQuantity() == null ? 0 : item.getStockQuantity();
         applyDtoToEntity(item, dto);
+        item.setStockQuantity(currentStock);
         applyImageToEntity(item, imageFile);
 
         return toDto(itemRepository.save(item));

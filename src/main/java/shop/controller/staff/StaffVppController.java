@@ -53,7 +53,7 @@ public class StaffVppController {
         long totalItems = itemPage.getTotalElements();
 
         model.addAttribute("items", itemPage.getContent());
-        model.addAttribute("categories", vppCategoryService.getFixedVppCategories());
+        model.addAttribute("categories", vppCategoryService.getActiveCategories());
 
         model.addAttribute("q", q);
         model.addAttribute("selectedCategoryId", categoryId);
