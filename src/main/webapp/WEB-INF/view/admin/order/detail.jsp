@@ -150,14 +150,23 @@
 
                         <form class="status-form" method="post" action="/admin/orders/${order.id}/status">
                             <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}" />
-                            <select name="status" required>
-                                <c:forEach items="${orderStatuses}" var="st">
-                                    <option value="${st}" <c:if test="${order.status eq st}">selected</c:if>>${st.label}</option>
-                                </c:forEach>
-                            </select>
-                            <button type="submit" class="admin-button admin-button--primary">
-                                <i class="fa-solid fa-rotate"></i> Update Status
-                            </button>
+                            <c:choose>
+                                <c:when test="${empty allowedNextStatuses}">
+                                    <p style="margin:0;color:#6B7280;font-size:.88rem;">
+                                        This order is in a final status and cannot be changed.
+                                    </p>
+                                </c:when>
+                                <c:otherwise>
+                                    <select name="status" required>
+                                        <c:forEach items="${allowedNextStatuses}" var="st">
+                                            <option value="${st}">${st.label}</option>
+                                        </c:forEach>
+                                    </select>
+                                    <button type="submit" class="admin-button admin-button--primary">
+                                        <i class="fa-solid fa-rotate"></i> Update Status
+                                    </button>
+                                </c:otherwise>
+                            </c:choose>
                         </form>
                     </div>
                 </div>

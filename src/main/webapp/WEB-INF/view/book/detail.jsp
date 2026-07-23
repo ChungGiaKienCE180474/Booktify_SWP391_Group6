@@ -368,21 +368,6 @@
         <span>${book.title}</span>
     </nav>
 
-    <c:if test="${not empty successMessage}">
-        <div style="max-width:1200px;margin:0 auto;padding:0 1.5rem;">
-            <div style="background:#dcfce7;color:#166534;padding:.75rem 1rem;border-radius:8px;margin-bottom:.5rem;">
-                ${successMessage}
-            </div>
-        </div>
-    </c:if>
-    <c:if test="${not empty errorMessage}">
-        <div style="max-width:1200px;margin:0 auto;padding:0 1.5rem;">
-            <div style="background:#fee2e2;color:#991b1b;padding:.75rem 1rem;border-radius:8px;margin-bottom:.5rem;">
-                ${errorMessage}
-            </div>
-        </div>
-    </c:if>
-
     <%-- Detail --%>
     <div class="detail-wrap">
 
@@ -473,7 +458,7 @@
                     <c:when test="${book.active and book.stockQuantity > 0}">
                         <c:choose>
                             <c:when test="${not empty sessionScope.username}">
-                                <form action="/cart/add" method="post" class="detail-cart-form">
+                                <form action="/cart/add" method="post" class="detail-cart-form js-cart-add-form">
                                     <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}" />
                                     <input type="hidden" name="bookId" value="${book.id}" />
                                     <input type="hidden" name="redirect" value="/books/${book.id}" />
