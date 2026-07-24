@@ -5,7 +5,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import shop.domain.Book;
 import shop.domain.Category;
+import shop.domain.Cart;
 import shop.domain.Promotion;
+import shop.domain.PromotionSelection;
 import shop.repository.PromotionRepository;
 
 import java.math.BigDecimal;
@@ -49,22 +51,17 @@ public class PromotionService {
 
     public boolean hasCategoryConflict(
             Long categoryId,
+            boolean percentage,
             LocalDateTime startDate,
             LocalDateTime endDate,
             Long excludePromotionId) {
 
-        if (categoryId == null
-                || startDate == null
-                || endDate == null) {
+        if (categoryId == null || startDate == null || endDate == null) {
             return false;
         }
 
         return promotionRepository.existsConflictingPromotion(
-                categoryId,
-                startDate,
-                endDate,
-                excludePromotionId
-        );
+                categoryId, percentage, startDate, endDate, excludePromotionId);
     }
 
     @Transactional
@@ -79,6 +76,59 @@ public class PromotionService {
                     promotion.setActive(false);
                     promotionRepository.save(promotion);
                 });
+    }
+
+
+    @Transactional(readOnly = true)
+    public Optional<Promotion> getActivePromotionForBookByType(Book book, boolean percentage) {
+        if (book == null || book.getPrice() == null || book.getCategory() == null
+                || book.getCategory().getId() == null) {
+            return Optional.empty();
+        }
+
+        return promotionRepository
+                .findActivePromotionsByCategoryIdAndType(book.getCategory().getId(), percentage)
+                .stream()
+                .findFirst();
+    }
+
+    @Transactional(readOnly = true)
+    public Optional<Promotion> getPromotionForSelection(Book book, PromotionSelection selection) {
+        if (selection == null || selection == PromotionSelection.NONE) {
+            return Optional.empty();
+        }
+        return getActivePromotionForBookByType(book, selection == PromotionSelection.PERCENTAGE);
+    }
+
+    @Transactional(readOnly = true)
+    public BigDecimal getPriceForSelection(Book book, PromotionSelection selection) {
+        if (book == null || book.getPrice() == null) {
+            return BigDecimal.ZERO.setScale(2, RoundingMode.HALF_UP);
+        }
+        return getPromotionForSelection(book, selection)
+                .map(promotion -> calculateDiscountedPrice(book.getPrice(), promotion))
+                .orElse(book.getPrice().setScale(2, RoundingMode.HALF_UP));
+    }
+
+    @Transactional(readOnly = true)
+    public BigDecimal calculateCartTotal(Cart cart, PromotionSelection selection) {
+        if (cart == null || cart.getItems() == null || cart.getItems().isEmpty()) {
+            return BigDecimal.ZERO.setScale(2, RoundingMode.HALF_UP);
+        }
+
+        return cart.getItems().stream()
+                .filter(item -> item != null)
+                .map(item -> {
+                    BigDecimal unitPrice = BigDecimal.ZERO;
+                    if (item.getBook() != null) {
+                        unitPrice = getPriceForSelection(item.getBook(), selection);
+                    } else if (item.getVppItem() != null && item.getVppItem().getPrice() != null) {
+                        unitPrice = item.getVppItem().getPrice();
+                    }
+                    return unitPrice.multiply(BigDecimal.valueOf(item.getQuantity()));
+                })
+                .reduce(BigDecimal.ZERO, BigDecimal::add)
+                .setScale(2, RoundingMode.HALF_UP);
     }
 
     /**
@@ -578,5 +628,93 @@ public class PromotionService {
                                 && item.getId()
                                 .equals(category.getId())
                 );
+    }
+    @Transactional(readOnly = true)
+    public boolean hasApplicablePromotion(
+            Cart cart,
+            PromotionSelection selection) {
+
+        if (cart == null
+                || cart.getItems() == null
+                || cart.getItems().isEmpty()
+                || selection == null
+                || selection == PromotionSelection.NONE) {
+            return false;
+        }
+
+        return cart.getItems()
+                .stream()
+                .filter(item -> item != null)
+                .filter(item -> item.getBook() != null)
+                .anyMatch(item ->
+                        getPromotionForSelection(
+                                item.getBook(),
+                                selection
+                        ).isPresent()
+                );
+    }
+    @Transactional(readOnly = true)
+    public BigDecimal calculateCartTotalBySelections(
+            Cart cart,
+            Map<Long, String> bookPromotionSelections) {
+
+        if (cart == null
+                || cart.getItems() == null
+                || cart.getItems().isEmpty()) {
+
+            return BigDecimal.ZERO.setScale(
+                    2,
+                    RoundingMode.HALF_UP
+            );
+        }
+
+        return cart.getItems()
+                .stream()
+                .filter(item -> item != null)
+                .map(item -> {
+                    BigDecimal unitPrice = BigDecimal.ZERO;
+
+                    if (item.getBook() != null) {
+                        Book book = item.getBook();
+
+                        String selectedValue =
+                                bookPromotionSelections == null
+                                        ? null
+                                        : bookPromotionSelections.get(
+                                        book.getId()
+                                );
+
+                        PromotionSelection selection =
+                                PromotionSelection.fromValue(
+                                        selectedValue
+                                );
+
+                        /*
+                         * getPriceForSelection() tự kiểm tra:
+                         * - promotion còn hoạt động;
+                         * - đúng thể loại;
+                         * - đúng loại % hoặc VND.
+                         *
+                         * Nếu lựa chọn không hợp lệ thì trả giá gốc.
+                         */
+                        unitPrice = getPriceForSelection(
+                                book,
+                                selection
+                        );
+                    } else if (item.getVppItem() != null
+                            && item.getVppItem().getPrice() != null) {
+
+                        unitPrice =
+                                item.getVppItem().getPrice();
+                    }
+
+                    return unitPrice.multiply(
+                            BigDecimal.valueOf(
+                                    item.getQuantity()
+                            )
+                    );
+                })
+                .reduce(BigDecimal.ZERO, BigDecimal::add)
+                .setScale(2, RoundingMode.HALF_UP);
     }
 }

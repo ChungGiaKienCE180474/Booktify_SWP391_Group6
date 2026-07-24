@@ -35,8 +35,8 @@ public class AdminPromotionController {
     }
 
     /*
-     * Hiển thị danh sách promotion.
-     * list.jsp dùng modal tạo và chỉnh sửa promotion.
+     * Displays the promotion list.
+     * list.jsp contains the create and edit promotion modal.
      */
     @GetMapping
     public String list(Model model) {
@@ -74,7 +74,7 @@ public class AdminPromotionController {
     }
 
     /*
-     * Hiển thị trang form tạo promotion riêng.
+     * Displays the separate promotion creation form.
      */
     @GetMapping("/create")
     public String createForm(Model model) {
@@ -103,7 +103,7 @@ public class AdminPromotionController {
     }
 
     /*
-     * Tạo promotion mới theo thể loại.
+     * Creates a new category-based promotion.
      */
     @PostMapping
     public String create(
@@ -149,8 +149,8 @@ public class AdminPromotionController {
         }
 
         /*
-         * Xóa dữ liệu category cũ nếu có,
-         * sau đó gán các category được chọn.
+         * Clears any existing category data and assigns
+         * the categories selected by the administrator.
          */
         promotion.getApplicableCategories().clear();
         promotion.getApplicableCategories().addAll(
@@ -172,7 +172,7 @@ public class AdminPromotionController {
     }
 
     /*
-     * Hiển thị trang chỉnh sửa promotion.
+     * Displays the promotion edit form.
      */
     @GetMapping("/{id}/edit")
     public String editForm(
@@ -245,7 +245,7 @@ public class AdminPromotionController {
     }
 
     /*
-     * Cập nhật promotion.
+     * Updates an existing promotion.
      */
     @PostMapping("/{id}")
     public String update(
@@ -341,8 +341,8 @@ public class AdminPromotionController {
         );
 
         /*
-         * Xóa danh sách category cũ
-         * và gán lại danh sách category mới.
+         * Replaces the previous category list
+         * with the newly selected categories.
          */
         existing.getApplicableCategories().clear();
         existing.getApplicableCategories().addAll(
@@ -364,7 +364,7 @@ public class AdminPromotionController {
     }
 
     /*
-     * Xóa mềm promotion.
+     * Soft-deletes a promotion.
      */
     @PostMapping("/{id}/delete")
     public String delete(
@@ -409,7 +409,7 @@ public class AdminPromotionController {
     }
 
     /*
-     * Kiểm tra toàn bộ dữ liệu promotion.
+     * Validates all promotion data.
      */
     private void validatePromotion(
             Promotion promotion,
@@ -449,7 +449,7 @@ public class AdminPromotionController {
     }
 
     /*
-     * Kiểm tra tên promotion bị trùng.
+     * Validates that the promotion name is unique.
      */
     private void validatePromotionName(
             Promotion promotion,
@@ -508,7 +508,7 @@ public class AdminPromotionController {
     }
 
     /*
-     * Kiểm tra ngày bắt đầu và ngày kết thúc.
+     * Validates the promotion start and end dates.
      */
     private void validatePromotionDates(
             Promotion promotion,
@@ -535,7 +535,7 @@ public class AdminPromotionController {
     }
 
     /*
-     * Kiểm tra giá trị giảm.
+     * Validates the promotion discount value.
      */
     private void validateDiscountValue(
             Promotion promotion,
@@ -548,12 +548,12 @@ public class AdminPromotionController {
             return;
         }
 
-        if (discountValue.compareTo(BigDecimal.ZERO) < 0) {
+        if (discountValue.compareTo(BigDecimal.ZERO) <= 0) {
 
             bindingResult.rejectValue(
                     "discountValue",
-                    "promotion.discountValue.negative",
-                    "Discount value cannot be negative."
+                    "promotion.discountValue.minimum",
+                    "Discount value must be greater than zero."
             );
 
             return;
@@ -561,19 +561,19 @@ public class AdminPromotionController {
 
         if (promotion.isPercentage()
                 && discountValue.compareTo(
-                BigDecimal.valueOf(100)
+                new BigDecimal("100")
         ) > 0) {
 
             bindingResult.rejectValue(
                     "discountValue",
-                    "promotion.discountValue.invalid",
-                    "Percentage discount cannot exceed 100%."
+                    "promotion.discountValue.maximum",
+                    "Percentage discount must not exceed 100%."
             );
         }
     }
 
     /*
-     * Kiểm tra category đã chọn có hợp lệ không.
+     * Validates the selected categories.
      */
     private void validateSelectedCategories(
             List<Long> categoryIds,
@@ -619,8 +619,8 @@ public class AdminPromotionController {
     }
 
     /*
-     * Không cho một category chạy nhiều promotion
-     * trong cùng khoảng thời gian.
+     * Prevents overlapping promotions of the same type
+     * for the same category.
      */
     private void validateCategoryConflicts(
             Promotion promotion,
@@ -637,7 +637,7 @@ public class AdminPromotionController {
         }
 
         /*
-         * Không kiểm tra conflict khi ngày đã sai.
+         * Skips conflict validation when the date range is invalid.
          */
         if (!promotion
                 .getEndDate()
@@ -658,6 +658,7 @@ public class AdminPromotionController {
             boolean hasConflict =
                     promotionService.hasCategoryConflict(
                             category.getId(),
+                            promotion.isPercentage(),
                             promotion.getStartDate(),
                             promotion.getEndDate(),
                             excludePromotionId
@@ -665,16 +666,22 @@ public class AdminPromotionController {
 
             if (hasConflict) {
 
+                String promotionType =
+                        promotion.isPercentage()
+                                ? "percentage"
+                                : "fixed amount";
+
                 bindingResult.reject(
                         "promotion.category.conflict",
                         "Category \""
                                 + category.getName()
-                                + "\" already has another promotion "
-                                + "during the selected period."
+                                + "\" already has an overlapping "
+                                + promotionType
+                                + " promotion during the selected period."
                 );
 
                 /*
-                 * Chỉ hiển thị lỗi conflict đầu tiên.
+                 * Displays only the first conflict error.
                  */
                 break;
             }
@@ -682,7 +689,7 @@ public class AdminPromotionController {
     }
 
     /*
-     * Lấy danh sách category đang active.
+     * Returns all active categories.
      */
     private List<Category> getActiveCategories() {
 
@@ -694,8 +701,7 @@ public class AdminPromotionController {
     }
 
     /*
-     * Lấy danh sách Category từ categoryIds.
-     * Chỉ nhận category đang active.
+     * Resolves category IDs into active Category entities.
      */
     private List<Category> getSelectedCategories(
             List<Long> categoryIds) {
@@ -730,7 +736,7 @@ public class AdminPromotionController {
     }
 
     /*
-     * Nạp lại dữ liệu cho list.jsp khi có lỗi.
+     * Repopulates list.jsp data after validation errors.
      */
     private void populateListPage(
             Model model,
@@ -761,7 +767,7 @@ public class AdminPromotionController {
     }
 
     /*
-     * Lấy thông báo lỗi đầu tiên.
+     * Returns the first validation error message.
      */
     private String getFirstErrorMessage(
             BindingResult bindingResult) {

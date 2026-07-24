@@ -1,0 +1,15 @@
+.promotion-help { margin: 0 0 12px; color: #64748b; font-size: .9rem; }
+.promotion-options { display: grid; gap: 10px; }
+.promotion-option { display: flex; align-items: flex-start; gap: 12px; padding: 14px; border: 1px solid #dbe4ee; border-radius: 12px; background: #fff; cursor: pointer; transition: .18s ease; }
+.promotion-option:hover { border-color: #2563eb; background: #f8fbff; }
+.promotion-option:has(input:checked) { border-color: #2563eb; box-shadow: 0 0 0 3px rgba(37, 99, 235, .1); background: #eff6ff; }
+.promotion-option input { margin-top: 4px; }
+.promotion-option span { display: flex; flex-direction: column; gap: 3px; }
+.promotion-option strong { color: #0f172a; }
+.promotion-option small { color: #64748b; line-height: 1.4; }
+.voucher-input-row { display: flex; gap: 10px; }
+.checkout-discount-value { color: #dc2626; font-weight: 700; }
+.checkout-preview-message { margin-bottom: 18px; }
+.checkout-preview-message.is-success { display: block; }
+.checkout-preview-message.is-error { display: block; }
+@media (max-width: 640px) { .voucher-input-row { flex-direction: column; } }

@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-
+import shop.service.UserSessionService;
 import shop.domain.dto.CustomerDTO;
 import shop.domain.dto.OrderDTO;
 import shop.service.EmailService;
@@ -30,7 +30,7 @@ import shop.service.UserService;
 public class CustomerController {
 
     private static final int PAGE_SIZE = 10;
-
+    private final UserSessionService userSessionService;
     private final UserService userService;
     private final EmailService emailService;
     private final OrderService orderService;
@@ -38,11 +38,13 @@ public class CustomerController {
     public CustomerController(
             UserService userService,
             EmailService emailService,
-            OrderService orderService) {
+            OrderService orderService,
+            UserSessionService userSessionService) {
 
         this.userService = userService;
         this.emailService = emailService;
         this.orderService = orderService;
+        this.userSessionService = userSessionService;
     }
 
     @GetMapping
@@ -202,7 +204,7 @@ public class CustomerController {
         return "admin/customer/list";
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("/{id:\\d+}")
     public String viewCustomerDetail(
             @PathVariable Long id,
             Model model,
@@ -238,7 +240,7 @@ public class CustomerController {
      * Returns the selected customer's order history for the customer detail
      * modal.
      */
-    @GetMapping("/{id}/orders")
+    @GetMapping("/{id:\\d+}/orders")
     @ResponseBody
     public ResponseEntity<List<OrderDTO>> getCustomerOrders(
             @PathVariable Long id) {
@@ -262,7 +264,9 @@ public class CustomerController {
             RedirectAttributes redirectAttributes) {
 
         CustomerDTO customer =
-                userService.getCustomerDTOById(userId);
+                userService.getCustomerDTOById(
+                        userId
+                );
 
         if (customer == null) {
 
@@ -274,29 +278,44 @@ public class CustomerController {
             return "redirect:/admin/customers";
         }
 
-        userService.banUser(userId);
+        userService.banUser(
+                userId
+        );
+
+        String warningMessage = null;
 
         try {
+            userSessionService.logoutUserImmediately(
+                    customer.getEmail()
+            );
+        } catch (Exception exception) {
+            warningMessage =
+                    "The customer was banned, but the active session could not be terminated immediately.";
+        }
 
+        try {
             emailService.sendStatusMail(
                     customer.getEmail(),
                     false
             );
-
         } catch (Exception exception) {
-
-            redirectAttributes.addFlashAttribute(
-                    "warningMessage",
-                    "The customer was banned, but the notification email could not be sent."
-            );
-
-            return "redirect:/admin/customers";
+            warningMessage = warningMessage == null
+                    ? "The customer was banned, but the notification email could not be sent."
+                    : warningMessage
+                    + " The notification email could not be sent.";
         }
 
-        redirectAttributes.addFlashAttribute(
-                "successMessage",
-                "Customer banned successfully."
-        );
+        if (warningMessage != null) {
+            redirectAttributes.addFlashAttribute(
+                    "warningMessage",
+                    warningMessage
+            );
+        } else {
+            redirectAttributes.addFlashAttribute(
+                    "successMessage",
+                    "Customer banned successfully. Active sessions were terminated and a notification email was sent."
+            );
+        }
 
         return "redirect:/admin/customers";
     }
@@ -342,6 +361,59 @@ public class CustomerController {
                 "successMessage",
                 "Customer unbanned successfully."
         );
+
+        return "redirect:/admin/customers";
+    }
+
+    @PostMapping("/delete")
+    public String deleteCustomer(
+            @RequestParam Long userId,
+            RedirectAttributes redirectAttributes) {
+
+        CustomerDTO customer =
+                userService.getCustomerDTOById(userId);
+
+        if (customer == null) {
+
+            redirectAttributes.addFlashAttribute(
+                    "errorMessage",
+                    "Customer not found."
+            );
+
+            return "redirect:/admin/customers";
+        }
+
+        try {
+
+            userService.softDeleteCustomer(userId);
+
+            userSessionService.logoutUserImmediately(
+                    customer.getEmail()
+            );
+
+            redirectAttributes.addFlashAttribute(
+                    "successMessage",
+                    "Customer deleted successfully. Active sessions were terminated."
+            );
+
+        } catch (Exception exception) {
+
+            /*
+             * Nếu tài khoản đã được soft-delete nhưng xóa session hoặc
+             * thao tác phụ thất bại, trạng thái khóa vẫn được giữ lại.
+             */
+            if (userService.getCustomerDTOById(userId) == null) {
+                redirectAttributes.addFlashAttribute(
+                        "warningMessage",
+                        "The customer was deleted, but the active session could not be terminated immediately."
+                );
+            } else {
+                redirectAttributes.addFlashAttribute(
+                        "errorMessage",
+                        "An error occurred while deleting the customer."
+                );
+            }
+        }
 
         return "redirect:/admin/customers";
     }
