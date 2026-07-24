@@ -92,12 +92,6 @@
             </div>
         </c:if>
 
-        <div
-            id="promotionPreviewMessage"
-            class="cart-alert checkout-preview-message"
-            hidden>
-        </div>
-
         <%-- CHECKOUT FORM --%>
 
         <form:form
@@ -306,118 +300,6 @@
 
                     </div>
 
-                    <%-- Product list --%>
-
-                    <div class="compact-product-list">
-
-                        <c:forEach
-                            items="${cart.items}"
-                            var="item">
-
-                            <c:set
-                                var="percentagePromotion"
-                                value="${percentagePromotionMap[item.bookId]}" />
-
-                            <c:set
-                                var="fixedPromotion"
-                                value="${fixedPromotionMap[item.bookId]}" />
-
-                            <div class="compact-product">
-
-                                <%-- Product information --%>
-
-                                <div class="compact-product-main">
-
-                                    <div class="compact-product-info">
-
-                                        <strong>
-                                            <c:out
-                                                value="${item.bookTitle}" />
-                                        </strong>
-
-                                        <small>
-                                            Quantity: ${item.quantity}
-                                        </small>
-
-                                    </div>
-
-                                    <div class="compact-product-price">
-
-                                        ${item.subtotalFormatted}
-
-                                        <span>
-                                            &#8363;
-                                        </span>
-
-                                    </div>
-
-                                </div>
-
-                                <%-- Promotion selection --%>
-
-                                <c:if test="${not empty percentagePromotion
-                                             or not empty fixedPromotion}">
-
-                                    <div class="compact-promotion-row">
-
-                                        <label>
-                                            <i class="fa-solid fa-tag"></i>
-                                            Promotion
-                                        </label>
-
-                                        <form:select
-                                            path="bookPromotionSelections[${item.bookId}]"
-                                            cssClass="compact-promotion-select promotion-selection">
-
-                                            <form:option
-                                                value="NONE"
-                                                label="No promotion" />
-
-                                            <c:if test="${not empty percentagePromotion}">
-
-                                                <form:option
-                                                    value="PERCENTAGE"
-                                                    label="Save ${percentagePromotion.discountValue}%" />
-
-                                            </c:if>
-
-                                            <c:if test="${not empty fixedPromotion}">
-
-                                                <form:option
-                                                    value="FIXED"
-                                                    label="Save ${fixedPromotion.discountValue} VND" />
-
-                                            </c:if>
-
-                                        </form:select>
-
-                                    </div>
-
-                                </c:if>
-
-                                <%-- No promotion --%>
-
-                                <c:if test="${empty percentagePromotion
-                                             and empty fixedPromotion}">
-
-                                    <div class="compact-no-promotion">
-
-                                        <i class="fa-regular fa-circle"></i>
-
-                                        <span>
-                                            No promotion available
-                                        </span>
-
-                                    </div>
-
-                                </c:if>
-
-                            </div>
-
-                        </c:forEach>
-
-                    </div>
-
                     <%-- Totals --%>
 
                     <div class="compact-total-box">
@@ -485,7 +367,21 @@
 <jsp:include
     page="/WEB-INF/view/layout/footer.jsp" />
 
-<script src="/js/checkout-promotion.js?v=6"></script>
-
 </body>
 </html>
+
+
+
+
+
+
+:root {
+    --cart-primary: #006B5E;
+    --cart-text: #1a1a2e;
+    --cart-muted: #64748b;
+    --cart-border: #e2e8f0;
+    --cart-white: #ffffff;
+    --cart-radius: 12px;
+    --cart-shadow: 0 4px 24px rgba(0, 107, 94, 0.08);
+}
+

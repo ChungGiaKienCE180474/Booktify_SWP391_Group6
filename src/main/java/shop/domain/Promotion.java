@@ -4,7 +4,7 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-
+import java.time.format.DateTimeFormatter;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -253,5 +253,24 @@ public class Promotion {
                 applicableCategories == null
                         ? new ArrayList<>()
                         : applicableCategories;
+    }
+    public String getStartDateFormatted() {
+        if (startDate == null) {
+            return "";
+        }
+
+        return startDate.format(
+                DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")
+        );
+    }
+
+    public String getEndDateFormatted() {
+        if (endDate == null) {
+            return "";
+        }
+
+        return endDate.format(
+                DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")
+        );
     }
 }

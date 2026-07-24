@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 
 import shop.domain.Book;
@@ -73,10 +74,13 @@ public class OrderController {
             CheckoutForm checkoutForm,
             BindingResult bindingResult,
             Model model,
-            RedirectAttributes redirectAttributes) {
+            RedirectAttributes redirectAttributes,
+            HttpSession session) {
 
         User user =
                 getCurrentUser(authentication);
+
+        applyCartPromotionSelections(checkoutForm, session);
 
         CartRefreshResult refreshResult =
                 cartService.refreshCartResult(
@@ -140,6 +144,10 @@ public class OrderController {
                             + order.getOrderCode()
             );
 
+            session.removeAttribute(
+                    CartController.PROMOTION_SESSION_KEY
+            );
+
             return "redirect:/orders/"
                     + order.getId();
 
@@ -174,10 +182,13 @@ public class OrderController {
             Authentication authentication,
             @ModelAttribute("checkoutForm")
             CheckoutForm checkoutForm,
-            Model model) {
+            Model model,
+            HttpSession session) {
 
         User user =
                 getCurrentUser(authentication);
+
+        applyCartPromotionSelections(checkoutForm, session);
 
         CartRefreshResult refreshResult =
                 cartService.refreshCartResult(
@@ -329,7 +340,8 @@ public class OrderController {
     @GetMapping("/checkout")
     public String checkoutForm(
             Authentication authentication,
-            Model model) {
+            Model model,
+            HttpSession session) {
 
         User user =
                 getCurrentUser(authentication);
@@ -371,6 +383,11 @@ public class OrderController {
                                     "checkoutForm"
                             );
         }
+
+        applyCartPromotionSelections(
+                checkoutForm,
+                session
+        );
 
         initializePromotionSelections(
                 refreshResult.getCart(),
@@ -678,6 +695,26 @@ public class OrderController {
         );
     }
 
+    @SuppressWarnings("unchecked")
+    private void applyCartPromotionSelections(
+            CheckoutForm checkoutForm,
+            HttpSession session) {
+
+        if (checkoutForm == null || session == null) {
+            return;
+        }
+
+        Object value = session.getAttribute(
+                CartController.PROMOTION_SESSION_KEY
+        );
+
+        if (value instanceof Map<?, ?>) {
+            checkoutForm.setBookPromotionSelections(
+                    new HashMap<>((Map<Long, String>) value)
+            );
+        }
+    }
+
     // =========================================================
     // PREVIEW RESPONSE
     // =========================================================
@@ -761,3 +798,5 @@ public class OrderController {
         return user;
     }
 }
+
+

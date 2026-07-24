@@ -736,6 +736,114 @@
         .simple-confirm-btn.yes:hover {
             background: #dc2626;
         }
+        .promotion-table-wrap {
+            overflow-x: auto;
+            border: 1px solid #e2e8f0;
+            border-radius: 14px;
+            background: #ffffff;
+            box-shadow: 0 8px 24px rgba(15, 23, 42, .06);
+        }
+
+        .promotion-table {
+            width: 100%;
+            min-width: 1180px;
+            border-collapse: collapse;
+        }
+
+        .promotion-table th,
+        .promotion-table td {
+            padding: 14px 16px;
+            border-bottom: 1px solid #e2e8f0;
+            vertical-align: middle;
+            text-align: left;
+        }
+
+        .promotion-table th {
+            background: #f8fafc;
+            color: #64748b;
+            font-size: 12px;
+            font-weight: 800;
+            letter-spacing: .045em;
+            text-transform: uppercase;
+            white-space: nowrap;
+        }
+
+        .promotion-table tbody tr:hover {
+            background: #f8fffd;
+        }
+
+        .promotion-table tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        .promotion-name {
+            max-width: 230px;
+            color: #111827;
+            font-weight: 800;
+        }
+
+        .promotion-description-cell {
+            max-width: 260px;
+            color: #475569;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .promotion-date {
+            color: #475569;
+            font-size: 13px;
+            white-space: nowrap;
+        }
+
+        .muted-text {
+            color: #94a3b8;
+        }
+
+        .promotion-action-heading {
+            text-align: center !important;
+        }
+
+        .promotion-table-actions {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 7px;
+            white-space: nowrap;
+        }
+
+        .promotion-icon-button {
+            width: 34px;
+            height: 34px;
+            padding: 0;
+            border: 1px solid #dbe3ea;
+            border-radius: 5px;
+            background: #ffffff;
+            color: #64748b;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all .2s ease;
+        }
+
+        .promotion-icon-button.edit:hover {
+            color: #d97706;
+            border-color: #f59e0b;
+            background: #fffbeb;
+        }
+
+        .promotion-icon-button.delete:hover {
+            color: #dc2626;
+            border-color: #ef4444;
+            background: #fef2f2;
+        }
+
+        .promotion-empty-state {
+            border: none;
+            box-shadow: none;
+        }
+
     </style>
 </head>
 
@@ -772,13 +880,13 @@
             <h3>Promotion List</h3>
         </div>
 
-        <div class="promotion-grid">
+        <div class="promotion-table-wrap">
 
             <c:choose>
 
                 <c:when test="${empty promotions}">
 
-                    <div class="empty-state">
+                    <div class="empty-state promotion-empty-state">
                         <i class="fa-solid fa-tags"></i>
                         <h3>No promotions found</h3>
                         <p>Create the first promotion campaign for the system.</p>
@@ -788,115 +896,102 @@
 
                 <c:otherwise>
 
-                    <c:forEach var="p" items="${promotions}">
+                    <table class="promotion-table">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Description</th>
+                                <th>Discount</th>
+                                <th>Categories</th>
+                                <th>Start date</th>
+                                <th>End date</th>
+                                <th>Status</th>
+                                <th class="promotion-action-heading">Actions</th>
+                            </tr>
+                        </thead>
 
-                        <div class="promotion-card">
+                        <tbody>
+                            <c:forEach var="p" items="${promotions}">
+                                <tr>
+                                    <td class="promotion-name">
+                                        <c:out value="${p.name}"/>
+                                    </td>
 
-                            <div class="promotion-card-header">
+                                    <td class="promotion-description-cell">
+                                        <c:choose>
+                                            <c:when test="${empty p.description}">
+                                                <span class="muted-text">No description</span>
+                                            </c:when>
+                                            <c:otherwise>
+                                                <c:out value="${p.description}"/>
+                                            </c:otherwise>
+                                        </c:choose>
+                                    </td>
 
-                                <h4>
-                                    <c:out value="${p.name}"/>
-                                </h4>
+                                    <td>
+                                        <span class="promo-discount">
+                                            ${p.discountValue}${p.percentage ? '%' : ' VND'}
+                                        </span>
+                                    </td>
 
-                                <span class="promo-badge ${p.active ? 'active' : 'inactive'}">
-                                    ${p.active ? 'Active' : 'Inactive'}
-                                </span>
+                                    <td>
+                                        <span class="promotion-category-count">
+                                            ${empty p.applicableCategories
+                                                    ? 0
+                                                    : p.applicableCategories.size()}
+                                            category(s)
+                                        </span>
+                                    </td>
 
-                            </div>
+                                    <td class="promotion-date">
+                                        ${p.startDateFormatted}
+                                    </td>
 
-                            <p class="promotion-description">
+                                    <td class="promotion-date">
+                                        ${p.endDateFormatted}
+                                    </td>
 
-                                <c:choose>
+                                    <td>
+                                        <span class="promo-badge ${p.active ? 'active' : 'inactive'}">
+                                            ${p.active ? 'Active' : 'Inactive'}
+                                        </span>
+                                    </td>
 
-                                    <c:when test="${empty p.description}">
-                                        No description
-                                    </c:when>
+                                    <td>
+                                        <div class="promotion-table-actions">
+                                            <button type="button"
+                                                    class="promotion-icon-button edit"
+                                                    title="Edit promotion"
+                                                    data-id="${p.id}"
+                                                    data-name="<c:out value='${p.name}'/>"
+                                                    data-description="<c:out value='${p.description}'/>"
+                                                    data-percentage="${p.percentage}"
+                                                    data-discount-value="${p.discountValue}"
+                                                    data-start-date="${p.startDate}"
+                                                    data-end-date="${p.endDate}"
+                                                    data-active="${p.active}"
+                                                    data-category-ids="<c:forEach var='selectedCategory'
+                                                                                     items='${p.applicableCategories}'
+                                                                                     varStatus='status'>${selectedCategory.id}<c:if test='${!status.last}'>,</c:if></c:forEach>"
+                                                    onclick="openEditModal(this)">
+                                                <i class="fa-solid fa-pen"></i>
+                                            </button>
 
-                                    <c:otherwise>
-                                        <c:out value="${p.description}"/>
-                                    </c:otherwise>
-
-                                </c:choose>
-
-                            </p>
-
-                            <div class="promotion-info">
-
-                                <div class="promotion-info-row">
-
-                                    <i class="fa-solid fa-ticket"></i>
-
-                                    <span class="promo-discount">
-                                        ${p.discountValue}${p.percentage ? '%' : ' VND'}
-                                    </span>
-
-                                </div>
-
-                                <div class="promotion-info-row">
-
-                                    <i class="fa-regular fa-calendar-days"></i>
-
-                                    <span>
-                                        ${p.startDate} → ${p.endDate}
-                                    </span>
-
-                                </div>
-
-                                <div class="promotion-info-row">
-
-                                    <i class="fa-solid fa-layer-group"></i>
-
-                                    <span class="promotion-category-count">
-
-                                        ${empty p.applicableCategories
-                                                ? 0
-                                                : p.applicableCategories.size()}
-
-                                        applicable category(s)
-
-                                    </span>
-
-                                </div>
-
-                            </div>
-
-                            <div class="promotion-actions">
-
-                                <button type="button"
-                                        class="card-btn edit"
-                                        data-id="${p.id}"
-                                        data-name="<c:out value='${p.name}'/>"
-                                        data-description="<c:out value='${p.description}'/>"
-                                        data-percentage="${p.percentage}"
-                                        data-discount-value="${p.discountValue}"
-                                        data-start-date="${p.startDate}"
-                                        data-end-date="${p.endDate}"
-                                        data-active="${p.active}"
-                                        data-category-ids="<c:forEach var='selectedCategory'
-                                                                         items='${p.applicableCategories}'
-                                                                         varStatus='status'>${selectedCategory.id}<c:if test='${!status.last}'>,</c:if></c:forEach>"
-                                        onclick="openEditModal(this)">
-
-                                    <i class="fa-solid fa-pen-to-square"></i>
-                                    Edit
-                                </button>
-
-                                <button type="button"
-                                        class="card-btn delete"
-                                        onclick="openPromotionDeleteModal(
-                                                '${p.id}',
-                                                '<c:out value="${p.name}"/>'
-                                                )">
-
-                                    <i class="fa-solid fa-trash"></i>
-                                    Delete
-                                </button>
-
-                            </div>
-
-                        </div>
-
-                    </c:forEach>
+                                            <button type="button"
+                                                    class="promotion-icon-button delete"
+                                                    title="Delete promotion"
+                                                    onclick="openPromotionDeleteModal(
+                                                            '${p.id}',
+                                                            '<c:out value="${p.name}"/>'
+                                                            )">
+                                                <i class="fa-solid fa-trash"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </c:forEach>
+                        </tbody>
+                    </table>
 
                 </c:otherwise>
 
@@ -1833,3 +1928,5 @@
 
 </body>
 </html>
+
+
