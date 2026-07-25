@@ -3,7 +3,10 @@ package shop.repository;
 import java.util.List;
 import java.util.Optional;
 
+import jakarta.persistence.LockModeType;
+
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -13,14 +16,24 @@ import shop.domain.Book;
 @Repository
 public interface BookRepository extends JpaRepository<Book, Long> {
 
+    // NEW: Lock the selected book while updating its stock.
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("SELECT b FROM Book b WHERE b.id = :id")
+    Optional<Book> findByIdForUpdate(@Param("id") Long id);
+
     List<Book> findAllByOrderByIdAsc();
 
     List<Book> findAllByActiveTrueOrderByIdAsc();
 
     // Used for the "related books" suggestions on the detail page.
-    List<Book> findAllByCategoryIdAndActiveTrueAndIdNotOrderByIdAsc(Long categoryId, Long excludeId);
+    List<Book> findAllByCategoryIdAndActiveTrueAndIdNotOrderByIdAsc(
+            Long categoryId,
+            Long excludeId
+    );
 
-    List<Book> findAllByCategoryIdAndActiveTrueOrderByIdAsc(Long categoryId);
+    List<Book> findAllByCategoryIdAndActiveTrueOrderByIdAsc(
+            Long categoryId
+    );
 
     Optional<Book> findByIsbnIgnoreCase(String isbn);
 
@@ -54,8 +67,10 @@ public interface BookRepository extends JpaRepository<Book, Long> {
            "AND (:categoryId IS NULL OR c.id = :categoryId) " +
            "AND (:hasGenreFilter = false OR g.id IN :genreIds) " +
            "ORDER BY b.id ASC")
-    List<Book> filterBooks(@Param("q") String q,
-                            @Param("categoryId") Long categoryId,
-                            @Param("genreIds") List<Long> genreIds,
-                            @Param("hasGenreFilter") boolean hasGenreFilter);
+    List<Book> filterBooks(
+            @Param("q") String q,
+            @Param("categoryId") Long categoryId,
+            @Param("genreIds") List<Long> genreIds,
+            @Param("hasGenreFilter") boolean hasGenreFilter
+    );
 }
