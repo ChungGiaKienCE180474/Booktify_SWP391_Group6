@@ -1,8 +1,13 @@
 package shop.repository;
 
+import java.util.Optional;
+
+import jakarta.persistence.LockModeType;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -10,9 +15,17 @@ import shop.domain.VppItem;
 
 public interface VppItemRepository extends JpaRepository<VppItem, Long> {
 
+    // NEW: Lock the selected stationery item while updating its stock.
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("SELECT item FROM VppItem item WHERE item.id = :id")
+    Optional<VppItem> findByIdForUpdate(@Param("id") Long id);
+
     boolean existsByNameIgnoreCase(String name);
 
-    boolean existsByNameIgnoreCaseAndIdNot(String name, Long id);
+    boolean existsByNameIgnoreCaseAndIdNot(
+            String name,
+            Long id
+    );
 
     @Query(
             value = """

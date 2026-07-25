@@ -26,12 +26,12 @@ import shop.domain.OrderStatus;
 import shop.domain.PaymentMethod;
 import shop.domain.PromotionSelection;
 import shop.domain.User;
+import shop.domain.VppItem;
 import shop.domain.dto.OrderDTO;
 import shop.domain.dto.OrderItemDTO;
 import shop.repository.BookRepository;
 import shop.repository.OrderRepository;
 import shop.repository.UserRepository;
-import shop.domain.VppItem;
 import shop.repository.VppItemRepository;
 
 @Service
@@ -44,6 +44,7 @@ public class OrderService {
     private final VoucherService voucherService;
     private final PromotionService promotionService;
     private final VppItemRepository vppItemRepository;
+    private final StockService stockService;
 
     public OrderService(
             OrderRepository orderRepository,
@@ -52,8 +53,9 @@ public class OrderService {
             UserRepository userRepository,
             VoucherService voucherService,
             PromotionService promotionService,
-            VppItemRepository vppItemRepository) {
-
+            VppItemRepository vppItemRepository,
+            StockService stockService
+    ) {
         this.orderRepository = orderRepository;
         this.bookRepository = bookRepository;
         this.cartService = cartService;
@@ -61,12 +63,13 @@ public class OrderService {
         this.voucherService = voucherService;
         this.promotionService = promotionService;
         this.vppItemRepository = vppItemRepository;
+        this.stockService = stockService;
     }
 
     @Transactional(readOnly = true)
     public List<OrderDTO> getOrdersForUser(
-            long userId) {
-
+            long userId
+    ) {
         return orderRepository
                 .findByUserIdOrderByCreatedAtDesc(userId)
                 .stream()
@@ -77,8 +80,8 @@ public class OrderService {
     @Transactional(readOnly = true)
     public Optional<OrderDTO> getOrderForUser(
             long userId,
-            long orderId) {
-
+            long orderId
+    ) {
         return orderRepository
                 .findByIdAndUserIdWithItems(
                         orderId,
@@ -89,7 +92,6 @@ public class OrderService {
 
     @Transactional(readOnly = true)
     public List<OrderDTO> getAllOrders() {
-
         return orderRepository
                 .findAllWithUserAndItemsOrderByCreatedAtDesc()
                 .stream()
@@ -101,8 +103,8 @@ public class OrderService {
     public List<OrderDTO> searchOrders(
             String keyword,
             String status,
-            String sort) {
-
+            String sort
+    ) {
         List<Order> orders =
                 orderRepository
                         .findAllWithUserAndItemsOrderByCreatedAtDesc();
@@ -150,8 +152,8 @@ public class OrderService {
 
     private boolean matchesKeyword(
             Order order,
-            String keyword) {
-
+            String keyword
+    ) {
         return containsIgnoreCase(
                 order.getOrderCode(),
                 keyword
@@ -181,16 +183,16 @@ public class OrderService {
 
     private boolean containsIgnoreCase(
             String value,
-            String keyword) {
-
+            String keyword
+    ) {
         return value != null
                 && value.toLowerCase(Locale.ROOT)
                 .contains(keyword);
     }
 
     private Comparator<Order> resolveSortComparator(
-            String sort) {
-
+            String sort
+    ) {
         if (sort == null) {
             sort = "default";
         }
@@ -285,8 +287,8 @@ public class OrderService {
     }
 
     private String getCustomerFullName(
-            Order order) {
-
+            Order order
+    ) {
         return order.getUser() != null
                 ? order.getUser().getFullName()
                 : null;
@@ -294,8 +296,8 @@ public class OrderService {
 
     @Transactional(readOnly = true)
     public Optional<OrderDTO> getOrderById(
-            long orderId) {
-
+            long orderId
+    ) {
         return orderRepository
                 .findByIdWithUserAndItems(orderId)
                 .map(this::toDetailDTO);
@@ -303,8 +305,8 @@ public class OrderService {
 
     @Transactional(readOnly = true)
     public List<OrderDTO> getOrdersForCustomer(
-            long customerUserId) {
-
+            long customerUserId
+    ) {
         return getOrdersForUser(
                 customerUserId
         );
@@ -313,10 +315,9 @@ public class OrderService {
     @Transactional
     public OrderDTO createOrderFromCart(
             long userId,
-            CheckoutForm form) {
-
+            CheckoutForm form
+    ) {
         validateCheckoutForm(form);
-
 
         User user = userRepository
                 .findById(userId)
@@ -356,9 +357,11 @@ public class OrderService {
             );
         }
 
-        BigDecimal shippingFee = BigDecimal.ZERO;
+        BigDecimal shippingFee =
+                BigDecimal.ZERO;
 
-        Order order = new Order();
+        Order order =
+                new Order();
 
         order.setOrderCode(
                 generateUniqueOrderCode()
@@ -402,22 +405,37 @@ public class OrderService {
                 )
         );
 
-        order.setShippingFee(shippingFee);
+        order.setShippingFee(
+                shippingFee
+        );
 
         BigDecimal subtotal =
                 BigDecimal.ZERO;
 
         for (CartItem cartItem :
                 cart.getItems()) {
-            if (cartItem.getBook() == null && cartItem.getVppItem() != null) {
 
-                VppItem vppItem = vppItemRepository
-                        .findById(cartItem.getVppItem().getId())
-                        .orElseThrow(() ->
-                                new IllegalArgumentException(
-                                        "A stationery item in your cart no longer exists."
+            /*
+             * ====================================================
+             * VPP ITEM
+             * ====================================================
+             */
+
+            if (cartItem.getBook() == null
+                    && cartItem.getVppItem() != null) {
+
+                VppItem vppItem =
+                        vppItemRepository
+                                .findById(
+                                        cartItem
+                                                .getVppItem()
+                                                .getId()
                                 )
-                        );
+                                .orElseThrow(() ->
+                                        new IllegalArgumentException(
+                                                "A stationery item in your cart no longer exists."
+                                        )
+                                );
 
                 validateVppLine(
                         vppItem,
@@ -443,59 +461,72 @@ public class OrderService {
                 orderItem.setOrder(order);
                 orderItem.setBook(null);
                 orderItem.setVppItem(vppItem);
-                orderItem.setBookTitle(vppItem.getName());
-                orderItem.setUnitPrice(unitPrice);
-                orderItem.setQuantity(cartItem.getQuantity());
-                orderItem.setLineTotal(lineTotal);
 
-                order.getItems().add(orderItem);
-
-                vppItem.setStockQuantity(
-                        vppItem.getStockQuantity()
-                                - cartItem.getQuantity()
+                orderItem.setBookTitle(
+                        vppItem.getName()
                 );
 
-                vppItemRepository.save(vppItem);
+                orderItem.setUnitPrice(
+                        unitPrice
+                );
+
+                orderItem.setQuantity(
+                        cartItem.getQuantity()
+                );
+
+                orderItem.setLineTotal(
+                        lineTotal
+                );
+
+                order.getItems().add(
+                        orderItem
+                );
 
                 continue;
             }
 
+            /*
+             * ====================================================
+             * BOOK
+             * ====================================================
+             */
+
             if (cartItem.getBook() == null) {
+
                 throw new IllegalArgumentException(
                         "An item in your cart is invalid."
                 );
             }
 
-
-            Book book = bookRepository
-                    .findById(
-                            cartItem.getBook().getId()
-                    )
-                    .orElseThrow(() ->
-                            new IllegalArgumentException(
-                                    "An item in your cart no longer exists."
+            Book book =
+                    bookRepository
+                            .findById(
+                                    cartItem
+                                            .getBook()
+                                            .getId()
                             )
-                    );
+                            .orElseThrow(() ->
+                                    new IllegalArgumentException(
+                                            "An item in your cart no longer exists."
+                                    )
+                            );
 
             validateBookLine(
                     book,
                     cartItem.getQuantity()
             );
 
-            /*
-             * Use the promotion price that is active when the order is
-             * created.
-             */
             PromotionSelection selectedPromotion =
                     form.resolvePromotionSelection(
                             book.getId()
                     );
 
             BigDecimal effectiveUnitPrice =
-                    promotionService.getPriceForSelection(
-                            book,
-                            selectedPromotion
-                    );
+                    promotionService
+                            .getPriceForSelection(
+                                    book,
+                                    selectedPromotion
+                            );
 
             BigDecimal lineTotal =
                     effectiveUnitPrice.multiply(
@@ -514,11 +545,6 @@ public class OrderService {
             orderItem.setBook(book);
             orderItem.setVppItem(null);
 
-            /*
-             * Store the book title and effective unit price directly in the
-             * order item. Order history will therefore keep the purchased
-             * price even after a promotion expires or is disabled.
-             */
             orderItem.setBookTitle(
                     book.getTitle()
             );
@@ -535,17 +561,14 @@ public class OrderService {
                     lineTotal
             );
 
-            order.getItems().add(orderItem);
-
-            book.setStockQuantity(
-                    book.getStockQuantity()
-                            - cartItem.getQuantity()
+            order.getItems().add(
+                    orderItem
             );
-
-            bookRepository.save(book);
         }
 
-        order.setSubtotal(subtotal);
+        order.setSubtotal(
+                subtotal
+        );
 
         BigDecimal discountAmount =
                 resolveDiscount(
@@ -557,25 +580,46 @@ public class OrderService {
                 discountAmount
         );
 
-        order.setShippingFee(shippingFee);
+        order.setShippingFee(
+                shippingFee
+        );
 
         BigDecimal total =
-                subtotal
-                        .subtract(discountAmount);
+                subtotal.subtract(
+                        discountAmount
+                );
 
-        if (total.compareTo(BigDecimal.ZERO) < 0) {
-            total = BigDecimal.ZERO;
+        if (total.compareTo(
+                BigDecimal.ZERO
+        ) < 0) {
+            total =
+                    BigDecimal.ZERO;
         }
 
-        order.setTotalAmount(total);
+        order.setTotalAmount(
+                total
+        );
 
         Order savedOrder =
                 orderRepository.save(order);
 
         /*
-         * Reduce the available voucher quantity only after the order has been
-         * created successfully.
+         * Bảng stock là nguồn số lượng chính.
+         *
+         * StockService sẽ:
+         * - khóa dòng stock;
+         * - kiểm tra số lượng;
+         * - giảm stock.quantity;
+         * - đồng bộ cột stock_quantity cũ tạm thời;
+         * - ghi lịch sử SALE.
+         *
+         * Nếu giảm kho thất bại thì toàn bộ transaction,
+         * bao gồm đơn hàng vừa tạo, sẽ rollback.
          */
+        decreaseOrderStock(
+                savedOrder
+        );
+
         if (form.getVoucherCode() != null
                 && !form.getVoucherCode().isBlank()) {
 
@@ -585,120 +629,216 @@ public class OrderService {
                     );
         }
 
-        cartService.clearCart(userId);
+        cartService.clearCart(
+                userId
+        );
 
-        return toDetailDTO(savedOrder);
+        return toDetailDTO(
+                savedOrder
+        );
     }
 
     @Transactional
     public void updateOrderStatus(
             long orderId,
-            String newStatus) {
+            String newStatus
+    ) {
+        Order order =
+                orderRepository
+                        .findByIdWithUserAndItems(orderId)
+                        .orElseThrow(() ->
+                                new IllegalArgumentException(
+                                        "Order not found."
+                                )
+                        );
 
-        Order order = orderRepository
-                .findByIdWithUserAndItems(orderId)
-                .orElseThrow(() ->
-                        new IllegalArgumentException(
-                                "Order not found."
-                        )
+        OrderStatus targetStatus =
+                OrderStatus.fromValue(
+                        newStatus
                 );
 
-        OrderStatus targetStatus = OrderStatus.fromValue(newStatus);
-        OrderStatus currentStatus = OrderStatus.fromValue(order.getStatus());
+        OrderStatus currentStatus =
+                OrderStatus.fromValue(
+                        order.getStatus()
+                );
 
         if (targetStatus == currentStatus) {
             return;
         }
 
-        if (!currentStatus.canTransitionTo(targetStatus)) {
+        if (!currentStatus.canTransitionTo(
+                targetStatus
+        )) {
             throw new IllegalArgumentException(
                     "Cannot change order status from "
                             + currentStatus.getLabel()
                             + " to "
                             + targetStatus.getLabel()
-                            + ".");
+                            + "."
+            );
         }
 
-        if (targetStatus == OrderStatus.CANCELLED) {
-            restoreOrderStock(order);
+        /*
+         * Khi đơn bị hủy, hoàn lại hàng vào bảng stock.
+         */
+        if (targetStatus
+                == OrderStatus.CANCELLED) {
+
+            restoreOrderStock(
+                    order
+            );
         }
 
-        order.setStatus(targetStatus.name());
-        orderRepository.save(order);
+        order.setStatus(
+                targetStatus.name()
+        );
+
+        orderRepository.save(
+                order
+        );
     }
 
     @Transactional
-    public void cancelOrderForUser(long userId, long orderId) {
-        Order order = orderRepository.findByIdAndUserIdWithItems(orderId, userId)
-                .orElseThrow(() -> new IllegalArgumentException("Order not found."));
+    public void cancelOrderForUser(
+            long userId,
+            long orderId
+    ) {
+        Order order =
+                orderRepository
+                        .findByIdAndUserIdWithItems(
+                                orderId,
+                                userId
+                        )
+                        .orElseThrow(() ->
+                                new IllegalArgumentException(
+                                        "Order not found."
+                                )
+                        );
 
-        OrderStatus currentStatus = OrderStatus.fromValue(order.getStatus());
+        OrderStatus currentStatus =
+                OrderStatus.fromValue(
+                        order.getStatus()
+                );
+
         if (!currentStatus.canBeCancelled()) {
-            throw new IllegalArgumentException("Only pending orders can be cancelled.");
+
+            throw new IllegalArgumentException(
+                    "Only pending orders can be cancelled."
+            );
         }
 
-        updateOrderStatus(orderId, OrderStatus.CANCELLED.name());
+        updateOrderStatus(
+                orderId,
+                OrderStatus.CANCELLED.name()
+        );
     }
 
-    private void restoreOrderStock(Order order) {
-        for (OrderItem item : order.getItems()) {
+    /*
+     * ============================================================
+     * DECREASE STOCK WHEN ORDER IS CREATED
+     * ============================================================
+     */
+
+    private void decreaseOrderStock(
+            Order order
+    ) {
+        for (OrderItem item :
+                order.getItems()) {
+
             if (item.getVppItem() != null) {
-                VppItem vppItem = vppItemRepository
-                        .findById(item.getVppItem().getId())
-                        .orElse(null);
-                if (vppItem != null && vppItem.getStockQuantity() != null) {
-                    vppItem.setStockQuantity(
-                            vppItem.getStockQuantity() + item.getQuantity());
-                    vppItemRepository.save(vppItem);
-                }
+
+                stockService
+                        .decreaseVppForSale(
+                                item
+                                        .getVppItem()
+                                        .getId(),
+                                item.getQuantity(),
+                                order.getId(),
+                                order.getOrderCode()
+                        );
+
                 continue;
             }
 
             if (item.getBook() != null) {
-                Book book = bookRepository
-                        .findById(item.getBook().getId())
-                        .orElse(null);
-                if (book != null) {
-                    book.setStockQuantity(
-                            book.getStockQuantity() + item.getQuantity());
-                    bookRepository.save(book);
-                }
+
+                stockService
+                        .decreaseBookForSale(
+                                item
+                                        .getBook()
+                                        .getId(),
+                                item.getQuantity(),
+                                order.getId(),
+                                order.getOrderCode()
+                        );
+            }
+        }
+    }
+
+    /*
+     * ============================================================
+     * RESTORE STOCK WHEN ORDER IS CANCELLED
+     * ============================================================
+     */
+
+    private void restoreOrderStock(
+            Order order
+    ) {
+        for (OrderItem item :
+                order.getItems()) {
+
+            if (item.getVppItem() != null) {
+
+                stockService
+                        .restoreVppForCancelledOrder(
+                                item
+                                        .getVppItem()
+                                        .getId(),
+                                item.getQuantity(),
+                                order.getId(),
+                                order.getOrderCode()
+                        );
+
+                continue;
+            }
+
+            if (item.getBook() != null) {
+
+                stockService
+                        .restoreBookForCancelledOrder(
+                                item
+                                        .getBook()
+                                        .getId(),
+                                item.getQuantity(),
+                                order.getId(),
+                                order.getOrderCode()
+                        );
             }
         }
     }
 
     public void validateCheckoutForm(
-            CheckoutForm form) {
-
+            CheckoutForm form
+    ) {
         if (form == null) {
+
             throw new IllegalArgumentException(
                     "Checkout information is required."
             );
         }
-
-        /*
-         * Promotion không còn được chọn cho toàn bộ đơn hàng.
-         * Mỗi sản phẩm sẽ được kiểm tra riêng trong
-         * createOrderFromCart() bằng bookId.
-         */
 
         String voucherCode =
                 form.getVoucherCode();
 
         if (voucherCode == null
                 || voucherCode.isBlank()) {
+
             return;
         }
 
-        /*
-         * Remove leading and trailing spaces.
-         */
         voucherCode =
                 voucherCode.trim();
 
-        /*
-         * Only one voucher may be used for each order.
-         */
         if (voucherCode.contains(",")
                 || voucherCode.contains(" ")) {
 
@@ -713,9 +853,10 @@ public class OrderService {
     }
 
     public List<String> validateCartItemsForOrder(
-            Cart cart) {
-
-        List<String> errors = new ArrayList<>();
+            Cart cart
+    ) {
+        List<String> errors =
+                new ArrayList<>();
 
         if (cart == null
                 || cart.getItems().isEmpty()) {
@@ -727,55 +868,126 @@ public class OrderService {
             return errors;
         }
 
-        int validItemCount = 0;
+        int validItemCount =
+                0;
 
-        for (CartItem item : cart.getItems()) {
-            if (item.getBook() == null && item.getVppItem() != null) {
+        for (CartItem item :
+                cart.getItems()) {
 
-                VppItem vppItem = vppItemRepository
-                        .findById(item.getVppItem().getId())
-                        .orElse(null);
+            /*
+             * ====================================================
+             * VALIDATE VPP
+             * ====================================================
+             */
+
+            if (item.getBook() == null
+                    && item.getVppItem() != null) {
+
+                VppItem vppItem =
+                        vppItemRepository
+                                .findById(
+                                        item
+                                                .getVppItem()
+                                                .getId()
+                                )
+                                .orElse(null);
 
                 if (vppItem == null) {
-                    errors.add("A stationery item in your cart no longer exists.");
+
+                    errors.add(
+                            "A stationery item in your cart no longer exists."
+                    );
+
                     continue;
                 }
 
-                if (vppItem.isDeleted() || !vppItem.isActive()) {
-                    errors.add("\"" + vppItem.getName() + "\" is no longer available.");
+                if (vppItem.isDeleted()
+                        || !vppItem.isActive()) {
+
+                    errors.add(
+                            "\""
+                                    + vppItem.getName()
+                                    + "\" is no longer available."
+                    );
+
                     continue;
                 }
 
-                if (vppItem.getStockQuantity() == null || vppItem.getStockQuantity() <= 0) {
-                    errors.add("\"" + vppItem.getName() + "\" — " + CartService.MSG_OUT_OF_STOCK);
+                int availableStock =
+                        stockService
+                                .getVppQuantity(
+                                        vppItem.getId()
+                                );
+
+                if (availableStock <= 0) {
+
+                    errors.add(
+                            "\""
+                                    + vppItem.getName()
+                                    + "\" — "
+                                    + CartService.MSG_OUT_OF_STOCK
+                    );
+
                     continue;
                 }
 
-                if (item.getQuantity() > vppItem.getStockQuantity()) {
-                    errors.add("\"" + vppItem.getName() + "\" — "
-                            + String.format(CartService.MSG_EXCEED_STOCK, vppItem.getStockQuantity()));
+                if (item.getQuantity()
+                        > availableStock) {
+
+                    errors.add(
+                            "\""
+                                    + vppItem.getName()
+                                    + "\" — "
+                                    + String.format(
+                                    CartService.MSG_EXCEED_STOCK,
+                                    availableStock
+                            )
+                    );
+
                     continue;
                 }
 
-                if (vppItem.getPrice() == null || vppItem.getPrice().compareTo(BigDecimal.ZERO) < 0) {
-                    errors.add("\"" + vppItem.getName() + "\" has an invalid selling price.");
+                if (vppItem.getPrice() == null
+                        || vppItem.getPrice()
+                        .compareTo(BigDecimal.ZERO) < 0) {
+
+                    errors.add(
+                            "\""
+                                    + vppItem.getName()
+                                    + "\" has an invalid selling price."
+                    );
+
                     continue;
                 }
 
                 validItemCount++;
+
                 continue;
             }
+
+            /*
+             * ====================================================
+             * VALIDATE BOOK
+             * ====================================================
+             */
 
             if (item.getBook() == null) {
-                errors.add("An item in your cart is invalid.");
+
+                errors.add(
+                        "An item in your cart is invalid."
+                );
+
                 continue;
             }
 
-            Book book = bookRepository
-                    .findById(
-                            item.getBook().getId()
-                    )
-                    .orElse(null);
+            Book book =
+                    bookRepository
+                            .findById(
+                                    item
+                                            .getBook()
+                                            .getId()
+                            )
+                            .orElse(null);
 
             if (book == null) {
 
@@ -797,7 +1009,13 @@ public class OrderService {
                 continue;
             }
 
-            if (book.getStockQuantity() <= 0) {
+            int availableStock =
+                    stockService
+                            .getBookQuantity(
+                                    book.getId()
+                            );
+
+            if (availableStock <= 0) {
 
                 errors.add(
                         "\""
@@ -810,7 +1028,7 @@ public class OrderService {
             }
 
             if (item.getQuantity()
-                    > book.getStockQuantity()) {
+                    > availableStock) {
 
                 errors.add(
                         "\""
@@ -818,7 +1036,7 @@ public class OrderService {
                                 + "\" — "
                                 + String.format(
                                 CartService.MSG_EXCEED_STOCK,
-                                book.getStockQuantity()
+                                availableStock
                         )
                 );
 
@@ -852,8 +1070,8 @@ public class OrderService {
     }
 
     public CheckoutForm buildCheckoutFormFromUser(
-            User user) {
-
+            User user
+    ) {
         CheckoutForm form =
                 new CheckoutForm();
 
@@ -877,8 +1095,8 @@ public class OrderService {
 
     public String getCheckoutTotalFormatted(
             BigDecimal subtotal,
-            BigDecimal discountAmount) {
-
+            BigDecimal discountAmount
+    ) {
         BigDecimal base =
                 subtotal == null
                         ? BigDecimal.ZERO
@@ -890,19 +1108,26 @@ public class OrderService {
                         : discountAmount;
 
         BigDecimal total =
-                base.subtract(discount);
+                base.subtract(
+                        discount
+                );
 
-        if (total.compareTo(BigDecimal.ZERO) < 0) {
-            total = BigDecimal.ZERO;
+        if (total.compareTo(
+                BigDecimal.ZERO
+        ) < 0) {
+            total =
+                    BigDecimal.ZERO;
         }
 
-        return formatMoney(total);
+        return formatMoney(
+                total
+        );
     }
 
     private void validateBookLine(
             Book book,
-            int quantity) {
-
+            int quantity
+    ) {
         if (!book.isActive()) {
 
             throw new IllegalArgumentException(
@@ -912,7 +1137,16 @@ public class OrderService {
             );
         }
 
-        if (book.getStockQuantity() <= 0) {
+        /*
+         * Đọc tồn kho từ bảng stock.
+         */
+        int availableStock =
+                stockService
+                        .getBookQuantity(
+                                book.getId()
+                        );
+
+        if (availableStock <= 0) {
 
             throw new IllegalArgumentException(
                     "\""
@@ -922,7 +1156,7 @@ public class OrderService {
             );
         }
 
-        if (quantity > book.getStockQuantity()) {
+        if (quantity > availableStock) {
 
             throw new IllegalArgumentException(
                     "\""
@@ -930,7 +1164,7 @@ public class OrderService {
                             + "\" — "
                             + String.format(
                             CartService.MSG_EXCEED_STOCK,
-                            book.getStockQuantity()
+                            availableStock
                     )
             );
         }
@@ -946,11 +1180,13 @@ public class OrderService {
             );
         }
     }
+
     private void validateVppLine(
             VppItem item,
-            int quantity) {
-
-        if (item.isDeleted() || !item.isActive()) {
+            int quantity
+    ) {
+        if (item.isDeleted()
+                || !item.isActive()) {
 
             throw new IllegalArgumentException(
                     "\""
@@ -959,8 +1195,16 @@ public class OrderService {
             );
         }
 
-        if (item.getStockQuantity() == null
-                || item.getStockQuantity() <= 0) {
+        /*
+         * Đọc tồn kho từ bảng stock.
+         */
+        int availableStock =
+                stockService
+                        .getVppQuantity(
+                                item.getId()
+                        );
+
+        if (availableStock <= 0) {
 
             throw new IllegalArgumentException(
                     "\""
@@ -970,7 +1214,7 @@ public class OrderService {
             );
         }
 
-        if (quantity > item.getStockQuantity()) {
+        if (quantity > availableStock) {
 
             throw new IllegalArgumentException(
                     "\""
@@ -978,13 +1222,14 @@ public class OrderService {
                             + "\" — "
                             + String.format(
                             CartService.MSG_EXCEED_STOCK,
-                            item.getStockQuantity()
+                            availableStock
                     )
             );
         }
 
         if (item.getPrice() == null
-                || item.getPrice().compareTo(BigDecimal.ZERO) < 0) {
+                || item.getPrice()
+                .compareTo(BigDecimal.ZERO) < 0) {
 
             throw new IllegalArgumentException(
                     "\""
@@ -996,8 +1241,8 @@ public class OrderService {
 
     private BigDecimal resolveDiscount(
             String voucherCode,
-            BigDecimal subtotal) {
-
+            BigDecimal subtotal
+    ) {
         if (voucherCode == null
                 || voucherCode.isBlank()) {
 
@@ -1012,13 +1257,13 @@ public class OrderService {
     }
 
     private String generateUniqueOrderCode() {
-
         String datePart =
                 LocalDateTime.now()
                         .format(
-                                DateTimeFormatter.ofPattern(
-                                        "yyyyMMdd"
-                                )
+                                DateTimeFormatter
+                                        .ofPattern(
+                                                "yyyyMMdd"
+                                        )
                         );
 
         for (int attempt = 0;
@@ -1040,7 +1285,9 @@ public class OrderService {
                             + suffix;
 
             if (!orderRepository
-                    .existsByOrderCode(orderCode)) {
+                    .existsByOrderCode(
+                            orderCode
+                    )) {
 
                 return orderCode;
             }
@@ -1052,8 +1299,8 @@ public class OrderService {
     }
 
     private OrderDTO toSummaryDTO(
-            Order order) {
-
+            Order order
+    ) {
         OrderDTO dto =
                 new OrderDTO();
 
@@ -1089,8 +1336,8 @@ public class OrderService {
     }
 
     private OrderDTO toDetailDTO(
-            Order order) {
-
+            Order order
+    ) {
         OrderDTO dto =
                 toSummaryDTO(order);
 
@@ -1129,27 +1376,35 @@ public class OrderService {
         if (order.getUser() != null) {
 
             dto.setCustomerEmail(
-                    order.getUser().getEmail()
+                    order
+                            .getUser()
+                            .getEmail()
             );
 
             dto.setCustomerName(
-                    order.getUser().getFullName()
+                    order
+                            .getUser()
+                            .getFullName()
             );
         }
 
         dto.setItems(
                 order.getItems()
                         .stream()
-                        .map(this::toOrderItemDTO)
-                        .collect(Collectors.toList())
+                        .map(
+                                this::toOrderItemDTO
+                        )
+                        .collect(
+                                Collectors.toList()
+                        )
         );
 
         return dto;
     }
 
     private OrderItemDTO toOrderItemDTO(
-            OrderItem item) {
-
+            OrderItem item
+    ) {
         OrderItemDTO dto =
                 new OrderItemDTO();
 
@@ -1172,22 +1427,31 @@ public class OrderService {
         if (item.getBook() != null) {
 
             dto.setBookId(
-                    item.getBook().getId()
+                    item
+                            .getBook()
+                            .getId()
             );
 
             dto.setBookImageUrl(
-                    item.getBook().getImageUrl()
+                    item
+                            .getBook()
+                            .getImageUrl()
             );
         }
+
         if (item.getVppItem() != null) {
 
             dto.setBookId(
-                    item.getVppItem().getId()
+                    item
+                            .getVppItem()
+                            .getId()
             );
 
             dto.setBookImageUrl(
                     "/uploads/vpp/"
-                            + item.getVppItem().getId()
+                            + item
+                            .getVppItem()
+                            .getId()
                             + "/image"
             );
         }
@@ -1196,8 +1460,8 @@ public class OrderService {
     }
 
     private String blankToNull(
-            String value) {
-
+            String value
+    ) {
         if (value == null
                 || value.isBlank()) {
 
@@ -1208,25 +1472,28 @@ public class OrderService {
     }
 
     public String formatMoney(
-            BigDecimal amount) {
-
+            BigDecimal amount
+    ) {
         if (amount == null) {
             return "0";
         }
 
         return NumberFormat
-                .getIntegerInstance(Locale.GERMANY)
-                .format(amount.longValue());
+                .getIntegerInstance(
+                        Locale.GERMANY
+                )
+                .format(
+                        amount.longValue()
+                );
     }
 
     public long countAllOrders() {
-
         return orderRepository.count();
     }
 
     public long countOrdersByUser(
-            long userId) {
-
+            long userId
+    ) {
         return orderRepository
                 .countByUserId(userId);
     }

@@ -36,7 +36,7 @@
                                             Categories
                                         </a>
 
-                                       
+
 
                                         <a href="/admin/books"
                                             class="admin-sidebar__item ${fn:contains(pageContext.request.requestURI, '/admin/books') ? 'active' : ''}">
@@ -46,9 +46,9 @@
                                         <a href="/admin/vpp"
                                             class="admin-sidebar__item ${fn:contains(pageContext.request.requestURI, '/admin/vpp') ? 'active' : ''}">
                                             <i class="fa-solid fa-pen-ruler"></i>
-                                            Stationery 
+                                            Stationery
                                         </a>
-                                         <a href="/admin/genres"
+                                        <a href="/admin/genres"
                                             class="admin-sidebar__item ${fn:contains(pageContext.request.requestURI, '/admin/genres') ? 'active' : ''}">
                                             <i class="fa-solid fa-layer-group"></i>
                                             Genres
@@ -100,7 +100,12 @@
                                             <i class="fa-solid fa-truck"></i>
                                             Suppliers
                                         </a>
-                                        
+                                        <a href="/admin/stock"
+                                            class="admin-sidebar__item ${fn:contains(pageContext.request.requestURI, '/admin/stock') ? 'active' : ''}">
+                                            <i class="fa-solid fa-boxes-stacked"></i>
+                                            Stock Management
+                                        </a>
+
                                         <!-- <a href="/admin/contacts"
                                             class="admin-sidebar__item ${fn:contains(pageContext.request.requestURI, '/admin/contacts') ? 'active' : ''}">
                                             <i class="fa-solid fa-headset"></i>
