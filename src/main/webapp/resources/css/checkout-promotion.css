@@ -12,4 +12,7 @@
 .checkout-preview-message { margin-bottom: 18px; }
 .checkout-preview-message.is-success { display: block; }
 .checkout-preview-message.is-error { display: block; }
-@media (max-width: 640px) { .voucher-input-row { flex-direction: column; } }
+
+@media (max-width: 640px) {
+    .voucher-input-row { flex-direction: column; }
+}

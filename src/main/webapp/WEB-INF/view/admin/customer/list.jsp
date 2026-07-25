@@ -16,7 +16,7 @@
         .customer-stats {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            gap: 20px;
+            gap: 0;
             margin: 24px 0 36px;
         }
 
@@ -175,37 +175,75 @@
         }
 
         .btn-small {
-            border: none;
-            border-radius: 10px;
-            padding: 9px 13px;
+            width: 34px;
+            height: 34px;
+            padding: 0;
+            border: 1px solid #dbe3ea;
+            border-radius: 5px;
+            background: #ffffff;
+            color: #64748b;
             cursor: pointer;
-            font-weight: 800;
             text-decoration: none;
             display: inline-flex;
             align-items: center;
-            gap: 6px;
+            justify-content: center;
             font-size: 13px;
             transition: all .2s ease;
         }
 
         .btn-small:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 8px 18px rgba(15, 23, 42, 0.12);
+            color: #00796b;
+            border-color: #00796b;
+            background: #f0fdfa;
         }
 
         .btn-view {
-            background: #2563eb;
-            color: #ffffff;
+            background: #ffffff;
+            color: #64748b;
         }
 
         .btn-ban {
-            background: #ef4444;
-            color: #ffffff;
+            background: #ffffff;
+            color: #64748b;
         }
 
         .btn-unban {
-            background: #22c55e;
-            color: #052e16;
+            background: #ffffff;
+            color: #64748b;
+        }
+
+        .btn-ban:hover {
+            color: #dc2626;
+            border-color: #ef4444;
+            background: #fef2f2;
+        }
+
+        .btn-unban:hover {
+            color: #16a34a;
+            border-color: #22c55e;
+            background: #f0fdf4;
+        }
+
+        .btn-small.btn-reset {
+            width: auto;
+            min-width: 72px;
+            height: 44px;
+            padding: 0 16px;
+            border: 1px solid #d1d5db;
+            border-radius: 10px;
+            background: #ffffff;
+            color: #111827;
+            font-weight: 700;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+
+        .btn-small.btn-reset:hover {
+            color: #00796b;
+            border-color: #00796b;
+            background: #f0fdfa;
+            transform: none;
+            box-shadow: none;
         }
 
         .btn-reset {
@@ -810,6 +848,7 @@
                                     <div class="customer-actions">
                                         <button type="button"
                                                 class="btn-small btn-view"
+                                                title="View customer"
                                                 onclick="openCustomerModal(
                                                         '${customer.id}',
                                                         '${customer.customerCode}',
@@ -821,25 +860,24 @@
                                                         '${customer.status}'
                                                         )">
                                             <i class="fa-solid fa-eye"></i>
-                                            View
                                         </button>
 
                                         <c:choose>
                                             <c:when test="${customer.status}">
                                                 <button type="button"
                                                         class="btn-small btn-ban"
+                                                        title="Ban customer"
                                                         onclick="openStatusModal('${customer.id}', '${customer.fullName}', '${customer.email}', 'BAN')">
                                                     <i class="fa-solid fa-ban"></i>
-                                                    Ban
                                                 </button>
                                             </c:when>
 
                                             <c:otherwise>
                                                 <button type="button"
                                                         class="btn-small btn-unban"
+                                                        title="Unban customer"
                                                         onclick="openStatusModal('${customer.id}', '${customer.fullName}', '${customer.email}', 'UNBAN')">
                                                     <i class="fa-solid fa-circle-check"></i>
-                                                    Unban
                                                 </button>
                                             </c:otherwise>
                                         </c:choose>
@@ -1254,3 +1292,7 @@
 
 </body>
 </html>
+
+
+
+

@@ -1,5 +1,5 @@
 :root {
-    --cart-primary: #006B5E;
+    --cart-primary: #006b5e;
     --cart-text: #1a1a2e;
     --cart-muted: #64748b;
     --cart-border: #e2e8f0;
@@ -31,7 +31,7 @@ body.home-page {
 }
 
 .cart-head h1 {
-    margin: 0 0 .35rem;
+    margin: 0 0 0.35rem;
     font-size: 1.75rem;
     color: var(--cart-primary);
 }
@@ -41,11 +41,15 @@ body.home-page {
     color: var(--cart-muted);
 }
 
+/* =========================
+   Alerts
+   ========================= */
+
 .cart-alert {
-    padding: .875rem 1rem;
+    padding: 0.875rem 1rem;
     border-radius: 8px;
     margin-bottom: 1rem;
-    font-size: .9rem;
+    font-size: 0.9rem;
 }
 
 .cart-alert--success {
@@ -66,6 +70,10 @@ body.home-page {
     border: 1px solid #fed7aa;
 }
 
+/* =========================
+   Main layout
+   ========================= */
+
 .cart-layout {
     display: grid;
     grid-template-columns: minmax(0, 1fr) 340px;
@@ -73,51 +81,71 @@ body.home-page {
     align-items: start;
 }
 
+/* =========================
+   Cart table
+   ========================= */
+
 .cart-table-wrap {
     background: var(--cart-white);
     border: 1px solid var(--cart-border);
     border-radius: var(--cart-radius);
     box-shadow: var(--cart-shadow);
-    overflow-x: auto;
+    overflow: hidden;
 }
 
 .cart-table {
     width: 100%;
+    min-width: 0;
     border-collapse: collapse;
-    table-layout: auto;
-    min-width: 760px;
+    table-layout: fixed;
 }
 
 .cart-table .col-product {
-    width: auto;
-    min-width: 220px;
+    width: 28%;
+    min-width: 0;
 }
 
 .cart-table .col-price {
-    width: auto;
-    min-width: 160px;
+    width: 14%;
+    min-width: 0;
 }
 
 .cart-table .col-qty {
-    width: 118px;
-    min-width: 118px;
+    width: 14%;
+    min-width: 0;
+}
+
+.cart-table .col-promotion {
+    width: 22%;
+    min-width: 0;
 }
 
 .cart-table .col-subtotal {
-    width: auto;
-    min-width: 150px;
+    width: 16%;
+    min-width: 0;
 }
 
 .cart-table .col-remove {
-    width: 48px;
-    min-width: 48px;
+    width: 6%;
+    min-width: 44px;
 }
 
 .cart-table th,
 .cart-table td {
-    padding: .75rem .75rem;
+    padding: 0.75rem 0.55rem;
     border-bottom: 1px solid var(--cart-border);
     vertical-align: middle;
+    overflow: hidden;
+}
+
+.cart-table th {
+    background: #f1f5f9;
+    color: var(--cart-muted);
+    font-size: 0.8rem;
+    text-align: left;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    text-overflow: ellipsis;
 }
 
 .cart-table th.col-price,
@@ -130,11 +158,9 @@ body.home-page {
 
 .cart-table th.col-remove,
 .cart-table td.col-remove {
-    width: 48px;
-    min-width: 48px;
-    max-width: 48px;
-    padding-left: .35rem;
-    padding-right: .35rem;
+    min-width: 44px;
+    padding-left: 0.35rem;
+    padding-right: 0.35rem;
     text-align: center;
     box-sizing: border-box;
 }
@@ -143,19 +169,14 @@ body.home-page {
     white-space: nowrap;
 }
 
-.cart-table th {
-    background: #f1f5f9;
-    font-size: .8rem;
-    text-transform: uppercase;
-    letter-spacing: .04em;
-    color: var(--cart-muted);
-    text-align: left;
-}
+/* =========================
+   Product
+   ========================= */
 
 .cart-book {
     display: flex;
-    gap: .75rem;
     align-items: center;
+    gap: 0.75rem;
     min-width: 0;
 }
 
@@ -183,10 +204,10 @@ body.home-page {
 }
 
 .cart-book__title {
-    font-weight: 700;
-    color: var(--cart-text);
-    text-decoration: none;
     display: block;
+    color: var(--cart-text);
+    font-weight: 700;
+    text-decoration: none;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -197,20 +218,24 @@ body.home-page {
 }
 
 .cart-book__author {
-    font-size: .8rem;
+    margin-top: 0.2rem;
     color: var(--cart-muted);
-    margin-top: .2rem;
+    font-size: 0.8rem;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
 }
 
+/* =========================
+   Prices
+   ========================= */
+
 .cart-price {
-    font-weight: 700;
-    color: var(--cart-primary);
-    font-size: .9rem;
-    white-space: nowrap;
     display: inline-block;
+    color: var(--cart-primary);
+    font-size: 0.9rem;
+    font-weight: 700;
+    white-space: nowrap;
 }
 
 .cart-promotion-price {
@@ -225,13 +250,13 @@ body.home-page {
     display: inline-flex;
     align-items: center;
     justify-content: flex-end;
-    gap: 4px;
     flex-wrap: wrap;
+    gap: 4px;
 }
 
 .cart-old-price {
     color: #94a3b8;
-    font-size: .75rem;
+    font-size: 0.75rem;
     font-weight: 700;
     text-decoration: line-through;
     white-space: nowrap;
@@ -244,7 +269,7 @@ body.home-page {
     border-radius: 999px;
     background: #fee2e2;
     color: #dc2626;
-    font-size: .62rem;
+    font-size: 0.62rem;
     font-weight: 800;
     white-space: nowrap;
     flex-shrink: 0;
@@ -252,49 +277,131 @@ body.home-page {
 
 .cart-sale-price {
     color: #dc2626;
-    font-size: .9rem;
+    font-size: 0.9rem;
     font-weight: 800;
     white-space: nowrap;
 }
 
+/* =========================
+   Quantity
+   ========================= */
+
 .cart-qty-form {
     display: flex;
     align-items: center;
-    gap: .35rem;
     flex-wrap: nowrap;
+    gap: 0.35rem;
+    margin: 0;
 }
 
 .cart-qty-form input[type="number"] {
     width: 52px;
-    padding: .35rem .4rem;
+    padding: 0.35rem 0.4rem;
     border: 1px solid var(--cart-border);
     border-radius: 8px;
-    font-size: .82rem;
+    font-size: 0.82rem;
+    box-sizing: border-box;
 }
+
+/* =========================
+   Promotion selection
+   ========================= */
+
+.cart-promotion-form {
+    width: 100%;
+    margin: 0;
+}
+
+.cart-promotion-select {
+    width: 100%;
+    min-height: 40px;
+    padding: 0.55rem 1.65rem 0.55rem 0.55rem;
+    border: 1px solid var(--cart-border);
+    border-radius: 8px;
+    background: #ffffff;
+    color: var(--cart-text);
+    font: inherit;
+    font-size: 0.8rem;
+    cursor: pointer;
+    box-sizing: border-box;
+}
+
+.cart-promotion-select:focus {
+    outline: none;
+    border-color: var(--cart-primary);
+    box-shadow: 0 0 0 3px rgba(0, 107, 94, 0.12);
+}
+
+.cart-promotion-select:disabled {
+    cursor: wait;
+    opacity: 0.65;
+}
+
+.promotion-saving {
+    display: block;
+    margin-top: 0.35rem;
+    color: #059669;
+    font-size: 0.72rem;
+}
+
+.no-promotion {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.35rem 0.6rem;
+    border-radius: 999px;
+    background: #f1f5f9;
+    color: var(--cart-muted);
+    font-size: 0.78rem;
+    white-space: nowrap;
+}
+
+/* =========================
+   Buttons
+   ========================= */
 
 .cart-btn {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: .35rem;
-    padding: .45rem .875rem;
-    border-radius: 8px;
-    font-weight: 600;
-    font-size: .85rem;
+    gap: 0.35rem;
+    padding: 0.45rem 0.875rem;
     border: none;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    font-weight: 600;
     cursor: pointer;
     text-decoration: none;
+    box-sizing: border-box;
 }
 
 .cart-btn--primary {
     background: var(--cart-primary);
-    color: #fff;
+    color: #ffffff;
+}
+
+.cart-btn--primary:hover {
+    background: #00584d;
+    color: #ffffff;
 }
 
 .cart-btn--ghost {
     background: transparent;
     color: #dc2626;
     border: 1px solid #fecaca;
+}
+
+.cart-btn--ghost:hover {
+    background: #fef2f2;
+}
+
+.cart-btn--outline {
+    background: #ffffff;
+    color: var(--cart-primary);
+    border: 1px solid var(--cart-primary);
+}
+
+.cart-btn--outline:hover {
+    background: #f0fdfa;
 }
 
 .cart-btn--remove {
@@ -317,18 +424,16 @@ body.home-page {
     margin: 0;
 }
 
-.cart-btn--outline {
-    background: #fff;
-    color: var(--cart-primary);
-    border: 1px solid var(--cart-primary);
-}
+/* =========================
+   Order summary
+   ========================= */
 
 .cart-summary {
-    background: var(--cart-white);
+    padding: 1.25rem;
     border: 1px solid var(--cart-border);
     border-radius: var(--cart-radius);
+    background: var(--cart-white);
     box-shadow: var(--cart-shadow);
-    padding: 1.25rem;
     position: sticky;
     top: 120px;
 }
@@ -342,14 +447,19 @@ body.home-page {
     display: flex;
     justify-content: space-between;
     gap: 1rem;
-    margin-bottom: .75rem;
+    margin-bottom: 0.75rem;
     color: var(--cart-muted);
-    font-size: .9rem;
+    font-size: 0.9rem;
 }
 
 .cart-summary-row span:last-child {
     white-space: nowrap;
     flex-shrink: 0;
+}
+
+.cart-summary-discount span:last-child {
+    color: #059669;
+    font-weight: 700;
 }
 
 .cart-summary-row.total {
@@ -368,61 +478,36 @@ body.home-page {
 .cart-summary-actions {
     display: flex;
     flex-direction: column;
-    gap: .75rem;
+    gap: 0.75rem;
     margin-top: 1.25rem;
 }
 
+.cart-summary-actions form {
+    width: 100%;
+    margin: 0;
+}
+
+/* =========================
+   Empty cart
+   ========================= */
+
 .cart-empty {
-    text-align: center;
     padding: 3rem 1.5rem;
-    background: var(--cart-white);
     border: 1px dashed var(--cart-border);
     border-radius: var(--cart-radius);
+    background: var(--cart-white);
+    text-align: center;
 }
 
 .cart-empty i {
-    font-size: 3rem;
-    color: var(--cart-muted);
     margin-bottom: 1rem;
+    color: var(--cart-muted);
+    font-size: 3rem;
 }
 
-@media (max-width: 900px) {
-    .cart-layout {
-        grid-template-columns: 1fr;
-    }
-
-    .cart-summary {
-        position: static;
-    }
-
-    .cart-table {
-        min-width: 680px;
-    }
-
-    .cart-table thead {
-        display: none;
-    }
-
-    .cart-table tr {
-        display: block;
-        border-bottom: 1px solid var(--cart-border);
-        padding: 1rem;
-    }
-
-    .cart-table td {
-        display: block;
-        border: none;
-        padding: .35rem 0;
-    }
-
-    .cart-table td.col-remove {
-        display: flex;
-        justify-content: flex-end;
-        padding-top: .75rem;
-        max-width: none;
-        width: 100%;
-    }
-}
+/* =========================
+   Voucher
+   ========================= */
 
 .voucher-box {
     margin-bottom: 20px;
@@ -432,166 +517,145 @@ body.home-page {
     margin-bottom: 15px;
 }
 
-
-/* vùng chứa scroll */
-
 .voucher-list-scroll {
     max-height: 390px;
-    overflow-y: auto;
-    overflow-x: hidden;
     padding: 8px;
+    overflow-x: hidden;
+    overflow-y: auto;
 }
-
-
-/* =========================
-   Ticket Card
 
 .voucher-card {
     position: relative;
     min-height: auto;
-    background: #ffffff;
-    border: 2px dashed #d1d5db;
-    border-radius: 16px;
     padding: 18px 20px;
     margin-bottom: 15px;
+    border: 2px dashed #d1d5db;
+    border-radius: 16px;
+    background: #ffffff;
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+    overflow: visible;
 }
-
-
-/* =========================
-   Hai lỗ vé
 
 .voucher-card::before,
 .voucher-card::after {
     content: "";
     position: absolute;
     top: 50%;
-    transform: translateY(-50%);
     width: 32px;
     height: 32px;
-    background: #f8fafc;
     border-radius: 50%;
+    background: #f8fafc;
+    transform: translateY(-50%);
     z-index: 2;
 }
-
-
-/* lỗ trái */
 
 .voucher-card::before {
     left: -16px;
 }
 
-
-/* lỗ phải */
-
 .voucher-card::after {
     right: -16px;
 }
 
-
-/* =========================
-   Description
-
 .voucher-description {
+    margin-bottom: 12px;
+    color: #111827;
     font-size: 1rem;
     font-weight: 700;
-    color: #111827;
-    margin-bottom: 12px;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
 }
-
-
-/* =========================
-   Info rows
 
 .voucher-info {
     display: flex;
     align-items: center;
     gap: 6px;
     margin-bottom: 5px;
-    font-size: .9rem;
     color: #475569;
+    font-size: 0.9rem;
     line-height: 1.2;
 }
-
 
 .voucher-info b {
     color: #111827;
 }
 
+.voucher-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 10px;
+}
 
-/* =========================
-   Copy Button
+.copy-voucher-btn,
+.detail-voucher-btn {
+    flex: 1;
+    padding: 6px 10px;
+    border: none;
+    border-radius: 7px;
+    color: #ffffff;
+    font-size: 0.8rem;
+    cursor: pointer;
+}
 
 .copy-voucher-btn {
     margin-left: auto;
-    border: none;
     background: #2563eb;
-    color: white;
-    padding: 4px 10px;
-    border-radius: 7px;
-    cursor: pointer;
-    font-size: .8rem;
 }
-
 
 .copy-voucher-btn:hover {
     background: #1d4ed8;
 }
 
+.detail-voucher-btn {
+    background: #16a34a;
+}
 
-/* =========================
-   Scrollbar
+.detail-voucher-btn:hover {
+    background: #15803d;
+}
 
 .voucher-list-scroll::-webkit-scrollbar {
     width: 6px;
 }
 
-
 .voucher-list-scroll::-webkit-scrollbar-thumb {
-    background: #cbd5e1;
     border-radius: 10px;
+    background: #cbd5e1;
 }
 
-.voucher-card {
-    overflow: visible;
-}
+/* =========================
+   Voucher modal
+   ========================= */
 
 .voucher-modal {
     position: fixed;
     inset: 0;
-    background: rgba(0, 0, 0, .45);
     display: none;
-    justify-content: center;
     align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.45);
     z-index: 9999;
 }
-
 
 .voucher-modal.active {
     display: flex;
 }
 
-
-
 .voucher-modal-content {
-    background: white;
+    position: relative;
     width: 420px;
+    max-width: calc(100vw - 32px);
     padding: 25px;
     border-radius: 16px;
-    position: relative;
-    box-shadow: 0 20px 40px rgba(0, 0, 0, .2);
+    background: #ffffff;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+    box-sizing: border-box;
 }
-
-
 
 .voucher-modal-content h2 {
     margin-bottom: 20px;
 }
-
-
 
 .voucher-close {
     position: absolute;
@@ -603,67 +667,116 @@ body.home-page {
     cursor: pointer;
 }
 
-
-
 .voucher-detail-item {
     margin-bottom: 15px;
     line-height: 1.5;
 }
-
-
 
 .voucher-detail-item b {
     display: block;
     color: #374151;
 }
 
-
-
 .voucher-detail-item span,
 .voucher-detail-item p {
     color: #6b7280;
 }
 
-.voucher-actions {
+/* =========================
+   Responsive
+   ========================= */
 
-    display: flex;
+@media (max-width: 900px) {
+    .cart-wrap {
+        padding: 1.25rem 1rem 2rem;
+    }
 
-    gap: 8px;
+    .cart-layout {
+        grid-template-columns: 1fr;
+    }
 
-    margin-top: 10px;
+    .cart-summary {
+        position: static;
+    }
 
+    .cart-table {
+        min-width: 0;
+    }
+
+    .cart-table thead {
+        display: none;
+    }
+
+    .cart-table tbody,
+    .cart-table tr,
+    .cart-table td {
+        display: block;
+        width: 100%;
+    }
+
+    .cart-table tr {
+        padding: 1rem;
+        border-bottom: 1px solid var(--cart-border);
+        box-sizing: border-box;
+    }
+
+    .cart-table td {
+        padding: 0.4rem 0;
+        border: none;
+        overflow: visible;
+    }
+
+    .cart-table td.col-product,
+    .cart-table td.col-price,
+    .cart-table td.col-qty,
+    .cart-table td.col-promotion,
+    .cart-table td.col-subtotal,
+    .cart-table td.col-remove {
+        width: 100%;
+        min-width: 0;
+        max-width: none;
+        text-align: left;
+    }
+
+    .cart-table td.col-price,
+    .cart-table td.col-subtotal {
+        text-align: left;
+    }
+
+    .cart-promotion-price {
+        align-items: flex-start;
+    }
+
+    .cart-table td.col-remove {
+        display: flex;
+        justify-content: flex-end;
+        padding-top: 0.75rem;
+    }
+
+    .cart-qty-form {
+        justify-content: flex-start;
+    }
+
+    .cart-promotion-select {
+        max-width: 100%;
+    }
 }
 
+@media (max-width: 520px) {
+    .cart-head h1 {
+        font-size: 1.45rem;
+    }
 
-.copy-voucher-btn,
-.detail-voucher-btn {
+    .cart-book__thumb {
+        width: 46px;
+        height: 60px;
+    }
 
-    flex: 1;
+    .cart-summary {
+        padding: 1rem;
+    }
 
-    padding: 6px 10px;
-
-    border-radius: 7px;
-
-    cursor: pointer;
-
-    font-size: .8rem;
-
-}
-
-
-.detail-voucher-btn {
-
-    border: none;
-
-    background: #16a34a;
-
-    color: white;
-
-}
-
-
-.detail-voucher-btn:hover {
-
-    background: #15803d;
-
+    .voucher-actions {
+        flex-direction: column;
+    }
 }
