@@ -172,22 +172,53 @@
         }
 
         .btn-small {
-            border: none;
-            border-radius: 10px;
-            padding: 9px 13px;
+            width: 34px;
+            height: 34px;
+            padding: 0;
+            border: 1px solid #dbe3ea;
+            border-radius: 5px;
+            background: #ffffff;
+            color: #64748b;
             cursor: pointer;
-            font-weight: 800;
             text-decoration: none;
             display: inline-flex;
             align-items: center;
-            gap: 6px;
+            justify-content: center;
             font-size: 13px;
+            transition: all .2s ease;
         }
 
-        .btn-view { background: #2563eb; color: white; }
-        .btn-edit { background: #f59e0b; color: #111827; }
-        .btn-ban { background: #ef4444; color: white; }
-        .btn-unban { background: #22c55e; color: #052e16; }
+        .btn-small:hover {
+            color: #00796b;
+            border-color: #00796b;
+            background: #f0fdfa;
+        }
+
+        .btn-view { background: #ffffff; color: #64748b; }
+        .btn-edit { background: #ffffff; color: #64748b; }
+        .btn-ban { background: #ffffff; color: #64748b; }
+        .btn-unban { background: #ffffff; color: #64748b; }
+        .btn-edit:hover { color: #d97706; border-color: #f59e0b; background: #fffbeb; }
+        .btn-ban:hover { color: #dc2626; border-color: #ef4444; background: #fef2f2; }
+        .btn-unban:hover { color: #16a34a; border-color: #22c55e; background: #f0fdf4; }
+        .btn-small.btn-reset {
+            width: auto;
+            min-width: 72px;
+            height: 44px;
+            padding: 0 16px;
+            border: 1px solid #d1d5db;
+            border-radius: 10px;
+            background: #ffffff;
+            color: #111827;
+            font-weight: 700;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+        .btn-small.btn-reset:hover {
+            color: #00796b;
+            border-color: #00796b;
+            background: #f0fdfa;
+        }
         .btn-delete { background: #991b1b; color: white; }
         .btn-reset { background: #ffffff; color: #111827; border: 1px solid #d1d5db; }
         .btn-secondary { background: #475569; color: white; }
@@ -319,13 +350,106 @@
 
         .modal-actions-row {
             display: flex;
+            align-items: center;
             justify-content: flex-end;
             gap: 12px;
             margin-top: 22px;
         }
 
-        .btn-submit {
+        /*
+         * Ghi đè kích thước icon button.
+         * Các nút nằm trong modal phải là nút chữ bình thường.
+         */
+        .modal-actions-row .btn-small {
+            width: auto;
+            min-width: 105px;
+            height: 44px;
+            padding: 0 18px;
+            border-radius: 10px;
+
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 7px;
+
+            font-size: 14px;
+            font-weight: 800;
+            line-height: 1;
+            white-space: nowrap;
+
+            flex: 0 0 auto;
+            box-sizing: border-box;
+        }
+
+        /* Cancel và No */
+        .modal-actions-row .btn-reset {
+            width: auto;
+            min-width: 105px;
+            height: 44px;
+            padding: 0 18px;
+
+            background: #ffffff;
+            color: #374151;
+            border: 1px solid #d1d5db;
+        }
+
+        .modal-actions-row .btn-reset:hover {
+            color: #00796b;
+            border-color: #00796b;
+            background: #f0fdfa;
+        }
+
+        /* Create Staff và Update Staff */
+        .modal-actions-row .btn-submit {
+            width: auto;
+            min-width: 125px;
+            height: 44px;
+            padding: 0 20px;
+
             background: #2563eb;
+            color: #ffffff;
+            border: 1px solid #2563eb;
+        }
+
+        .modal-actions-row .btn-submit:hover {
+            background: #1d4ed8;
+            border-color: #1d4ed8;
+            color: #ffffff;
+        }
+
+        /* Confirm Ban */
+        .confirm-modal .modal-actions-row .btn-ban {
+            width: auto;
+            min-width: 105px;
+            height: 44px;
+            padding: 0 18px;
+
+            background: #ef4444;
+            color: #ffffff;
+            border: 1px solid #ef4444;
+        }
+
+        .confirm-modal .modal-actions-row .btn-ban:hover {
+            background: #dc2626;
+            border-color: #dc2626;
+            color: #ffffff;
+        }
+
+        /* Confirm Unban */
+        .confirm-modal .modal-actions-row .btn-unban {
+            width: auto;
+            min-width: 105px;
+            height: 44px;
+            padding: 0 18px;
+
+            background: #22c55e;
+            color: #052e16;
+            border: 1px solid #22c55e;
+        }
+
+        .confirm-modal .modal-actions-row .btn-unban:hover {
+            background: #16a34a;
+            border-color: #16a34a;
             color: #ffffff;
         }
 
@@ -603,13 +727,14 @@
                                 <td>
                                     <div class="staff-actions">
                                         <a href="/admin/staff/${staff.id}"
-                                           class="btn-small btn-view">
+                                           class="btn-small btn-view"
+                                           title="View staff">
                                             <i class="fa-solid fa-eye"></i>
-                                            View
                                         </a>
 
                                         <button type="button"
                                                 class="btn-small btn-edit"
+                                                title="Edit staff"
                                                 onclick="openUpdateModal(
                                                         '${staff.id}',
                                                         '${staff.fullName}',
@@ -617,25 +742,24 @@
                                                         '${empty staff.address ? '' : staff.address}'
                                                         )">
                                             <i class="fa-solid fa-pen"></i>
-                                            Edit
                                         </button>
 
                                         <c:choose>
                                             <c:when test="${staff.status}">
                                                 <button type="button"
                                                         class="btn-small btn-ban"
+                                                        title="Ban staff"
                                                         onclick="openConfirmModal('${staff.id}', '${staff.fullName}', '${staff.email}', 'BAN')">
                                                     <i class="fa-solid fa-ban"></i>
-                                                    Ban
                                                 </button>
                                             </c:when>
 
                                             <c:otherwise>
                                                 <button type="button"
                                                         class="btn-small btn-unban"
+                                                        title="Unban staff"
                                                         onclick="openConfirmModal('${staff.id}', '${staff.fullName}', '${staff.email}', 'UNBAN')">
                                                     <i class="fa-solid fa-circle-check"></i>
-                                                    Unban
                                                 </button>
                                             </c:otherwise>
                                         </c:choose>
@@ -1119,3 +1243,7 @@
 
 </body>
 </html>
+
+
+
+
