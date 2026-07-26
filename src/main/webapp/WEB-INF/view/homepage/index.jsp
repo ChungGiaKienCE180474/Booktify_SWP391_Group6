@@ -175,7 +175,7 @@
                                                 <div class="book-card__body">
                                                     <div class="book-card__title">${book.title}</div>
                                                     <div class="book-card__author">
-                                                        <c:out value="${book.author}" default="—" />
+                                                        <c:out value="${book.author.authorName}" default="—" />
                                                     </div>
                                                     <div class="book-card__footer">
                                                         <div class="book-card__price-box">
@@ -248,7 +248,7 @@
                                                         </c:if>
                                                         <div class="book-card__title">${book.title}</div>
                                                         <div class="book-card__author">
-                                                            <c:out value="${book.author}" default="—" />
+                                                            <c:out value="${book.author.authorName}" default="—" />
                                                         </div>
                                                         <div class="book-card__footer">
                                                             <div class="book-card__price-box">

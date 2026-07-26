@@ -45,9 +45,9 @@ public interface BookRepository extends JpaRepository<Book, Long> {
     long countByActiveTrue();
 
     // Quick keyword search across title/author/isbn/category name.
-    @Query("SELECT b FROM Book b LEFT JOIN b.category c WHERE " +
+    @Query("SELECT b FROM Book b LEFT JOIN b.category c LEFT JOIN b.author a WHERE " +
            "LOWER(b.title) LIKE LOWER(CONCAT('%', :q, '%')) OR " +
-           "LOWER(b.author) LIKE LOWER(CONCAT('%', :q, '%')) OR " +
+           "LOWER(COALESCE(a.authorName, '')) LIKE LOWER(CONCAT('%', :q, '%')) OR " +
            "LOWER(COALESCE(b.isbn, '')) LIKE LOWER(CONCAT('%', :q, '%')) OR " +
            "LOWER(COALESCE(c.name, '')) LIKE LOWER(CONCAT('%', :q, '%')) " +
            "ORDER BY b.id ASC")
@@ -57,10 +57,11 @@ public interface BookRepository extends JpaRepository<Book, Long> {
     // of binding a null/empty list into the IN clause, which JPQL can't handle.
     @Query("SELECT DISTINCT b FROM Book b " +
            "LEFT JOIN b.category c " +
+           "LEFT JOIN b.author a " +
            "LEFT JOIN b.genres g " +
            "WHERE (:q IS NULL OR :q = '' OR " +
            "       LOWER(b.title) LIKE LOWER(CONCAT('%', :q, '%')) OR " +
-           "       LOWER(b.author) LIKE LOWER(CONCAT('%', :q, '%')) OR " +
+           "       LOWER(COALESCE(a.authorName, '')) LIKE LOWER(CONCAT('%', :q, '%')) OR " +
            "       LOWER(COALESCE(b.isbn, '')) LIKE LOWER(CONCAT('%', :q, '%')) OR " +
            "       LOWER(COALESCE(c.name, '')) LIKE LOWER(CONCAT('%', :q, '%')) OR " +
            "       LOWER(COALESCE(g.name, '')) LIKE LOWER(CONCAT('%', :q, '%'))) " +

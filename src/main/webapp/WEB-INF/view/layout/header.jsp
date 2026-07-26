@@ -38,9 +38,10 @@
                                 </a>
 
                                 <%-- Search bar --%>
-                                    <form class="header-search" action="/books" method="get">
+                                    <form class="header-search" action="/search" method="get">
                                         <input type="text" name="q" class="header-search__input"
-                                            value="${not empty q ? q : ''}" placeholder="Search books, authors, ..." />
+                                            value="${not empty q ? q : ''}"
+                                            placeholder="Search books, stationery, authors..." />
                                         <button type="submit" class="header-search__btn">
                                             <i class="fa-solid fa-magnifying-glass"></i> Search
                                         </button>

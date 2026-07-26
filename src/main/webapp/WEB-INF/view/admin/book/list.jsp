@@ -142,7 +142,7 @@
                                                     </c:if>
                                                 </td>
                                                 <td style="color:#374151;">
-                                                    <c:out value="${book.author}" />
+                                                    <c:out value="${book.author.authorName}" default="&#8212;" />
                                                 </td>
                                                 <td>
                                                     <c:choose>
@@ -185,9 +185,10 @@
                                                 <td class="admin-table__actions">
                                                     <button type="button" class="icon-link js-view-book"
                                                         title="View details" data-title="<c:out value='${book.title}'/>"
-                                                        data-author="<c:out value='${book.author}'/>"
+                                                        data-author="<c:out value='${book.author.authorName}'/>"
                                                         data-isbn="<c:out value='${book.isbn}'/>"
                                                         data-category="<c:out value='${not empty book.category ? book.category.name : &quot;&quot;}'/>"
+                                                        data-supplier="<c:out value='${not empty book.supplier ? book.supplier.supplierName : &quot;&quot;}'/>"
                                                         data-genre="<c:out value='${book.genreNames}'/>"
                                                         data-price="<c:out value='${book.priceFormatted}'/>"
                                                         data-stock="${book.stockQuantity}" data-active="${book.active}"
@@ -332,6 +333,8 @@
                                                     id="mBIsbn" class="modal-value"></span></div>
                                             <div class="modal-row"><span class="modal-label">Category</span><span
                                                     id="mBCategory" class="modal-value"></span></div>
+                                            <div class="modal-row"><span class="modal-label">Supplier</span><span
+                                                    id="mBSupplier" class="modal-value"></span></div>
                                             <div class="modal-row"><span class="modal-label">Genre</span><span
                                                     id="mBGenre" class="modal-value"></span></div>
                                             <div class="modal-row"><span class="modal-label">Price</span><span
@@ -353,18 +356,7 @@
                             </div>
                         </div>
 
-                        <%-- Toast --%>
-                            <div id="toastContainer" class="toast-container"></div>
-                            <c:if test="${not empty successMessage}">
-                                <div id="toastSuccessMessage" style="display:none;">
-                                    <c:out value="${successMessage}" />
-                                </div>
-                            </c:if>
-                            <c:if test="${not empty errorMessage}">
-                                <div id="toastErrorMessage" style="display:none;">
-                                    <c:out value="${errorMessage}" />
-                                </div>
-                            </c:if>
+                        <jsp:include page="/WEB-INF/view/layout/admin/toast.jsp" />
 
                             <script>
                                 // ── Genre filter dropdown (toggle open/close, closes on outside click) ──
@@ -380,21 +372,6 @@
                                         if (!wrap.contains(e.target)) wrap.classList.remove('is-open');
                                     });
                                 })();
-
-                                function showToast(msg, type) {
-                                    var tc = document.getElementById('toastContainer');
-                                    var t = document.createElement('div');
-                                    t.className = 'toast toast--' + type;
-                                    t.innerHTML = '<i class="fa-solid ' + (type === 'success' ? 'fa-circle-check' : 'fa-circle-exclamation') + '"></i> ' + msg;
-                                    tc.appendChild(t);
-                                    setTimeout(function () { t.classList.add('toast--show'); }, 10);
-                                    setTimeout(function () { t.classList.remove('toast--show'); setTimeout(function () { t.remove(); }, 320); }, 3500);
-                                }
-                                // Flash messages are rendered into hidden divs server-side; show them as toasts on load.
-                                var s = document.getElementById('toastSuccessMessage');
-                                if (s) showToast(s.textContent.trim(), 'success');
-                                var e = document.getElementById('toastErrorMessage');
-                                if (e) showToast(e.textContent.trim(), 'error');
 
                                 function openConfirmModal(action, type, msg) {
                                     document.getElementById('confirmModalMsg').textContent = msg;
@@ -425,6 +402,7 @@
                                     document.getElementById('mBAuthor').textContent = d.author || '—';
                                     document.getElementById('mBIsbn').textContent = d.isbn || '—';
                                     document.getElementById('mBCategory').textContent = d.category || '—';
+                                    document.getElementById('mBSupplier').textContent = d.supplier || '—';
                                     document.getElementById('mBGenre').textContent = d.genre || '—';
                                     document.getElementById('mBPrice').textContent = (d.price || '0') + ' ₫';
                                     document.getElementById('mBStock').textContent = d.stock || '0';

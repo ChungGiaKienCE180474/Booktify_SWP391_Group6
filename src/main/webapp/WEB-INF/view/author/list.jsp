@@ -31,6 +31,15 @@
                     <span>Authors</span>
                 </div>
 
+                <c:if test="${not empty errorMessage}">
+                    <div style="margin:0 0 18px;padding:14px 18px;border-radius:10px;font-weight:700;
+                                background:#FEF2F2;color:#DC2626;border:1px solid #FECACA;
+                                display:flex;align-items:center;gap:10px;">
+                        <i class="fa-solid fa-circle-exclamation"></i>
+                        <c:out value="${errorMessage}" />
+                    </div>
+                </c:if>
+
                 <div class="author-header">
                     <div>
                         <h2>Authors</h2>

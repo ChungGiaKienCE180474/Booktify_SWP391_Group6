@@ -84,10 +84,11 @@
                                                                 Optional</span>
                                                         </label>
 
-                                                        <%-- Actual submitted value; Book.author is plain text, not a
-                                                            foreign key --%>
-                                                            <input type="hidden" name="author" id="authorHidden"
-                                                                value="<c:out value='${book.author}'/>" />
+                                                        <%-- Real FK — submitted as authorId, resolved server-side to
+                                                            an Author entity so renaming the author never breaks the
+                                                            link on the customer-facing book detail page. --%>
+                                                            <input type="hidden" name="authorId" id="authorHidden"
+                                                                value="<c:out value='${book.author != null ? book.author.authorId : &quot;&quot;}'/>" />
 
                                                             <c:choose>
                                                                 <c:when test="${empty authors}">
@@ -116,7 +117,7 @@
                                                                                 id="authorInput"
                                                                                 placeholder="Search or select an author..."
                                                                                 autocomplete="off"
-                                                                                value="<c:out value='${book.author}'/>" />
+                                                                                value="<c:out value='${book.author != null ? book.author.authorName : &quot;&quot;}'/>" />
                                                                             <span class="ac-chevron">
                                                                                 <i class="fa-solid fa-chevron-down"></i>
                                                                             </span>
@@ -124,7 +125,8 @@
                                                                         <ul class="ac-dropdown" id="authorDropdown"
                                                                             role="listbox">
                                                                             <c:forEach items="${authors}" var="au">
-                                                                                <li class="ac-option${au.authorName == book.author ? ' is-selected' : ''}"
+                                                                                <li class="ac-option${not empty book.author and au.authorId == book.author.authorId ? ' is-selected' : ''}"
+                                                                                    data-id="${au.authorId}"
                                                                                     data-value="<c:out value='${au.authorName}'/>"
                                                                                     data-nat="<c:out value='${au.nationality}'/>"
                                                                                     role="option"><span
@@ -149,8 +151,6 @@
                                                                     </div>
                                                                 </c:otherwise>
                                                             </c:choose>
-
-                                                            <form:errors path="author" cssClass="admin-error" />
                                                     </div>
                                                 </div>
 
@@ -447,8 +447,10 @@
                     });
 
                     // Searchable author dropdown: a plain <select> can't do the
-                    // type-to-filter + "add new author" UX we want, so this is a
-                    // hand-rolled combobox backed by the hidden "author" input.
+                    // type-to-filter UX we want, so this is a hand-rolled combobox.
+                    // The hidden input submits authorId (a real FK) — the visible
+                    // text input is purely for search/display and never itself
+                    // submitted.
                     (function () {
                         var wrap = document.getElementById('authorCombobox');
                         var control = document.getElementById('authorControl');
@@ -460,6 +462,10 @@
                         var allOpts = Array.prototype.slice.call(
                             wrap.querySelectorAll('.ac-option')
                         );
+                        // Remember the display name for whatever id is currently
+                        // selected, so closing the dropdown without picking
+                        // anything new restores the right text.
+                        var selectedName = inputEl.value || '';
 
                         function openList() {
                             wrap.classList.add('is-open');
@@ -470,15 +476,16 @@
 
                         function closeList() {
                             wrap.classList.remove('is-open');
-                            inputEl.value = hidden.value || '';
+                            inputEl.value = selectedName;
                             allOpts.forEach(function (o) { o.classList.remove('is-highlighted'); });
                         }
 
-                        function pick(val) {
-                            hidden.value = val;
-                            inputEl.value = val;
+                        function pick(id, name) {
+                            hidden.value = id;
+                            selectedName = name;
+                            inputEl.value = name;
                             allOpts.forEach(function (o) {
-                                o.classList.toggle('is-selected', o.dataset.value === val);
+                                o.classList.toggle('is-selected', o.dataset.id === id);
                             });
                             wrap.classList.remove('is-open');
                             allOpts.forEach(function (o) { o.classList.remove('is-highlighted'); });
@@ -522,7 +529,7 @@
                         allOpts.forEach(function (o) {
                             o.addEventListener('mousedown', function (e) {
                                 e.preventDefault();
-                                pick(o.dataset.value);
+                                pick(o.dataset.id, o.dataset.value);
                             });
                         });
 
@@ -550,7 +557,7 @@
                                 if (prev) { prev.classList.add('is-highlighted'); prev.scrollIntoView({ block: 'nearest' }); }
                             } else if (e.key === 'Enter') {
                                 e.preventDefault();
-                                if (hi) pick(hi.dataset.value);
+                                if (hi) pick(hi.dataset.id, hi.dataset.value);
                             } else if (e.key === 'Escape') {
                                 closeList();
                             }

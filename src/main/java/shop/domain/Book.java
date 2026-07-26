@@ -47,10 +47,12 @@ public class Book {
     @Column(nullable = false, length = 500)
     private String title;
 
-    // Optional — a book can be saved without an author selected.
-    @Size(max = 150, message = "Author must be at most 150 characters")
-    @Column(length = 150)
-    private String author;
+    // Optional — a book can be saved without an author selected. Real FK to
+    // Author (not a free-text name) so renaming an author never breaks the
+    // link from a book's detail page back to that author's profile.
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "author_id")
+    private Author author;
 
     @Size(max = 20, message = "ISBN must be at most 20 characters")
     @Column(length = 20, unique = true)
@@ -136,11 +138,11 @@ public class Book {
         this.title = title;
     }
 
-    public String getAuthor() {
+    public Author getAuthor() {
         return author;
     }
 
-    public void setAuthor(String author) {
+    public void setAuthor(Author author) {
         this.author = author;
     }
 
