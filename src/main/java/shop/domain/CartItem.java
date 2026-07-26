@@ -1,5 +1,9 @@
 package shop.domain;
 
+import java.math.BigDecimal;
+import java.text.NumberFormat;
+import java.util.Locale;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -13,7 +17,8 @@ import jakarta.persistence.UniqueConstraint;
 
 @Entity
 @Table(name = "cart_items", uniqueConstraints = {
-        @UniqueConstraint(name = "uk_cart_book", columnNames = { "cart_id", "book_id" })
+        @UniqueConstraint(name = "uk_cart_book", columnNames = { "cart_id", "book_id" }),
+        @UniqueConstraint(name = "uk_cart_vpp", columnNames = { "cart_id", "vpp_item_id" })
 })
 public class CartItem {
 
@@ -26,8 +31,12 @@ public class CartItem {
     private Cart cart;
 
     @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "book_id", nullable = false)
+    @JoinColumn(name = "book_id")
     private Book book;
+    
+    @ManyToOne
+    @JoinColumn(name = "vpp_item_id")
+    private VppItem vppItem;
 
     @Column(nullable = false)
     private int quantity;
@@ -62,5 +71,27 @@ public class CartItem {
 
     public void setQuantity(int quantity) {
         this.quantity = quantity;
+    }
+    
+    public VppItem getVppItem() {
+        return vppItem;
+    }
+    public void setVppItem(VppItem vppItem) {
+    this.vppItem = vppItem;
+}
+
+    /** Subtotal formatted as xxx.xxx (German locale, no decimals) */
+    public String getSubtotalFormatted() {
+        BigDecimal unitPrice = null;
+        if (book != null) {
+            unitPrice = book.getPrice();
+        } else if (vppItem != null) {
+            unitPrice = vppItem.getPrice();
+        }
+        if (unitPrice == null) {
+            return "0";
+        }
+        BigDecimal subtotal = unitPrice.multiply(BigDecimal.valueOf(quantity));
+        return NumberFormat.getIntegerInstance(Locale.GERMANY).format(subtotal.longValue());
     }
 }

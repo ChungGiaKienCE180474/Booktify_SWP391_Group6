@@ -15,6 +15,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import jakarta.validation.Valid;
 import shop.domain.Category;
 import shop.service.CategoryService;
+import shop.service.VppCategoryService;
 
 @Controller
 @RequestMapping("/admin/categories")
@@ -22,15 +23,51 @@ import shop.service.CategoryService;
 public class CategoryController {
 
     private final CategoryService categoryService;
+    private final VppCategoryService vppCategoryService;
 
-    public CategoryController(CategoryService categoryService) {
+    public CategoryController(CategoryService categoryService, VppCategoryService vppCategoryService) {
         this.categoryService = categoryService;
+        this.vppCategoryService = vppCategoryService;
     }
 
+    private static final int PAGE_SIZE = 10;
+
+    // Filters in memory and paginates via subList — fine here since the
+    // number of categories is small.
     @GetMapping
-    public String list(@RequestParam(required = false) String q, Model model) {
-        model.addAttribute("categories", categoryService.searchCategories(q));
+    public String list(@RequestParam(required = false) String q,
+                       @RequestParam(required = false) String status,
+                       @RequestParam(defaultValue = "0") int page,
+                       @RequestParam(defaultValue = "false") boolean all,
+                       Model model) {
+        java.util.List<shop.domain.Category> allCategories = categoryService.searchCategories(q, status);
+        int totalItems = allCategories.size();
+        int totalPages = Math.max(1, (int) Math.ceil((double) totalItems / PAGE_SIZE));
+        int from;
+        int to;
+        if (all) {
+            page = 0;
+            from = 0;
+            to = totalItems;
+        } else {
+            page = Math.max(0, Math.min(page, totalPages - 1));
+            from = page * PAGE_SIZE;
+            to   = Math.min(from + PAGE_SIZE, totalItems);
+        }
+        model.addAttribute("categories", allCategories.subList(from, to));
         model.addAttribute("q", q);
+        model.addAttribute("status", status);
+        model.addAttribute("currentPage", page);
+        model.addAttribute("totalPages", totalPages);
+        model.addAttribute("totalItems", totalItems);
+        model.addAttribute("fromItem", totalItems == 0 ? 0 : from + 1);
+        model.addAttribute("toItem", to);
+        model.addAttribute("viewingAll", all);
+
+        // Stationery categories are a small, fixed set (see VppCategoryService),
+        // so no search/pagination needed — just render them in the second tab.
+        model.addAttribute("vppCategories", vppCategoryService.getAllCategories());
+
         return "admin/category/list";
     }
 
@@ -83,22 +120,36 @@ public class CategoryController {
 
         existing.setName(category.getName());
         existing.setDescription(category.getDescription());
-        existing.setActive(category.isActive());
+        // active is intentionally left untouched — toggling it goes through
+        // the Remove/Restore actions on the list page, not this form.
         categoryService.saveCategory(existing);
         redirectAttributes.addFlashAttribute("successMessage", "Category updated successfully.");
         return "redirect:/admin/categories";
     }
 
     @PostMapping("/{id}/delete")
-    public String delete(@PathVariable Long id, RedirectAttributes redirectAttributes) {
+    public String remove(@PathVariable Long id, RedirectAttributes redirectAttributes) {
         try {
-            categoryService.deleteCategory(id);
-            redirectAttributes.addFlashAttribute("successMessage", "Category deleted successfully.");
+            categoryService.removeCategory(id);
+            redirectAttributes.addFlashAttribute("successMessage", "Category removed successfully.");
         } catch (IllegalStateException e) {
+            // Category still has books attached — surface the specific reason.
             redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("errorMessage",
-                    "An unexpected error occurred while deleting the category.");
+                    "An unexpected error occurred while removing the category.");
+        }
+        return "redirect:/admin/categories";
+    }
+
+    @PostMapping("/{id}/restore")
+    public String restore(@PathVariable Long id, RedirectAttributes redirectAttributes) {
+        try {
+            categoryService.restoreCategory(id);
+            redirectAttributes.addFlashAttribute("successMessage", "Category restored successfully.");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage",
+                    "An unexpected error occurred while restoring the category.");
         }
         return "redirect:/admin/categories";
     }

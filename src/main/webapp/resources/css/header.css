@@ -303,6 +303,12 @@
     margin-right: .25rem;
 }
 .catbar-link.active { color: var(--hdr-primary); border-bottom-color: var(--hdr-primary); font-weight: 700; }
+.catbar-link.catbar-disabled {
+    color: var(--hdr-text-muted, #9CA3AF);
+    cursor: not-allowed;
+    opacity: .65;
+}
+.catbar-link.catbar-disabled:hover { color: var(--hdr-text-muted, #9CA3AF); border-bottom-color: transparent; }
 
 /* ── MOBILE ──────────────────────────────────────────── */
 .nav-toggle {

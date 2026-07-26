@@ -1,0 +1,382 @@
+/* =========================
+   Rating Form
+========================= */
+
+.rating-section {
+    max-width: 1200px;
+    margin: 40px auto;
+    padding: 24px;
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, .08);
+}
+
+.rating-title {
+    font-size: 1.4rem;
+    font-weight: 800;
+    margin-bottom: 1.5rem;
+}
+
+.rating-item {
+    padding: 18px 0;
+    border-bottom: 1px solid #ececec;
+}
+
+.rating-item:last-child {
+    border-bottom: none;
+}
+
+.rating-user {
+    font-weight: 700;
+    margin-bottom: .4rem;
+}
+
+.rating-stars i {
+    color: #f59e0b;
+}
+
+.rating-content {
+    margin-top: .5rem;
+    color: var(--text);
+}
+
+.no-rating {
+    color: var(--text-muted);
+}
+
+
+/* Form */
+
+.rating-form {
+    margin-top: 2rem;
+    padding: 1.5rem;
+    background: #f8fafc;
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+}
+
+.rating-form label {
+    font-weight: 700;
+    display: block;
+    margin-bottom: .5rem;
+}
+
+.rating-form select,
+.rating-form textarea {
+    width: 100%;
+    padding: .7rem;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    margin-bottom: 1rem;
+}
+
+.rating-form textarea {
+    min-height: 120px;
+}
+
+.rating-submit {
+    background: var(--primary);
+    color: white;
+    border: none;
+    padding: .8rem 1.5rem;
+    border-radius: 8px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.rating-stars-select {
+    display: flex;
+    flex-direction: row-reverse;
+    justify-content: flex-end;
+    gap: 8px;
+    margin: 10px 0 20px;
+}
+
+.rating-stars-select input {
+    position: absolute;
+    opacity: 0;
+}
+
+.rating-stars-select label {
+    font-size: 32px;
+    color: #d1d5db;
+    cursor: pointer;
+    transition: .2s;
+}
+
+.rating-stars-select label:hover,
+.rating-stars-select label:hover~label {
+    color: #fbbf24;
+}
+
+.rating-stars-select input:checked~label {
+    color: #fbbf24;
+}
+
+.rating-create {
+    margin: 25px 0;
+    padding: 25px;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    background: #fafafa;
+}
+
+.rating-create textarea {
+    width: 100%;
+    min-height: 150px;
+    padding: 15px;
+    border: 1px solid #d1d5db;
+    border-radius: 10px;
+    font-size: 15px;
+    resize: vertical;
+    box-sizing: border-box;
+    resize: vertical;
+    height: 120px;
+    max-height: 240px;
+}
+
+.rating-create .form-label {
+    display: block;
+    font-weight: 700;
+    margin-bottom: 10px;
+    color: #374151;
+}
+
+.star-filled {
+    color: #fbbf24;
+}
+
+.star-empty {
+    color: #d1d5db;
+}
+
+
+
+.rating-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+
+.rating-user {
+    font-weight: 600;
+    font-size: 16px;
+}
+
+
+.rating-edit-btn {
+    border: none;
+    background: transparent;
+    cursor: pointer;
+
+    font-size: 16px;
+    color: #777;
+
+    padding: 5px;
+}
+
+
+.rating-edit-btn:hover {
+    color: #111;
+}
+
+.rating-delete-btn {
+    width: 34px;
+    height: 34px;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    border: none;
+    border-radius: 8px;
+
+    background: transparent;
+    color: #EF4444;
+
+    cursor: pointer;
+
+    transition: all .2s ease;
+}
+
+.rating-delete-btn i {
+    font-size: 15px;
+}
+
+.rating-delete-btn:hover {
+    background: #FEE2E2;
+    color: #DC2626;
+
+    transform: translateY(-1px);
+}
+
+
+/*ADMIN*/
+.admin-table {
+    table-layout: fixed;
+    width: 100%;
+}
+
+.book-cover {
+    width: 42px;
+    height: 58px;
+    object-fit: cover;
+    border-radius: 5px;
+    border: 1px solid #E5E7EB;
+}
+
+.review-summary {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.review-count {
+    font-weight: 700;
+    color: #111827;
+}
+
+.review-star {
+    color: #F59E0B;
+    font-size: .85rem;
+}
+
+.no-rating {
+    color: #9CA3AF;
+    font-size: .8rem;
+}
+
+.book-title {
+    font-weight: 600;
+    color: #111827;
+}
+
+.book-author {
+    color: #6B7280;
+    font-size: .82rem;
+}
+
+.admin-table__actions {
+    text-align: center;
+    vertical-align: middle;
+}
+
+.admin-table__actions .icon-link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.admin-table td.admin-table__actions {
+    display: table-cell;
+    text-align: center;
+    vertical-align: middle;
+}
+
+.admin-table td.admin-table__actions .icon-link {
+    display: inline-flex;
+}
+
+
+.book-info-card {
+    background: white;
+    border: 1px solid #E5E7EB;
+    border-radius: 12px;
+    padding: 20px 24px;
+    margin-bottom: 22px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.book-cover {
+    width: 80px;
+    height: 110px;
+    object-fit: cover;
+    border-radius: 6px;
+    border: 1px solid #E5E7EB;
+}
+
+.book-title {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: #111827;
+}
+
+.book-author {
+    color: #6B7280;
+    margin-top: 4px;
+}
+
+.review-summary {
+    margin-top: 10px;
+}
+
+.stars {
+    color: #F59E0B;
+    font-size: 1rem;
+}
+
+.review-count {
+    color: #374151;
+    font-size: .85rem;
+}
+
+.review-content {
+    max-width: 350px;
+    color: #374151;
+    line-height: 1.5;
+}
+
+.status-visible {
+    background: #DCFCE7;
+    color: #166534;
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: .75rem;
+    font-weight: 700;
+}
+
+.status-hidden {
+    background: #FEE2E2;
+    color: #991B1B;
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: .75rem;
+    font-weight: 700;
+}
+
+.icon-link--hide {
+    color: #DC2626;
+}
+
+.icon-link--hide:hover {
+    background: #FEE2E2;
+}
+
+.icon-link--visible {
+    color: #059669;
+}
+
+.icon-link--visible:hover {
+    background: #D1FAE5;
+}
+
+.rating-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 5px;
+    margin-bottom: 8px;
+}
+
+.vpp-alert {
+    display: inline-block;
+    width: fit-content;
+}
+
+.vpp-rating-section {
+    max-width: 1300px;
+    width: 100%;
+}

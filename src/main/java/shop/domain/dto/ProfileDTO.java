@@ -1,5 +1,7 @@
 package shop.domain.dto;
 
+import shop.domain.AuthProvider;
+
 public class ProfileDTO {
 
     private Long id;
@@ -10,6 +12,7 @@ public class ProfileDTO {
     private String avatar;
     private String roleName;
     private boolean status;
+    private String authProvider;
 
     public Long getId() {
         return id;
@@ -73,5 +76,17 @@ public class ProfileDTO {
 
     public void setStatus(boolean status) {
         this.status = status;
+    }
+
+    public String getAuthProvider() {
+        return authProvider;
+    }
+
+    public void setAuthProvider(String authProvider) {
+        this.authProvider = authProvider;
+    }
+
+    public boolean isGoogleAccount() {
+        return AuthProvider.GOOGLE.name().equals(authProvider);
     }
 }

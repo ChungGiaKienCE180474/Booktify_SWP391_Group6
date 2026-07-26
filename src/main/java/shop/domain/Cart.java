@@ -1,9 +1,11 @@
 package shop.domain;
 
 import java.math.BigDecimal;
+import java.text.NumberFormat;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -88,5 +90,11 @@ public class Cart {
 
     public void setUpdatedAt(LocalDateTime updatedAt) {
         this.updatedAt = updatedAt;
+    }
+
+    /** Total formatted as xxx.xxx (German locale, no decimals) */
+    public String getTotalAmountFormatted() {
+        if (totalAmount == null) return "0";
+        return NumberFormat.getIntegerInstance(Locale.GERMANY).format(totalAmount.longValue());
     }
 }

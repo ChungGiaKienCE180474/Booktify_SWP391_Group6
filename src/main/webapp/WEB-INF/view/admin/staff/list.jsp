@@ -14,9 +14,7 @@
     <style>
         .staff-stats {
             display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 20px;
-            margin: 24px 0 36px;
+            grid-template-columns: repeat(3, 1fr);
         }
 
         .staff-stat-card {
@@ -174,22 +172,53 @@
         }
 
         .btn-small {
-            border: none;
-            border-radius: 10px;
-            padding: 9px 13px;
+            width: 34px;
+            height: 34px;
+            padding: 0;
+            border: 1px solid #dbe3ea;
+            border-radius: 5px;
+            background: #ffffff;
+            color: #64748b;
             cursor: pointer;
-            font-weight: 800;
             text-decoration: none;
             display: inline-flex;
             align-items: center;
-            gap: 6px;
+            justify-content: center;
             font-size: 13px;
+            transition: all .2s ease;
         }
 
-        .btn-view { background: #2563eb; color: white; }
-        .btn-edit { background: #f59e0b; color: #111827; }
-        .btn-ban { background: #ef4444; color: white; }
-        .btn-unban { background: #22c55e; color: #052e16; }
+        .btn-small:hover {
+            color: #00796b;
+            border-color: #00796b;
+            background: #f0fdfa;
+        }
+
+        .btn-view { background: #ffffff; color: #64748b; }
+        .btn-edit { background: #ffffff; color: #64748b; }
+        .btn-ban { background: #ffffff; color: #64748b; }
+        .btn-unban { background: #ffffff; color: #64748b; }
+        .btn-edit:hover { color: #d97706; border-color: #f59e0b; background: #fffbeb; }
+        .btn-ban:hover { color: #dc2626; border-color: #ef4444; background: #fef2f2; }
+        .btn-unban:hover { color: #16a34a; border-color: #22c55e; background: #f0fdf4; }
+        .btn-small.btn-reset {
+            width: auto;
+            min-width: 72px;
+            height: 44px;
+            padding: 0 16px;
+            border: 1px solid #d1d5db;
+            border-radius: 10px;
+            background: #ffffff;
+            color: #111827;
+            font-weight: 700;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+        .btn-small.btn-reset:hover {
+            color: #00796b;
+            border-color: #00796b;
+            background: #f0fdfa;
+        }
         .btn-delete { background: #991b1b; color: white; }
         .btn-reset { background: #ffffff; color: #111827; border: 1px solid #d1d5db; }
         .btn-secondary { background: #475569; color: white; }
@@ -321,13 +350,106 @@
 
         .modal-actions-row {
             display: flex;
+            align-items: center;
             justify-content: flex-end;
             gap: 12px;
             margin-top: 22px;
         }
 
-        .btn-submit {
+        /*
+         * Ghi đè kích thước icon button.
+         * Các nút nằm trong modal phải là nút chữ bình thường.
+         */
+        .modal-actions-row .btn-small {
+            width: auto;
+            min-width: 105px;
+            height: 44px;
+            padding: 0 18px;
+            border-radius: 10px;
+
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 7px;
+
+            font-size: 14px;
+            font-weight: 800;
+            line-height: 1;
+            white-space: nowrap;
+
+            flex: 0 0 auto;
+            box-sizing: border-box;
+        }
+
+        /* Cancel và No */
+        .modal-actions-row .btn-reset {
+            width: auto;
+            min-width: 105px;
+            height: 44px;
+            padding: 0 18px;
+
+            background: #ffffff;
+            color: #374151;
+            border: 1px solid #d1d5db;
+        }
+
+        .modal-actions-row .btn-reset:hover {
+            color: #00796b;
+            border-color: #00796b;
+            background: #f0fdfa;
+        }
+
+        /* Create Staff và Update Staff */
+        .modal-actions-row .btn-submit {
+            width: auto;
+            min-width: 125px;
+            height: 44px;
+            padding: 0 20px;
+
             background: #2563eb;
+            color: #ffffff;
+            border: 1px solid #2563eb;
+        }
+
+        .modal-actions-row .btn-submit:hover {
+            background: #1d4ed8;
+            border-color: #1d4ed8;
+            color: #ffffff;
+        }
+
+        /* Confirm Ban */
+        .confirm-modal .modal-actions-row .btn-ban {
+            width: auto;
+            min-width: 105px;
+            height: 44px;
+            padding: 0 18px;
+
+            background: #ef4444;
+            color: #ffffff;
+            border: 1px solid #ef4444;
+        }
+
+        .confirm-modal .modal-actions-row .btn-ban:hover {
+            background: #dc2626;
+            border-color: #dc2626;
+            color: #ffffff;
+        }
+
+        /* Confirm Unban */
+        .confirm-modal .modal-actions-row .btn-unban {
+            width: auto;
+            min-width: 105px;
+            height: 44px;
+            padding: 0 18px;
+
+            background: #22c55e;
+            color: #052e16;
+            border: 1px solid #22c55e;
+        }
+
+        .confirm-modal .modal-actions-row .btn-unban:hover {
+            background: #16a34a;
+            border-color: #16a34a;
             color: #ffffff;
         }
 
@@ -425,6 +547,46 @@
                 grid-template-columns: 1fr;
             }
         }
+        .simple-confirm-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 14px;
+        }
+
+        .simple-confirm-title i {
+            color: #ef4444;
+            font-size: 20px;
+        }
+
+        .simple-confirm-title h3 {
+            margin: 0;
+            color: #111827;
+            font-size: 21px;
+        }
+
+        .confirm-description {
+            color: #4b5563;
+            line-height: 1.5;
+        }
+
+        .form-help {
+            color: #64748b;
+            font-size: 12px;
+            line-height: 1.4;
+        }
+
+        .form-field-error {
+            color: #dc2626;
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        .form-group input.field-invalid,
+        .form-group textarea.field-invalid {
+            border-color: #ef4444;
+            box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.12);
+        }
     </style>
 </head>
 
@@ -436,18 +598,17 @@
 
     <section class="admin-content">
 
-        <div class="admin-hero">
+        <div class="admin-toolbar">
             <div>
-                <p class="admin-kicker">Staff Management</p>
-                <h2>Staff Management</h2>
+                <p class="admin-kicker">
+                    <i class="fa-solid fa-user-tie"></i>
+                    Staff Management
+                </p>
+                <h2>Staff</h2>
                 <p>Manage staff accounts, roles, status and information.</p>
             </div>
 
             <div style="display:flex; gap:12px; flex-wrap:wrap;">
-                <a href="/admin/staff/deleted" class="admin-button">
-                    <i class="fa-solid fa-trash-can"></i>
-                    Deleted Staff
-                </a>
 
                 <button type="button" class="admin-button" onclick="openCreateModal()">
                     <i class="fa-solid fa-plus"></i>
@@ -487,15 +648,6 @@
                 </div>
             </article>
 
-            <article class="staff-stat-card">
-                <div class="staff-stat-info">
-                    <span>Deleted Staff</span>
-                    <strong>${deletedStaff}</strong>
-                </div>
-                <div class="staff-stat-icon">
-                    <i class="fa-solid fa-trash-can"></i>
-                </div>
-            </article>
         </div>
 
         <form method="get" action="/admin/staff" class="staff-toolbar">
@@ -505,13 +657,6 @@
                    name="keyword"
                    value="${keyword}"
                    placeholder="Search by name, email, phone, address..."/>
-
-            <select name="staffRole">
-                <option value="all" ${staffRole == 'all' ? 'selected' : ''}>All Roles</option>
-                <option value="Sales Staff" ${staffRole == 'Sales Staff' ? 'selected' : ''}>Sales Staff</option>
-                <option value="Warehouse Staff" ${staffRole == 'Warehouse Staff' ? 'selected' : ''}>Warehouse Staff</option>
-                <option value="Customer Support" ${staffRole == 'Customer Support' ? 'selected' : ''}>Customer Support</option>
-            </select>
 
             <select name="sort">
                 <option value="default" ${sort == 'default' ? 'selected' : ''}>Default</option>
@@ -564,9 +709,7 @@
                                 <td><span class="staff-email">${staff.email}</span></td>
                                 <td><strong>${staff.fullName}</strong></td>
                                 <td>
-                                    <span class="role-pill">
-                                        ${empty staff.staffRole ? 'N/A' : staff.staffRole}
-                                    </span>
+                                    <span class="role-pill">Staff</span>
                                 </td>
                                 <td>${empty staff.phone ? 'N/A' : staff.phone}</td>
                                 <td>${empty staff.address ? 'N/A' : staff.address}</td>
@@ -583,61 +726,43 @@
 
                                 <td>
                                     <div class="staff-actions">
-                                        <button type="button"
-                                                class="btn-small btn-view"
-                                                onclick="openDetailModal(
-                                                        '${staff.staffCode}',
-                                                        '${staff.initial}',
-                                                        '${staff.fullName}',
-                                                        '${staff.email}',
-                                                        '${empty staff.staffRole ? 'N/A' : staff.staffRole}',
-                                                        '${empty staff.phone ? 'N/A' : staff.phone}',
-                                                        '${empty staff.address ? 'N/A' : staff.address}',
-                                                        '${staff.status}'
-                                                        )">
+                                        <a href="/admin/staff/${staff.id}"
+                                           class="btn-small btn-view"
+                                           title="View staff">
                                             <i class="fa-solid fa-eye"></i>
-                                            View
-                                        </button>
+                                        </a>
 
                                         <button type="button"
                                                 class="btn-small btn-edit"
+                                                title="Edit staff"
                                                 onclick="openUpdateModal(
                                                         '${staff.id}',
                                                         '${staff.fullName}',
-                                                        '${empty staff.staffRole ? '' : staff.staffRole}',
                                                         '${empty staff.phone ? '' : staff.phone}',
                                                         '${empty staff.address ? '' : staff.address}'
                                                         )">
                                             <i class="fa-solid fa-pen"></i>
-                                            Edit
                                         </button>
 
                                         <c:choose>
                                             <c:when test="${staff.status}">
                                                 <button type="button"
                                                         class="btn-small btn-ban"
+                                                        title="Ban staff"
                                                         onclick="openConfirmModal('${staff.id}', '${staff.fullName}', '${staff.email}', 'BAN')">
                                                     <i class="fa-solid fa-ban"></i>
-                                                    Ban
                                                 </button>
                                             </c:when>
 
                                             <c:otherwise>
                                                 <button type="button"
                                                         class="btn-small btn-unban"
+                                                        title="Unban staff"
                                                         onclick="openConfirmModal('${staff.id}', '${staff.fullName}', '${staff.email}', 'UNBAN')">
                                                     <i class="fa-solid fa-circle-check"></i>
-                                                    Unban
                                                 </button>
                                             </c:otherwise>
                                         </c:choose>
-
-                                        <button type="button"
-                                                class="btn-small btn-delete"
-                                                onclick="openConfirmModal('${staff.id}', '${staff.fullName}', '${staff.email}', 'DELETE')">
-                                            <i class="fa-solid fa-trash"></i>
-                                            Delete
-                                        </button>
                                     </div>
                                 </td>
                             </tr>
@@ -657,21 +782,21 @@
                     <div class="pagination-actions">
                         <c:if test="${currentPage > 0}">
                             <a class="btn-small btn-reset"
-                               href="/admin/staff?page=${currentPage - 1}&keyword=${keyword}&staffRole=${staffRole}&status=${status}&sort=${sort}">
+                               href="/admin/staff?page=${currentPage - 1}&keyword=${keyword}&status=${status}&sort=${sort}">
                                 Previous
                             </a>
                         </c:if>
 
                         <c:forEach begin="0" end="${totalPages - 1}" var="i">
                             <a class="btn-small page-btn ${i == currentPage ? 'page-active' : 'btn-reset'}"
-                               href="/admin/staff?page=${i}&keyword=${keyword}&staffRole=${staffRole}&status=${status}&sort=${sort}">
+                               href="/admin/staff?page=${i}&keyword=${keyword}&status=${status}&sort=${sort}">
                                 ${i + 1}
                             </a>
                         </c:forEach>
 
                         <c:if test="${currentPage < totalPages - 1}">
                             <a class="btn-small btn-reset"
-                               href="/admin/staff?page=${currentPage + 1}&keyword=${keyword}&staffRole=${staffRole}&status=${status}&sort=${sort}">
+                               href="/admin/staff?page=${currentPage + 1}&keyword=${keyword}&status=${status}&sort=${sort}">
                                 Next
                             </a>
                         </c:if>
@@ -690,43 +815,79 @@
         </div>
 
         <div class="staff-modal-body">
-            <form method="post" action="/admin/staff/create">
+            <form id="createStaffForm" method="post" action="/admin/staff/create">
                 <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
 
                 <div class="form-grid">
                     <div class="form-group">
-                        <label>Full Name *</label>
-                        <input type="text" name="fullName" required/>
+                        <label for="createFullName">Full Name *</label>
+                        <input id="createFullName"
+                               type="text"
+                               name="fullName"
+                               value="${createStaffData.fullName}"
+                               minlength="3"
+                               maxlength="150"
+                               required/>
                     </div>
 
                     <div class="form-group">
-                        <label>Email *</label>
-                        <input type="email" name="email" required/>
+                        <label for="createEmail">Email *</label>
+                        <input id="createEmail"
+                               type="email"
+                               name="email"
+                               value="${createStaffData.email}"
+                               maxlength="255"
+                               required/>
                     </div>
 
                     <div class="form-group">
-                        <label>Staff Role *</label>
-                        <select name="staffRole" required>
-                            <option value="">Select Role</option>
-                            <option value="Sales Staff">Sales Staff</option>
-                            <option value="Warehouse Staff">Warehouse Staff</option>
-                            <option value="Customer Support">Customer Support</option>
-                        </select>
+                        <label for="createPassword">Password *</label>
+                        <input id="createPassword"
+                               type="password"
+                               name="password"
+                               minlength="8"
+                               maxlength="72"
+                               autocomplete="new-password"
+                               required/>
+                        <small class="form-help">
+                            At least 8 characters, including uppercase, lowercase and a number.
+                        </small>
                     </div>
 
                     <div class="form-group">
-                        <label>Password *</label>
-                        <input type="password" name="password" required/>
+                        <label for="createConfirmPassword">Confirm Password *</label>
+                        <input id="createConfirmPassword"
+                               type="password"
+                               name="confirmPassword"
+                               minlength="8"
+                               maxlength="72"
+                               autocomplete="new-password"
+                               required/>
+                        <small id="passwordMatchError"
+                               class="form-field-error"
+                               hidden>
+                            Password confirmation does not match.
+                        </small>
                     </div>
 
                     <div class="form-group">
-                        <label>Phone</label>
-                        <input type="text" name="phone"/>
+                        <label for="createPhone">Phone *</label>
+                        <input id="createPhone"
+                               type="tel"
+                               name="phone"
+                               value="${createStaffData.phone}"
+                               pattern="(0[35789])[0-9]{8}"
+                               maxlength="10"
+                               placeholder="Example: 0912345678"
+                               required/>
                     </div>
 
                     <div class="form-group full">
-                        <label>Address</label>
-                        <textarea name="address"></textarea>
+                        <label for="createAddress">Address *</label>
+                        <textarea id="createAddress"
+                                  name="address"
+                                  maxlength="500"
+                                  required><c:out value="${createStaffData.address}"/></textarea>
                     </div>
                 </div>
 
@@ -755,15 +916,6 @@
                     <div class="form-group">
                         <label>Full Name *</label>
                         <input type="text" id="updateFullName" name="fullName" required/>
-                    </div>
-
-                    <div class="form-group">
-                        <label>Staff Role *</label>
-                        <select id="updateStaffRole" name="staffRole" required>
-                            <option value="Sales Staff">Sales Staff</option>
-                            <option value="Warehouse Staff">Warehouse Staff</option>
-                            <option value="Customer Support">Customer Support</option>
-                        </select>
                     </div>
 
                     <div class="form-group">
@@ -814,8 +966,10 @@
                 </div>
 
                 <div class="detail-item">
-                    <div class="detail-label">Staff Role</div>
-                    <div id="detailRole" class="detail-value"></div>
+                    <div class="detail-label">Role</div>
+                    <div id="detailRole" class="detail-value">
+                        <span class="role-pill">Staff</span>
+                    </div>
                 </div>
 
                 <div class="detail-item">
@@ -838,41 +992,83 @@
 </div>
 
 <div id="confirmModal" class="modal-overlay">
-    <div class="confirm-modal">
-        <h3 id="confirmTitle">Confirm Action</h3>
 
-        <p>
-            <strong>Name:</strong> <span id="confirmName"></span><br>
-            <strong>Email:</strong> <span id="confirmEmail"></span>
+    <div class="confirm-modal">
+
+        <div class="simple-confirm-title">
+
+            <i id="confirmIcon"
+               class="fa-solid fa-circle-exclamation"></i>
+
+            <h3 id="confirmTitle">
+                Confirm Action
+            </h3>
+
+        </div>
+
+        <p class="confirm-description"
+           id="confirmDescription">
+
+            Are you sure you want to perform this action?
         </p>
 
-        <div class="confirm-warning" id="confirmWarning">
-            This action will change staff account status.
+        <p>
+            <strong>Name:</strong>
+            <span id="confirmName"></span>
+            <br>
+
+            <strong>Email:</strong>
+            <span id="confirmEmail"></span>
+        </p>
+
+        <div class="confirm-warning"
+             id="confirmWarning">
+
+            This action will change the staff account.
         </div>
 
-        <div id="confirmTypeBox" style="margin-top:16px;">
-            <p style="margin-bottom:8px;">
-                To confirm, type <strong id="confirmWord">BAN</strong> below:
-            </p>
+        <form id="confirmForm"
+              method="post">
 
-            <input type="text"
-                   id="confirmInput"
-                   placeholder="Type to confirm"
-                   oninput="checkConfirmInput()"
-                   style="width:100%; padding:12px 14px; border:1px solid #d1d5db; border-radius:12px;" />
-        </div>
+            <input type="hidden"
+                   name="${_csrf.parameterName}"
+                   value="${_csrf.token}"/>
 
-        <form id="confirmForm" method="post">
-            <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
-            <input type="hidden" id="confirmStaffId" name="staffId"/>
+            <input type="hidden"
+                   id="confirmStaffId"
+                   name="staffId"/>
 
             <div class="modal-actions-row">
-                <button type="button" class="btn-small btn-reset" onclick="closeConfirmModal()">Cancel</button>
-                <button type="submit" id="confirmSubmit" class="btn-small btn-ban">Confirm</button>
+
+                <button type="button"
+                        class="btn-small btn-reset"
+                        onclick="closeConfirmModal()">
+
+                    <i class="fa-solid fa-xmark"></i>
+                    No
+                </button>
+
+                <button type="submit"
+                        id="confirmSubmit"
+                        class="btn-small btn-ban">
+
+                    <i id="confirmSubmitIcon"
+                       class="fa-solid fa-check"></i>
+
+                    <span id="confirmSubmitText">
+                        Yes
+                    </span>
+                </button>
+
             </div>
+
         </form>
+
     </div>
+
 </div>
+
+<jsp:include page="/WEB-INF/view/layout/admin/toast.jsp" />
 
 <script>
     function openCreateModal() {
@@ -883,10 +1079,35 @@
         document.getElementById("createModal").classList.remove("show");
     }
 
-    function openUpdateModal(id, fullName, staffRole, phone, address) {
+    const createStaffForm = document.getElementById("createStaffForm");
+
+    if (createStaffForm) {
+        createStaffForm.addEventListener("submit", function (event) {
+            const passwordInput = document.getElementById("createPassword");
+            const confirmInput = document.getElementById("createConfirmPassword");
+            const passwordError = document.getElementById("passwordMatchError");
+
+            confirmInput.classList.remove("field-invalid");
+            passwordError.hidden = true;
+
+            if (passwordInput.value !== confirmInput.value) {
+                event.preventDefault();
+                confirmInput.classList.add("field-invalid");
+                passwordError.hidden = false;
+                confirmInput.focus();
+            }
+        });
+    }
+
+    <c:if test="${openCreateModal}">
+        document.addEventListener("DOMContentLoaded", function () {
+            openCreateModal();
+        });
+    </c:if>
+
+    function openUpdateModal(id, fullName, phone, address) {
         document.getElementById("updateStaffId").value = id;
         document.getElementById("updateFullName").value = fullName || "";
-        document.getElementById("updateStaffRole").value = staffRole || "Sales Staff";
         document.getElementById("updatePhone").value = phone || "";
         document.getElementById("updateAddress").value = address || "";
         document.getElementById("updateModal").classList.add("show");
@@ -896,12 +1117,11 @@
         document.getElementById("updateModal").classList.remove("show");
     }
 
-    function openDetailModal(code, initial, fullName, email, staffRole, phone, address, status) {
+    function openDetailModal(code, initial, fullName, email, phone, address, status) {
         document.getElementById("detailCode").innerText = code || "N/A";
         document.getElementById("detailInitial").innerText = initial || "S";
         document.getElementById("detailFullName").innerText = fullName || "N/A";
         document.getElementById("detailEmail").innerText = email || "N/A";
-        document.getElementById("detailRole").innerHTML = '<span class="role-pill">' + (staffRole || "N/A") + '</span>';
         document.getElementById("detailPhone").innerText = phone || "N/A";
         document.getElementById("detailAddress").innerText = address || "N/A";
 
@@ -920,75 +1140,95 @@
         document.getElementById("detailModal").classList.remove("show");
     }
 
-    let requiredConfirmWord = "";
-
     function openConfirmModal(id, fullName, email, action) {
-        document.getElementById("confirmStaffId").value = id;
-        document.getElementById("confirmName").innerText = fullName || "N/A";
-        document.getElementById("confirmEmail").innerText = email || "N/A";
 
-        const form = document.getElementById("confirmForm");
-        const title = document.getElementById("confirmTitle");
-        const warning = document.getElementById("confirmWarning");
-        const submit = document.getElementById("confirmSubmit");
-        const typeBox = document.getElementById("confirmTypeBox");
-        const word = document.getElementById("confirmWord");
-        const input = document.getElementById("confirmInput");
+        document.getElementById(
+            "confirmStaffId"
+        ).value = id;
+
+        document.getElementById(
+            "confirmName"
+        ).innerText = fullName || "N/A";
+
+        document.getElementById(
+            "confirmEmail"
+        ).innerText = email || "N/A";
+
+        const form =
+            document.getElementById("confirmForm");
+
+        const title =
+            document.getElementById("confirmTitle");
+
+        const description =
+            document.getElementById("confirmDescription");
+
+        const warning =
+            document.getElementById("confirmWarning");
+
+        const submit =
+            document.getElementById("confirmSubmit");
+
+        const submitText =
+            document.getElementById("confirmSubmitText");
+
+        const submitIcon =
+            document.getElementById("confirmSubmitIcon");
 
         submit.className = "btn-small";
-        input.value = "";
 
         if (action === "BAN") {
-            requiredConfirmWord = "BAN";
+
             form.action = "/admin/staff/ban";
-            title.innerText = "Confirm Ban Staff";
-            warning.innerText = "This staff account will be deactivated and an email notification will be sent.";
-            submit.innerText = "Ban Staff";
+
+            title.innerText =
+                "Confirm Ban Staff";
+
+            description.innerText =
+                "Are you sure you want to deactivate this staff account?";
+
+            warning.innerText =
+                "The staff account will be deactivated and an email notification will be sent.";
+
+            submitText.innerText = "Yes";
+
+            submitIcon.className =
+                "fa-solid fa-ban";
+
             submit.classList.add("btn-ban");
-            typeBox.style.display = "block";
-            word.innerText = "BAN";
+
         } else if (action === "UNBAN") {
-            requiredConfirmWord = "UNBAN";
+
             form.action = "/admin/staff/unban";
-            title.innerText = "Confirm Unban Staff";
-            warning.innerText = "This staff account will be activated and an email notification will be sent.";
-            submit.innerText = "Unban Staff";
+
+            title.innerText =
+                "Confirm Unban Staff";
+
+            description.innerText =
+                "Are you sure you want to activate this staff account?";
+
+            warning.innerText =
+                "The staff account will be activated and an email notification will be sent.";
+
+            submitText.innerText = "Yes";
+
+            submitIcon.className =
+                "fa-solid fa-circle-check";
+
             submit.classList.add("btn-unban");
-            typeBox.style.display = "block";
-            word.innerText = "UNBAN";
-        } else {
-            requiredConfirmWord = "DELETE";
-            form.action = "/admin/staff/delete";
-            title.innerText = "Confirm Soft Delete Staff";
-            warning.innerText = "This staff account will be moved to Deleted Staff. You can restore it later.";
-            submit.innerText = "Delete Staff";
-            submit.classList.add("btn-delete");
-            typeBox.style.display = "block";
-            word.innerText = "DELETE";
+
         }
 
-        checkConfirmInput();
-        document.getElementById("confirmModal").classList.add("show");
-    }
-    function checkConfirmInput() {
-        const input = document.getElementById("confirmInput").value.trim();
-        const submit = document.getElementById("confirmSubmit");
-
-        if (input === requiredConfirmWord) {
-            submit.disabled = false;
-            submit.style.opacity = "1";
-            submit.style.cursor = "pointer";
-        } else {
-            submit.disabled = true;
-            submit.style.opacity = "0.45";
-            submit.style.cursor = "not-allowed";
-        }
+        document.getElementById(
+            "confirmModal"
+        ).classList.add("show");
     }
 
     function closeConfirmModal() {
-        document.getElementById("confirmModal").classList.remove("show");
-        document.getElementById("confirmInput").value = "";
-        checkConfirmInput();
+
+        document.getElementById(
+            "confirmModal"
+        ).classList.remove("show");
     }
 
     document.addEventListener("keydown", function (event) {
@@ -1003,3 +1243,7 @@
 
 </body>
 </html>
+
+
+
+

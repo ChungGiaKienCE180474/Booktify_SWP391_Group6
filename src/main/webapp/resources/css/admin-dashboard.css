@@ -1,25 +1,26 @@
 /* ═══════════════════════════════════════════════════════════════════
    BOOKTIFY — ADMIN PANEL
-   Light theme  ·  Navy sidebar  ·  Orange / Blue accents
+   Light theme  ·  Teal sidebar  ·  Orange / Teal accents
+   (đồng bộ tone màu với Customer UI — xem :root trong header.css)
    ═══════════════════════════════════════════════════════════════════ */
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
 
 /* ── CSS Custom Properties ─────────────────────────────────────── */
 :root {
     /* Backgrounds */
-    --bg:          #F1F5F9;
+    --bg:          #F5F7FA;
     --white:       #FFFFFF;
-    --sidebar-bg:  #0F172A;
+    --sidebar-bg:  #004D42;
     --sidebar-hover: rgba(255,255,255,.07);
-    --sidebar-act: rgba(249,115,22,.15);
+    --sidebar-act: rgba(245,124,0,.18);
 
-    /* Brand */
-    --primary:     #2563EB;
-    --primary-dk:  #1D4ED8;
-    --primary-lt:  #EFF6FF;
-    --accent:      #F97316;
-    --accent-dk:   #EA6C0B;
-    --accent-lt:   #FFF7ED;
+    /* Brand — khớp với --primary/--accent-warm ở Customer UI (header.css) */
+    --primary:     #006B5E;
+    --primary-dk:  #004D42;
+    --primary-lt:  #E3F4F1;
+    --accent:      #F57C00;
+    --accent-dk:   #D96900;
+    --accent-lt:   #FFF3E0;
 
     /* Semantic */
     --success:     #16A34A;
@@ -92,7 +93,7 @@ body.admin-shell {
 }
 
 /* ══════════════════════════════════════════════════════════════════
-   SIDEBAR  (dark navy)
+   SIDEBAR  (dark teal — đồng bộ với Customer UI)
    ══════════════════════════════════════════════════════════════════ */
 .admin-sidebar {
     position: sticky;
@@ -128,7 +129,7 @@ body.admin-shell {
     font-size: .95rem;
     color: #fff;
     flex-shrink: 0;
-    box-shadow: 0 4px 12px rgba(249,115,22,.4);
+    box-shadow: 0 4px 12px rgba(245,124,0,.4);
 }
 
 .sidebar-logo__text { display: flex; flex-direction: column; }
@@ -221,16 +222,26 @@ body.admin-shell {
     flex-shrink: 0;
 }
 
+.admin-sidebar__logout-form {
+    margin: 0;
+    padding: 0;
+}
+
 .admin-sidebar__logout {
     display: flex;
     align-items: center;
     gap: 11px;
+    width: 100%;
     padding: 10px 12px;
+    border: none;
     border-radius: var(--radius-sm);
+    background: transparent;
     color: #FCA5A5;
     text-decoration: none;
     font-size: .85rem;
     font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
     transition: var(--ease);
 }
 .admin-sidebar__logout:hover { background: rgba(239,68,68,.12); color: #F87171; }
@@ -243,6 +254,8 @@ body.admin-shell {
     min-width: 0;
     display: flex;
     flex-direction: column;
+    height: 100vh;
+    overflow-y: auto;
 }
 
 /* ── Topbar ─────────────────────────────────────────────────────── */
@@ -280,7 +293,7 @@ body.admin-shell {
     font-size: .8rem;
     color: #fff;
     flex-shrink: 0;
-    box-shadow: 0 3px 10px rgba(37,99,235,.25);
+    box-shadow: 0 3px 10px rgba(0,107,94,.25);
 }
 
 .admin-topbar__brand h1 {
@@ -300,13 +313,13 @@ body.admin-shell {
     width: 36px;
     height: 36px;
     border-radius: var(--radius-sm);
-    background: linear-gradient(135deg, var(--primary-dk), #4F46E5);
+    background: linear-gradient(135deg, var(--primary), var(--primary-dk));
     display: grid;
     place-items: center;
     font-size: .8rem;
     color: #fff;
     flex-shrink: 0;
-    box-shadow: 0 2px 8px rgba(37,99,235,.2);
+    box-shadow: 0 2px 8px rgba(0,107,94,.2);
 }
 
 .admin-topbar__user strong {
@@ -329,14 +342,14 @@ body.admin-shell {
     padding: 7px 14px;
     border-radius: var(--radius-sm);
     background: var(--primary-lt);
-    border: 1px solid #BFDBFE;
+    border: 1px solid #B7DED7;
     color: var(--primary);
     font-size: .8rem;
     font-weight: 600;
     text-decoration: none;
     transition: var(--ease);
 }
-.admin-topbar__link:hover { background: #DBEAFE; }
+.admin-topbar__link:hover { background: #D3EEE9; }
 
 /* ── Content ──────────────────────────────────────────────────── */
 .admin-content {
@@ -379,6 +392,31 @@ body.admin-shell {
     letter-spacing: -.02em;
 }
 
+/* ── Tabs (e.g. Category Management: Book vs Stationery) ─────── */
+.admin-tabs {
+    display: flex;
+    gap: 6px;
+    border-bottom: 1px solid #E5E7EB;
+    margin-bottom: 20px;
+}
+.admin-tab {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 18px;
+    border: none;
+    background: none;
+    cursor: pointer;
+    font-size: .88rem;
+    font-weight: 700;
+    color: #6B7280;
+    border-bottom: 2px solid transparent;
+    transition: var(--ease);
+}
+.admin-tab:hover { color: var(--text); }
+.admin-tab.active { color: var(--primary); border-bottom-color: var(--primary); }
+.tab-pane.active { display: block; }
+
 /* ── Hero ─────────────────────────────────────────────────────── */
 .admin-hero {
     display: flex;
@@ -386,7 +424,7 @@ body.admin-shell {
     align-items: center;
     gap: 24px;
     padding: 32px 36px;
-    background: linear-gradient(135deg, #1D3865 0%, #2563EB 55%, #1D4ED8 100%);
+    background: linear-gradient(135deg, #012B24 0%, var(--primary) 55%, var(--primary-dk) 100%);
     border-radius: var(--radius-xl);
     box-shadow: var(--shadow-md);
     position: relative;
@@ -458,7 +496,7 @@ body.admin-shell {
     height: 46px;
     border-radius: var(--radius-sm);
     background: var(--primary-lt);
-    border: 1px solid #BFDBFE;
+    border: 1px solid #B7DED7;
     display: grid;
     place-items: center;
     font-size: 1.1rem;
@@ -536,14 +574,14 @@ body.admin-shell {
     background: var(--primary);
     color: #fff;
     border-color: var(--primary);
-    box-shadow: 0 2px 8px rgba(37,99,235,.25);
+    box-shadow: 0 2px 8px rgba(0,107,94,.25);
 }
 .admin-button:hover,
 .admin-action:hover {
     background: var(--primary-dk);
     border-color: var(--primary-dk);
     transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(37,99,235,.35);
+    box-shadow: 0 4px 12px rgba(0,107,94,.35);
 }
 
 /* Ghost / Cancel */
@@ -637,11 +675,16 @@ body.admin-shell {
 .admin-table tbody tr:hover { background: #F0F6FF; }
 .admin-table tbody tr:last-child td { border-bottom: none; }
 
-.admin-table__actions {
-    display: flex;
-    align-items: center;
-    gap: 6px;
+/* Ô Actions giữ nguyên là table-cell (KHÔNG dùng display:flex) để viền dưới —
+   tức vạch ngang phân cách hàng — chạy suốt hết chiều rộng khung lớn và nằm
+   đúng đáy hàng, thay vì bị cắt ngắn/lệch theo cụm 3 nút như khi dùng flex. */
+.admin-table td.admin-table__actions {
+    vertical-align: top;       /* 3 nút mặc định nằm ở TOP của hàng */
+    white-space: nowrap;       /* view / edit / delete luôn trên MỘT hàng ngang, không xuống dòng */
+    font-size: 0;              /* bỏ khoảng trắng thừa giữa các nút inline */
 }
+.admin-table__actions .icon-link { vertical-align: top; }
+.admin-table__actions .icon-link + .icon-link { margin-left: 6px; }  /* khoảng cách giữa các nút (thay cho gap của flex) */
 
 .inline-form { display: inline; }
 
@@ -649,18 +692,31 @@ body.admin-shell {
 .icon-link {
     width: 34px;
     height: 34px;
+    box-sizing: border-box;
     border-radius: var(--radius-xs);
     border: 1px solid var(--border);
     background: var(--white);
     color: var(--text-muted);
-    display: inline-grid;
-    place-items: center;
+    /* inline-flex + reset padding/line-height/appearance so <button> and <a>
+       render identically — otherwise the browser's default button styles push
+       the icon off-center and the row looks misaligned */
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    margin: 0;
+    line-height: 1;
+    font-family: inherit;
+    vertical-align: middle;
+    -webkit-appearance: none;
+    appearance: none;
     text-decoration: none;
     font-size: .82rem;
     transition: var(--ease);
     cursor: pointer;
     flex-shrink: 0;
 }
+.icon-link > i { display: block; line-height: 1; }
 
 /* View — default gray */
 .icon-link:hover {
@@ -672,7 +728,7 @@ body.admin-shell {
 /* Edit — blue */
 .icon-link--edit:hover {
     background: var(--primary-lt);
-    border-color: #BFDBFE;
+    border-color: #B7DED7;
     color: var(--primary);
 }
 
@@ -788,10 +844,76 @@ body.admin-shell {
 
 .admin-input:focus {
     border-color: var(--primary);
-    box-shadow: 0 0 0 3px rgba(37,99,235,.12);
+    box-shadow: 0 0 0 3px rgba(0,107,94,.12);
 }
 
 .admin-input::placeholder { color: var(--text-faint); }
+
+.admin-hint {
+    font-size: .75rem;
+    color: var(--text-muted);
+    line-height: 1.4;
+}
+
+.admin-qty-stepper {
+    display: flex;
+    align-items: stretch;
+    width: 100%;
+    max-width: 220px;
+    border: 1px solid var(--border-md);
+    border-radius: var(--radius-sm);
+    overflow: hidden;
+    background: var(--white);
+}
+
+.admin-qty-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    border: none;
+    background: var(--bg);
+    color: var(--text-soft);
+    font-size: .85rem;
+    cursor: pointer;
+    transition: var(--ease);
+    flex-shrink: 0;
+}
+
+.admin-qty-btn:hover {
+    background: var(--primary-lt);
+    color: var(--primary);
+}
+
+.admin-qty-btn:active {
+    transform: scale(0.96);
+}
+
+.admin-qty-input {
+    flex: 1;
+    min-width: 0;
+    border: none;
+    border-left: 1px solid var(--border);
+    border-right: 1px solid var(--border);
+    text-align: center;
+    font-size: .95rem;
+    font-weight: 600;
+    color: var(--text);
+    padding: 10px 8px;
+    outline: none;
+    -moz-appearance: textfield;
+    appearance: textfield;
+}
+
+.admin-qty-input::-webkit-outer-spin-button,
+.admin-qty-input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+.admin-qty-input:focus {
+    background: #FAFBFC;
+}
 
 .admin-textarea { min-height: 130px; resize: vertical; line-height: 1.6; }
 
@@ -957,12 +1079,12 @@ select.admin-input option { background: var(--white); color: var(--text); }
 }
 
 /* ══════════════════════════════════════════════════════════════════
-   TOAST  (top-left)
+   TOAST  (top-right)
    ══════════════════════════════════════════════════════════════════ */
 .toast-container {
     position: fixed;
     top: 20px;
-    left: 20px;
+    right: 20px;
     display: flex;
     flex-direction: column;
     gap: 10px;
@@ -980,7 +1102,7 @@ select.admin-input option { background: var(--white); color: var(--text); }
     font-weight: 600;
     border: 1px solid transparent;
     opacity: 0;
-    transform: translateX(-16px);
+    transform: translateX(16px);
     transition: opacity .28s ease, transform .28s ease;
     max-width: 320px;
     min-width: 220px;
@@ -1000,6 +1122,12 @@ select.admin-input option { background: var(--white); color: var(--text); }
     background: var(--danger-lt);
     border-color: var(--danger-bd);
     color: var(--danger);
+}
+
+.toast--warning {
+    background: var(--warn-lt);
+    border-color: #FDE68A;
+    color: var(--warn);
 }
 
 /* ══════════════════════════════════════════════════════════════════
@@ -1048,3 +1176,214 @@ select.admin-input option { background: var(--white); color: var(--text); }
     .admin-form-grid { grid-template-columns: 1fr; }
     .admin-table-wrap { overflow-x: auto; }
 }
+
+/* ── Pagination ─────────────────────────────────────────────────────────── */
+/* Nav bar renders visually above the summary text (order), regardless of
+   DOM order — the "X of Y items" line sits bottom-right underneath it. */
+.admin-pagination {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 8px;
+    padding: 14px 4px 4px;
+}
+.admin-pagination__info {
+    order: 2;
+    font-size: .82rem;
+    color: #6B7280;
+}
+.admin-pagination__info strong { color: #111827; }
+.admin-pagination__nav {
+    order: 1;
+    display: flex;
+    align-items: stretch;
+    flex-wrap: wrap;
+    border: 1px solid #E5E7EB;
+    border-radius: 8px;
+    overflow: hidden;
+    background: #fff;
+}
+.pag-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 38px;
+    height: 34px;
+    padding: 0 12px;
+    font-size: .8rem;
+    font-weight: 600;
+    text-decoration: none;
+    color: #374151;
+    background: #fff;
+    border-right: 1px solid #E5E7EB;
+    transition: background .15s, color .15s;
+    white-space: nowrap;
+}
+.pag-btn:last-child { border-right: none; }
+.pag-btn:hover { background: #F3F4F6; }
+.pag-btn--active { background: var(--primary); color: #fff; pointer-events: none; }
+.pag-btn--disabled { opacity: .4; pointer-events: none; }
+
+/* ── Order management ───────────────────────────────────────────── */
+.order-status-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 5px 11px;
+    border-radius: 999px;
+    font-size: .72rem;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.order-status-badge--PENDING { background: #FEF3C7; color: #92400E; border: 1px solid #FDE68A; }
+.order-status-badge--CONFIRMED { background: #DBEAFE; color: #1D4ED8; border: 1px solid #BFDBFE; }
+.order-status-badge--SHIPPING { background: #E0E7FF; color: #4338CA; border: 1px solid #C7D2FE; }
+.order-status-badge--DELIVERED { background: #D1FAE5; color: #047857; border: 1px solid #A7F3D0; }
+.order-status-badge--CANCELLED { background: #FEE2E2; color: #B91C1C; border: 1px solid #FECACA; }
+
+.admin-order-card {
+    overflow: hidden;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    background: var(--white);
+    box-shadow: var(--shadow-sm);
+}
+
+.admin-order-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 24px 28px;
+    border-bottom: 1px solid var(--border);
+    background: #F9FAFB;
+}
+
+.admin-order-header__main h3 {
+    margin: 0 0 6px;
+    font-size: 1.35rem;
+    font-weight: 800;
+    color: var(--text);
+}
+
+.admin-order-header__meta {
+    margin: 0;
+    color: var(--text-muted);
+    font-size: .875rem;
+}
+
+.admin-order-body {
+    padding: 24px 28px;
+}
+
+.admin-order-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1.5fr) minmax(280px, 1fr);
+    gap: 20px;
+    align-items: start;
+}
+
+.admin-order-product {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.admin-order-product__thumb {
+    width: 44px;
+    height: 58px;
+    flex-shrink: 0;
+    border-radius: 8px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+    background: #F8FAFC;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #94A3B8;
+}
+
+.admin-order-product__thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.admin-order-side {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.admin-kv-list {
+    margin: 0;
+    padding: 0;
+}
+
+.admin-kv-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: .875rem;
+}
+
+.admin-kv-row:last-child {
+    border-bottom: none;
+}
+
+.admin-kv-row dt {
+    color: var(--text-muted);
+    margin: 0;
+    font-weight: 600;
+}
+
+.admin-kv-row dd {
+    margin: 0;
+    font-weight: 700;
+    text-align: right;
+    word-break: break-word;
+}
+
+.admin-kv-row--total dd {
+    color: var(--primary);
+    font-size: 1rem;
+}
+
+.admin-order-status-form {
+    display: flex;
+    gap: 10px;
+    margin-top: 16px;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+.admin-order-status-form .admin-input {
+    flex: 1;
+    min-width: 160px;
+}
+
+.admin-order-status-note {
+    margin: 0;
+    color: var(--text-muted);
+    font-size: .84rem;
+    line-height: 1.5;
+}
+
+.admin-table .col-money {
+    white-space: nowrap;
+    text-align: right;
+}
+
+@media (max-width: 900px) {
+    .admin-order-layout {
+        grid-template-columns: 1fr;
+    }
+
+    .admin-order-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+}
+.pag-btn--all { font-weight: 700; }
