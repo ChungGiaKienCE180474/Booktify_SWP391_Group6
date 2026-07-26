@@ -39,7 +39,7 @@ public interface RatingRepository extends JpaRepository<Rating, Integer> {
                     :keyword IS NULL
                     OR :keyword = ''
                     OR LOWER(r.book.title) LIKE LOWER(CONCAT('%', :keyword, '%'))
-                    OR LOWER(r.book.author) LIKE LOWER(CONCAT('%', :keyword, '%'))
+                    OR LOWER(COALESCE(r.book.author.authorName, '')) LIKE LOWER(CONCAT('%', :keyword, '%'))
             """)
 
     List<Book> findBooksHasReview(

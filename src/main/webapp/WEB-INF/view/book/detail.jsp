@@ -85,20 +85,29 @@
                                         </c:if>
 
                                         <h1 class="detail-info__title">${book.title}</h1>
-                                        <p class="detail-info__author">
-                                            Author:
-                                            <c:choose>
-                                                <c:when test="${not empty authorProfile}">
-                                                    <a href="/authors/${authorProfile.authorId}"
-                                                        class="detail-info__author-link">
-                                                        <strong>${book.author}</strong>
-                                                    </a>
-                                                </c:when>
-                                                <c:otherwise>
-                                                    <strong>${book.author}</strong>
-                                                </c:otherwise>
-                                            </c:choose>
-                                        </p>
+                                        <c:if test="${not empty book.author}">
+                                            <p class="detail-info__author">
+                                                Author:
+                                                <c:choose>
+                                                    <c:when test="${not empty authorProfile}">
+                                                        <a href="/authors/${authorProfile.authorId}"
+                                                            class="detail-info__author-link">
+                                                            <strong>${book.author.authorName}</strong>
+                                                        </a>
+                                                    </c:when>
+                                                    <c:otherwise>
+                                                        <strong>${book.author.authorName}</strong>
+                                                    </c:otherwise>
+                                                </c:choose>
+                                            </p>
+                                        </c:if>
+
+                                        <c:if test="${not empty book.supplier}">
+                                            <p class="detail-info__author">
+                                                Supplier:
+                                                <strong>${book.supplier.supplierName}</strong>
+                                            </p>
+                                        </c:if>
 
                                         <div class="detail-price-row">
                                             <c:choose>

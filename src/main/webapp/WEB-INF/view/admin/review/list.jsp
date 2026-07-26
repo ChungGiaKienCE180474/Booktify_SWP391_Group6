@@ -84,7 +84,7 @@
                                                 </div>
                                                 <c:if test="${not empty book.author}">
                                                     <div class="book-author">
-                                                        <c:out value="${book.author}" />
+                                                        <c:out value="${book.author.authorName}" />
                                                     </div>
                                                 </c:if>
                                             </td>

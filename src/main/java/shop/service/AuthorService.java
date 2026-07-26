@@ -89,15 +89,12 @@ public class AuthorService {
                                 .orElseThrow(() -> new IllegalArgumentException("Author not found"));
         }
 
-        /**
-         * Resolve Book.author (free-text name) to an active Author record, so the
-         * storefront can link to that author's detail page. Empty if no active
-         * author matches — Book.author isn't a real foreign key.
-         */
-        public Optional<Author> findActiveByName(String authorName) {
-                if (authorName == null || authorName.isBlank())
+        // Non-throwing lookup used when Book.author (a real FK now) needs to be
+        // re-resolved by id, e.g. when saving a book from the admin form.
+        public Optional<Author> findById(Long id) {
+                if (id == null)
                         return Optional.empty();
-                return authorRepository.findByAuthorNameIgnoreCaseAndStatusTrue(authorName.trim());
+                return authorRepository.findById(id);
         }
 
         /*

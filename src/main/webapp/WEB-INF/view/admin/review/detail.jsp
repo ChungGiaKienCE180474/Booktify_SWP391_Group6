@@ -71,10 +71,12 @@
                                 <c:out value="${book.title}" />
                             </div>
 
-                            <div class="book-author">
-                                Author:
-                                <c:out value="${book.author}" />
-                            </div>
+                            <c:if test="${not empty book.author}">
+                                <div class="book-author">
+                                    Author:
+                                    <c:out value="${book.author.authorName}" />
+                                </div>
+                            </c:if>
 
                             <div class="review-summary">
 

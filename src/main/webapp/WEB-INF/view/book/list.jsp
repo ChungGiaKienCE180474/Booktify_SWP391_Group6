@@ -102,6 +102,15 @@
                                         </c:if>
                                     </nav>
 
+                                    <c:if test="${not empty errorMessage}">
+                                        <div style="margin:0 0 18px;padding:14px 18px;border-radius:10px;font-weight:700;
+                                                    background:#FEF2F2;color:#DC2626;border:1px solid #FECACA;
+                                                    display:flex;align-items:center;gap:10px;">
+                                            <i class="fa-solid fa-circle-exclamation"></i>
+                                            <c:out value="${errorMessage}" />
+                                        </div>
+                                    </c:if>
+
                                     <%-- Search result bar --%>
                                         <c:if test="${not empty q}">
                                             <div class="search-result-bar">
@@ -164,7 +173,7 @@
                                                                         <div class="product-card__title">${book.title}
                                                                         </div>
                                                                         <div class="product-card__author">
-                                                                            <c:out value="${book.author}" default="—" />
+                                                                            <c:out value="${book.author.authorName}" default="—" />
                                                                         </div>
                                                                         <div class="product-card__footer">
                                                                             <div class="product-card__price-box">

@@ -22,7 +22,6 @@ import jakarta.validation.Valid;
 import shop.domain.Book;
 import shop.domain.Category;
 import shop.domain.Genre;
-import shop.domain.Supplier;
 import shop.repository.SupplierRepository;
 import shop.service.AuthorService;
 import shop.service.BookService;
@@ -120,6 +119,7 @@ public class AdminBookController {
             @RequestParam(name = "categoryId", required = false) Long categoryId,
             @RequestParam(name = "genreIds", required = false) List<Long> genreIds,
             @RequestParam(name = "supplierId", required = false) Long supplierId,
+            @RequestParam(name = "authorId", required = false) Long authorId,
             @RequestParam(name = "imageFile", required = false) MultipartFile imageFile,
             Model model, RedirectAttributes redirectAttributes) {
 
@@ -178,10 +178,9 @@ public class AdminBookController {
         book.setCategory(selectedCategory);
         book.setGenres(new LinkedHashSet<>(validGenres));
         book.setSupplier(supplierId == null ? null : supplierRepository.findById(supplierId).orElse(null));
+        book.setAuthor(authorId == null ? null : authorService.findById(authorId).orElse(null));
         if (!StringUtils.hasText(book.getIsbn()))
             book.setIsbn(null);
-        if (!StringUtils.hasText(book.getAuthor()))
-            book.setAuthor(null);
 
         bookService.saveBook(book);
         redirectAttributes.addFlashAttribute("successMessage", "Book created successfully.");
@@ -209,6 +208,7 @@ public class AdminBookController {
             @RequestParam(name = "categoryId", required = false) Long categoryId,
             @RequestParam(name = "genreIds", required = false) List<Long> genreIds,
             @RequestParam(name = "supplierId", required = false) Long supplierId,
+            @RequestParam(name = "authorId", required = false) Long authorId,
             @RequestParam(name = "imageFile", required = false) MultipartFile imageFile,
             Model model, RedirectAttributes redirectAttributes) {
 
@@ -249,7 +249,7 @@ public class AdminBookController {
         }
 
         existing.setTitle(book.getTitle());
-        existing.setAuthor(StringUtils.hasText(book.getAuthor()) ? book.getAuthor() : null);
+        existing.setAuthor(authorId == null ? null : authorService.findById(authorId).orElse(null));
         existing.setIsbn(StringUtils.hasText(book.getIsbn()) ? book.getIsbn() : null);
         existing.setDescription(book.getDescription());
         existing.setPrice(book.getPrice());

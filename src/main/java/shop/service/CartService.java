@@ -513,7 +513,7 @@ public class CartService {
 
             dto.setBookId(book.getId());
             dto.setBookTitle(book.getTitle());
-            dto.setBookAuthor(book.getAuthor());
+            dto.setBookAuthor(book.getAuthor() == null ? null : book.getAuthor().getAuthorName());
             dto.setBookImageUrl(book.getImageUrl());
             dto.setBookPriceFormatted(promotionService.formatMoney(price));
             dto.setOriginalPriceFormatted(promotionService.formatMoney(price));
