@@ -1,3 +1,4 @@
+
 /* ═══════════════════════════════════════════════════════
    BOOKTIFY — HOMEPAGE / SHARED CLIENT CSS
    Fahasa-inspired, teal palette, "mát mắt"
@@ -335,15 +336,63 @@ body.home-page {
     flex-direction: column;
     gap: .4rem;
     margin-top: auto;
+    width: 100%;
+    align-items: stretch;
+}
+.book-card__price-box {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    gap: 3px;
+    width: 100%;
+    min-width: 0;
+    height: 42px;
+    min-height: 42px;
+    flex: 0 0 42px;
+    overflow: hidden;
+}
+.book-card__discount-line {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    min-height: 19px;
+    flex-wrap: nowrap;
+    overflow: hidden;
+}
+.book-card__old-price {
+    color: #94a3b8;
+    font-size: .72rem;
+    font-weight: 700;
+    line-height: 19px;
+    text-decoration: line-through;
+    white-space: nowrap;
+}
+.book-card__discount-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 2px 7px;
+    border-radius: 999px;
+    background: #fee2e2;
+    color: #dc2626;
+    font-size: .68rem;
+    font-weight: 800;
+    line-height: 15px;
+    white-space: nowrap;
 }
 .book-card__price {
+    display: block;
     font-size: .88rem;
     font-weight: 800;
+    line-height: 20px;
     color: var(--accent-warm, #F57C00);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
     width: 100%;
+}
+.book-card__price--sale {
+    color: #dc2626;
+    font-size: 1rem;
 }
 .book-card__detail-btn {
     display: flex;
@@ -361,6 +410,7 @@ body.home-page {
     transition: background .15s, transform .15s;
     white-space: nowrap;
     cursor: pointer;
+    flex-shrink: 0;
 }
 .book-card__detail-btn:hover { background: var(--primary-light); transform: scale(1.02); }
 
@@ -458,3 +508,4 @@ body.home-page {
     .cat-grid { grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: .75rem; }
     .cta-strip { text-align: center; justify-content: center; }
 }
+
