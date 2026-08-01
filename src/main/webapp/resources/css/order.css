@@ -231,6 +231,32 @@
     color: var(--cart-muted);
 }
 
+.order-payment-options {
+    display: flex;
+    flex-direction: column;
+    gap: .65rem;
+}
+
+.order-payment-option {
+    display: flex;
+    align-items: center;
+    gap: .65rem;
+    padding: .75rem 1rem;
+    border: 1px solid var(--cart-border, #e2e8f0);
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 500;
+}
+
+.order-payment-option:has(input:checked) {
+    border-color: var(--cart-primary, #0d9488);
+    background: #f0fdfa;
+}
+
+.order-payment-option input {
+    accent-color: var(--cart-primary, #0d9488);
+}
+
 .order-btn--cancel {
     background: #fee2e2;
     color: #b91c1c;

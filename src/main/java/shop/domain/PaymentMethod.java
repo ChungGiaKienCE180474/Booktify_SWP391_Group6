@@ -1,7 +1,8 @@
 package shop.domain;
 
 public enum PaymentMethod {
-    COD("Cash on delivery (COD)");
+    COD("Cash on delivery (COD)"),
+    VNPAY("VNPay online payment");
 
     private final String label;
 
