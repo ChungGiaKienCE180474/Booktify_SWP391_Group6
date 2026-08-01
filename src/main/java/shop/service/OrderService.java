@@ -29,13 +29,11 @@ import shop.domain.OrderStatus;
 import shop.domain.PaymentMethod;
 import shop.domain.PromotionSelection;
 import shop.domain.User;
-import shop.domain.VppItem;
 import shop.domain.dto.OrderDTO;
 import shop.domain.dto.OrderItemDTO;
 import shop.repository.BookRepository;
 import shop.repository.OrderRepository;
 import shop.repository.UserRepository;
-import shop.repository.VppItemRepository;
 
 /**
  * Service xử lý toàn bộ nghiệp vụ đơn hàng.
@@ -61,7 +59,6 @@ public class OrderService {
     private final VoucherService voucherService;
     /** Giá sau KM từng sách (PERCENTAGE/FIXED/NONE) */
     private final PromotionService promotionService;
-    private final VppItemRepository vppItemRepository;
     /** Giảm/hoàn tồn kho khi tạo/hủy đơn */
     private final StockService stockService;
 
@@ -73,7 +70,6 @@ public class OrderService {
             UserRepository userRepository,
             VoucherService voucherService,
             PromotionService promotionService,
-            VppItemRepository vppItemRepository,
             StockService stockService
     ) {
         this.orderRepository = orderRepository;       // CRUD bảng orders
@@ -82,7 +78,6 @@ public class OrderService {
         this.userRepository = userRepository;         // Load user đặt đơn
         this.voucherService = voucherService;         // Validate + tính voucher
         this.promotionService = promotionService;     // Giá sau KM từng sách
-        this.vppItemRepository = vppItemRepository;   // Load VPP khi tạo OrderItem
         this.stockService = stockService;             // Trừ/hoàn tồn kho
     }
 
@@ -472,95 +467,9 @@ public class OrderService {
         for (CartItem cartItem :
                 cart.getItems()) {
 
-            /*
-             * ====================================================
-             * VPP ITEM (văn phòng phẩm)
-             * ====================================================
-             */
-
-            if (cartItem.getBook() == null
-                    && cartItem.getVppItem() != null) {
-
-                // Load lại VPP từ DB (tránh dùng entity stale trong session)
-                VppItem vppItem =
-                        vppItemRepository
-                                .findById(
-                                        cartItem
-                                                .getVppItem()
-                                                .getId()
-                                )
-                                .orElseThrow(() ->
-                                        new IllegalArgumentException(
-                                                "A stationery item in your cart no longer exists."
-                                        )
-                                );
-
-                // Kiểm tra active, stock, giá — throw nếu không đủ điều kiện
-                validateVppLine(
-                        vppItem,
-                        cartItem.getQuantity()
-                );
-
-                // VPP không áp promotion theo sách — dùng giá gốc
-                BigDecimal unitPrice =
-                        vppItem.getPrice();
-
-                // Thành tiền dòng = đơn giá × số lượng
-                BigDecimal lineTotal =
-                        unitPrice.multiply(
-                                BigDecimal.valueOf(
-                                        cartItem.getQuantity()
-                                )
-                        );
-
-                // Cộng vào subtotal tổng đơn
-                subtotal =
-                        subtotal.add(lineTotal);
-
-                // Tạo dòng OrderItem và gắn vào Order (cascade save)
-                OrderItem orderItem =
-                        new OrderItem();
-
-                orderItem.setOrder(order);       // FK order_id
-                orderItem.setBook(null);         // Dòng VPP — không có book
-                orderItem.setVppItem(vppItem);   // FK vpp_item_id
-
-                // Snapshot tên sản phẩm tại thời điểm mua
-                orderItem.setBookTitle(
-                        vppItem.getName()
-                );
-
-                orderItem.setUnitPrice(
-                        unitPrice
-                );
-
-                orderItem.setQuantity(
-                        cartItem.getQuantity()
-                );
-
-                orderItem.setLineTotal(
-                        lineTotal
-                );
-
-                // Thêm vào list items của Order — JPA cascade INSERT khi save
-                order.getItems().add(
-                        orderItem
-                );
-
-                continue;  // Sang CartItem tiếp theo
-            }
-
-            /*
-             * ====================================================
-             * BOOK (sách)
-             * ====================================================
-             */
-
             if (cartItem.getBook() == null) {
-
-                // Item không phải sách cũng không phải VPP — dữ liệu giỏ hỏng
                 throw new IllegalArgumentException(
-                        "An item in your cart is invalid."
+                        "Stationery items are no longer sold. Please refresh your cart."
                 );
             }
 
@@ -1154,116 +1063,10 @@ public class OrderService {
         for (CartItem item :
                 cart.getItems()) { // Duyệt từng dòng trong giỏ
 
-            /*
-             * ====================================================
-             * VALIDATE VPP — văn phòng phẩm (book == null, vppItem != null)
-             * ====================================================
-             */
-
-            if (item.getBook() == null
-                    && item.getVppItem() != null) {
-                // Dòng này là VPP, không phải sách
-
-                VppItem vppItem =
-                        vppItemRepository
-                                .findById(
-                                        item
-                                                .getVppItem()
-                                                .getId() // Load lại VPP từ DB — tránh stale data
-                                )
-                                .orElse(null); // Không tìm thấy → null
-
-                if (vppItem == null) {
-                    // VPP đã bị xóa khỏi DB
-
-                    errors.add(
-                            "A stationery item in your cart no longer exists."
-                    );
-
-                    continue; // Sang item tiếp theo
-                }
-
-                if (vppItem.isDeleted()
-                        || !vppItem.isActive()) {
-                    // Soft-delete hoặc admin tắt bán
-
-                    errors.add(
-                            "\""
-                                    + vppItem.getName()
-                                    + "\" is no longer available."
-                    );
-
-                    continue;
-                }
-
-                int availableStock =
-                        stockService
-                                .getVppQuantity(
-                                        vppItem.getId() // Tồn kho thực tế từ bảng stock
-                                );
-
-                if (availableStock <= 0) {
-                    // Hết hàng
-
-                    errors.add(
-                            "\""
-                                    + vppItem.getName()
-                                    + "\" — "
-                                    + CartService.MSG_OUT_OF_STOCK
-                    );
-
-                    continue;
-                }
-
-                if (item.getQuantity()
-                        > availableStock) {
-                    // User chọn số lượng > tồn kho
-
-                    errors.add(
-                            "\""
-                                    + vppItem.getName()
-                                    + "\" — "
-                                    + String.format(
-                                    CartService.MSG_EXCEED_STOCK,
-                                    availableStock // VD "Only 3 left in stock."
-                            )
-                    );
-
-                    continue;
-                }
-
-                if (vppItem.getPrice() == null
-                        || vppItem.getPrice()
-                        .compareTo(BigDecimal.ZERO) < 0) {
-                    // Giá null hoặc âm — data lỗi
-
-                    errors.add(
-                            "\""
-                                    + vppItem.getName()
-                                    + "\" has an invalid selling price."
-                    );
-
-                    continue;
-                }
-
-                validItemCount++; // Dòng VPP hợp lệ
-
-                continue; // Không xử lý nhánh sách bên dưới
-            }
-
-            /*
-             * ====================================================
-             * VALIDATE BOOK — sách (book != null)
-             * ====================================================
-             */
-
             if (item.getBook() == null) {
-                // Không phải sách cũng không phải VPP — dòng giỏ lỗi
-
                 errors.add(
-                        "An item in your cart is invalid."
+                        "Stationery items are no longer sold. Please refresh your cart."
                 );
-
                 continue;
             }
 
@@ -1476,63 +1279,6 @@ public class OrderService {
             );
         }
         // Pass — không return gì (void)
-    }
-
-    // Validate 1 dòng VPP khi tạo đơn — throw nếu lỗi
-    private void validateVppLine(
-            VppItem item,  // Entity văn phòng phẩm
-            int quantity     // Số lượng đặt
-    ) {
-        if (item.isDeleted()
-                || !item.isActive()) {
-            // Đã xóa mềm hoặc inactive
-
-            throw new IllegalArgumentException(
-                    "\""
-                            + item.getName()
-                            + "\" is no longer available."
-            );
-        }
-
-        int availableStock =
-                stockService
-                        .getVppQuantity(
-                                item.getId() // Tồn kho VPP
-                        );
-
-        if (availableStock <= 0) {
-
-            throw new IllegalArgumentException(
-                    "\""
-                            + item.getName()
-                            + "\" — "
-                            + CartService.MSG_OUT_OF_STOCK
-            );
-        }
-
-        if (quantity > availableStock) {
-
-            throw new IllegalArgumentException(
-                    "\""
-                            + item.getName()
-                            + "\" — "
-                            + String.format(
-                            CartService.MSG_EXCEED_STOCK,
-                            availableStock
-                    )
-            );
-        }
-
-        if (item.getPrice() == null
-                || item.getPrice()
-                .compareTo(BigDecimal.ZERO) < 0) {
-
-            throw new IllegalArgumentException(
-                    "\""
-                            + item.getName()
-                            + "\" has an invalid selling price."
-            );
-        }
     }
 
     // Tính số tiền giảm từ voucher — dùng trong createOrderFromCart

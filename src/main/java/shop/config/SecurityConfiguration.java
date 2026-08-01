@@ -84,7 +84,6 @@ public class SecurityConfiguration {
                         .requestMatchers("/", "/login", "/register", "/css/**",
                                 "/js/**", "/images/**", "/uploads/**", "/forgotpassword",
                                 "/authentication/**", "/books", "/books/**", "/client/**",
-                                "/customer/vpp", "/customer/vpp/**",
                                 "/authors", "/authors/**", "/logout", "/logout/**")
                         .permitAll()
                         .requestMatchers("/admin/**").hasRole("ADMIN")
@@ -92,7 +91,6 @@ public class SecurityConfiguration {
                         .requestMatchers("/changepass", "/profile", "/profile/**", "/cart", "/cart/**",
                                 "/orders", "/orders/**").authenticated()
                         .requestMatchers("/payment/vnpay/return", "/payment/vnpay/ipn").permitAll()
-                        .requestMatchers("/stationery/**").authenticated()
                         .anyRequest().authenticated())
                 .csrf(csrf -> csrf
                         .ignoringRequestMatchers(

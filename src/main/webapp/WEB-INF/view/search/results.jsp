@@ -231,68 +231,6 @@
                     </section>
                 </c:if>
 
-                <%-- ── Stationery (VPP) ── --%>
-                <c:if test="${not empty vppItems}">
-                    <section class="search-section">
-                        <div class="search-section__head">
-                            <h2><i class="fa-solid fa-pen-ruler"></i> Stationery (${vppItems.size()})</h2>
-                            <c:url var="vppSearchUrl" value="/customer/vpp">
-                                <c:param name="q" value="${q}" />
-                            </c:url>
-                            <a href="${vppSearchUrl}">View all in Stationery <i class="fa-solid fa-chevron-right"></i></a>
-                        </div>
-
-                        <div class="product-grid">
-                            <c:forEach items="${vppItems}" var="item">
-                                <a href="${ctx}/customer/vpp/${item.id}" class="product-card">
-                                    <div class="product-card__thumb">
-                                        <c:choose>
-                                            <c:when test="${item.hasImage}">
-                                                <img src="${ctx}/uploads/vpp/${item.id}/image?v=${item.updatedAt}"
-                                                    alt="${item.name}" />
-                                            </c:when>
-                                            <c:when test="${not empty item.imagePath}">
-                                                <img src="${ctx}${item.imagePath}" alt="${item.name}" />
-                                            </c:when>
-                                            <c:otherwise>
-                                                <div class="product-card__no-img">
-                                                    <i class="fa-solid fa-pen-ruler"></i>
-                                                    <span>No image</span>
-                                                </div>
-                                            </c:otherwise>
-                                        </c:choose>
-                                        <c:if test="${not empty item.categoryName}">
-                                            <span class="product-card__cat-badge">
-                                                <c:out value="${item.categoryName}" />
-                                            </span>
-                                        </c:if>
-                                    </div>
-                                    <div class="product-card__body">
-                                        <div class="product-card__title">
-                                            <c:out value="${item.name}" />
-                                        </div>
-                                        <div class="product-card__author">
-                                            <c:choose>
-                                                <c:when test="${not empty item.description}">
-                                                    <c:out value="${item.description}" />
-                                                </c:when>
-                                                <c:otherwise>Stationery products at Booktify.</c:otherwise>
-                                            </c:choose>
-                                        </div>
-                                        <div class="product-card__footer">
-                                            <span class="product-card__price">
-                                                <fmt:formatNumber value="${item.price}" type="number" groupingUsed="true" />
-                                                &#8363;
-                                            </span>
-                                            <span class="product-card__link">Details</span>
-                                        </div>
-                                    </div>
-                                </a>
-                            </c:forEach>
-                        </div>
-                    </section>
-                </c:if>
-
                 <%-- ── Authors ── --%>
                 <c:if test="${not empty authors}">
                     <section class="search-section">

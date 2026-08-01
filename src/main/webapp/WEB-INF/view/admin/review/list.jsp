@@ -129,68 +129,8 @@
                                         </tr>
                                     </c:forEach>
 
-                                    <%-- VPP Items List --%>
-                                        <c:forEach items="${vppItems}" var="item">
-                                            <c:set var="index" value="${index + 1}" />
-                                            <tr>
-                                                <td style="text-align: center; color: #9CA3AF; font-weight: 600;">
-                                                    ${index}
-                                                </td>
-
-                                                <td>
-                                                    <div class="book-title">
-                                                        <c:out value="${item.name}" />
-                                                    </div>
-                                                    <c:if test="${not empty item.supplier}">
-                                                        <div class="book-author">
-                                                            <c:out value="${item.supplier}" />
-                                                        </div>
-                                                    </c:if>
-                                                </td>
-
-                                                <td>
-                                                    <div class="review-summary">
-                                                        <c:choose>
-                                                            <c:when test="${vppReviewCounts[item.id] > 0}">
-                                                                <div class="review-count">
-                                                                    ${vppReviewCounts[item.id]} Reviews
-                                                                </div>
-
-                                                                <div class="review-star">
-                                                                    <c:forEach begin="1" end="5" var="i">
-                                                                        <c:choose>
-                                                                            <c:when
-                                                                                test="${i <= vppAverageRatings[item.id]}">
-                                                                                ★</c:when>
-                                                                            <c:otherwise>☆</c:otherwise>
-                                                                        </c:choose>
-                                                                    </c:forEach>
-
-                                                                    <span style="color:#374151;margin-left:5px;">
-                                                                        ${vppAverageRatings[item.id]}
-                                                                    </span>
-                                                                </div>
-                                                            </c:when>
-
-                                                            <c:otherwise>
-                                                                <div class="review-count">0 Reviews</div>
-                                                                <div class="no-rating">No ratings</div>
-                                                            </c:otherwise>
-                                                        </c:choose>
-                                                    </div>
-                                                </td>
-
-                                                <td class="admin-table__actions">
-                                                    <a href="/admin/reviews/vpp/${item.id}" class="icon-link"
-                                                        title="View Reviews">
-                                                        <i class="fa-solid fa-comments"></i>
-                                                    </a>
-                                                </td>
-                                            </tr>
-                                        </c:forEach>
-
                                         <%-- Empty State --%>
-                                            <c:if test="${empty books && empty vppItems}">
+                                            <c:if test="${empty books}">
                                                 <tr>
                                                     <td colspan="4"
                                                         style="text-align: center; padding: 56px 20px; color: #9CA3AF;">

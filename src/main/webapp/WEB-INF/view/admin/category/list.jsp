@@ -33,17 +33,6 @@
                 </a>
             </div>
 
-            <%-- Book / Stationery tabs — same page, same "Categories" sidebar entry,
-                 just two independent panes switched client-side. --%>
-            <div class="admin-tabs">
-                <button type="button" class="admin-tab active" data-tab="book">
-                    <i class="fa-solid fa-book"></i> Book Categories
-                </button>
-                <button type="button" class="admin-tab" data-tab="stationery">
-                    <i class="fa-solid fa-pen-ruler"></i> Stationery Categories
-                </button>
-            </div>
-
             <div id="tab-book" class="tab-pane active">
 
             <%-- Search + Filter --%>
@@ -181,112 +170,6 @@
             </div>
 
             </div> <%-- /tab-book --%>
-
-            <div id="tab-stationery" class="tab-pane" style="display:none;">
-
-                <%-- Categories are all loaded at once (small list, no pagination),
-                     so search/status filter run as a plain client-side row
-                     filter — see script below — instead of a server round-trip. --%>
-                <div class="admin-panel" style="padding:14px 22px;">
-                    <div class="admin-search-form">
-                        <div style="position:relative;flex:1;max-width:380px;">
-                            <i class="fa-solid fa-magnifying-glass"
-                               style="position:absolute;left:13px;top:50%;transform:translateY(-50%);color:#9CA3AF;font-size:.82rem;pointer-events:none;"></i>
-                            <input type="text" id="vppSearchInput"
-                                   placeholder="Search by name or description…"
-                                   class="admin-input" style="padding-left:38px;" />
-                        </div>
-                        <select id="vppStatusFilter" class="admin-input" style="max-width:160px;">
-                            <option value="">All Status</option>
-                            <option value="active">Active</option>
-                            <option value="hidden">Hidden</option>
-                        </select>
-                        <button type="button" id="vppFilterBtn" class="admin-button">
-                            <i class="fa-solid fa-filter"></i> Filter
-                        </button>
-                        <button type="button" id="vppResetBtn" class="admin-button admin-button--ghost">
-                            <i class="fa-solid fa-rotate-right"></i> Reset
-                        </button>
-                    </div>
-                </div>
-
-                <div class="admin-table-wrap">
-                    <table class="admin-table">
-                        <thead>
-                            <tr>
-                                <th style="width:48px;">#</th>
-                                <th>Name</th>
-                                <th>Description</th>
-                                <th>Status</th>
-                                <th style="width:120px;">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody id="vppTableBody">
-                            <c:forEach items="${vppCategories}" var="vcat" varStatus="vs">
-                                <tr class="vpp-row"
-                                    data-search="<c:out value='${vcat.name}'/> <c:out value='${vcat.description}'/>"
-                                    data-status="${vcat.active ? 'active' : 'hidden'}">
-                                    <td style="color:#9CA3AF;font-weight:600;">${vs.index + 1}</td>
-                                    <td>
-                                        <div style="font-weight:700;color:#111827;">
-                                            <c:out value="${vcat.name}"/>
-                                        </div>
-                                    </td>
-                                    <td style="color:#374151;font-size:.875rem;max-width:280px;">
-                                        <c:out value="${vcat.description}" default="—"/>
-                                    </td>
-                                    <td>
-                                        <span class="status-pill ${vcat.active ? 'status-pill--on' : 'status-pill--off'}">
-                                            <i class="fa-solid ${vcat.active ? 'fa-circle-check' : 'fa-circle-xmark'}"
-                                               style="font-size:.6rem;"></i>
-                                            ${vcat.active ? 'Active' : 'Hidden'}
-                                        </span>
-                                    </td>
-                                    <td class="admin-table__actions">
-                                        <a href="/admin/vpp/categories/${vcat.id}" class="icon-link" title="View">
-                                            <i class="fa-solid fa-eye"></i>
-                                        </a>
-                                        <a href="/admin/vpp/categories/${vcat.id}/edit" class="icon-link icon-link--edit" title="Edit">
-                                            <i class="fa-solid fa-pen"></i>
-                                        </a>
-                                        <c:choose>
-                                            <c:when test="${vcat.active}">
-                                                <form method="post" action="/admin/vpp/categories/${vcat.id}/hide" style="display:inline;">
-                                                    <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}" />
-                                                    <button type="submit" class="icon-link" title="Delete">
-                                                        <i class="fa-solid fa-trash"></i>
-                                                    </button>
-                                                </form>
-                                            </c:when>
-                                            <c:otherwise>
-                                                <form method="post" action="/admin/vpp/categories/${vcat.id}/restore" style="display:inline;">
-                                                    <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}" />
-                                                    <button type="submit" class="icon-link icon-link--restore" title="Restore">
-                                                        <i class="fa-solid fa-rotate-left"></i>
-                                                    </button>
-                                                </form>
-                                            </c:otherwise>
-                                        </c:choose>
-                                    </td>
-                                </tr>
-                            </c:forEach>
-                            <c:if test="${empty vppCategories}">
-                                <tr>
-                                    <td colspan="5" style="text-align:center;padding:56px 20px;color:#9CA3AF;">
-                                        No stationery categories found.
-                                    </td>
-                                </tr>
-                            </c:if>
-                            <tr id="vppNoMatchRow" style="display:none;">
-                                <td colspan="5" style="text-align:center;padding:56px 20px;color:#9CA3AF;">
-                                    No categories match your search.
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-
-            </div> <%-- /tab-stationery --%>
 
         </section>
     </main>

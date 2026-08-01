@@ -41,7 +41,7 @@
                                     <form class="header-search" action="/search" method="get">
                                         <input type="text" name="q" class="header-search__input"
                                             value="${not empty q ? q : ''}"
-                                            placeholder="Search books, stationery, authors..." />
+                                            placeholder="Search books, authors..." />
                                         <button type="submit" class="header-search__btn">
                                             <i class="fa-solid fa-magnifying-glass"></i> Search
                                         </button>
@@ -115,19 +115,11 @@
 
                                     <a href="/authors" class="catbar-link">
                                         Author
-                                        <%-- Stationery module belongs to a teammate; left as a non-functional
-                                            placeholder until it's wired up. --%>
-
-                                            <%-- Stationery module belongs to a teammate; left as a non-functional
-                                                placeholder until it's wired up. --%>
-                                                <a href="${pageContext.request.contextPath}/customer/vpp"
-                                                    class="catbar-link">
-                                                    <i class="fa-solid fa-pen-ruler"></i> Stationery
-                                                </a>
-                                                <a href="${pageContext.request.contextPath}/contact"
-                                                    class="catbar-link">
-                                                    <i class="fa-solid fa-headset"></i> Contact Support
-                                                </a>
+                                    </a>
+                                    <a href="${pageContext.request.contextPath}/contact"
+                                        class="catbar-link">
+                                        <i class="fa-solid fa-headset"></i> Contact Support
+                                    </a>
 
                                 </div>
                             </nav>

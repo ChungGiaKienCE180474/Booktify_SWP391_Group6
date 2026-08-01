@@ -382,77 +382,6 @@ public class CartController {
     }
 
     // =========================================================
-    // THÊM VPP VÀO GIỎ
-    // =========================================================
-
-    // POST /cart/add-vpp — thêm văn phòng phẩm vào giỏ
-    @PostMapping("/add-vpp")
-    public Object addVppToCart(
-            Authentication authentication,
-            @RequestParam Long vppItemId,           // ID sản phẩm VPP
-            @RequestParam(required = false)
-            String quantity,
-            @RequestParam(required = false)
-            String redirect,
-            HttpServletRequest request,
-            RedirectAttributes redirectAttributes) {
-
-        User user =
-                getCurrentUser(authentication);
-
-        Integer parsedQuantity =
-                cartService.parsePositiveIntegerQuantity(
-                        quantity != null
-                                ? quantity
-                                : "1"
-                );
-
-        if (parsedQuantity == null) {
-            return handleAddResponse(
-                    request,
-                    redirectAttributes,
-                    false,
-                    CartService.MSG_QUANTITY_INVALID,
-                    user,
-                    redirectAfterAddVpp(
-                            redirect
-                    )
-            );
-        }
-
-        try {
-            cartService.addVppItem(
-                    user.getId(),
-                    vppItemId,
-                    parsedQuantity
-            );
-
-            return handleAddResponse(
-                    request,
-                    redirectAttributes,
-                    true,
-                    "Stationery item added to your cart.",
-                    user,
-                    redirectAfterAddVpp(
-                            redirect
-                    )
-            );
-
-        } catch (IllegalArgumentException exception) {
-            return handleAddResponse(
-                    request,
-                    redirectAttributes,
-                    false,
-                    exception.getMessage(),
-                    user,
-                    redirectAfterAddVpp(
-                            redirect
-                    )
-            );
-        }
-    }
-
-    // =========================================================
     // CẬP NHẬT / XÓA / XÓA HẾT GIỎ
     // =========================================================
 
@@ -705,19 +634,6 @@ public class CartController {
         }
 
         return "redirect:/books/" + bookId; // Mặc định: trang chi tiết sách vừa thêm
-    }
-
-    // Xác định URL redirect sau khi thêm VPP
-    private String redirectAfterAddVpp(
-            String redirect) {
-
-        if (redirect != null
-                && !redirect.isBlank()) {
-
-            return "redirect:" + redirect;
-        }
-
-        return "redirect:/customer/vpp"; // Mặc định: trang danh sách VPP
     }
 
     // =========================================================
