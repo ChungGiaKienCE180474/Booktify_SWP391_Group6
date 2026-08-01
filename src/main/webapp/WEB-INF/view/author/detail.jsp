@@ -9,10 +9,10 @@
             <meta name="viewport" content="width=device-width, initial-scale=1.0">
             <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
             <link rel="stylesheet" href="/css/header.css">
-            <link rel="stylesheet" href="/css/footer.css">
-            <link rel="stylesheet" href="/css/homepage.css">
+            <link rel="stylesheet" href="/css/footer.css?v=2">
+            <link rel="stylesheet" href="/css/homepage.css?v=2">
             <!-- CSS specific to Author Detail -->
-            <link rel="stylesheet" href="/css/author.css">
+            <link rel="stylesheet" href="/css/author.css?v=2">
             <title>${author.authorName} — Booktify</title>
         </head>
 

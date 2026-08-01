@@ -17,6 +17,7 @@ public interface CartRepository extends JpaRepository<Cart, Long> {
     @Query("SELECT DISTINCT c FROM Cart c "
             + "LEFT JOIN FETCH c.items i "
             + "LEFT JOIN FETCH i.book "
+            + "LEFT JOIN FETCH i.bookSet "
             + "WHERE c.user.id = :userId")
     Optional<Cart> findByUserIdWithItems(@Param("userId") long userId);
 }

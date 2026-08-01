@@ -164,6 +164,24 @@ public class CartController {
         if (cart != null && cart.getItems() != null) {
             cart.getItems().forEach(cartItem -> {
 
+                if (cartItem.getBookSet() != null) {
+                    BigDecimal setPrice = cartItem.getBookSet().getSetPrice() == null
+                            ? BigDecimal.ZERO
+                            : cartItem.getBookSet().getSetPrice();
+                    BigDecimal lineTotal = setPrice.multiply(
+                            BigDecimal.valueOf(cartItem.getQuantity())
+                    );
+                    selectedUnitPriceMap.put(
+                            cartItem.getId(),
+                            orderService.formatMoney(setPrice)
+                    );
+                    selectedSubtotalMap.put(
+                            cartItem.getId(),
+                            orderService.formatMoney(lineTotal)
+                    );
+                    return;
+                }
+
                 Book book = cartItem.getBook();
 
                 if (book == null || book.getId() == null) {
@@ -377,6 +395,59 @@ public class CartController {
                             bookId,
                             redirect
                     )
+            );
+        }
+    }
+
+    // POST /cart/add-set — thêm bộ sách vào giỏ
+    @PostMapping("/add-set")
+    public Object addBookSetToCart(
+            Authentication authentication,
+            @RequestParam Long bookSetId,
+            @RequestParam(required = false) String quantity,
+            @RequestParam(required = false) String redirect,
+            HttpServletRequest request,
+            RedirectAttributes redirectAttributes) {
+
+        User user = getCurrentUser(authentication);
+
+        Integer parsedQuantity = cartService.parsePositiveIntegerQuantity(
+                quantity != null ? quantity : "1"
+        );
+
+        String redirectTarget = (redirect != null && !redirect.isBlank())
+                ? "redirect:" + redirect
+                : "redirect:/book-sets/" + bookSetId;
+
+        if (parsedQuantity == null) {
+            return handleAddResponse(
+                    request,
+                    redirectAttributes,
+                    false,
+                    CartService.MSG_QUANTITY_INVALID,
+                    user,
+                    redirectTarget
+            );
+        }
+
+        try {
+            cartService.addBookSet(user.getId(), bookSetId, parsedQuantity);
+            return handleAddResponse(
+                    request,
+                    redirectAttributes,
+                    true,
+                    "Book set added to your cart.",
+                    user,
+                    redirectTarget
+            );
+        } catch (IllegalArgumentException exception) {
+            return handleAddResponse(
+                    request,
+                    redirectAttributes,
+                    false,
+                    exception.getMessage(),
+                    user,
+                    redirectTarget
             );
         }
     }

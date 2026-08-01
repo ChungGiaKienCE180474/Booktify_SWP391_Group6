@@ -43,6 +43,11 @@
                                             <i class="fa-solid fa-book"></i>
                                             Books
                                         </a>
+                                        <a href="/admin/book-sets"
+                                            class="admin-sidebar__item ${fn:contains(pageContext.request.requestURI, '/admin/book-sets') ? 'active' : ''}">
+                                            <i class="fa-solid fa-layer-group"></i>
+                                            Book sets
+                                        </a>
                                         <a href="/admin/genres"
                                             class="admin-sidebar__item ${fn:contains(pageContext.request.requestURI, '/admin/genres') ? 'active' : ''}">
                                             <i class="fa-solid fa-layer-group"></i>
