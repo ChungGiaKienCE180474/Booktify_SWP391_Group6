@@ -1,3 +1,4 @@
+// Package service — logic nghiệp vụ user (đăng ký, profile, quản lý customer/staff)
 package shop.service;
 
 import java.util.List;
@@ -10,6 +11,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+// @Transactional: đảm bảo các thao tác DB trong 1 method là atomic (rollback nếu lỗi)
 import org.springframework.transaction.annotation.Transactional;
 import shop.domain.dto.StaffDTO;
 import shop.domain.Role;
@@ -25,9 +27,12 @@ import shop.repository.UserRepository;
 @Service
 public class UserService {
 
+    // Giới hạn độ dài tên và địa chỉ khi validate staff
     private static final int MAX_NAME_LENGTH = 150;
     private static final int MAX_ADDRESS_LENGTH = 500;
+    // Regex SĐT Việt Nam: bắt đầu 03/05/07/08/09 + 8 số
     private static final String PHONE_PATTERN = "^(0[35789])[0-9]{8}$";
+    // Regex mật khẩu: ít nhất 8 ký tự, có chữ hoa, thường và số
     private static final String PASSWORD_PATTERN =
             "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d).{8,72}$";
 
@@ -44,13 +49,17 @@ public class UserService {
         this.passwordEncoder = passwordEncoder;
     }
 
+    // Chuyển RegisterDTO → entity User (chưa hash password, chưa gán role)
     public User registerDTOtoUser(RegisterDTO registerDTO) {
         User user = new User();
+        // Ghép firstName + lastName thành fullName
         user.setFullName(registerDTO.getFirstName() + " " + registerDTO.getLastName());
+        // Chuẩn hóa email: trim + lowercase
         user.setEmail(normalizeEmail(registerDTO.getEmail()));
         return user;
     }
 
+    // Đăng ký user mới — được RegisterController gọi sau khi OTP hợp lệ
     @Transactional
     public User registerNewUser(RegisterDTO registerDTO, RoleName roleName) {
         if (registerDTO == null) {
@@ -61,6 +70,7 @@ public class UserService {
         if (normalizedEmail == null || normalizedEmail.isBlank()) {
             throw new IllegalArgumentException("Email is required.");
         }
+        // Kiểm tra lại email trùng (phòng trường hợp race condition sau OTP)
         if (userRepository.existsByEmailIgnoreCase(normalizedEmail)) {
             throw new IllegalArgumentException(
                     "This email address is already used by another customer or staff account."
@@ -68,17 +78,20 @@ public class UserService {
         }
 
         User user = registerDTOtoUser(registerDTO);
+        // Hash mật khẩu bằng BCrypt trước khi lưu DB
         user.setPassword(passwordEncoder.encode(registerDTO.getPassword()));
         user.setRole(getRoleByName(roleName));
-        user.setStatus(true);
-        user.setDeleted(false);
-        user.setAuthProvider(AuthProvider.LOCAL.name());
+        user.setStatus(true);       // Tài khoản active ngay sau đăng ký
+        user.setDeleted(false);     // Chưa bị soft delete
+        user.setAuthProvider(AuthProvider.LOCAL.name()); // Đăng ký bằng email/password
         return userRepository.save(user);
     }
 
+    // Xử lý user đăng nhập Google OAuth2 — tạo mới hoặc cập nhật avatar
     public User processOAuth2User(String email, String fullName, String avatarUrl) {
         User user = getUserByEmail(email);
         if (user != null) {
+            // User đã tồn tại → chỉ cập nhật avatar nếu chưa có
             boolean updated = false;
             if (avatarUrl != null && (user.getAvatar() == null || user.getAvatar().isBlank())) {
                 user.setAvatar(avatarUrl);
@@ -90,9 +103,11 @@ public class UserService {
             return user;
         }
 
+        // User chưa tồn tại → tạo tài khoản Google mới
         user = new User();
         user.setEmail(normalizeEmail(email));
         user.setFullName(fullName != null && !fullName.isBlank() ? fullName.trim() : normalizeEmail(email));
+        // Mật khẩu random (user Google không dùng password local, trừ khi đặt sau)
         user.setPassword(passwordEncoder.encode(UUID.randomUUID().toString()));
         user.setAvatar(avatarUrl);
         user.setRole(getRoleByName(RoleName.CUSTOMER));
@@ -102,6 +117,7 @@ public class UserService {
         return userRepository.save(user);
     }
 
+    // Lưu user generic, chuẩn hóa email trước khi save
     public User handleSaveUser(User user) {
         if (user.getEmail() != null) {
             user.setEmail(normalizeEmail(user.getEmail()));
@@ -109,6 +125,7 @@ public class UserService {
         return userRepository.save(user);
     }
 
+    // Chuẩn hóa email: trim khoảng trắng, chuyển lowercase (Locale.ROOT tránh lỗi locale)
     public String normalizeEmail(String email) {
         if (email == null) {
             return null;
@@ -116,14 +133,17 @@ public class UserService {
         return email.trim().toLowerCase(Locale.ROOT);
     }
 
+    // Lấy Role entity theo tên string
     public Role getRoleByName(String name) {
         return roleRepository.findByName(name);
     }
 
+    // Lấy Role entity theo enum RoleName
     public Role getRoleByName(RoleName roleName) {
         return roleRepository.findByName(roleName.name());
     }
 
+    // Kiểm tra email đã tồn tại — RegisterController gọi trước khi gửi OTP
     public boolean checkEmailExist(String email) {
         if (email == null || email.isBlank()) {
             return false;
@@ -131,6 +151,7 @@ public class UserService {
         return userRepository.existsByEmailIgnoreCase(normalizeEmail(email));
     }
 
+    // Tìm user theo email (ignore case) — ProfileController, OrderController dùng
     public User getUserByEmail(String email) {
         if (email == null || email.isBlank()) {
             return null;
@@ -138,11 +159,13 @@ public class UserService {
         return userRepository.findByEmailIgnoreCase(normalizeEmail(email));
     }
 
+    // Lấy ProfileDTO theo email
     public ProfileDTO getProfileDTOByEmail(String email) {
         User user = getUserByEmail(email);
         return user != null ? toProfileDTO(user) : null;
     }
 
+    // Chuyển User entity → ProfileDTO (ẩn password, dùng cho view profile)
     public ProfileDTO toProfileDTO(User user) {
         if (user == null) {
             return null;
@@ -162,10 +185,12 @@ public class UserService {
         return dto;
     }
 
+    // Đổi mật khẩu — ProfileController gọi sau khi validate
     public void updatePassword(String email, String plainPassword) {
         User user = getUserByEmail(email);
         if (user != null) {
             user.setPassword(passwordEncoder.encode(plainPassword));
+            // Tài khoản Google sau khi đặt mật khẩu → chuyển sang LOCAL (login bằng email+pass)
             if (user.isGoogleAccount()) {
                 user.setAuthProvider(AuthProvider.LOCAL.name());
             }
@@ -173,6 +198,7 @@ public class UserService {
         }
     }
 
+    // Cập nhật thông tin cá nhân — ProfileController gọi
     public User updateProfile(String email, String fullName, String phone, String address) {
         User user = getUserByEmail(email);
         if (user == null) {
@@ -184,6 +210,7 @@ public class UserService {
         return userRepository.save(user);
     }
 
+    // Chuỗi rỗng/blank → null để DB không lưu chuỗi trống
     private String blankToNull(String value) {
         if (value == null || value.isBlank()) {
             return null;
@@ -191,8 +218,9 @@ public class UserService {
         return value.trim();
     }
 
-    // ================= CUSTOMER MANAGEMENT =================
+    // ================= QUẢN LÝ CUSTOMER (ADMIN) =================
 
+    // Kiểm tra user có role CUSTOMER không
     private boolean isCustomer(User user) {
         return user.getRole() != null
                 && "CUSTOMER".equalsIgnoreCase(
@@ -200,6 +228,7 @@ public class UserService {
         );
     }
 
+    // Chuyển User → CustomerDTO kèm mã khách hàng CUS-xxxxxx
     private CustomerDTO toCustomerDTO(User user) {
         return new CustomerDTO(
                 user.getId(),
@@ -212,6 +241,7 @@ public class UserService {
         );
     }
 
+    // Sinh mã khách hàng giả lập từ ID (deterministic, không trùng theo ID)
     private String generateCustomerCode(Long id) {
         return String.format(
                 "CUS-%06d",
@@ -222,6 +252,7 @@ public class UserService {
         );
     }
 
+    // Phân trang danh sách customer với filter keyword và status
     public Page<CustomerDTO> getCustomersPage(
             String keyword,
             String status,
@@ -232,6 +263,7 @@ public class UserService {
                         ? ""
                         : keyword.trim().toLowerCase();
 
+        // Lấy tất cả user, filter in-memory (customer, chưa deleted, keyword, status)
         List<CustomerDTO> customers =
                 userRepository.findAll()
                         .stream()
@@ -280,6 +312,7 @@ public class UserService {
                         .map(this::toCustomerDTO)
                         .collect(Collectors.toList());
 
+        // Cắt sublist theo pageable (offset + pageSize)
         int start =
                 (int) pageable.getOffset();
 
@@ -352,6 +385,7 @@ public class UserService {
                 .count();
     }
 
+    // Khóa tài khoản customer (status = false)
     public void banUser(Long userId) {
 
         userRepository.findById(userId)
@@ -364,6 +398,7 @@ public class UserService {
                 });
     }
 
+    // Mở khóa tài khoản customer
     public void unbanUser(Long userId) {
 
         userRepository.findById(userId)
@@ -376,6 +411,7 @@ public class UserService {
                 });
     }
 
+    // Soft delete customer: đánh dấu deleted + inactive, không xóa khỏi DB
     public void softDeleteCustomer(Long userId) {
 
         userRepository.findById(userId)
@@ -389,7 +425,7 @@ public class UserService {
                 });
     }
 
-    // ================= STAFF MANAGEMENT =================
+    // ================= QUẢN LÝ STAFF (ADMIN) =================
 
     private StaffDTO toStaffDTO(User user) {
         return new StaffDTO(
@@ -459,6 +495,7 @@ public class UserService {
                 .orElse(null);
     }
 
+    // Tạo tài khoản staff mới với validate đầy đủ
     @Transactional
     public User createStaff(String fullName, String email, String password,
                             String phone, String address) {
@@ -558,6 +595,7 @@ public class UserService {
                 .count();
     }
 
+    // Tìm staff theo ID, ném exception nếu không tồn tại hoặc đã deleted
     private User findActiveStaffOrThrow(Long id) {
         if (id == null) {
             throw new IllegalArgumentException("Staff ID is required.");

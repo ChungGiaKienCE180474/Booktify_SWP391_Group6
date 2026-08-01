@@ -91,10 +91,15 @@ public class SecurityConfiguration {
                         .requestMatchers("/staff", "/staff/**").hasRole("STAFF")
                         .requestMatchers("/changepass", "/profile", "/profile/**", "/cart", "/cart/**",
                                 "/orders", "/orders/**").authenticated()
+                        .requestMatchers("/payment/vnpay/return", "/payment/vnpay/ipn").permitAll()
                         .requestMatchers("/stationery/**").authenticated()
                         .anyRequest().authenticated())
                 .csrf(csrf -> csrf
-                        .ignoringRequestMatchers("/authentication/**", "/register"))
+                        .ignoringRequestMatchers(
+                                "/authentication/**",
+                                "/register",
+                                "/payment/vnpay/ipn",
+                                "/payment/vnpay/return"))
                 .sessionManagement(sessionManagement -> sessionManagement
                         .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
                         .invalidSessionUrl("/login?expired")

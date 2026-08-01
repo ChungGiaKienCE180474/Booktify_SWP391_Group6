@@ -1,3 +1,4 @@
+// Package service — logic nghiệp vụ đơn hàng (checkout, hủy đơn, quản lý stock)
 package shop.service;
 
 import java.math.BigDecimal;
@@ -6,9 +7,11 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 
@@ -34,18 +37,35 @@ import shop.repository.OrderRepository;
 import shop.repository.UserRepository;
 import shop.repository.VppItemRepository;
 
+/**
+ * Service xử lý toàn bộ nghiệp vụ đơn hàng.
+ * <p>
+ * Chức năng chính:
+ * <ul>
+ *   <li>{@link #createOrderFromCart} — tạo đơn từ giỏ, trừ stock, xóa cart (@Transactional)</li>
+ *   <li>{@link #cancelOrderForUser} — customer hủy đơn PENDING</li>
+ *   <li>{@link #updateOrderStatus} — admin/staff chuyển trạng thái (state machine)</li>
+ *   <li>{@link #searchOrders} — tìm kiếm/lọc cho admin/staff</li>
+ * </ul>
+ * Phụ thuộc: CartService, PromotionService, VoucherService, StockService.
+ */
 @Service
 public class OrderService {
 
     private final OrderRepository orderRepository;
     private final BookRepository bookRepository;
+    /** Giỏ hàng: refresh, clear sau đặt hàng */
     private final CartService cartService;
     private final UserRepository userRepository;
+    /** Tính và validate voucher, decreaseVoucherQuantity */
     private final VoucherService voucherService;
+    /** Giá sau KM từng sách (PERCENTAGE/FIXED/NONE) */
     private final PromotionService promotionService;
     private final VppItemRepository vppItemRepository;
+    /** Giảm/hoàn tồn kho khi tạo/hủy đơn */
     private final StockService stockService;
 
+    // Inject các repository và service phụ thuộc
     public OrderService(
             OrderRepository orderRepository,
             BookRepository bookRepository,
@@ -56,181 +76,190 @@ public class OrderService {
             VppItemRepository vppItemRepository,
             StockService stockService
     ) {
-        this.orderRepository = orderRepository;
-        this.bookRepository = bookRepository;
-        this.cartService = cartService;
-        this.userRepository = userRepository;
-        this.voucherService = voucherService;
-        this.promotionService = promotionService;
-        this.vppItemRepository = vppItemRepository;
-        this.stockService = stockService;
+        this.orderRepository = orderRepository;       // CRUD bảng orders
+        this.bookRepository = bookRepository;         // Load sách khi tạo OrderItem
+        this.cartService = cartService;               // Refresh/clear giỏ hàng
+        this.userRepository = userRepository;         // Load user đặt đơn
+        this.voucherService = voucherService;         // Validate + tính voucher
+        this.promotionService = promotionService;     // Giá sau KM từng sách
+        this.vppItemRepository = vppItemRepository;   // Load VPP khi tạo OrderItem
+        this.stockService = stockService;             // Trừ/hoàn tồn kho
     }
 
-    @Transactional(readOnly = true)
+    // Lấy danh sách đơn hàng của user — OrderController GET /orders
+    @Transactional(readOnly = true) // Chỉ đọc DB, không ghi — tối ưu performance
     public List<OrderDTO> getOrdersForUser(
-            long userId
+            long userId // ID customer đang đăng nhập
     ) {
         return orderRepository
-                .findByUserIdOrderByCreatedAtDesc(userId)
-                .stream()
-                .map(this::toSummaryDTO)
-                .collect(Collectors.toList());
+                .findByUserIdOrderByCreatedAtDesc(userId) // Query: đơn của user, mới nhất trước
+                .stream() // Chuyển List<Order> thành Stream để map
+                .map(this::toSummaryDTO) // Entity -> DTO tóm tắt (không có items)
+                .collect(Collectors.toList()); // Thu thập lại thành List<OrderDTO>
     }
 
+    // Lấy chi tiết 1 đơn thuộc user — OrderController GET /orders/{id}
     @Transactional(readOnly = true)
     public Optional<OrderDTO> getOrderForUser(
-            long userId,
-            long orderId
+            long userId,   // Chỉ lấy đơn của user này — bảo mật
+            long orderId   // ID đơn từ URL
     ) {
         return orderRepository
-                .findByIdAndUserIdWithItems(
-                        orderId,
-                        userId
-                )
-                .map(this::toDetailDTO);
+                .findByIdAndUserIdWithItems(orderId, userId) // JOIN FETCH items, book, vpp
+                .map(this::toDetailDTO); // Có đơn -> map full detail; không -> Optional.empty()
     }
 
+    // Lấy tất cả đơn — có thể dùng nội bộ admin (searchOrders dùng query tương tự)
     @Transactional(readOnly = true)
     public List<OrderDTO> getAllOrders() {
         return orderRepository
-                .findAllWithUserAndItemsOrderByCreatedAtDesc()
+                .findAllWithUserAndItemsOrderByCreatedAtDesc() // All orders + user + items
                 .stream()
-                .map(this::toDetailDTO)
+                .map(this::toDetailDTO) // Full detail cho mỗi đơn
                 .collect(Collectors.toList());
     }
 
+    // Tìm kiếm đơn hàng theo keyword, status, sort — AdminOrderController / StaffOrderController
     @Transactional(readOnly = true)
     public List<OrderDTO> searchOrders(
-            String keyword,
-            String status,
-            String sort
+            String keyword, // Mã đơn, tên KH, email, người nhận, SĐT (nullable)
+            String status,  // PENDING, CONFIRMED... hoặc "all"
+            String sort     // default, oldest, total_asc...
     ) {
+        // Bước 1: Load toàn bộ đơn từ DB (kèm user + items)
         List<Order> orders =
                 orderRepository
                         .findAllWithUserAndItemsOrderByCreatedAtDesc();
 
+        // Bước 2: Lọc theo keyword nếu user nhập tìm kiếm
         if (StringUtils.hasText(keyword)) {
 
             String normalizedKeyword =
-                    keyword.trim()
-                            .toLowerCase(Locale.ROOT);
+                    keyword.trim()                    // Bỏ khoảng trắng đầu/cuối
+                            .toLowerCase(Locale.ROOT); // Lowercase để so không phân biệt hoa thường
 
             orders = orders.stream()
                     .filter(order ->
-                            matchesKeyword(
+                            matchesKeyword(           // Giữ đơn khớp keyword
                                     order,
                                     normalizedKeyword
                             )
                     )
-                    .collect(Collectors.toList());
+                    .collect(Collectors.toList());    // List mới đã lọc
         }
 
+        // Bước 3: Lọc theo trạng thái nếu không phải "all"
         if (StringUtils.hasText(status)
                 && !"all".equalsIgnoreCase(status)) {
 
             String normalizedStatus =
                     status.trim()
-                            .toUpperCase(Locale.ROOT);
+                            .toUpperCase(Locale.ROOT); // PENDING, CONFIRMED...
 
             orders = orders.stream()
                     .filter(order ->
-                            normalizedStatus.equals(
+                            normalizedStatus.equals(  // So khớp chính xác status
                                     order.getStatus()
                             )
                     )
                     .collect(Collectors.toList());
         }
 
+        // Bước 4: Sắp xếp theo tham số sort (mặc định mới nhất trước)
         orders.sort(
                 resolveSortComparator(sort)
         );
 
+        // Bước 5: Map entity -> DTO và trả về
         return orders.stream()
                 .map(this::toDetailDTO)
                 .collect(Collectors.toList());
     }
 
+    // Kiểm tra một Order có khớp từ khóa tìm kiếm không
     private boolean matchesKeyword(
             Order order,
-            String keyword
+            String keyword // Đã normalize lowercase
     ) {
         return containsIgnoreCase(
-                order.getOrderCode(),
+                order.getOrderCode(),  // Tìm theo mã đơn ORD-...
                 keyword
         )
                 || (
-                order.getUser() != null
+                order.getUser() != null  // Có thông tin customer
                         && (
                         containsIgnoreCase(
-                                order.getUser().getFullName(),
+                                order.getUser().getFullName(), // Tên customer
                                 keyword
                         )
                                 || containsIgnoreCase(
-                                order.getUser().getEmail(),
+                                order.getUser().getEmail(),    // Email customer
                                 keyword
                         )
                 )
         )
                 || containsIgnoreCase(
-                order.getRecipientName(),
+                order.getRecipientName(),  // Tên người nhận trên đơn
                 keyword
         )
                 || containsIgnoreCase(
-                order.getRecipientPhone(),
+                order.getRecipientPhone(), // SĐT người nhận
                 keyword
         );
     }
 
+    // Helper: value có chứa keyword không (case insensitive)
     private boolean containsIgnoreCase(
             String value,
             String keyword
     ) {
-        return value != null
-                && value.toLowerCase(Locale.ROOT)
-                .contains(keyword);
+        return value != null                              // value không null
+                && value.toLowerCase(Locale.ROOT)       // lowercase value
+                .contains(keyword);                       // substring match
     }
 
+    // Trả Comparator sắp xếp đơn theo sort param (admin/staff list)
     private Comparator<Order> resolveSortComparator(
-            String sort
+            String sort // Query param ?sort=... từ URL
     ) {
         if (sort == null) {
-            sort = "default";
+            sort = "default"; // Không truyền sort → dùng mặc định mới nhất trước
         }
 
-        switch (sort) {
+        switch (sort) { // Chọn cách sắp xếp theo giá trị sort
 
             case "oldest":
-
+                // Cũ nhất trước — createdAt tăng dần
                 return Comparator.comparing(
-                        Order::getCreatedAt,
-                        Comparator.nullsLast(
-                                Comparator.naturalOrder()
+                        Order::getCreatedAt, // So sánh theo ngày tạo
+                        Comparator.nullsLast( // null createdAt xếp cuối
+                                Comparator.naturalOrder() // LocalDateTime tăng dần
                         )
                 );
 
             case "id_asc":
-
+                // ID nhỏ → lớn
                 return Comparator.comparing(
-                        Order::getId
+                        Order::getId // So sánh theo primary key
                 );
 
             case "id_desc":
-
+                // ID lớn → nhỏ (đơn mới tạo thường ID lớn hơn)
                 return Comparator.comparing(
                         Order::getId
-                ).reversed();
+                ).reversed(); // Đảo thứ tự so sánh
 
             case "total_asc":
-
+                // Tổng tiền thấp → cao
                 return Comparator.comparing(
-                        Order::getTotalAmount,
+                        Order::getTotalAmount, // BigDecimal totalAmount
                         Comparator.nullsLast(
                                 Comparator.naturalOrder()
                         )
                 );
 
             case "total_desc":
-
+                // Tổng tiền cao → thấp
                 return Comparator.comparing(
                         Order::getTotalAmount,
                         Comparator.nullsLast(
@@ -239,16 +268,16 @@ public class OrderService {
                 ).reversed();
 
             case "code_asc":
-
+                // Mã đơn A→Z (không phân biệt hoa thường)
                 return Comparator.comparing(
-                        Order::getOrderCode,
+                        Order::getOrderCode, // VD ORD-20260728-123456
                         Comparator.nullsLast(
                                 String::compareToIgnoreCase
                         )
                 );
 
             case "code_desc":
-
+                // Mã đơn Z→A
                 return Comparator.comparing(
                         Order::getOrderCode,
                         Comparator.nullsLast(
@@ -257,16 +286,16 @@ public class OrderService {
                 ).reversed();
 
             case "customer_asc":
-
+                // Tên khách A→Z
                 return Comparator.comparing(
-                        this::getCustomerFullName,
+                        this::getCustomerFullName, // Method reference lấy fullName từ order.user
                         Comparator.nullsLast(
                                 String.CASE_INSENSITIVE_ORDER
                         )
                 );
 
             case "customer_desc":
-
+                // Tên khách Z→A
                 return Comparator.comparing(
                         this::getCustomerFullName,
                         Comparator.nullsLast(
@@ -276,28 +305,30 @@ public class OrderService {
 
             case "default":
             default:
-
+                // Mặc định: mới nhất trước — createdAt giảm dần
                 return Comparator.comparing(
                         Order::getCreatedAt,
                         Comparator.nullsLast(
                                 Comparator.naturalOrder()
                         )
-                ).reversed();
+                ).reversed(); // Đảo → mới nhất đầu danh sách
         }
     }
 
+    // Lấy tên khách từ order.user — dùng cho sort customer_asc/desc
     private String getCustomerFullName(
-            Order order
+            Order order // Entity đơn hàng
     ) {
-        return order.getUser() != null
-                ? order.getUser().getFullName()
-                : null;
+        return order.getUser() != null // User có thể null nếu data lỗi
+                ? order.getUser().getFullName() // Tên đầy đủ từ bảng users
+                : null; // null → xếp cuối khi sort
     }
 
     @Transactional(readOnly = true)
     public Optional<OrderDTO> getOrderById(
             long orderId
     ) {
+        // Không lọc user — admin/staff xem mọi đơn
         return orderRepository
                 .findByIdWithUserAndItems(orderId)
                 .map(this::toDetailDTO);
@@ -307,18 +338,23 @@ public class OrderService {
     public List<OrderDTO> getOrdersForCustomer(
             long customerUserId
     ) {
+        // Alias của getOrdersForUser — dùng từ AdminCustomerController
         return getOrdersForUser(
                 customerUserId
         );
     }
 
+    // Tạo đơn hàng từ giỏ — OrderController POST /orders/checkout
+    // @Transactional: toàn bộ method trong 1 transaction — lỗi giữa chừng rollback hết
     @Transactional
     public OrderDTO createOrderFromCart(
             long userId,
             CheckoutForm form
     ) {
+        // Kiểm tra voucher hợp lệ (nếu có) trước khi xử lý giỏ
         validateCheckoutForm(form);
 
+        // Load user từ DB — throw nếu userId không tồn tại
         User user = userRepository
                 .findById(userId)
                 .orElseThrow(() ->
@@ -328,14 +364,19 @@ public class OrderService {
                 );
 
         /*
-         * Refresh the cart before creating the order so current promotions,
-         * stock quantities, active statuses, and prices are applied.
+         * Refresh giỏ trước khi tạo đơn để áp dụng:
+         * - khuyến mãi hiện tại
+         * - tồn kho mới nhất
+         * - trạng thái active của sản phẩm
+         * - giá bán cập nhật
          */
         cartService.refreshCart(userId);
 
+        // Lấy entity Cart sau refresh (đã sync với DB)
         Cart cart =
                 cartService.getCartForUser(userId);
 
+        // Không cho tạo đơn từ giỏ rỗng
         if (cart == null
                 || cart.getItems().isEmpty()) {
 
@@ -344,9 +385,11 @@ public class OrderService {
             );
         }
 
+        // Kiểm tra từng item: tồn tại, active, đủ stock, giá hợp lệ
         List<String> validationErrors =
                 validateCartItemsForOrder(cart);
 
+        // Gom tất cả lỗi validation thành 1 message
         if (!validationErrors.isEmpty()) {
 
             throw new IllegalArgumentException(
@@ -357,18 +400,22 @@ public class OrderService {
             );
         }
 
+        // Phí ship — hiện chưa tính phí, luôn 0
         BigDecimal shippingFee =
                 BigDecimal.ZERO;
 
+        // Khởi tạo entity Order (chưa save DB)
         Order order =
                 new Order();
 
+        // Sinh mã đơn unique dạng ORD-yyyyMMdd-xxxxxx
         order.setOrderCode(
                 generateUniqueOrderCode()
         );
 
         order.setUser(user);
 
+        // Thông tin giao hàng từ CheckoutForm — trim khoảng trắng thừa
         order.setRecipientName(
                 form.getRecipientName().trim()
         );
@@ -381,24 +428,32 @@ public class OrderService {
                 form.getShippingAddress().trim()
         );
 
+        // Phương thức thanh toán từ form — mặc định COD
+        PaymentMethod paymentMethod =
+                form.resolvePaymentMethod();
+
         order.setPaymentMethod(
-                PaymentMethod.COD.name()
+                paymentMethod.name()
         );
 
+        // Vận chuyển tiêu chuẩn — chưa có lựa chọn khác trên form
         order.setShippingMethod(
                 "STANDARD"
         );
 
+        // Đơn mới luôn ở trạng thái PENDING — chờ admin/staff xác nhận
         order.setStatus(
                 OrderStatus.PENDING.name()
         );
 
+        // Lưu mã voucher (null nếu không dùng)
         order.setVoucherCode(
                 blankToNull(
                         form.getVoucherCode()
                 )
         );
 
+        // Ghi chú tùy chọn từ customer
         order.setNote(
                 blankToNull(
                         form.getNote()
@@ -409,21 +464,24 @@ public class OrderService {
                 shippingFee
         );
 
+        // Biến cộng dồn tổng tiền hàng (sau KM từng dòng)
         BigDecimal subtotal =
                 BigDecimal.ZERO;
 
+        // Duyệt từng item trong giỏ để tạo OrderItem
         for (CartItem cartItem :
                 cart.getItems()) {
 
             /*
              * ====================================================
-             * VPP ITEM
+             * VPP ITEM (văn phòng phẩm)
              * ====================================================
              */
 
             if (cartItem.getBook() == null
                     && cartItem.getVppItem() != null) {
 
+                // Load lại VPP từ DB (tránh dùng entity stale trong session)
                 VppItem vppItem =
                         vppItemRepository
                                 .findById(
@@ -437,14 +495,17 @@ public class OrderService {
                                         )
                                 );
 
+                // Kiểm tra active, stock, giá — throw nếu không đủ điều kiện
                 validateVppLine(
                         vppItem,
                         cartItem.getQuantity()
                 );
 
+                // VPP không áp promotion theo sách — dùng giá gốc
                 BigDecimal unitPrice =
                         vppItem.getPrice();
 
+                // Thành tiền dòng = đơn giá × số lượng
                 BigDecimal lineTotal =
                         unitPrice.multiply(
                                 BigDecimal.valueOf(
@@ -452,16 +513,19 @@ public class OrderService {
                                 )
                         );
 
+                // Cộng vào subtotal tổng đơn
                 subtotal =
                         subtotal.add(lineTotal);
 
+                // Tạo dòng OrderItem và gắn vào Order (cascade save)
                 OrderItem orderItem =
                         new OrderItem();
 
-                orderItem.setOrder(order);
-                orderItem.setBook(null);
-                orderItem.setVppItem(vppItem);
+                orderItem.setOrder(order);       // FK order_id
+                orderItem.setBook(null);         // Dòng VPP — không có book
+                orderItem.setVppItem(vppItem);   // FK vpp_item_id
 
+                // Snapshot tên sản phẩm tại thời điểm mua
                 orderItem.setBookTitle(
                         vppItem.getName()
                 );
@@ -478,26 +542,29 @@ public class OrderService {
                         lineTotal
                 );
 
+                // Thêm vào list items của Order — JPA cascade INSERT khi save
                 order.getItems().add(
                         orderItem
                 );
 
-                continue;
+                continue;  // Sang CartItem tiếp theo
             }
 
             /*
              * ====================================================
-             * BOOK
+             * BOOK (sách)
              * ====================================================
              */
 
             if (cartItem.getBook() == null) {
 
+                // Item không phải sách cũng không phải VPP — dữ liệu giỏ hỏng
                 throw new IllegalArgumentException(
                         "An item in your cart is invalid."
                 );
             }
 
+            // Load sách mới nhất từ DB
             Book book =
                     bookRepository
                             .findById(
@@ -511,16 +578,19 @@ public class OrderService {
                                     )
                             );
 
+            // Kiểm tra sách active, đủ stock, giá hợp lệ
             validateBookLine(
                     book,
                     cartItem.getQuantity()
             );
 
+            // Lấy lựa chọn KM user chọn cho sách này (% hoặc fixed hoặc NONE)
             PromotionSelection selectedPromotion =
                     form.resolvePromotionSelection(
                             book.getId()
                     );
 
+            // Tính giá đơn vị sau KM — PromotionService áp PERCENTAGE/FIXED/NONE
             BigDecimal effectiveUnitPrice =
                     promotionService
                             .getPriceForSelection(
@@ -528,6 +598,7 @@ public class OrderService {
                                     selectedPromotion
                             );
 
+            // Thành tiền dòng sách
             BigDecimal lineTotal =
                     effectiveUnitPrice.multiply(
                             BigDecimal.valueOf(
@@ -542,13 +613,15 @@ public class OrderService {
                     new OrderItem();
 
             orderItem.setOrder(order);
-            orderItem.setBook(book);
-            orderItem.setVppItem(null);
+            orderItem.setBook(book);         // FK book_id
+            orderItem.setVppItem(null);      // Dòng sách — không có VPP
 
+            // Snapshot tên sách tại thời điểm mua
             orderItem.setBookTitle(
                     book.getTitle()
             );
 
+            // Lưu giá đã giảm KM (snapshot — không đổi khi sách đổi giá sau này)
             orderItem.setUnitPrice(
                     effectiveUnitPrice
             );
@@ -566,10 +639,12 @@ public class OrderService {
             );
         }
 
+        // Tổng tiền hàng sau KM (trước voucher)
         order.setSubtotal(
                 subtotal
         );
 
+        // Tính giảm giá voucher trên subtotal
         BigDecimal discountAmount =
                 resolveDiscount(
                         form.getVoucherCode(),
@@ -584,6 +659,7 @@ public class OrderService {
                 shippingFee
         );
 
+        // Tổng thanh toán = subtotal - voucher (không âm)
         BigDecimal total =
                 subtotal.subtract(
                         discountAmount
@@ -600,49 +676,49 @@ public class OrderService {
                 total
         );
 
+        // INSERT orders + order_items (cascade) vào DB — trả về entity có id generated
         Order savedOrder =
                 orderRepository.save(order);
 
+        boolean isVnPayOrder =
+                paymentMethod == PaymentMethod.VNPAY;
+
         /*
-         * Bảng stock là nguồn số lượng chính.
-         *
-         * StockService sẽ:
-         * - khóa dòng stock;
-         * - kiểm tra số lượng;
-         * - giảm stock.quantity;
-         * - đồng bộ cột stock_quantity cũ tạm thời;
-         * - ghi lịch sử SALE.
-         *
-         * Nếu giảm kho thất bại thì toàn bộ transaction,
-         * bao gồm đơn hàng vừa tạo, sẽ rollback.
+         * VNPay: chờ thanh toán thành công mới trừ kho và giảm voucher.
+         * COD: hoàn tất ngay sau khi tạo đơn.
          */
-        decreaseOrderStock(
-                savedOrder
-        );
+        if (!isVnPayOrder) {
+            decreaseOrderStock(
+                    savedOrder
+            );
 
-        if (form.getVoucherCode() != null
-                && !form.getVoucherCode().isBlank()) {
+            if (form.getVoucherCode() != null
+                    && !form.getVoucherCode().isBlank()) {
 
-            voucherService
-                    .decreaseVoucherQuantity(
-                            form.getVoucherCode()
-                    );
+                voucherService
+                        .decreaseVoucherQuantity(
+                                form.getVoucherCode()
+                        );
+            }
         }
 
         cartService.clearCart(
                 userId
         );
 
+        // Map entity đã save -> OrderDTO trả về Controller (redirect /orders/{id})
         return toDetailDTO(
                 savedOrder
         );
     }
 
+    // Cập nhật trạng thái đơn — AdminOrderController / StaffOrderController POST .../status
     @Transactional
     public void updateOrderStatus(
             long orderId,
             String newStatus
     ) {
+        // Load đơn kèm user + items (cần items nếu hủy để hoàn stock)
         Order order =
                 orderRepository
                         .findByIdWithUserAndItems(orderId)
@@ -652,6 +728,7 @@ public class OrderService {
                                 )
                         );
 
+        // Parse String form -> enum OrderStatus
         OrderStatus targetStatus =
                 OrderStatus.fromValue(
                         newStatus
@@ -662,10 +739,12 @@ public class OrderService {
                         order.getStatus()
                 );
 
+        // Không làm gì nếu trạng thái không đổi
         if (targetStatus == currentStatus) {
             return;
         }
 
+        // State machine: vd PENDING->SHIPPING là invalid
         if (!currentStatus.canTransitionTo(
                 targetStatus
         )) {
@@ -678,17 +757,36 @@ public class OrderService {
             );
         }
 
-        /*
-         * Khi đơn bị hủy, hoàn lại hàng vào bảng stock.
-         */
-        if (targetStatus
-                == OrderStatus.CANCELLED) {
-
-            restoreOrderStock(
-                    order
+        // VNPay đã thanh toán — không cho hủy đơn
+        if (targetStatus == OrderStatus.CANCELLED
+                && isPaidVnPayOrder(order)) {
+            throw new IllegalArgumentException(
+                    "Paid VNPay orders cannot be cancelled."
             );
         }
 
+        // Chuyển sang CANCELLED -> hoàn hàng vào kho trước khi đổi status
+        if (targetStatus
+                == OrderStatus.CANCELLED) {
+
+            if (shouldRestoreStockOnCancel(order)) {
+                restoreOrderStock(
+                        order
+                );
+            }
+        }
+
+        // VNPay chưa thanh toán — không cho admin/staff xác nhận thủ công
+        if (targetStatus == OrderStatus.CONFIRMED
+                && currentStatus == OrderStatus.PENDING
+                && PaymentMethod.VNPAY.name().equals(order.getPaymentMethod())) {
+
+            throw new IllegalArgumentException(
+                    "VNPay orders can only be confirmed after successful online payment."
+            );
+        }
+
+        // Cập nhật status và lưu — @PreUpdate set updatedAt
         order.setStatus(
                 targetStatus.name()
         );
@@ -698,11 +796,13 @@ public class OrderService {
         );
     }
 
+    // User hủy đơn của mình — OrderController POST /orders/{id}/cancel
     @Transactional
     public void cancelOrderForUser(
             long userId,
             long orderId
     ) {
+        // Chỉ lấy đơn thuộc userId — tránh hủy đơn người khác
         Order order =
                 orderRepository
                         .findByIdAndUserIdWithItems(
@@ -720,6 +820,7 @@ public class OrderService {
                         order.getStatus()
                 );
 
+        // Customer chỉ hủy được PENDING — canBeCancelled() == true
         if (!currentStatus.canBeCancelled()) {
 
             throw new IllegalArgumentException(
@@ -727,6 +828,7 @@ public class OrderService {
             );
         }
 
+        // Tái sử dụng updateOrderStatus -> CANCELLED + restoreOrderStock
         updateOrderStatus(
                 orderId,
                 OrderStatus.CANCELLED.name()
@@ -735,18 +837,20 @@ public class OrderService {
 
     /*
      * ============================================================
-     * DECREASE STOCK WHEN ORDER IS CREATED
+     * GIẢM TỒN KHO KHI TẠO ĐƠN
      * ============================================================
      */
 
     private void decreaseOrderStock(
             Order order
     ) {
+        // Duyệt từng dòng đơn — trừ stock tương ứng
         for (OrderItem item :
                 order.getItems()) {
 
             if (item.getVppItem() != null) {
 
+                // Trừ tồn kho VPP + ghi lịch sử SALE (orderId, orderCode để audit)
                 stockService
                         .decreaseVppForSale(
                                 item
@@ -762,6 +866,7 @@ public class OrderService {
 
             if (item.getBook() != null) {
 
+                // Trừ tồn kho sách + ghi lịch sử SALE
                 stockService
                         .decreaseBookForSale(
                                 item
@@ -777,13 +882,14 @@ public class OrderService {
 
     /*
      * ============================================================
-     * RESTORE STOCK WHEN ORDER IS CANCELLED
+     * HOÀN TỒN KHO KHI HỦY ĐƠN
      * ============================================================
      */
 
     private void restoreOrderStock(
             Order order
     ) {
+        // Hoàn lại số lượng đã trừ khi đơn bị CANCELLED
         for (OrderItem item :
                 order.getItems()) {
 
@@ -817,6 +923,7 @@ public class OrderService {
         }
     }
 
+    // Validate form checkout — OrderController gọi trước khi createOrderFromCart
     public void validateCheckoutForm(
             CheckoutForm form
     ) {
@@ -827,9 +934,16 @@ public class OrderService {
             );
         }
 
+        if (!PaymentMethod.isValid(form.getPaymentMethod())) {
+            throw new IllegalArgumentException(
+                    "Invalid payment method."
+            );
+        }
+
         String voucherCode =
                 form.getVoucherCode();
 
+        // Không có voucher -> bỏ qua validate voucher
         if (voucherCode == null
                 || voucherCode.isBlank()) {
 
@@ -839,6 +953,7 @@ public class OrderService {
         voucherCode =
                 voucherCode.trim();
 
+        // Chỉ cho phép 1 voucher mỗi đơn — không nhập nhiều mã cách nhau dấu phẩy/space
         if (voucherCode.contains(",")
                 || voucherCode.contains(" ")) {
 
@@ -847,62 +962,230 @@ public class OrderService {
             );
         }
 
+        // Ném exception nếu voucher hết hạn, hết lượt, hoặc không tồn tại
         voucherService.findValidVoucher(
                 voucherCode
         );
     }
 
+    /**
+     * Các trạng thái tiếp theo hợp lệ — dùng dropdown Admin/Staff.
+     * Đơn VNPay đã thanh toán không được phép chuyển sang CANCELLED.
+     */
+    public Set<OrderStatus> getAllowedNextStatuses(Order order) {
+        return getAllowedNextStatuses(
+                order.getStatus(),
+                order.getPaymentMethod()
+        );
+    }
+
+    public Set<OrderStatus> getAllowedNextStatuses(
+            String status,
+            String paymentMethod
+    ) {
+        OrderStatus currentStatus =
+                OrderStatus.fromValue(status);
+
+        Set<OrderStatus> allowed =
+                EnumSet.copyOf(currentStatus.allowedTransitions());
+
+        if (PaymentMethod.VNPAY.name().equals(paymentMethod)
+                && currentStatus != OrderStatus.PENDING) {
+            allowed.remove(OrderStatus.CANCELLED);
+        }
+
+        return allowed;
+    }
+
+    private boolean isPaidVnPayOrder(Order order) {
+        if (!PaymentMethod.VNPAY.name().equals(order.getPaymentMethod())) {
+            return false;
+        }
+
+        OrderStatus currentStatus =
+                OrderStatus.fromValue(order.getStatus());
+
+        return currentStatus != OrderStatus.PENDING;
+    }
+
+    private boolean shouldRestoreStockOnCancel(Order order) {
+        if (!PaymentMethod.VNPAY.name().equals(order.getPaymentMethod())) {
+            return true;
+        }
+
+        OrderStatus currentStatus =
+                OrderStatus.fromValue(order.getStatus());
+
+        return currentStatus != OrderStatus.PENDING;
+    }
+
+    /**
+     * Hủy đơn VNPay chưa thanh toán — khi khách hủy hoặc thanh toán thất bại trên cổng VNPay.
+     *
+     * @return true nếu đơn vừa được chuyển sang CANCELLED
+     */
+    @Transactional
+    public boolean cancelPendingVnPayOrder(long orderId) {
+        Order order =
+                orderRepository
+                        .findByIdWithUserAndItems(orderId)
+                        .orElseThrow(() ->
+                                new IllegalArgumentException(
+                                        "Order not found."
+                                )
+                        );
+
+        if (!PaymentMethod.VNPAY.name().equals(order.getPaymentMethod())) {
+            return false;
+        }
+
+        OrderStatus currentStatus =
+                OrderStatus.fromValue(order.getStatus());
+
+        if (currentStatus == OrderStatus.CANCELLED) {
+            return false;
+        }
+
+        if (currentStatus != OrderStatus.PENDING) {
+            return false;
+        }
+
+        updateOrderStatus(
+                orderId,
+                OrderStatus.CANCELLED.name()
+        );
+
+        return true;
+    }
+
+    /**
+     * Xác nhận thanh toán VNPay thành công — chuyển đơn sang CONFIRMED,
+     * trừ kho, giảm voucher và xóa giỏ hàng.
+     */
+    @Transactional
+    public boolean confirmVnPayPayment(long orderId, BigDecimal paidAmount) {
+        Order order =
+                orderRepository
+                        .findByIdWithUserAndItems(orderId)
+                        .orElseThrow(() ->
+                                new IllegalArgumentException(
+                                        "Order not found."
+                                )
+                        );
+
+        if (!PaymentMethod.VNPAY.name().equals(order.getPaymentMethod())) {
+            throw new IllegalArgumentException(
+                    "This order is not a VNPay payment order."
+            );
+        }
+
+        OrderStatus currentStatus =
+                OrderStatus.fromValue(order.getStatus());
+
+        if (currentStatus == OrderStatus.CONFIRMED
+                || currentStatus == OrderStatus.SHIPPING
+                || currentStatus == OrderStatus.DELIVERED) {
+            return true;
+        }
+
+        if (currentStatus != OrderStatus.PENDING) {
+            throw new IllegalArgumentException(
+                    "Cannot confirm payment for order in status "
+                            + currentStatus.getLabel()
+                            + "."
+            );
+        }
+
+        if (paidAmount == null
+                || paidAmount.compareTo(order.getTotalAmount()) != 0) {
+            throw new IllegalArgumentException(
+                    "Paid amount does not match order total."
+            );
+        }
+
+        decreaseOrderStock(order);
+
+        if (order.getVoucherCode() != null
+                && !order.getVoucherCode().isBlank()) {
+            voucherService.decreaseVoucherQuantity(
+                    order.getVoucherCode()
+            );
+        }
+
+        order.setStatus(
+                OrderStatus.CONFIRMED.name()
+        );
+
+        orderRepository.save(order);
+        return true;
+    }
+
+    public Order getOrderEntityForPayment(long orderId) {
+        return orderRepository
+                .findByIdWithUserAndItems(orderId)
+                .orElseThrow(() ->
+                        new IllegalArgumentException(
+                                "Order not found."
+                        )
+                );
+    }
+
+    // Validate toàn bộ item trong giỏ trước checkout — trả list lỗi (rỗng = OK)
     public List<String> validateCartItemsForOrder(
-            Cart cart
+            Cart cart // Entity giỏ hàng đã refresh
     ) {
         List<String> errors =
-                new ArrayList<>();
+                new ArrayList<>(); // Gom mọi lỗi validation vào 1 list
 
         if (cart == null
                 || cart.getItems().isEmpty()) {
+            // Giỏ null hoặc không có dòng nào
 
             errors.add(
                     "The cart must contain at least one item."
             );
 
-            return errors;
+            return errors; // Trả sớm — không cần duyệt item
         }
 
         int validItemCount =
-                0;
+                0; // Đếm số dòng hợp lệ — phải >= 1 mới cho checkout
 
         for (CartItem item :
-                cart.getItems()) {
+                cart.getItems()) { // Duyệt từng dòng trong giỏ
 
             /*
              * ====================================================
-             * VALIDATE VPP
+             * VALIDATE VPP — văn phòng phẩm (book == null, vppItem != null)
              * ====================================================
              */
 
             if (item.getBook() == null
                     && item.getVppItem() != null) {
+                // Dòng này là VPP, không phải sách
 
                 VppItem vppItem =
                         vppItemRepository
                                 .findById(
                                         item
                                                 .getVppItem()
-                                                .getId()
+                                                .getId() // Load lại VPP từ DB — tránh stale data
                                 )
-                                .orElse(null);
+                                .orElse(null); // Không tìm thấy → null
 
                 if (vppItem == null) {
+                    // VPP đã bị xóa khỏi DB
 
                     errors.add(
                             "A stationery item in your cart no longer exists."
                     );
 
-                    continue;
+                    continue; // Sang item tiếp theo
                 }
 
                 if (vppItem.isDeleted()
                         || !vppItem.isActive()) {
+                    // Soft-delete hoặc admin tắt bán
 
                     errors.add(
                             "\""
@@ -916,10 +1199,11 @@ public class OrderService {
                 int availableStock =
                         stockService
                                 .getVppQuantity(
-                                        vppItem.getId()
+                                        vppItem.getId() // Tồn kho thực tế từ bảng stock
                                 );
 
                 if (availableStock <= 0) {
+                    // Hết hàng
 
                     errors.add(
                             "\""
@@ -933,6 +1217,7 @@ public class OrderService {
 
                 if (item.getQuantity()
                         > availableStock) {
+                    // User chọn số lượng > tồn kho
 
                     errors.add(
                             "\""
@@ -940,7 +1225,7 @@ public class OrderService {
                                     + "\" — "
                                     + String.format(
                                     CartService.MSG_EXCEED_STOCK,
-                                    availableStock
+                                    availableStock // VD "Only 3 left in stock."
                             )
                     );
 
@@ -950,6 +1235,7 @@ public class OrderService {
                 if (vppItem.getPrice() == null
                         || vppItem.getPrice()
                         .compareTo(BigDecimal.ZERO) < 0) {
+                    // Giá null hoặc âm — data lỗi
 
                     errors.add(
                             "\""
@@ -960,18 +1246,19 @@ public class OrderService {
                     continue;
                 }
 
-                validItemCount++;
+                validItemCount++; // Dòng VPP hợp lệ
 
-                continue;
+                continue; // Không xử lý nhánh sách bên dưới
             }
 
             /*
              * ====================================================
-             * VALIDATE BOOK
+             * VALIDATE BOOK — sách (book != null)
              * ====================================================
              */
 
             if (item.getBook() == null) {
+                // Không phải sách cũng không phải VPP — dòng giỏ lỗi
 
                 errors.add(
                         "An item in your cart is invalid."
@@ -985,11 +1272,12 @@ public class OrderService {
                             .findById(
                                     item
                                             .getBook()
-                                            .getId()
+                                            .getId() // Load lại Book từ DB
                             )
                             .orElse(null);
 
             if (book == null) {
+                // Sách đã bị xóa
 
                 errors.add(
                         "An item in your cart no longer exists."
@@ -999,6 +1287,7 @@ public class OrderService {
             }
 
             if (!book.isActive()) {
+                // Admin tắt bán sách
 
                 errors.add(
                         "\""
@@ -1012,7 +1301,7 @@ public class OrderService {
             int availableStock =
                     stockService
                             .getBookQuantity(
-                                    book.getId()
+                                    book.getId() // Tồn kho sách
                             );
 
             if (availableStock <= 0) {
@@ -1056,79 +1345,85 @@ public class OrderService {
                 continue;
             }
 
-            validItemCount++;
-        }
+            validItemCount++; // Dòng sách hợp lệ
+        } // end for
 
         if (validItemCount == 0) {
+            // Mọi dòng đều lỗi — không có item nào đặt được
 
             errors.add(
                     "The order must contain at least one valid item."
             );
         }
 
-        return errors;
+        return errors; // Rỗng = pass; có phần tử = fail với message cụ thể
     }
 
+    // Tạo CheckoutForm pre-fill từ thông tin user — OrderController GET checkout
     public CheckoutForm buildCheckoutFormFromUser(
-            User user
+            User user // Entity user đang đăng nhập
     ) {
         CheckoutForm form =
-                new CheckoutForm();
+                new CheckoutForm(); // Object form rỗng
 
-        if (user != null) {
+        if (user != null) { // Phòng null — thường user luôn có khi đã login
 
             form.setRecipientName(
-                    user.getFullName()
+                    user.getFullName() // Pre-fill tên người nhận = tên user
             );
 
             form.setRecipientPhone(
-                    user.getPhone()
+                    user.getPhone() // Có thể null nếu user chưa cập nhật profile
             );
 
             form.setShippingAddress(
-                    user.getAddress()
+                    user.getAddress() // Có thể null — user sửa trên form checkout
             );
         }
 
-        return form;
+        return form; // Trả về form để bind lên checkout.jsp
     }
 
+    // Format tổng tiền checkout để hiển thị trên view — subtotal trừ discount
     public String getCheckoutTotalFormatted(
-            BigDecimal subtotal,
-            BigDecimal discountAmount
+            BigDecimal subtotal,      // Tổng sau khuyến mãi
+            BigDecimal discountAmount // Giảm giá voucher
     ) {
         BigDecimal base =
                 subtotal == null
-                        ? BigDecimal.ZERO
+                        ? BigDecimal.ZERO // null → 0
                         : subtotal;
 
         BigDecimal discount =
                 discountAmount == null
-                        ? BigDecimal.ZERO
+                        ? BigDecimal.ZERO // Không có voucher → 0
                         : discountAmount;
 
         BigDecimal total =
                 base.subtract(
-                        discount
+                        discount // Tổng cuối = subtotal - voucher
                 );
 
         if (total.compareTo(
                 BigDecimal.ZERO
         ) < 0) {
+            // Voucher lớn hơn subtotal → không cho âm
             total =
                     BigDecimal.ZERO;
         }
 
         return formatMoney(
-                total
+                total // VD "150,000 đ" — method format có sẵn trong service
         );
     }
 
+    // Validate 1 dòng sách khi tạo đơn (active, tồn kho, giá) — throw nếu lỗi
     private void validateBookLine(
-            Book book,
-            int quantity
+            Book book,     // Entity sách từ DB
+            int quantity   // Số lượng user đặt
     ) {
         if (!book.isActive()) {
+            // Sách đã ngừng bán
 
             throw new IllegalArgumentException(
                     "\""
@@ -1137,9 +1432,7 @@ public class OrderService {
             );
         }
 
-        /*
-         * Đọc tồn kho từ bảng stock.
-         */
+        // Đọc tồn kho từ bảng stock (nguồn chính, không dùng book.stock cũ)
         int availableStock =
                 stockService
                         .getBookQuantity(
@@ -1147,6 +1440,7 @@ public class OrderService {
                         );
 
         if (availableStock <= 0) {
+            // Hết hàng tại thời điểm tạo đơn
 
             throw new IllegalArgumentException(
                     "\""
@@ -1157,6 +1451,7 @@ public class OrderService {
         }
 
         if (quantity > availableStock) {
+            // Race condition hoặc refresh chưa kịp — chặn vượt tồn
 
             throw new IllegalArgumentException(
                     "\""
@@ -1172,6 +1467,7 @@ public class OrderService {
         if (book.getPrice() == null
                 || book.getPrice()
                 .compareTo(BigDecimal.ZERO) < 0) {
+            // Giá không hợp lệ
 
             throw new IllegalArgumentException(
                     "\""
@@ -1179,14 +1475,17 @@ public class OrderService {
                             + "\" has an invalid selling price."
             );
         }
+        // Pass — không return gì (void)
     }
 
+    // Validate 1 dòng VPP khi tạo đơn — throw nếu lỗi
     private void validateVppLine(
-            VppItem item,
-            int quantity
+            VppItem item,  // Entity văn phòng phẩm
+            int quantity     // Số lượng đặt
     ) {
         if (item.isDeleted()
                 || !item.isActive()) {
+            // Đã xóa mềm hoặc inactive
 
             throw new IllegalArgumentException(
                     "\""
@@ -1195,13 +1494,10 @@ public class OrderService {
             );
         }
 
-        /*
-         * Đọc tồn kho từ bảng stock.
-         */
         int availableStock =
                 stockService
                         .getVppQuantity(
-                                item.getId()
+                                item.getId() // Tồn kho VPP
                         );
 
         if (availableStock <= 0) {
@@ -1239,24 +1535,28 @@ public class OrderService {
         }
     }
 
+    // Tính số tiền giảm từ voucher — dùng trong createOrderFromCart
     private BigDecimal resolveDiscount(
-            String voucherCode,
-            BigDecimal subtotal
+            String voucherCode,  // Mã voucher user nhập (có thể null/blank)
+            BigDecimal subtotal  // Tổng trước voucher (sau KM)
     ) {
         if (voucherCode == null
                 || voucherCode.isBlank()) {
+            // Không áp voucher
 
             return BigDecimal.ZERO;
         }
 
         return voucherService
                 .calculateDiscount(
-                        voucherCode,
-                        subtotal
+                        voucherCode, // Validate + tính % hoặc fixed amount
+                        subtotal     // Base amount để áp voucher
                 );
     }
 
+    // Sinh mã đơn unique: ORD-yyyyMMdd-xxxxxx, thử tối đa 20 lần
     private String generateUniqueOrderCode() {
+        // Phần ngày: vd 20260728
         String datePart =
                 LocalDateTime.now()
                         .format(
@@ -1266,10 +1566,12 @@ public class OrderService {
                                         )
                         );
 
+        // Thử tối đa 20 lần random suffix tránh trùng
         for (int attempt = 0;
              attempt < 20;
              attempt++) {
 
+            // Random 6 chữ số: 100000 .. 999998
             int suffix =
                     ThreadLocalRandom
                             .current()
@@ -1278,12 +1580,14 @@ public class OrderService {
                                     999999
                             );
 
+            // Ghép mã: ORD-20260728-384521
             String orderCode =
                     "ORD-"
                             + datePart
                             + "-"
                             + suffix;
 
+            // Kiểm tra unique trên bảng orders
             if (!orderRepository
                     .existsByOrderCode(
                             orderCode
@@ -1291,13 +1595,16 @@ public class OrderService {
 
                 return orderCode;
             }
+            // Trùng -> vòng lặp thử suffix khác
         }
 
+        // Hiếm — 20 lần đều trùng
         throw new IllegalStateException(
                 "A unique order code could not be generated. Please try again."
         );
     }
 
+    // Chuyển Order → OrderDTO tóm tắt — dùng trang danh sách GET /orders
     private OrderDTO toSummaryDTO(
             Order order
     ) {
@@ -1335,6 +1642,7 @@ public class OrderService {
         return dto;
     }
 
+    // Mở rộng toSummaryDTO — thêm items, địa chỉ, voucher (trang chi tiết)
     private OrderDTO toDetailDTO(
             Order order
     ) {
@@ -1347,6 +1655,10 @@ public class OrderService {
 
         dto.setShippingAddress(
                 order.getShippingAddress()
+        );
+
+        dto.setPaymentMethod(
+                order.getPaymentMethod()
         );
 
         dto.setPaymentMethodLabel(
@@ -1373,6 +1685,7 @@ public class OrderService {
                 order.getNote()
         );
 
+        // Thông tin customer — hiển thị trên admin/staff detail
         if (order.getUser() != null) {
 
             dto.setCustomerEmail(
@@ -1388,6 +1701,7 @@ public class OrderService {
             );
         }
 
+        // Map từng OrderItem entity -> OrderItemDTO
         dto.setItems(
                 order.getItems()
                         .stream()
@@ -1402,6 +1716,7 @@ public class OrderService {
         return dto;
     }
 
+    // Map 1 dòng sản phẩm sang DTO cho JSP
     private OrderItemDTO toOrderItemDTO(
             OrderItem item
     ) {
@@ -1441,6 +1756,7 @@ public class OrderService {
 
         if (item.getVppItem() != null) {
 
+            // DTO dùng chung field bookId cho VPP id
             dto.setBookId(
                     item
                             .getVppItem()
@@ -1459,6 +1775,7 @@ public class OrderService {
         return dto;
     }
 
+    /** Chuỗi rỗng -> null để DB không lưu "" */
     private String blankToNull(
             String value
     ) {
@@ -1471,6 +1788,7 @@ public class OrderService {
         return value.trim();
     }
 
+    // Format tiền VND kiểu Đức (1.234.567) — OrderController dùng cho preview checkout
     public String formatMoney(
             BigDecimal amount
     ) {
@@ -1487,10 +1805,12 @@ public class OrderService {
                 );
     }
 
+    /** Tổng số đơn — AdminDashboard */
     public long countAllOrders() {
         return orderRepository.count();
     }
 
+    /** Số đơn của 1 user — profile hoặc thống kê */
     public long countOrdersByUser(
             long userId
     ) {

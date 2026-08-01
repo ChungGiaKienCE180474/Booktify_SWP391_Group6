@@ -1,3 +1,4 @@
+// Controller giỏ hàng — quản lý thêm/sửa/xóa item, chọn KM, validate trước checkout
 package shop.controller.client;
 
 import java.math.BigDecimal;
@@ -6,7 +7,9 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+// ResponseEntity: trả JSON cho request AJAX (thêm giỏ không reload trang)
 import org.springframework.http.ResponseEntity;
+// Authentication: thông tin user đã đăng nhập từ Spring Security
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -31,19 +34,31 @@ import shop.service.PromotionService;
 import shop.service.UserService;
 import shop.service.VoucherService;
 
+// @Controller + prefix /cart — yêu cầu đăng nhập (SecurityConfiguration)
+// Luồng order: viewCart → chọn KM → POST /cart/validate → redirect /orders/checkout
 @Controller
 @RequestMapping("/cart")
 public class CartController {
 
+    /**
+     * Key HttpSession lưu lựa chọn khuyến mãi từng sách (Map bookId → PERCENTAGE|FIXED|NONE).
+     * OrderController đọc key này khi checkout qua applyCartPromotionSelections().
+     */
     public static final String PROMOTION_SESSION_KEY =
             "cartPromotionSelections";
 
+    // Service thao tác giỏ: add, update, remove, refresh, validate...
     private final CartService cartService;
+    // Service lấy User theo email
     private final UserService userService;
+    // Service voucher — hiển thị danh sách voucher active trên trang giỏ
     private final VoucherService voucherService;
+    // Service khuyến mãi — tính giá theo lựa chọn PERCENTAGE/FIXED/NONE
     private final PromotionService promotionService;
+    // Dùng formatMoney() và validate liên quan order/checkout
     private final OrderService orderService;
 
+    // Constructor injection — Spring tự inject 5 service
     public CartController(
             CartService cartService,
             UserService userService,
@@ -58,43 +73,53 @@ public class CartController {
         this.orderService = orderService;
     }
 
+    // =========================================================
+    // XEM GIỎ HÀNG
+    // =========================================================
+
+    // GET /cart — hiển thị trang giỏ hàng với giá, KM, tổng tiền
     @GetMapping
     public String viewCart(
-            Authentication authentication,
-            Model model,
-            HttpSession session) {
+            Authentication authentication, // User đăng nhập
+            Model model,                   // Truyền data sang cart/index.jsp
+            HttpSession session) {         // Đọc lựa chọn KM đã lưu
 
-        User user = getCurrentUser(authentication);
+        User user = getCurrentUser(authentication); // Email → User entity
 
+        // Refresh giỏ: cập nhật giá, xóa sản phẩm inactive/hết hàng, thu thập warnings
         CartRefreshResult refreshResult =
                 cartService.refreshCartResult(user.getId());
 
-        Cart cart = refreshResult.getCart();
+        Cart cart = refreshResult.getCart(); // Entity Cart sau refresh
 
+        // CartDTO để JSP hiển thị (format tiền, tên sách, ảnh...)
         model.addAttribute(
                 "cart",
                 cartService.toCartDTO(cart)
         );
 
+        // Map bookId → promotion giảm theo % (để hiển thị option trên UI)
         Map<Long, Promotion> percentagePromotionMap =
                 new HashMap<>();
 
+        // Map bookId → promotion giảm số tiền cố định
         Map<Long, Promotion> fixedPromotionMap =
                 new HashMap<>();
 
         if (cart != null && cart.getItems() != null) {
-            cart.getItems().forEach(cartItem -> {
+            cart.getItems().forEach(cartItem -> { // Duyệt từng dòng giỏ
 
-                Book book = cartItem.getBook();
+                Book book = cartItem.getBook(); // Chỉ sách mới có KM per-item
 
                 if (book == null || book.getId() == null) {
-                    return;
+                    return; // VPP hoặc dòng lỗi — bỏ qua
                 }
 
+                // Tìm KM % đang active cho sách này
                 promotionService
                         .getActivePromotionForBookByType(
                                 book,
-                                true
+                                true // true = percentage promotion
                         )
                         .ifPresent(promotion ->
                                 percentagePromotionMap.put(
@@ -103,10 +128,11 @@ public class CartController {
                                 )
                         );
 
+                // Tìm KM fixed amount đang active
                 promotionService
                         .getActivePromotionForBookByType(
                                 book,
-                                false
+                                false // false = fixed amount promotion
                         )
                         .ifPresent(promotion ->
                                 fixedPromotionMap.put(
@@ -117,17 +143,21 @@ public class CartController {
             });
         }
 
+        // Map bookId → "PERCENTAGE"|"FIXED"|"NONE" — đọc từ session
         Map<Long, String> selectedPromotionMap =
                 getPromotionSelections(session);
 
+        // Xóa selection của sách đã bị remove khỏi giỏ
         removeSelectionsNotInCart(
                 cart,
                 selectedPromotionMap
         );
 
+        // Map cartItemId → đơn giá đã format theo KM user chọn
         Map<Long, String> selectedUnitPriceMap =
                 new HashMap<>();
 
+        // Map cartItemId → thành tiền dòng (đơn giá × số lượng) đã format
         Map<Long, String> selectedSubtotalMap =
                 new HashMap<>();
 
@@ -140,6 +170,7 @@ public class CartController {
                     return;
                 }
 
+                // Parse lựa chọn KM từ session — mặc định NONE nếu chưa chọn
                 PromotionSelection selection =
                         PromotionSelection.fromValue(
                                 selectedPromotionMap.get(
@@ -147,12 +178,14 @@ public class CartController {
                                 )
                         );
 
+                // Giá bán sau khi áp KM (PERCENTAGE/FIXED/NONE)
                 BigDecimal effectivePrice =
                         promotionService.getPriceForSelection(
                                 book,
                                 selection
                         );
 
+                // Thành tiền dòng = giá × số lượng
                 BigDecimal lineTotal =
                         effectivePrice.multiply(
                                 BigDecimal.valueOf(
@@ -160,6 +193,7 @@ public class CartController {
                                 )
                         );
 
+                // Key = cartItem.getId() (ID dòng giỏ, không phải bookId)
                 selectedUnitPriceMap.put(
                         cartItem.getId(),
                         orderService.formatMoney(
@@ -176,6 +210,7 @@ public class CartController {
             });
         }
 
+        // Tổng gốc trước khuyến mãi (sum giá gốc × quantity)
         BigDecimal originalSubtotal =
                 safeAmount(
                         cart == null
@@ -183,6 +218,7 @@ public class CartController {
                                 : cart.getTotalAmount()
                 );
 
+        // Tổng sau khi áp KM theo lựa chọn từng sách
         BigDecimal promotionSubtotal =
                 promotionService
                         .calculateCartTotalBySelections(
@@ -190,11 +226,13 @@ public class CartController {
                                 selectedPromotionMap
                         );
 
+        // Số tiền giảm từ KM = gốc - sau KM (không âm)
         BigDecimal promotionDiscount =
                 originalSubtotal
                         .subtract(promotionSubtotal)
                         .max(BigDecimal.ZERO);
 
+        // Đưa các map và tổng tiền đã format vào model cho JSP
         model.addAttribute(
                 "percentagePromotionMap",
                 percentagePromotionMap
@@ -241,11 +279,13 @@ public class CartController {
                 )
         );
 
+        // Danh sách voucher đang active — hiển thị gợi ý trên trang giỏ
         model.addAttribute(
                 "activeVouchers",
                 voucherService.getActiveVouchers()
         );
 
+        // Hiển thị cảnh báo refresh (VD: sách hết hàng đã bị xóa khỏi giỏ)
         if (refreshResult.hasWarnings()
                 && !model.containsAttribute(
                 "warningMessage"
@@ -260,35 +300,42 @@ public class CartController {
             );
         }
 
-        return "cart/index";
+        return "cart/index"; // WEB-INF/view/cart/index.jsp
     }
 
+    // =========================================================
+    // THÊM SÁCH VÀO GIỎ
+    // =========================================================
+
+    // POST /cart/add — thêm sách vào giỏ (form hoặc AJAX)
     @PostMapping("/add")
     public Object addToCart(
             Authentication authentication,
-            @RequestParam Long bookId,
+            @RequestParam Long bookId,              // ID sách cần thêm
             @RequestParam(required = false)
-            String quantity,
+            String quantity,                        // Số lượng — mặc định "1" nếu null
             @RequestParam(required = false)
-            String redirect,
-            HttpServletRequest request,
-            RedirectAttributes redirectAttributes) {
+            String redirect,                        // URL redirect tùy chọn sau khi thêm
+            HttpServletRequest request,             // Kiểm tra AJAX qua header
+            RedirectAttributes redirectAttributes) {  // Flash message khi redirect
 
         User user =
                 getCurrentUser(authentication);
 
+        // Parse quantity — phải là số nguyên dương
         Integer parsedQuantity =
                 cartService.parsePositiveIntegerQuantity(
                         quantity != null
                                 ? quantity
-                                : "1"
+                                : "1" // Mặc định thêm 1 cuốn
                 );
 
         if (parsedQuantity == null) {
+            // Số lượng không hợp lệ (âm, 0, không phải số)
             return handleAddResponse(
                     request,
                     redirectAttributes,
-                    false,
+                    false, // success = false
                     CartService.MSG_QUANTITY_INVALID,
                     user,
                     redirectAfterAdd(
@@ -299,6 +346,7 @@ public class CartController {
         }
 
         try {
+            // Gọi service: kiểm tra tồn kho, merge nếu sách đã có trong giỏ
             cartService.addBook(
                     user.getId(),
                     bookId,
@@ -318,6 +366,7 @@ public class CartController {
             );
 
         } catch (IllegalArgumentException exception) {
+            // VD: hết hàng, sách inactive, vượt stock
             return handleAddResponse(
                     request,
                     redirectAttributes,
@@ -332,10 +381,15 @@ public class CartController {
         }
     }
 
+    // =========================================================
+    // THÊM VPP VÀO GIỎ
+    // =========================================================
+
+    // POST /cart/add-vpp — thêm văn phòng phẩm vào giỏ
     @PostMapping("/add-vpp")
     public Object addVppToCart(
             Authentication authentication,
-            @RequestParam Long vppItemId,
+            @RequestParam Long vppItemId,           // ID sản phẩm VPP
             @RequestParam(required = false)
             String quantity,
             @RequestParam(required = false)
@@ -398,10 +452,15 @@ public class CartController {
         }
     }
 
+    // =========================================================
+    // CẬP NHẬT / XÓA / XÓA HẾT GIỎ
+    // =========================================================
+
+    // POST /cart/update — đổi số lượng 1 dòng giỏ
     @PostMapping("/update")
     public String updateQuantity(
             Authentication authentication,
-            @RequestParam Long itemId,
+            @RequestParam Long itemId,              // ID dòng cart_items (không phải bookId)
             @RequestParam(required = false)
             String quantity,
             RedirectAttributes redirectAttributes) {
@@ -442,13 +501,14 @@ public class CartController {
             );
         }
 
-        return "redirect:/cart";
+        return "redirect:/cart"; // PRG — luôn redirect sau POST
     }
 
+    // POST /cart/remove — xóa 1 dòng khỏi giỏ
     @PostMapping("/remove")
     public String removeItem(
             Authentication authentication,
-            @RequestParam Long itemId,
+            @RequestParam Long itemId,              // ID dòng cart_items
             RedirectAttributes redirectAttributes) {
 
         User user =
@@ -475,6 +535,7 @@ public class CartController {
         return "redirect:/cart";
     }
 
+    // POST /cart/clear — xóa toàn bộ giỏ + xóa KM trong session
     @PostMapping("/clear")
     public String clearCart(
             Authentication authentication,
@@ -488,6 +549,7 @@ public class CartController {
                 user.getId()
         );
 
+        // Xóa lựa chọn KM — tránh dùng selection cũ khi thêm sách mới
         session.removeAttribute(
                 PROMOTION_SESSION_KEY
         );
@@ -500,17 +562,26 @@ public class CartController {
         return "redirect:/cart";
     }
 
+    // =========================================================
+    // KHUYẾN MÃI
+    // =========================================================
+
+    /**
+     * POST /cart/promotion — user chọn KM (% hoặc fixed) cho 1 sách trong giỏ.
+     * Lưu vào session để OrderController mang sang checkout.
+     */
     @PostMapping("/promotion")
     public String updatePromotion(
             Authentication authentication,
-            @RequestParam Long bookId,
-            @RequestParam String selection,
+            @RequestParam Long bookId,      // Sách cần áp/bỏ KM
+            @RequestParam String selection, // "PERCENTAGE" | "FIXED" | "NONE"
             HttpSession session,
             RedirectAttributes redirectAttributes) {
 
         User user =
                 getCurrentUser(authentication);
 
+        // Refresh giỏ trước khi kiểm tra sách còn trong giỏ không
         Cart cart =
                 cartService
                         .refreshCartResult(
@@ -518,6 +589,7 @@ public class CartController {
                         )
                         .getCart();
 
+        // Chỉ cho áp KM nếu bookId thật sự có trong giỏ
         boolean bookExistsInCart =
                 cart != null
                         && cart.getItems() != null
@@ -540,21 +612,25 @@ public class CartController {
             return "redirect:/cart";
         }
 
+        // Parse "PERCENTAGE" / "FIXED" / "NONE" từ form
         PromotionSelection selected =
                 PromotionSelection.fromValue(
                         selection
                 );
 
+        // Lấy map hiện tại từ session (hoặc tạo map rỗng mới)
         Map<Long, String> selections =
                 getPromotionSelections(
                         session
                 );
 
+        // Ghi lựa chọn KM cho bookId
         selections.put(
                 bookId,
                 selected.name()
         );
 
+        // Lưu lại session — OrderController đọc khi POST /orders/checkout
         session.setAttribute(
                 PROMOTION_SESSION_KEY,
                 selections
@@ -570,51 +646,68 @@ public class CartController {
         return "redirect:/cart";
     }
 
+    // =========================================================
+    // VALIDATE TRƯỚC CHECKOUT
+    // =========================================================
+
+    /**
+     * POST /cart/validate — kiểm tra giỏ hợp lệ rồi chuyển sang trang checkout.
+     * Bước bắt buộc trước GET /orders/checkout.
+     */
     @PostMapping("/validate")
     public String validateCheckout(
-            Authentication authentication,
-            RedirectAttributes redirectAttributes) {
+            Authentication authentication, // User đã login từ Spring Security
+            RedirectAttributes redirectAttributes) { // Flash message sau redirect
 
         User user =
-                getCurrentUser(authentication);
+                getCurrentUser(authentication); // Lấy User entity từ email trong Authentication
 
+        // Đồng bộ giỏ với DB: cập nhật giá, xóa sản phẩm inactive/hết hàng
         cartService.refreshCart(
-                user.getId()
+                user.getId() // PK user → tìm cart của user đó
         );
 
+        // Validate nghiệp vụ: stock, active, giá... — trả List lỗi (rỗng nếu OK)
         List<String> errors =
                 cartService.validateForCheckout(
                         user.getId()
                 );
 
-        if (!errors.isEmpty()) {
+        if (!errors.isEmpty()) { // Còn lỗi → không cho sang checkout
             redirectAttributes.addFlashAttribute(
-                    "errorMessage",
+                    "errorMessage", // Key hiển thị trên trang cart
                     String.join(
-                            " ",
+                            " ",  // Nối nhiều lỗi thành 1 chuỗi
                             errors
                     )
             );
 
-            return "redirect:/cart";
+            return "redirect:/cart"; // Ở lại trang giỏ hàng
         }
 
+        // Giỏ hợp lệ → chuyển sang OrderController.checkoutForm (GET /orders/checkout)
         return "redirect:/orders/checkout";
     }
 
+    // =========================================================
+    // HELPER — REDIRECT SAU KHI THÊM GIỎ
+    // =========================================================
+
+    // Xác định URL redirect sau khi thêm sách — ưu tiên param redirect nếu có
     private String redirectAfterAdd(
-            Long bookId,
+            Long bookId,    // Fallback: quay về trang chi tiết sách
             String redirect) {
 
         if (redirect != null
                 && !redirect.isBlank()) {
 
-            return "redirect:" + redirect;
+            return "redirect:" + redirect; // VD redirect=/cart
         }
 
-        return "redirect:/books/" + bookId;
+        return "redirect:/books/" + bookId; // Mặc định: trang chi tiết sách vừa thêm
     }
 
+    // Xác định URL redirect sau khi thêm VPP
     private String redirectAfterAddVpp(
             String redirect) {
 
@@ -624,18 +717,24 @@ public class CartController {
             return "redirect:" + redirect;
         }
 
-        return "redirect:/customer/vpp";
+        return "redirect:/customer/vpp"; // Mặc định: trang danh sách VPP
     }
 
+    // =========================================================
+    // HELPER — RESPONSE THÊM GIỎ (FORM vs AJAX)
+    // =========================================================
+
+    // Trả JSON nếu AJAX, hoặc redirect + flash message nếu form submit thường
     private Object handleAddResponse(
             HttpServletRequest request,
             RedirectAttributes redirectAttributes,
-            boolean success,
-            String message,
-            User user,
-            String redirectTarget) {
+            boolean success,        // true = thêm thành công
+            String message,         // Nội dung thông báo
+            User user,              // Cần userId để đếm số item trong giỏ (JSON)
+            String redirectTarget) { // Chuỗi "redirect:..." khi không phải AJAX
 
         if (isAjaxRequest(request)) {
+            // Frontend gửi X-Requested-With: XMLHttpRequest → trả JSON
             return cartAddJsonResponse(
                     success,
                     message,
@@ -643,6 +742,7 @@ public class CartController {
             );
         }
 
+        // Form submit thường → flash message + redirect
         if (success) {
             redirectAttributes.addFlashAttribute(
                     "cartSuccessMessage",
@@ -659,6 +759,7 @@ public class CartController {
         return redirectTarget;
     }
 
+    // Build JSON body cho AJAX add-to-cart — cập nhật badge số item trên header
     private ResponseEntity<Map<String, Object>>
     cartAddJsonResponse(
             boolean success,
@@ -666,7 +767,7 @@ public class CartController {
             long userId) {
 
         Map<String, Object> body =
-                new LinkedHashMap<>();
+                new LinkedHashMap<>(); // Giữ thứ tự key khi serialize JSON
 
         body.put(
                 "success",
@@ -681,19 +782,20 @@ public class CartController {
         body.put(
                 "cartItemCount",
                 cartService.getCartItemCount(
-                        userId
+                        userId // Tổng số dòng trong giỏ — hiển thị icon giỏ
                 )
         );
 
         return ResponseEntity
                 .status(
                         success
-                                ? 200
-                                : 400
+                                ? 200  // OK
+                                : 400  // Bad Request — lỗi nghiệp vụ
                 )
                 .body(body);
     }
 
+    // Kiểm tra request có phải AJAX không — convention jQuery/fetch
     private boolean isAjaxRequest(
             HttpServletRequest request) {
 
@@ -704,7 +806,12 @@ public class CartController {
         );
     }
 
-    @SuppressWarnings("unchecked")
+    // =========================================================
+    // HELPER — SESSION KHUYẾN MÃI
+    // =========================================================
+
+    // Đọc map lựa chọn KM từ session — tạo map mới nếu chưa có
+    @SuppressWarnings("unchecked") // Cast Map từ session — kiểm tra instanceof trước
     private Map<Long, String>
     getPromotionSelections(
             HttpSession session) {
@@ -715,9 +822,10 @@ public class CartController {
                 );
 
         if (value instanceof Map<?, ?>) {
-            return (Map<Long, String>) value;
+            return (Map<Long, String>) value; // Trả map đã lưu — sửa trực tiếp cũng cập nhật session
         }
 
+        // Lần đầu: tạo map rỗng và gắn vào session
         Map<Long, String> selections =
                 new HashMap<>();
 
@@ -729,6 +837,7 @@ public class CartController {
         return selections;
     }
 
+    // Dọn selection của sách không còn trong giỏ — tránh map session phình ra
     private void removeSelectionsNotInCart(
             Cart cart,
             Map<Long, String> selections) {
@@ -736,16 +845,17 @@ public class CartController {
         if (selections == null
                 || selections.isEmpty()) {
 
-            return;
+            return; // Không có gì để dọn
         }
 
         if (cart == null
                 || cart.getItems() == null) {
 
-            selections.clear();
+            selections.clear(); // Giỏ rỗng → xóa hết selection
             return;
         }
 
+        // Xóa key bookId nếu không còn dòng sách tương ứng trong giỏ
         selections.keySet()
                 .removeIf(bookId ->
                         cart.getItems()
@@ -760,6 +870,11 @@ public class CartController {
                 );
     }
 
+    // =========================================================
+    // HELPER — TIỆN ÍCH
+    // =========================================================
+
+    // Coalesce null BigDecimal → ZERO — tránh NPE khi tính tổng
     private BigDecimal safeAmount(
             BigDecimal amount) {
 
@@ -768,12 +883,13 @@ public class CartController {
                 : amount;
     }
 
+    // Lấy User entity từ Authentication — dùng chung mọi endpoint /cart
     private User getCurrentUser(
             Authentication authentication) {
 
         if (authentication == null
                 || !authentication.isAuthenticated()) {
-
+            // Chưa login — SecurityConfiguration thường chặn trước, đây là lớp phòng thủ
             throw new IllegalStateException(
                     "You need to log in to use the cart."
             );
@@ -781,15 +897,16 @@ public class CartController {
 
         User user =
                 userService.getUserByEmail(
-                        authentication.getName()
+                        authentication.getName() // getName() = email (CustomUserDetailsService)
                 );
 
         if (user == null) {
+            // Email trong session không còn trong DB
             throw new IllegalStateException(
                     "User not found."
             );
         }
 
-        return user;
+        return user; // Entity User đầy đủ từ bảng users
     }
 }

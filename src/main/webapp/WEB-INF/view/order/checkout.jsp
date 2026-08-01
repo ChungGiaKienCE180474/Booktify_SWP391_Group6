@@ -34,7 +34,7 @@
 
     <link
         rel="stylesheet"
-        href="/css/order.css?v=6" />
+        href="/css/order.css?v=7" />
 
     <link
         rel="stylesheet"
@@ -177,14 +177,39 @@
 
                     <%-- Payment --%>
 
-                    <div class="order-field order-field--info">
+                    <div class="order-field">
 
                         <label>Payment</label>
 
-                        <p class="order-static-value">
-                            <i class="fa-solid fa-money-bill-wave"></i>
-                            ${paymentLabel}
-                        </p>
+                        <div class="order-payment-options">
+                            <label class="order-payment-option">
+                                <input
+                                    type="radio"
+                                    name="paymentMethod"
+                                    value="COD"
+                                    ${checkoutForm.paymentMethod == 'VNPAY' ? '' : 'checked="checked"'} />
+                                <span>
+                                    <i class="fa-solid fa-money-bill-wave"></i>
+                                    Cash on delivery (COD)
+                                </span>
+                            </label>
+
+                            <label class="order-payment-option">
+                                <input
+                                    type="radio"
+                                    name="paymentMethod"
+                                    value="VNPAY"
+                                    ${checkoutForm.paymentMethod == 'VNPAY' ? 'checked="checked"' : ''} />
+                                <span>
+                                    <i class="fa-solid fa-credit-card"></i>
+                                    VNPay online payment
+                                </span>
+                            </label>
+                        </div>
+
+                        <form:errors
+                            path="paymentMethod"
+                            cssClass="order-error" />
 
                     </div>
 
@@ -369,19 +394,3 @@
 
 </body>
 </html>
-
-
-
-
-
-
-:root {
-    --cart-primary: #006B5E;
-    --cart-text: #1a1a2e;
-    --cart-muted: #64748b;
-    --cart-border: #e2e8f0;
-    --cart-white: #ffffff;
-    --cart-radius: 12px;
-    --cart-shadow: 0 4px 24px rgba(0, 107, 94, 0.08);
-}
-

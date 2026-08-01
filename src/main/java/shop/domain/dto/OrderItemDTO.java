@@ -1,11 +1,20 @@
 package shop.domain.dto;
 
+/**
+ * DTO một dòng sản phẩm trong đơn — map từ {@link shop.domain.OrderItem}.
+ * <p>
+ * bookId dùng cho cả sách và VPP (VPP dùng vppItem.id).
+ * bookImageUrl: URL ảnh sách hoặc /uploads/vpp/{id}/image cho VPP.
+ */
 public class OrderItemDTO {
 
+    /** ID sách hoặc VPP — dùng link chi tiết sản phẩm trên view */
     private Long bookId;
+    /** Tên snapshot tại thời điểm đặt hàng */
     private String bookTitle;
     private String bookImageUrl;
     private int quantity;
+    /** Giá đơn vị và thành tiền dòng — đã format VND */
     private String unitPriceFormatted;
     private String lineTotalFormatted;
 

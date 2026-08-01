@@ -7,8 +7,15 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
+/**
+ * Form dữ liệu checkout — bind từ trang order/checkout.jsp.
+ * <p>
+ * Submit qua POST /orders/checkout ({@link shop.controller.client.OrderController#placeOrder}).
+ * Bean Validation chạy với @Valid trước khi OrderService.createOrderFromCart().
+ */
 public class CheckoutForm {
 
+    /** Tên người nhận hàng — @NotBlank khi submit checkout */
     @NotBlank(message = "Please enter the recipient's name.")
     @Size(
             max = 150,
@@ -16,6 +23,7 @@ public class CheckoutForm {
     )
     private String recipientName;
 
+    /** SĐT VN 10 số, bắt đầu 03/05/07/08/09 */
     @NotBlank(message = "Please enter a phone number.")
     @Pattern(
             regexp = "^(0[35789])[0-9]{8}$",
@@ -23,6 +31,7 @@ public class CheckoutForm {
     )
     private String recipientPhone;
 
+    /** Địa chỉ giao hàng đầy đủ */
     @NotBlank(message = "Shipping address must not be empty.")
     @Size(
             max = 500,
@@ -30,17 +39,22 @@ public class CheckoutForm {
     )
     private String shippingAddress;
 
+    /** Mã giảm giá tùy chọn — validate trong OrderService.validateCheckoutForm */
     @Size(
             max = 50,
             message = "Voucher code must be at most 50 characters."
     )
     private String voucherCode;
 
+    /** Ghi chú giao hàng tùy chọn */
     @Size(
             max = 500,
             message = "Note must be at most 500 characters."
     )
     private String note;
+
+    /** Phương thức thanh toán — COD hoặc VNPAY */
+    private String paymentMethod = PaymentMethod.COD.name();
 
     /*
      * Lưu promotion được chọn cho từng sách.
@@ -101,6 +115,21 @@ public class CheckoutForm {
     public void setNote(
             String note) {
         this.note = note;
+    }
+
+    public String getPaymentMethod() {
+        return paymentMethod;
+    }
+
+    public void setPaymentMethod(String paymentMethod) {
+        this.paymentMethod = paymentMethod;
+    }
+
+    public PaymentMethod resolvePaymentMethod() {
+        if (PaymentMethod.isValid(paymentMethod)) {
+            return PaymentMethod.valueOf(paymentMethod);
+        }
+        return PaymentMethod.COD;
     }
 
     public Map<Long, String>
