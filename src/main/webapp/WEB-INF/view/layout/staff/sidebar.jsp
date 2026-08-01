@@ -52,11 +52,6 @@
                             <span>Suppliers</span>
                         </a>
 
-                        <a href="${ctx}/staff/vpp" class="admin-sidebar__item ${fn:contains(uri, '/staff/vpp') ? 'active' : ''}">
-                            <i class="fa-solid fa-pen-ruler"></i>
-                            <span>Stationery</span>
-                        </a>
-
                         <a href="${ctx}/staff/contact" class="admin-sidebar__item ${fn:contains(uri, '/staff/contact') ? 'active' : ''}">
                             <i class="fa-solid fa-headset"></i>
                             <span>Contact Requests</span>
