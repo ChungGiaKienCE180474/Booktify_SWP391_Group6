@@ -1318,3 +1318,89 @@
     color: #9CA3AF;
     padding: 6px 4px;
 }
+
+/* Book-set detail only — do not alter product-card / books list */
+.set-include-list {
+    list-style: none;
+    margin: 0 0 1.25rem;
+    padding: 0;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: #fff;
+    overflow: hidden;
+}
+
+.set-include-list li + li {
+    border-top: 1px solid var(--border);
+}
+
+.set-include-row {
+    display: grid;
+    grid-template-columns: 44px 1fr auto;
+    gap: .75rem;
+    align-items: center;
+    padding: .65rem .85rem;
+    text-decoration: none;
+    color: inherit;
+    transition: background .12s;
+}
+
+.set-include-row:hover {
+    background: rgba(0, 107, 94, .05);
+}
+
+.set-include-thumb {
+    width: 44px;
+    height: 56px;
+    border-radius: 6px;
+    overflow: hidden;
+    background: linear-gradient(135deg, #ECEFF1, #CFD8DC);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #90A4AE;
+    flex-shrink: 0;
+}
+
+.set-include-thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.set-include-thumb i {
+    font-size: 1rem;
+}
+
+.set-include-main {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: .15rem;
+}
+
+.set-include-title {
+    font-size: .9rem;
+    font-weight: 700;
+    color: var(--text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.set-include-row:hover .set-include-title {
+    color: var(--primary);
+}
+
+.set-include-meta {
+    font-size: .75rem;
+    color: var(--text-muted);
+}
+
+.set-include-price {
+    font-size: .85rem;
+    font-weight: 800;
+    color: var(--accent-warm, #F57C00);
+    white-space: nowrap;
+}

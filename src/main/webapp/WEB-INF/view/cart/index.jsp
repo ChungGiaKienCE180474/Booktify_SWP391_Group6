@@ -186,12 +186,23 @@
 
                                             <div class="cart-book__info">
 
-                                                <a
-                                                    href="/books/${item.bookId}"
-                                                    class="cart-book__title">
-
-                                                    <c:out value="${item.bookTitle}"/>
-                                                </a>
+                                                <c:choose>
+                                                    <c:when test="${item.setItem}">
+                                                        <a href="/book-sets/${item.bookSetId}" class="cart-book__title">
+                                                            <c:out value="${item.bookTitle}"/>
+                                                        </a>
+                                                    </c:when>
+                                                    <c:otherwise>
+                                                        <a href="/books/${item.bookId}" class="cart-book__title">
+                                                            <c:out value="${item.bookTitle}"/>
+                                                        </a>
+                                                    </c:otherwise>
+                                                </c:choose>
+                                                <c:if test="${item.setItem}">
+                                                    <div class="cart-book__author" style="color:#0f766e;">
+                                                        <i class="fa-solid fa-layer-group"></i> Book set
+                                                    </div>
+                                                </c:if>
 
                                                 <div class="cart-book__author">
                                                     <c:out value="${item.bookAuthor}"/>
@@ -301,6 +312,12 @@
 
                                     <td class="col-promotion">
 
+                                        <c:if test="${item.setItem}">
+                                            <span style="color:#6b7280;font-size:.85rem;">Set price</span>
+                                        </c:if>
+
+                                        <c:if test="${!item.setItem}">
+
                                         <c:set
                                             var="percentagePromotion"
                                             value="${percentagePromotionMap[item.bookId]}"/>
@@ -406,6 +423,8 @@
                                             </c:otherwise>
 
                                         </c:choose>
+
+                                        </c:if>
 
                                     </td>
 

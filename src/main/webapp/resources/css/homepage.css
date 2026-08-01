@@ -13,6 +13,12 @@ body.home-page {
 }
 .main-content { min-height: calc(100vh - 260px); }
 
+/* Keep footer from floating up on short pages without changing card layout */
+.shop-wrap,
+.author-wrap {
+    min-height: calc(100vh - 340px);
+}
+
 /* ── BANNER ──────────────────────────────────────────── */
 .banner {
     background: linear-gradient(135deg, var(--primary) 0%, #00897B 50%, #00ACC1 100%);

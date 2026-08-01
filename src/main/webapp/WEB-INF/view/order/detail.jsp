@@ -61,6 +61,12 @@
                                             </div>
                                             <div class="cart-book__info">
                                                 <a href="/books/${item.bookId}" class="cart-book__title">${item.bookTitle}</a>
+                                                <c:if test="${not empty item.bookSetName}">
+                                                    <div class="cart-book__author" style="color:#0f766e;">
+                                                        <i class="fa-solid fa-layer-group"></i>
+                                                        From set: <c:out value="${item.bookSetName}"/>
+                                                    </div>
+                                                </c:if>
                                             </div>
                                         </div>
                                     </td>

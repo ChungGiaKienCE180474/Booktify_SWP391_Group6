@@ -8,8 +8,10 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.EnumSet;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
@@ -20,6 +22,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import shop.domain.Book;
+import shop.domain.BookSet;
+import shop.domain.BookSetItem;
 import shop.domain.Cart;
 import shop.domain.CartItem;
 import shop.domain.CheckoutForm;
@@ -61,6 +65,7 @@ public class OrderService {
     private final PromotionService promotionService;
     /** Giảm/hoàn tồn kho khi tạo/hủy đơn */
     private final StockService stockService;
+    private final BookSetService bookSetService;
 
     // Inject các repository và service phụ thuộc
     public OrderService(
@@ -70,7 +75,8 @@ public class OrderService {
             UserRepository userRepository,
             VoucherService voucherService,
             PromotionService promotionService,
-            StockService stockService
+            StockService stockService,
+            BookSetService bookSetService
     ) {
         this.orderRepository = orderRepository;       // CRUD bảng orders
         this.bookRepository = bookRepository;         // Load sách khi tạo OrderItem
@@ -79,6 +85,7 @@ public class OrderService {
         this.voucherService = voucherService;         // Validate + tính voucher
         this.promotionService = promotionService;     // Giá sau KM từng sách
         this.stockService = stockService;             // Trừ/hoàn tồn kho
+        this.bookSetService = bookSetService;
     }
 
     // Lấy danh sách đơn hàng của user — OrderController GET /orders
@@ -463,17 +470,70 @@ public class OrderService {
         BigDecimal subtotal =
                 BigDecimal.ZERO;
 
+        // Validate tồn kho gộp (sách lẻ + thành phần bộ) trước khi tạo dòng đơn
+        validateAggregatedBookDemand(cart);
+
         // Duyệt từng item trong giỏ để tạo OrderItem
         for (CartItem cartItem :
                 cart.getItems()) {
 
+            if (cartItem.getBookSet() != null) {
+                BookSet bookSet = bookSetService.getByIdWithItems(
+                        cartItem.getBookSet().getId()
+                );
+                if (!bookSet.isActive()) {
+                    throw new IllegalArgumentException(
+                            "\"" + bookSet.getName() + "\" is no longer available."
+                    );
+                }
+
+                int availableSets = bookSetService.getAvailableSetQuantity(bookSet);
+                if (cartItem.getQuantity() > availableSets) {
+                    throw new IllegalArgumentException(
+                            "\"" + bookSet.getName() + "\" — "
+                                    + String.format(
+                                    CartService.MSG_EXCEED_STOCK,
+                                    availableSets
+                            )
+                    );
+                }
+
+                Map<Long, BigDecimal> unitPrices =
+                        bookSetService.allocateUnitPrices(bookSet);
+
+                for (BookSetItem setItem : bookSet.getItems()) {
+                    Book book = setItem.getBook();
+                    int lineQty = cartItem.getQuantity() * setItem.getQuantity();
+                    BigDecimal unitPrice = unitPrices.getOrDefault(
+                            book.getId(),
+                            BigDecimal.ZERO
+                    );
+                    BigDecimal lineTotal = unitPrice.multiply(
+                            BigDecimal.valueOf(lineQty)
+                    );
+                    subtotal = subtotal.add(lineTotal);
+
+                    OrderItem orderItem = new OrderItem();
+                    orderItem.setOrder(order);
+                    orderItem.setBook(book);
+                    orderItem.setVppItem(null);
+                    orderItem.setBookTitle(book.getTitle());
+                    orderItem.setUnitPrice(unitPrice);
+                    orderItem.setQuantity(lineQty);
+                    orderItem.setLineTotal(lineTotal);
+                    orderItem.setBookSetId(bookSet.getId());
+                    orderItem.setBookSetName(bookSet.getName());
+                    order.getItems().add(orderItem);
+                }
+                continue;
+            }
+
             if (cartItem.getBook() == null) {
                 throw new IllegalArgumentException(
-                        "Stationery items are no longer sold. Please refresh your cart."
+                        "An item in your cart is invalid. Please refresh your cart."
                 );
             }
 
-            // Load sách mới nhất từ DB
             Book book =
                     bookRepository
                             .findById(
@@ -487,19 +547,16 @@ public class OrderService {
                                     )
                             );
 
-            // Kiểm tra sách active, đủ stock, giá hợp lệ
             validateBookLine(
                     book,
                     cartItem.getQuantity()
             );
 
-            // Lấy lựa chọn KM user chọn cho sách này (% hoặc fixed hoặc NONE)
             PromotionSelection selectedPromotion =
                     form.resolvePromotionSelection(
                             book.getId()
                     );
 
-            // Tính giá đơn vị sau KM — PromotionService áp PERCENTAGE/FIXED/NONE
             BigDecimal effectiveUnitPrice =
                     promotionService
                             .getPriceForSelection(
@@ -507,7 +564,6 @@ public class OrderService {
                                     selectedPromotion
                             );
 
-            // Thành tiền dòng sách
             BigDecimal lineTotal =
                     effectiveUnitPrice.multiply(
                             BigDecimal.valueOf(
@@ -522,23 +578,17 @@ public class OrderService {
                     new OrderItem();
 
             orderItem.setOrder(order);
-            orderItem.setBook(book);         // FK book_id
-            orderItem.setVppItem(null);      // Dòng sách — không có VPP
-
-            // Snapshot tên sách tại thời điểm mua
+            orderItem.setBook(book);
+            orderItem.setVppItem(null);
             orderItem.setBookTitle(
                     book.getTitle()
             );
-
-            // Lưu giá đã giảm KM (snapshot — không đổi khi sách đổi giá sau này)
             orderItem.setUnitPrice(
                     effectiveUnitPrice
             );
-
             orderItem.setQuantity(
                     cartItem.getQuantity()
             );
-
             orderItem.setLineTotal(
                     lineTotal
             );
@@ -1063,9 +1113,40 @@ public class OrderService {
         for (CartItem item :
                 cart.getItems()) { // Duyệt từng dòng trong giỏ
 
+            if (item.getBookSet() != null) {
+                try {
+                    BookSet bookSet = bookSetService.getByIdWithItems(
+                            item.getBookSet().getId()
+                    );
+                    if (!bookSet.isActive()) {
+                        errors.add("\"" + bookSet.getName() + "\" is no longer available.");
+                        continue;
+                    }
+                    if (bookSet.getItems().size() < 2) {
+                        errors.add("\"" + bookSet.getName() + "\" is invalid.");
+                        continue;
+                    }
+                    int available = bookSetService.getAvailableSetQuantity(bookSet);
+                    if (available <= 0) {
+                        errors.add("\"" + bookSet.getName() + "\" — "
+                                + CartService.MSG_OUT_OF_STOCK);
+                        continue;
+                    }
+                    if (item.getQuantity() > available) {
+                        errors.add("\"" + bookSet.getName() + "\" — "
+                                + String.format(CartService.MSG_EXCEED_STOCK, available));
+                        continue;
+                    }
+                    validItemCount++;
+                } catch (IllegalArgumentException ex) {
+                    errors.add("A book set in your cart no longer exists.");
+                }
+                continue;
+            }
+
             if (item.getBook() == null) {
                 errors.add(
-                        "Stationery items are no longer sold. Please refresh your cart."
+                        "An item in your cart is invalid. Please refresh your cart."
                 );
                 continue;
             }
@@ -1159,7 +1240,56 @@ public class OrderService {
             );
         }
 
+        try {
+            validateAggregatedBookDemand(cart);
+        } catch (IllegalArgumentException ex) {
+            errors.add(ex.getMessage());
+        }
+
         return errors; // Rỗng = pass; có phần tử = fail với message cụ thể
+    }
+
+    /**
+     * Cộng dồn nhu cầu tồn kho từ sách lẻ + thành phần bộ, tránh oversell.
+     */
+    private void validateAggregatedBookDemand(Cart cart) {
+        Map<Long, Integer> demand = new HashMap<>();
+        Map<Long, String> titles = new HashMap<>();
+
+        for (CartItem item : cart.getItems()) {
+            if (item.getBook() != null) {
+                Long bookId = item.getBook().getId();
+                demand.merge(bookId, item.getQuantity(), Integer::sum);
+                titles.put(bookId, item.getBook().getTitle());
+                continue;
+            }
+
+            if (item.getBookSet() != null) {
+                BookSet bookSet = bookSetService.getByIdWithItems(
+                        item.getBookSet().getId()
+                );
+                for (BookSetItem setItem : bookSet.getItems()) {
+                    Long bookId = setItem.getBook().getId();
+                    int need = item.getQuantity() * setItem.getQuantity();
+                    demand.merge(bookId, need, Integer::sum);
+                    titles.put(bookId, setItem.getBook().getTitle());
+                }
+            }
+        }
+
+        for (Map.Entry<Long, Integer> entry : demand.entrySet()) {
+            int available = stockService.getBookQuantity(entry.getKey());
+            if (entry.getValue() > available) {
+                String title = titles.getOrDefault(entry.getKey(), "A book");
+                throw new IllegalArgumentException(
+                        "\"" + title + "\" — combined cart demand ("
+                                + entry.getValue()
+                                + ") exceeds available stock ("
+                                + available
+                                + ")."
+                );
+            }
+        }
     }
 
     // Tạo CheckoutForm pre-fill từ thông tin user — OrderController GET checkout
@@ -1484,6 +1614,9 @@ public class OrderService {
         dto.setLineTotalFormatted(
                 item.getLineTotalFormatted()
         );
+
+        dto.setBookSetId(item.getBookSetId());
+        dto.setBookSetName(item.getBookSetName());
 
         if (item.getBook() != null) {
 

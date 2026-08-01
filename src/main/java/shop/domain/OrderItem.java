@@ -59,6 +59,13 @@ public class OrderItem {
     @Column(name = "line_total", nullable = false, precision = 12, scale = 2)
     private BigDecimal lineTotal;
 
+    /** Snapshot: dòng này thuộc bộ sách nào (nullable nếu mua lẻ). */
+    @Column(name = "book_set_id")
+    private Long bookSetId;
+
+    @Column(name = "book_set_name", length = 200)
+    private String bookSetName;
+
     public Long getId() {
         return id;
     }
@@ -121,6 +128,22 @@ public class OrderItem {
 
     public void setLineTotal(BigDecimal lineTotal) {
         this.lineTotal = lineTotal;
+    }
+
+    public Long getBookSetId() {
+        return bookSetId;
+    }
+
+    public void setBookSetId(Long bookSetId) {
+        this.bookSetId = bookSetId;
+    }
+
+    public String getBookSetName() {
+        return bookSetName;
+    }
+
+    public void setBookSetName(String bookSetName) {
+        this.bookSetName = bookSetName;
     }
 
     /** Format giá đơn vị VND kiểu 1.234.567 — dùng khi map sang OrderItemDTO. */

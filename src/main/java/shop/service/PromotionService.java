@@ -120,7 +120,9 @@ public class PromotionService {
                 .filter(item -> item != null)
                 .map(item -> {
                     BigDecimal unitPrice = BigDecimal.ZERO;
-                    if (item.getBook() != null) {
+                    if (item.getBookSet() != null && item.getBookSet().getSetPrice() != null) {
+                        unitPrice = item.getBookSet().getSetPrice();
+                    } else if (item.getBook() != null) {
                         unitPrice = getPriceForSelection(item.getBook(), selection);
                     } else if (item.getVppItem() != null && item.getVppItem().getPrice() != null) {
                         unitPrice = item.getVppItem().getPrice();
@@ -674,7 +676,10 @@ public class PromotionService {
                 .map(item -> {
                     BigDecimal unitPrice = BigDecimal.ZERO;
 
-                    if (item.getBook() != null) {
+                    if (item.getBookSet() != null
+                            && item.getBookSet().getSetPrice() != null) {
+                        unitPrice = item.getBookSet().getSetPrice();
+                    } else if (item.getBook() != null) {
                         Book book = item.getBook();
 
                         String selectedValue =

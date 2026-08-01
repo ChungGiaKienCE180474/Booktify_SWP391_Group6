@@ -112,7 +112,9 @@
                                     <a href="/books" class="catbar-link catbar-all">
                                         <i class="fa-solid fa-book"></i> Book
                                     </a>
-
+                                    <a href="/book-sets" class="catbar-link">
+                                        <i class="fa-solid fa-layer-group"></i> Book sets
+                                    </a>
                                     <a href="/authors" class="catbar-link">
                                         Author
                                     </a>
