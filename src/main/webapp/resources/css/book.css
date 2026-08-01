@@ -1,3 +1,4 @@
+
 /* BOOK CUSTOMER*/
 
 /*details*/
@@ -803,11 +804,15 @@
     flex-direction: column;
     gap: .4rem;
     margin-top: auto;
+    width: 100%;
+    align-items: stretch;
 }
 
 .product-card__price {
+    display: block;
     font-size: .88rem;
     font-weight: 800;
+    line-height: 20px;
     color: var(--accent-warm, #F57C00);
     white-space: nowrap;
     overflow: hidden;
@@ -818,33 +823,44 @@
 .product-card__price-box {
     display: flex;
     flex-direction: column;
-    gap: 4px;
+    justify-content: flex-end;
+    gap: 3px;
     width: 100%;
     min-width: 0;
+    height: 42px;
+    min-height: 42px;
+    flex: 0 0 42px;
+    overflow: hidden;
 }
 
 .product-card__discount-line {
     display: flex;
     align-items: center;
     gap: 6px;
-    flex-wrap: wrap;
+    min-height: 19px;
+    flex-wrap: nowrap;
+    overflow: hidden;
 }
 
 .product-card__old-price {
     color: #94a3b8;
     font-size: .72rem;
     font-weight: 700;
+    line-height: 19px;
     text-decoration: line-through;
+    white-space: nowrap;
 }
 
 .product-card__discount-badge {
     display: inline-flex;
-    padding: 3px 7px;
+    align-items: center;
+    padding: 2px 7px;
     border-radius: 999px;
     background: #fee2e2;
     color: #dc2626;
     font-size: .68rem;
     font-weight: 800;
+    line-height: 15px;
     white-space: nowrap;
 }
 
@@ -869,6 +885,7 @@
     transition: background .15s, transform .15s;
     white-space: nowrap;
     cursor: pointer;
+    flex-shrink: 0;
 }
 
 .product-card__link:hover {
