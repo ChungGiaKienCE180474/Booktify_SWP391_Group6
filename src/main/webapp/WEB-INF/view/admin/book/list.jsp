@@ -109,7 +109,7 @@
                                             <th>Author</th>
                                             <th>Category</th>
                                             <th>Genres</th>
-                                            <th>Price</th>
+                                            <th>Price (₫)</th>
                                             <th>Stock</th>
                                             <th>Status</th>
                                             <th>Updated</th>
@@ -168,7 +168,7 @@
                                                     </c:choose>
                                                 </td>
                                                 <td style="font-weight:700;color:#111827;">
-                                                    <c:out value="${book.priceFormatted}" /> &#8363;
+                                                    <c:out value="${book.priceFormatted}" />
                                                 </td>
                                                 <td style="color:#374151;">${book.stockQuantity}</td>
                                                 <td>
@@ -404,7 +404,7 @@
                                     document.getElementById('mBCategory').textContent = d.category || '—';
                                     document.getElementById('mBSupplier').textContent = d.supplier || '—';
                                     document.getElementById('mBGenre').textContent = d.genre || '—';
-                                    document.getElementById('mBPrice').textContent = (d.price || '0') + ' ₫';
+                                    document.getElementById('mBPrice').textContent = (d.price || '0') ;
                                     document.getElementById('mBStock').textContent = d.stock || '0';
                                     document.getElementById('mBStatus').innerHTML = d.active === 'true'
                                         ? '<span class="status-pill status-pill--on"><i class="fa-solid fa-circle-check" style="font-size:.6rem;"></i> Active</span>'
