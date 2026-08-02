@@ -56,6 +56,9 @@ public class CheckoutForm {
     /** Phương thức thanh toán — COD hoặc VNPAY */
     private String paymentMethod = PaymentMethod.COD.name();
 
+    /** Lưu tên/SĐT/địa chỉ vừa nhập làm mặc định cho tài khoản (mặc định bật). */
+    private boolean saveAddress = true;
+
     /*
      * Lưu promotion được chọn cho từng sách.
      *
@@ -97,6 +100,14 @@ public class CheckoutForm {
     public void setShippingAddress(
             String shippingAddress) {
         this.shippingAddress = shippingAddress;
+    }
+
+    public boolean isSaveAddress() {
+        return saveAddress;
+    }
+
+    public void setSaveAddress(boolean saveAddress) {
+        this.saveAddress = saveAddress;
     }
 
     public String getVoucherCode() {

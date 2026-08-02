@@ -24,6 +24,14 @@ public class OrderDTO {
     private String shippingAddress;
     private String paymentMethod;
     private String paymentMethodLabel;
+    /** Giá trị enum PaymentStatus.name() — vd: UNPAID */
+    private String paymentStatus;
+    /** Nhãn hiển thị — vd: Awaiting confirmation */
+    private String paymentStatusLabel;
+    /** Khách được phép bấm "Tôi đã thanh toán" (COD, đang giao/đã giao, chưa thanh toán). */
+    private boolean canCustomerConfirmPayment;
+    /** Admin được phép bấm "Hoàn thành" (COD, khách đã báo thanh toán). */
+    private boolean canAdminCompletePayment;
     private String shippingMethodLabel;
     private String voucherCode;
     /** Tổng hàng sau KM từng sách (đã format) */
@@ -111,6 +119,38 @@ public class OrderDTO {
 
     public void setPaymentMethodLabel(String paymentMethodLabel) {
         this.paymentMethodLabel = paymentMethodLabel;
+    }
+
+    public String getPaymentStatus() {
+        return paymentStatus;
+    }
+
+    public void setPaymentStatus(String paymentStatus) {
+        this.paymentStatus = paymentStatus;
+    }
+
+    public String getPaymentStatusLabel() {
+        return paymentStatusLabel;
+    }
+
+    public void setPaymentStatusLabel(String paymentStatusLabel) {
+        this.paymentStatusLabel = paymentStatusLabel;
+    }
+
+    public boolean isCanCustomerConfirmPayment() {
+        return canCustomerConfirmPayment;
+    }
+
+    public void setCanCustomerConfirmPayment(boolean canCustomerConfirmPayment) {
+        this.canCustomerConfirmPayment = canCustomerConfirmPayment;
+    }
+
+    public boolean isCanAdminCompletePayment() {
+        return canAdminCompletePayment;
+    }
+
+    public void setCanAdminCompletePayment(boolean canAdminCompletePayment) {
+        this.canAdminCompletePayment = canAdminCompletePayment;
     }
 
     public String getShippingMethodLabel() {
