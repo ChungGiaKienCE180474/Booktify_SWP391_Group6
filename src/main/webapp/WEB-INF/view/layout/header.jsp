@@ -118,11 +118,6 @@
                                     <a href="/authors" class="catbar-link">
                                         Author
                                     </a>
-                                    <a href="${pageContext.request.contextPath}/contact"
-                                        class="catbar-link">
-                                        <i class="fa-solid fa-headset"></i> Contact Support
-                                    </a>
-
                                 </div>
                             </nav>
 

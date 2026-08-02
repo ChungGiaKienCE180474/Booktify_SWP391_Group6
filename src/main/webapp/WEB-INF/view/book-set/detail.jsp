@@ -135,7 +135,7 @@
                                     <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}" />
                                     <input type="hidden" name="bookSetId" value="${bookSet.id}" />
                                     <input type="hidden" name="redirect" value="/book-sets/${bookSet.id}" />
-                                    <div>
+                                    <div class="detail-qty-group">
                                         <label class="detail-qty-label" for="cartQty">Quantity</label>
                                         <input type="number" id="cartQty" name="quantity"
                                                value="1" min="1" max="${availableSets}"

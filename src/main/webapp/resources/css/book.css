@@ -240,58 +240,100 @@
 /* Action buttons */
 .detail-actions {
     display: flex;
-    gap: .75rem;
+    gap: 1rem;
     margin-bottom: 1.75rem;
     flex-wrap: wrap;
     align-items: flex-end;
 }
 
+/* Quantity + Add-to-cart share one row and one baseline */
 .detail-cart-form {
     display: flex;
     flex-wrap: wrap;
-    gap: .75rem;
+    gap: 1rem;
     align-items: flex-end;
     flex: 1;
+    min-width: 260px;
+}
+
+/* Stacked caption + input, sized to its content (no stretching) */
+.detail-qty-group {
+    display: flex;
+    flex-direction: column;
+    flex: 0 0 auto;
 }
 
 .detail-qty-label {
-    font-size: .8rem;
-    font-weight: 600;
+    font-size: .72rem;
+    font-weight: 700;
+    letter-spacing: .04em;
+    text-transform: uppercase;
     color: var(--text-muted);
-    display: block;
-    margin-bottom: .25rem;
+    margin-bottom: .45rem;
 }
 
 .detail-qty-input {
-    width: 80px;
-    padding: .65rem .75rem;
+    width: 92px;
+    height: 52px;
+    box-sizing: border-box;
+    padding: 0 .75rem;
+    font-size: 1.05rem;
+    font-weight: 600;
+    text-align: center;
+    color: var(--text);
+    background: #fff;
     border: 1px solid var(--border);
     border-radius: var(--radius);
+    transition: border-color .15s, box-shadow .15s;
+}
+
+.detail-qty-input:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(0, 107, 94, .15);
 }
 
 .btn-detail-primary {
-    flex: 1;
+    flex: 1 1 auto;
+    max-width: 360px;
+    height: 52px;
+    box-sizing: border-box;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: .5rem;
-    padding: .85rem 1.5rem;
+    gap: .55rem;
+    padding: 0 1.5rem;
     background: var(--primary);
     color: #fff;
     border: none;
     border-radius: var(--radius);
-    font-size: .95rem;
+    font-size: .98rem;
     font-weight: 700;
+    letter-spacing: .01em;
     cursor: pointer;
     text-decoration: none;
     transition: background .15s, transform .15s, box-shadow .15s;
-    min-width: 160px;
+    min-width: 180px;
 }
 
 .btn-detail-primary:hover {
     background: var(--primary-light);
     transform: translateY(-2px);
     box-shadow: 0 6px 20px rgba(0, 107, 94, .3);
+}
+
+/* On narrow screens the button drops below and fills the row */
+@media (max-width: 480px) {
+    .detail-qty-group {
+        flex: 1 1 100%;
+    }
+    .detail-qty-input {
+        width: 100%;
+    }
+    .btn-detail-primary {
+        flex: 1 1 100%;
+        max-width: none;
+    }
 }
 
 .btn-detail-secondary {
