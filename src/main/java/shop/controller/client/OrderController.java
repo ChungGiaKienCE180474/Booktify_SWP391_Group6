@@ -611,6 +611,37 @@ public class OrderController {
         return "redirect:/orders/" + id; // PRG — quay lại trang chi tiết cùng đơn
     }
 
+    // POST /orders/{id}/confirm-payment — khách xác nhận đã thanh toán (COD)
+    @PostMapping("/{id:\\d+}/confirm-payment")
+    public String confirmPayment(
+            Authentication authentication,
+            @PathVariable Long id,
+            RedirectAttributes redirectAttributes) {
+
+        User user =
+                getCurrentUser(authentication);
+
+        try {
+            orderService.customerConfirmPayment(
+                    user.getId(),
+                    id
+            );
+
+            redirectAttributes.addFlashAttribute(
+                    "successMessage",
+                    "Payment confirmation sent. Please wait for the shop to complete your order."
+            );
+
+        } catch (IllegalArgumentException exception) {
+            redirectAttributes.addFlashAttribute(
+                    "errorMessage",
+                    exception.getMessage()
+            );
+        }
+
+        return "redirect:/orders/" + id;
+    }
+
     // =========================================================
     // CHUẨN BỊ DỮ LIỆU CHO VIEW CHECKOUT
     // =========================================================

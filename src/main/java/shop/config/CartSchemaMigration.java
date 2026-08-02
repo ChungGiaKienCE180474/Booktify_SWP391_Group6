@@ -25,6 +25,19 @@ public class CartSchemaMigration implements ApplicationRunner {
         migrateCartItems();
         migrateOrderItems();
         migrateBookSetTags();
+        migrateOrderPaymentStatus();
+    }
+
+    /** Cột theo dõi thanh toán COD/VNPay: payment_status + paid_at. */
+    private void migrateOrderPaymentStatus() {
+        ensureColumn("orders", "payment_status", "VARCHAR(30) DEFAULT 'UNPAID' NOT NULL");
+        ensureColumn("orders", "paid_at", "TIMESTAMP");
+        try {
+            jdbcTemplate.execute(
+                    "UPDATE orders SET payment_status = 'UNPAID' WHERE payment_status IS NULL");
+        } catch (Exception ignored) {
+            // Bảng có thể chưa tồn tại ở lần boot đầu — Hibernate ddl-auto sẽ tạo.
+        }
     }
 
     /** Allow free-text set tags (comics, series…), not only short grade codes. */

@@ -12,6 +12,7 @@ import java.util.stream.Collectors;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
@@ -297,5 +298,17 @@ public class VoucherService {
                 voucher.setQuantity(voucher.getQuantity() - 1);
 
                 voucherRepository.save(voucher);
+        }
+
+        /**
+         * Trừ lượt voucher trong MỘT TRANSACTION RIÊNG (REQUIRES_NEW).
+         * <p>
+         * Dùng cho VNPay: nếu voucher hết lượt/hết hạn thì chỉ transaction này
+         * rollback, KHÔNG kéo theo rollback của giao dịch xác nhận đơn đã thanh toán.
+         * Bên gọi bắt exception để bỏ qua an toàn.
+         */
+        @Transactional(propagation = Propagation.REQUIRES_NEW)
+        public void decreaseVoucherQuantityIsolated(String voucherCode) {
+                decreaseVoucherQuantity(voucherCode);
         }
 }

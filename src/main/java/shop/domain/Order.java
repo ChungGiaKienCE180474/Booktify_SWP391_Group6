@@ -70,6 +70,14 @@ public class Order {
     @Column(nullable = false, length = 30)
     private String status;
 
+    /** Trạng thái thanh toán — giá trị enum {@link PaymentStatus#name()}. */
+    @Column(name = "payment_status", nullable = false, length = 30)
+    private String paymentStatus = PaymentStatus.UNPAID.name();
+
+    /** Thời điểm xác nhận đã thu tiền (admin/VNPay); null khi chưa thanh toán. */
+    @Column(name = "paid_at")
+    private LocalDateTime paidAt;
+
     /** Mã voucher đã áp dụng (nullable nếu không dùng voucher). */
     @Column(name = "voucher_code", length = 50)
     private String voucherCode;
@@ -192,6 +200,22 @@ public class Order {
         this.status = status;
     }
 
+    public String getPaymentStatus() {
+        return paymentStatus;
+    }
+
+    public void setPaymentStatus(String paymentStatus) {
+        this.paymentStatus = paymentStatus;
+    }
+
+    public LocalDateTime getPaidAt() {
+        return paidAt;
+    }
+
+    public void setPaidAt(LocalDateTime paidAt) {
+        this.paidAt = paidAt;
+    }
+
     public String getVoucherCode() {
         return voucherCode;
     }
@@ -300,6 +324,11 @@ public class Order {
         } catch (Exception ex) {
             return paymentMethod;
         }
+    }
+
+    /** Nhãn trạng thái thanh toán — OrderDTO.paymentStatusLabel */
+    public String getPaymentStatusLabel() {
+        return PaymentStatus.fromValue(paymentStatus).getLabel();
     }
 
     public String getShippingMethodLabel() {
