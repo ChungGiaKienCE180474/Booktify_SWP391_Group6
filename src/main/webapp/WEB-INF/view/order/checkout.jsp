@@ -173,6 +173,12 @@
                             path="shippingAddress"
                             cssClass="order-error" />
 
+                        <label class="order-save-address"
+                               style="display:flex;align-items:center;gap:.5rem;margin-top:.6rem;font-weight:500;cursor:pointer;">
+                            <form:checkbox path="saveAddress" />
+                            Save this name, phone and address as my default
+                        </label>
+
                     </div>
 
                     <%-- Payment --%>

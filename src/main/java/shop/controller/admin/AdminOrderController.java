@@ -121,4 +121,25 @@ public class AdminOrderController {
         }
         return "redirect:/admin/orders/" + id; // PRG — quay lại trang detail cùng đơn
     }
+
+    /**
+     * POST /admin/orders/{id}/complete-payment — admin xác nhận đã thu tiền COD:
+     * đánh dấu PAID và đẩy đơn sang DELIVERED.
+     */
+    @PostMapping("/{id}/complete-payment")
+    public String completePayment(
+            @PathVariable Long id,
+            RedirectAttributes redirectAttributes) {
+
+        try {
+            orderService.adminCompletePayment(id);
+            redirectAttributes.addFlashAttribute(
+                    "successMessage",
+                    "Payment confirmed. Order marked as delivered."
+            );
+        } catch (IllegalArgumentException ex) {
+            redirectAttributes.addFlashAttribute("errorMessage", ex.getMessage());
+        }
+        return "redirect:/admin/orders/" + id;
+    }
 }

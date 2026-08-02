@@ -31,6 +31,7 @@ import shop.domain.Order;
 import shop.domain.OrderItem;
 import shop.domain.OrderStatus;
 import shop.domain.PaymentMethod;
+import shop.domain.PaymentStatus;
 import shop.domain.PromotionSelection;
 import shop.domain.User;
 import shop.domain.dto.OrderDTO;
@@ -53,6 +54,9 @@ import shop.repository.UserRepository;
  */
 @Service
 public class OrderService {
+
+    private static final org.slf4j.Logger logger =
+            org.slf4j.LoggerFactory.getLogger(OrderService.class);
 
     private final OrderRepository orderRepository;
     private final BookRepository bookRepository;
@@ -429,6 +433,14 @@ public class OrderService {
         order.setShippingAddress(
                 form.getShippingAddress().trim()
         );
+
+        // Lưu tên/SĐT/địa chỉ vừa nhập làm mặc định cho tài khoản (tùy chọn)
+        if (form.isSaveAddress()) {
+            user.setFullName(form.getRecipientName().trim());
+            user.setPhone(form.getRecipientPhone().trim());
+            user.setAddress(form.getShippingAddress().trim());
+            userRepository.save(user);
+        }
 
         // Phương thức thanh toán từ form — mặc định COD
         PaymentMethod paymentMethod =
@@ -938,6 +950,72 @@ public class OrderService {
         );
     }
 
+    /* ===================== Xác nhận thanh toán COD ===================== */
+
+    /**
+     * Khách được bấm "Tôi đã thanh toán" khi: đơn COD, đang giao hoặc đã giao
+     * (SHIPPING/DELIVERED), và trạng thái thanh toán còn UNPAID.
+     */
+    public boolean canCustomerConfirmPayment(Order order) {
+        if (!PaymentMethod.COD.name().equals(order.getPaymentMethod())) {
+            return false;
+        }
+        if (PaymentStatus.fromValue(order.getPaymentStatus()) != PaymentStatus.UNPAID) {
+            return false;
+        }
+        OrderStatus status = OrderStatus.fromValue(order.getStatus());
+        return status == OrderStatus.SHIPPING || status == OrderStatus.DELIVERED;
+    }
+
+    /**
+     * Admin được bấm "Hoàn thành" khi: đơn COD và khách đã báo đã thanh toán
+     * (AWAITING_CONFIRMATION).
+     */
+    public boolean canAdminCompletePayment(Order order) {
+        return PaymentMethod.COD.name().equals(order.getPaymentMethod())
+                && PaymentStatus.fromValue(order.getPaymentStatus())
+                        == PaymentStatus.AWAITING_CONFIRMATION;
+    }
+
+    /** Khách xác nhận đã thanh toán COD — UNPAID → AWAITING_CONFIRMATION. */
+    @Transactional
+    public void customerConfirmPayment(long userId, long orderId) {
+        Order order = orderRepository
+                .findByIdAndUserIdWithItems(orderId, userId)
+                .orElseThrow(() -> new IllegalArgumentException("Order not found."));
+
+        if (!canCustomerConfirmPayment(order)) {
+            throw new IllegalArgumentException(
+                    "This order cannot be confirmed as paid at the moment."
+            );
+        }
+
+        order.setPaymentStatus(PaymentStatus.AWAITING_CONFIRMATION.name());
+        orderRepository.save(order);
+    }
+
+    /**
+     * Admin hoàn thành đơn COD — AWAITING_CONFIRMATION → PAID (+ paidAt),
+     * đồng thời đẩy đơn sang DELIVERED.
+     */
+    @Transactional
+    public void adminCompletePayment(long orderId) {
+        Order order = orderRepository
+                .findByIdWithUserAndItems(orderId)
+                .orElseThrow(() -> new IllegalArgumentException("Order not found."));
+
+        if (!canAdminCompletePayment(order)) {
+            throw new IllegalArgumentException(
+                    "This order is not awaiting payment confirmation."
+            );
+        }
+
+        order.setPaymentStatus(PaymentStatus.PAID.name());
+        order.setPaidAt(LocalDateTime.now());
+        order.setStatus(OrderStatus.DELIVERED.name());
+        orderRepository.save(order);
+    }
+
     public Set<OrderStatus> getAllowedNextStatuses(
             String status,
             String paymentMethod
@@ -1066,14 +1144,29 @@ public class OrderService {
 
         if (order.getVoucherCode() != null
                 && !order.getVoucherCode().isBlank()) {
-            voucherService.decreaseVoucherQuantity(
-                    order.getVoucherCode()
-            );
+            // Tiền đã vào — KHÔNG được để lỗi voucher (hết lượt/hết hạn) làm rollback
+            // đơn đã thanh toán. Trừ voucher trong transaction riêng (REQUIRES_NEW);
+            // nếu thất bại thì bỏ qua, vẫn xác nhận đơn.
+            try {
+                voucherService.decreaseVoucherQuantityIsolated(
+                        order.getVoucherCode()
+                );
+            } catch (RuntimeException ex) {
+                logger.warn(
+                        "VNPay order {} paid but voucher '{}' could not be consumed: {}",
+                        order.getId(),
+                        order.getVoucherCode(),
+                        ex.getMessage()
+                );
+            }
         }
 
         order.setStatus(
                 OrderStatus.CONFIRMED.name()
         );
+
+        order.setPaymentStatus(PaymentStatus.PAID.name());
+        order.setPaidAt(LocalDateTime.now());
 
         orderRepository.save(order);
         return true;
@@ -1503,6 +1596,14 @@ public class OrderService {
                 order.getStatusLabel()
         );
 
+        dto.setPaymentStatus(
+                order.getPaymentStatus()
+        );
+
+        dto.setPaymentStatusLabel(
+                order.getPaymentStatusLabel()
+        );
+
         dto.setTotalAmountFormatted(
                 order.getTotalAmountFormatted()
         );
@@ -1539,6 +1640,14 @@ public class OrderService {
 
         dto.setPaymentMethodLabel(
                 order.getPaymentMethodLabel()
+        );
+
+        dto.setCanCustomerConfirmPayment(
+                canCustomerConfirmPayment(order)
+        );
+
+        dto.setCanAdminCompletePayment(
+                canAdminCompletePayment(order)
         );
 
         dto.setVoucherCode(
