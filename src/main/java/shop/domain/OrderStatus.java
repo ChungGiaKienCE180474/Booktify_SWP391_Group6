@@ -1,6 +1,5 @@
 package shop.domain;
 
-import java.util.Collections;
 import java.util.EnumSet;
 import java.util.Set;
 
@@ -66,13 +65,13 @@ public enum OrderStatus {
     /** Các trạng thái tiếp theo hợp lệ — dùng cho dropdown Admin/Staff. */
     public Set<OrderStatus> allowedTransitions() {
         if (isTerminal()) {
-            return Collections.emptySet();
+            return EnumSet.noneOf(OrderStatus.class);
         }
         return switch (this) {
             case PENDING -> EnumSet.of(CONFIRMED, CANCELLED);
             case CONFIRMED -> EnumSet.of(SHIPPING, CANCELLED);
             case SHIPPING -> EnumSet.of(DELIVERED, CANCELLED);
-            default -> Collections.emptySet();
+            default -> EnumSet.noneOf(OrderStatus.class);
         };
     }
 
