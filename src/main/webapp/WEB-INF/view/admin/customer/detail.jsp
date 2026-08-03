@@ -10,7 +10,7 @@
 
     <link rel="stylesheet"
           href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" />
-    <link rel="stylesheet" href="/css/admin-dashboard.css" />
+    <link rel="stylesheet" href="/css/admin-dashboard.css?v=4" />
 
     <style>
         .customer-detail-card {
@@ -358,6 +358,47 @@
                             <i class="fa-solid fa-circle-check"></i>
                             Unban Account
                         </button>
+                    </c:otherwise>
+                </c:choose>
+            </div>
+
+            <div class="customer-detail-card" style="margin-top: 24px;">
+                <h3 style="margin: 0 0 16px; font-size: 1.1rem;">
+                    <i class="fa-solid fa-receipt"></i> Order History
+                </h3>
+                <c:choose>
+                    <c:when test="${empty orders}">
+                        <p style="color: #6B7280; margin: 0;">This customer has no orders yet.</p>
+                    </c:when>
+                    <c:otherwise>
+                        <div class="admin-table-wrap">
+                            <table class="admin-table">
+                                <thead>
+                                    <tr>
+                                        <th>Code</th>
+                                        <th>Total</th>
+                                        <th>Status</th>
+                                        <th>Date</th>
+                                        <th></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <c:forEach items="${orders}" var="ord">
+                                        <tr>
+                                            <td>${ord.orderCode}</td>
+                                            <td>${ord.totalAmountFormatted} &#8363;</td>
+                                            <td>${ord.statusLabel}</td>
+                                            <td>${ord.createdAtFormatted}</td>
+                                            <td>
+                                                <a href="/admin/orders/${ord.id}" class="admin-button" style="padding: 6px 10px; font-size: .8rem;">
+                                                    View
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    </c:forEach>
+                                </tbody>
+                            </table>
+                        </div>
                     </c:otherwise>
                 </c:choose>
             </div>

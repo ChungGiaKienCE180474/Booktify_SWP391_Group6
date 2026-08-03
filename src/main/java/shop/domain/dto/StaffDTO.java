@@ -10,14 +10,13 @@ public class StaffDTO {
     private String address;
     private Boolean status;
     private Boolean deleted;
-    private String staffRole;
 
     public StaffDTO() {
     }
 
     public StaffDTO(Long id, String staffCode, String email, String fullName,
                     String phone, String address, Boolean status,
-                    Boolean deleted, String staffRole) {
+                    Boolean deleted) {
         this.id = id;
         this.staffCode = staffCode;
         this.email = email;
@@ -26,7 +25,6 @@ public class StaffDTO {
         this.address = address;
         this.status = status;
         this.deleted = deleted;
-        this.staffRole = staffRole;
     }
 
     public String getInitial() {
@@ -44,7 +42,6 @@ public class StaffDTO {
     public String getAddress() { return address; }
     public Boolean getStatus() { return status; }
     public Boolean getDeleted() { return deleted; }
-    public String getStaffRole() { return staffRole; }
 
     public void setId(Long id) { this.id = id; }
     public void setStaffCode(String staffCode) { this.staffCode = staffCode; }
@@ -54,5 +51,4 @@ public class StaffDTO {
     public void setAddress(String address) { this.address = address; }
     public void setStatus(Boolean status) { this.status = status; }
     public void setDeleted(Boolean deleted) { this.deleted = deleted; }
-    public void setStaffRole(String staffRole) { this.staffRole = staffRole; }
 }

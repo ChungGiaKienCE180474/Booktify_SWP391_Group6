@@ -10,13 +10,13 @@
 
     <link rel="stylesheet"
           href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" />
-    <link rel="stylesheet" href="/css/admin-dashboard.css" />
+    <link rel="stylesheet" href="/css/admin-dashboard.css?v=4" />
 
     <style>
         .customer-stats {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            gap: 20px;
+            gap: 0;
             margin: 24px 0 36px;
         }
 
@@ -175,37 +175,75 @@
         }
 
         .btn-small {
-            border: none;
-            border-radius: 10px;
-            padding: 9px 13px;
+            width: 34px;
+            height: 34px;
+            padding: 0;
+            border: 1px solid #dbe3ea;
+            border-radius: 5px;
+            background: #ffffff;
+            color: #64748b;
             cursor: pointer;
-            font-weight: 800;
             text-decoration: none;
             display: inline-flex;
             align-items: center;
-            gap: 6px;
+            justify-content: center;
             font-size: 13px;
             transition: all .2s ease;
         }
 
         .btn-small:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 8px 18px rgba(15, 23, 42, 0.12);
+            color: #00796b;
+            border-color: #00796b;
+            background: #f0fdfa;
         }
 
         .btn-view {
-            background: #2563eb;
-            color: #ffffff;
+            background: #ffffff;
+            color: #64748b;
         }
 
         .btn-ban {
-            background: #ef4444;
-            color: #ffffff;
+            background: #ffffff;
+            color: #64748b;
         }
 
         .btn-unban {
-            background: #22c55e;
-            color: #052e16;
+            background: #ffffff;
+            color: #64748b;
+        }
+
+        .btn-ban:hover {
+            color: #dc2626;
+            border-color: #ef4444;
+            background: #fef2f2;
+        }
+
+        .btn-unban:hover {
+            color: #16a34a;
+            border-color: #22c55e;
+            background: #f0fdf4;
+        }
+
+        .btn-small.btn-reset {
+            width: auto;
+            min-width: 72px;
+            height: 44px;
+            padding: 0 16px;
+            border: 1px solid #d1d5db;
+            border-radius: 10px;
+            background: #ffffff;
+            color: #111827;
+            font-weight: 700;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+
+        .btn-small.btn-reset:hover {
+            color: #00796b;
+            border-color: #00796b;
+            background: #f0fdfa;
+            transform: none;
+            box-shadow: none;
         }
 
         .btn-reset {
@@ -271,10 +309,11 @@
         }
 
         .customer-modal {
-            width: 640px;
-            max-width: 96vw;
+            width: 1040px;
+            max-width: calc(100vw - 48px);
             max-height: 88vh;
             overflow-y: auto;
+            overflow-x: hidden;
             background: #ffffff;
             color: #1f2937;
             border-radius: 18px;
@@ -436,17 +475,6 @@
             font-size: 14px;
         }
 
-        .status-modal input {
-            width: 100%;
-            padding: 12px;
-            border: 1px solid #d1d5db;
-            border-radius: 10px;
-            margin-top: 10px;
-            outline: none;
-            color: #111827;
-            background: #ffffff;
-        }
-
         .status-modal-actions {
             display: flex;
             gap: 12px;
@@ -484,6 +512,110 @@
             cursor: pointer;
         }
 
+
+        .order-history-loading,
+        .order-history-error,
+        .order-history-empty {
+            padding: 18px;
+            border: 1px dashed #d1d5db;
+            border-radius: 14px;
+            background: #f9fafb;
+            color: #6b7280;
+            text-align: center;
+            font-weight: 700;
+        }
+
+        .order-history-error {
+            border-color: #fecaca;
+            background: #fef2f2;
+            color: #b91c1c;
+        }
+
+        .order-history-table-wrap {
+            width: 100%;
+            overflow-x: hidden;
+            border: 1px solid #e5e7eb;
+            border-radius: 14px;
+        }
+
+        .order-history-table {
+            width: 100%;
+            table-layout: fixed;
+            border-collapse: collapse;
+            background: #ffffff;
+        }
+
+        .order-history-table th,
+        .order-history-table td {
+            padding: 12px 10px;
+            border-bottom: 1px solid #e5e7eb;
+            text-align: left;
+            white-space: normal;
+            overflow-wrap: anywhere;
+            word-break: break-word;
+            color: #111827;
+            font-size: 13px;
+            vertical-align: middle;
+        }
+
+        .order-history-table th {
+            background: #f8fafc;
+            color: #64748b;
+            font-size: 11px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: .04em;
+        }
+
+        .order-history-table th:nth-child(1),
+        .order-history-table td:nth-child(1) {
+            width: 28%;
+            white-space: nowrap;
+        }
+
+        .order-history-table th:nth-child(2),
+        .order-history-table td:nth-child(2) {
+            width: 14%;
+            white-space: nowrap;
+        }
+
+        .order-history-table th:nth-child(3),
+        .order-history-table td:nth-child(3) {
+            width: 23%;
+        }
+
+        .order-history-table th:nth-child(4),
+        .order-history-table td:nth-child(4) {
+            width: 23%;
+            white-space: nowrap;
+        }
+
+        .order-history-table th:nth-child(5),
+        .order-history-table td:nth-child(5) {
+            width: 12%;
+            text-align: center;
+            white-space: nowrap;
+        }
+
+        .order-history-table tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        .order-view-link {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+            padding: 7px 9px;
+            border-radius: 9px;
+            background: #2563eb;
+            color: #ffffff;
+            text-decoration: none;
+            font-size: 12px;
+            font-weight: 800;
+            white-space: nowrap;
+        }
+
         @media (max-width: 900px) {
             .customer-stats {
                 grid-template-columns: 1fr;
@@ -502,6 +634,87 @@
                 grid-template-columns: 1fr;
             }
         }
+
+        @media (max-width: 700px) {
+            .customer-modal {
+                width: calc(100vw - 20px);
+                max-width: calc(100vw - 20px);
+            }
+
+            .customer-modal-body {
+                padding: 16px;
+            }
+
+            .order-history-table th,
+            .order-history-table td {
+                padding: 9px 5px;
+                font-size: 11px;
+            }
+
+            .order-history-table th:nth-child(1),
+            .order-history-table td:nth-child(1) {
+                width: 27%;
+                white-space: normal;
+            }
+
+            .order-history-table th:nth-child(2),
+            .order-history-table td:nth-child(2) {
+                width: 15%;
+            }
+
+            .order-history-table th:nth-child(3),
+            .order-history-table td:nth-child(3) {
+                width: 22%;
+            }
+
+            .order-history-table th:nth-child(4),
+            .order-history-table td:nth-child(4) {
+                width: 24%;
+                white-space: normal;
+            }
+
+            .order-history-table th:nth-child(5),
+            .order-history-table td:nth-child(5) {
+                width: 12%;
+            }
+
+            .order-view-link {
+                padding: 6px;
+                font-size: 0;
+            }
+
+            .order-view-link i {
+                font-size: 12px;
+            }
+        }
+        .customer-confirm-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 14px;
+        }
+
+        .customer-confirm-title i {
+            color: #ef4444;
+            font-size: 20px;
+        }
+
+        .customer-confirm-title h3 {
+            margin: 0;
+        }
+
+        .status-cancel,
+        .status-confirm {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 7px;
+        }
+
+        .status-confirm {
+            opacity: 1;
+            cursor: pointer;
+        }
     </style>
 </head>
 
@@ -513,10 +726,13 @@
 
     <section class="admin-content">
 
-        <div class="admin-hero">
+        <div class="admin-toolbar">
             <div>
-                <p class="admin-kicker">Customer Management</p>
-                <h2>Customer Management</h2>
+                <p class="admin-kicker">
+                    <i class="fa-solid fa-users"></i>
+                    Customer Management
+                </p>
+                <h2>Customers</h2>
                 <p>Manage customer information and account status.</p>
             </div>
         </div>
@@ -632,7 +848,9 @@
                                     <div class="customer-actions">
                                         <button type="button"
                                                 class="btn-small btn-view"
+                                                title="View customer"
                                                 onclick="openCustomerModal(
+                                                        '${customer.id}',
                                                         '${customer.customerCode}',
                                                         '${customer.initial}',
                                                         '${customer.fullName}',
@@ -642,25 +860,24 @@
                                                         '${customer.status}'
                                                         )">
                                             <i class="fa-solid fa-eye"></i>
-                                            View
                                         </button>
 
                                         <c:choose>
                                             <c:when test="${customer.status}">
                                                 <button type="button"
                                                         class="btn-small btn-ban"
+                                                        title="Ban customer"
                                                         onclick="openStatusModal('${customer.id}', '${customer.fullName}', '${customer.email}', 'BAN')">
                                                     <i class="fa-solid fa-ban"></i>
-                                                    Ban
                                                 </button>
                                             </c:when>
 
                                             <c:otherwise>
                                                 <button type="button"
                                                         class="btn-small btn-unban"
+                                                        title="Unban customer"
                                                         onclick="openStatusModal('${customer.id}', '${customer.fullName}', '${customer.email}', 'UNBAN')">
                                                     <i class="fa-solid fa-circle-check"></i>
-                                                    Unban
                                                 </button>
                                             </c:otherwise>
                                         </c:choose>
@@ -749,58 +966,118 @@
 
             <div class="order-section">
                 <h4><i class="fa-solid fa-cart-shopping"></i> Order History</h4>
-                <div class="order-empty">
-                    Order history is not connected yet.
+
+                <div id="modalOrderLoading" class="order-history-loading">
+                    <i class="fa-solid fa-spinner fa-spin"></i>
+                    Loading order history...
+                </div>
+
+                <div id="modalOrderError" class="order-history-error" style="display:none;">
+                    Could not load order history.
+                </div>
+
+                <div id="modalOrderEmpty" class="order-history-empty" style="display:none;">
+                    This customer has no orders yet.
+                </div>
+
+                <div id="modalOrderTableWrap" class="order-history-table-wrap" style="display:none;">
+                    <table class="order-history-table">
+                        <thead>
+                            <tr>
+                                <th>Order Code</th>
+                                <th>Total</th>
+                                <th>Status</th>
+                                <th>Date</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody id="modalOrderTableBody"></tbody>
+                    </table>
                 </div>
             </div>
         </div>
     </div>
 </div>
 
-<div id="statusModal" class="status-modal-overlay">
+<div id="statusModal"
+     class="status-modal-overlay">
+
     <div class="status-modal">
-        <h3 id="statusModalTitle">Confirm Account Action</h3>
 
-        <p>You are about to change the account status of customer:</p>
+        <div class="customer-confirm-title">
 
-        <p>
-            <strong>Name:</strong> <span id="statusCustomerName"></span><br>
-            <strong>Email:</strong> <span id="statusCustomerEmail"></span>
+            <i id="statusModalIcon"
+               class="fa-solid fa-circle-exclamation"></i>
+
+            <h3 id="statusModalTitle">
+                Confirm Account Action
+            </h3>
+
+        </div>
+
+        <p id="statusModalDescription">
+            Are you sure you want to change this customer account?
         </p>
 
-        <div class="status-warning" id="statusWarningText">
+        <p>
+            <strong>Name:</strong>
+            <span id="statusCustomerName"></span>
+            <br>
+
+            <strong>Email:</strong>
+            <span id="statusCustomerEmail"></span>
+        </p>
+
+        <div class="status-warning"
+             id="statusWarningText">
+
             This action will change customer account status.
         </div>
 
-        <p>
-            To confirm, type <strong id="statusConfirmWord">BAN</strong> below:
-        </p>
+        <form id="statusForm"
+              method="post">
 
-        <form id="statusForm" method="post">
-            <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}" />
-            <input type="hidden" id="statusUserId" name="userId" />
+            <input type="hidden"
+                   name="${_csrf.parameterName}"
+                   value="${_csrf.token}"/>
 
-            <input type="text"
-                   id="statusInput"
-                   placeholder="Type to confirm"
-                   oninput="checkStatusInput()" />
+            <input type="hidden"
+                   id="statusUserId"
+                   name="userId"/>
 
             <div class="status-modal-actions">
-                <button type="button" class="status-cancel" onclick="closeStatusModal()">
-                    Cancel
+
+                <button type="button"
+                        class="status-cancel"
+                        onclick="closeStatusModal()">
+
+                    <i class="fa-solid fa-xmark"></i>
+                    No
                 </button>
 
-                <button type="submit" id="statusSubmit" class="status-confirm" disabled>
-                    Confirm
+                <button type="submit"
+                        id="statusSubmit"
+                        class="status-confirm enabled">
+
+                    <i id="statusSubmitIcon"
+                       class="fa-solid fa-check"></i>
+
+                    Yes
                 </button>
+
             </div>
+
         </form>
+
     </div>
+
 </div>
 
+<jsp:include page="/WEB-INF/view/layout/admin/toast.jsp" />
+
 <script>
-    function openCustomerModal(id, initial, fullName, email, phone, address, status) {
-        document.getElementById("modalCustomerId").innerText = id;
+    function openCustomerModal(customerId, customerCode, initial, fullName, email, phone, address, status) {
+        document.getElementById("modalCustomerId").innerText = customerCode || customerId;
         document.getElementById("modalInitial").innerText = initial || "U";
         document.getElementById("modalFullName").innerText = fullName || "N/A";
         document.getElementById("modalEmail").innerText = email || "N/A";
@@ -816,6 +1093,76 @@
         }
 
         document.getElementById("customerDetailModal").classList.add("show");
+        loadCustomerOrders(customerId);
+    }
+
+    async function loadCustomerOrders(customerId) {
+        const loading = document.getElementById("modalOrderLoading");
+        const errorBox = document.getElementById("modalOrderError");
+        const emptyBox = document.getElementById("modalOrderEmpty");
+        const tableWrap = document.getElementById("modalOrderTableWrap");
+        const tableBody = document.getElementById("modalOrderTableBody");
+
+        loading.style.display = "block";
+        errorBox.style.display = "none";
+        emptyBox.style.display = "none";
+        tableWrap.style.display = "none";
+        tableBody.innerHTML = "";
+
+        try {
+            const response = await fetch(
+                "/admin/customers/" + encodeURIComponent(customerId) + "/orders",
+                {
+                    method: "GET",
+                    headers: {
+                        "Accept": "application/json"
+                    }
+                }
+            );
+
+            if (!response.ok) {
+                throw new Error("Could not load customer orders.");
+            }
+
+            const orders = await response.json();
+            loading.style.display = "none";
+
+            if (!Array.isArray(orders) || orders.length === 0) {
+                emptyBox.style.display = "block";
+                return;
+            }
+
+            orders.forEach(function (order) {
+                const row = document.createElement("tr");
+
+                appendTextCell(row, order.orderCode || "N/A");
+                appendTextCell(row, (order.totalAmountFormatted || "0") + " ₫");
+                appendTextCell(row, order.statusLabel || order.status || "N/A");
+                appendTextCell(row, order.createdAtFormatted || "N/A");
+
+                const actionCell = document.createElement("td");
+                const link = document.createElement("a");
+                link.href = "/admin/orders/" + order.id;
+                link.className = "order-view-link";
+                link.innerHTML = '<i class="fa-solid fa-eye"></i> View';
+                actionCell.appendChild(link);
+                row.appendChild(actionCell);
+
+                tableBody.appendChild(row);
+            });
+
+            tableWrap.style.display = "block";
+        } catch (error) {
+            loading.style.display = "none";
+            errorBox.textContent = error.message || "Could not load order history.";
+            errorBox.style.display = "block";
+        }
+    }
+
+    function appendTextCell(row, value) {
+        const cell = document.createElement("td");
+        cell.textContent = value;
+        row.appendChild(cell);
     }
 
     function closeCustomerModal() {
@@ -828,66 +1175,112 @@
         }
     }
 
-    let requiredStatusWord = "BAN";
 
-    function openStatusModal(userId, fullName, email, action) {
-        requiredStatusWord = action;
+    function openStatusModal(
+            userId,
+            fullName,
+            email,
+            action) {
 
-        document.getElementById("statusUserId").value = userId;
-        document.getElementById("statusCustomerName").innerText = fullName || "N/A";
-        document.getElementById("statusCustomerEmail").innerText = email || "N/A";
-        document.getElementById("statusConfirmWord").innerText = action;
-        document.getElementById("statusInput").value = "";
+        document.getElementById(
+            "statusUserId"
+        ).value = userId;
 
-        const title = document.getElementById("statusModalTitle");
-        const warning = document.getElementById("statusWarningText");
-        const form = document.getElementById("statusForm");
-        const submit = document.getElementById("statusSubmit");
+        document.getElementById(
+            "statusCustomerName"
+        ).innerText = fullName || "N/A";
+
+        document.getElementById(
+            "statusCustomerEmail"
+        ).innerText = email || "N/A";
+
+        const title =
+            document.getElementById(
+                "statusModalTitle"
+            );
+
+        const description =
+            document.getElementById(
+                "statusModalDescription"
+            );
+
+        const warning =
+            document.getElementById(
+                "statusWarningText"
+            );
+
+        const form =
+            document.getElementById(
+                "statusForm"
+            );
+
+        const submit =
+            document.getElementById(
+                "statusSubmit"
+            );
+
+        const submitIcon =
+            document.getElementById(
+                "statusSubmitIcon"
+            );
 
         if (action === "BAN") {
-            title.innerText = "⚠️ Confirm Account Deactivation";
-            warning.innerHTML =
-                "This action will:<br>" +
-                "- Prevent the customer from logging in<br>" +
-                "- Send notification email to customer<br>" +
-                "- Can be undone later";
 
-            form.action = "/admin/customers/ban";
-            submit.innerText = "Deactivate Account";
-            submit.classList.remove("unban");
+            title.innerText =
+                "Confirm Account Deactivation";
+
+            description.innerText =
+                "Are you sure you want to deactivate this customer account?";
+
+            warning.innerHTML =
+                "The customer will be unable to log in.<br>"
+                + "A notification email will be sent.<br>"
+                + "This action can be undone later.";
+
+            form.action =
+                "/admin/customers/ban";
+
+            submit.className =
+                "status-confirm enabled";
+
+            submitIcon.className =
+                "fa-solid fa-ban";
+
         } else {
-            title.innerText = "✅ Confirm Account Activation";
-            warning.innerHTML =
-                "This action will:<br>" +
-                "- Allow the customer to log in again<br>" +
-                "- Send notification email to customer<br>" +
-                "- Can be changed later";
 
-            form.action = "/admin/customers/unban";
-            submit.innerText = "Activate Account";
-            submit.classList.add("unban");
+            title.innerText =
+                "Confirm Account Activation";
+
+            description.innerText =
+                "Are you sure you want to activate this customer account?";
+
+            warning.innerHTML =
+                "The customer will be allowed to log in again.<br>"
+                + "A notification email will be sent.<br>"
+                + "This action can be changed later.";
+
+            form.action =
+                "/admin/customers/unban";
+
+            submit.className =
+                "status-confirm unban enabled";
+
+            submitIcon.className =
+                "fa-solid fa-circle-check";
         }
 
-        checkStatusInput();
-        document.getElementById("statusModal").classList.add("show");
+        document.getElementById(
+            "statusModal"
+        ).classList.add("show");
     }
 
     function closeStatusModal() {
-        document.getElementById("statusModal").classList.remove("show");
+
+        document.getElementById(
+            "statusModal"
+        ).classList.remove("show");
     }
 
-    function checkStatusInput() {
-        const input = document.getElementById("statusInput").value.trim();
-        const submit = document.getElementById("statusSubmit");
-
-        if (input === requiredStatusWord) {
-            submit.disabled = false;
-            submit.classList.add("enabled");
-        } else {
-            submit.disabled = true;
-            submit.classList.remove("enabled");
-        }
-    }
 
     document.addEventListener("keydown", function (event) {
         if (event.key === "Escape") {
@@ -899,3 +1292,7 @@
 
 </body>
 </html>
+
+
+
+

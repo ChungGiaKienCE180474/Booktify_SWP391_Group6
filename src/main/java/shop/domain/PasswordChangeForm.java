@@ -1,13 +1,14 @@
 package shop.domain;
 
 import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.Size;
 
 public class PasswordChangeForm {
 
-    @NotEmpty(message = "Current password is required")
     private String currentPassword;
 
     @NotEmpty(message = "New password is required")
+    @Size(min = 3, message = "New password must be at least 3 characters")
     private String newPassword;
 
     @NotEmpty(message = "Confirm password is required")

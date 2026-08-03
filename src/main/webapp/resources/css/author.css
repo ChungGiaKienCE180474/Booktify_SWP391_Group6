@@ -1,0 +1,233 @@
+.author-wrap {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 1.5rem 1.5rem 3rem;
+}
+
+.author-breadcrumb {
+    display: flex;
+    align-items: center;
+    gap: .45rem;
+    font-size: .8rem;
+    color: var(--text-muted);
+    margin-bottom: 1.2rem;
+    flex-wrap: wrap;
+}
+
+.author-breadcrumb a {
+    text-decoration: none;
+    color: var(--text-muted);
+    transition: .2s;
+}
+
+.author-breadcrumb a:hover {
+    color: var(--primary);
+}
+
+.author-breadcrumb i {
+    font-size: .6rem;
+    opacity: .4;
+}
+
+.author-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.2rem;
+}
+
+.author-header h2 {
+    margin: 0;
+    color: var(--primary);
+    font-size: 1.4rem;
+    font-weight: 800;
+}
+
+.author-header p {
+    margin: .2rem 0 0;
+    color: var(--text-muted);
+    font-size: .85rem;
+}
+
+.author-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 1rem;
+}
+
+.author-card {
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    text-decoration: none;
+    color: inherit;
+    display: flex;
+    flex-direction: column;
+    transition: .2s;
+}
+
+.author-card:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--shadow-lg);
+}
+
+.author-img {
+    height: 220px;
+    width: 100%;
+    background: linear-gradient(135deg, #ECEFF1, #CFD8DC);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+
+.author-img img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 12px;
+    display: block;
+}
+
+.author-body {
+    padding: .8rem;
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+}
+
+.author-name {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--text);
+}
+
+.author-nationality {
+    font-size: .8rem;
+    color: var(--text-muted);
+    margin-top: 12px;
+    margin-bottom: .8rem;
+}
+
+.author-btn {
+    margin-top: auto;
+    padding: .4rem .7rem;
+    background: var(--primary);
+    color: #fff;
+    font-size: .75rem;
+    font-weight: 700;
+    text-align: center;
+    border-radius: 6px;
+}
+
+.author-btn:hover {
+    background: var(--primary-light);
+}
+
+.empty-state {
+    text-align: center;
+    padding: 4rem 1rem;
+    color: var(--text-muted);
+    grid-column: 1 / -1;
+}
+
+
+/* =====================================================
+   Author Detail
+===================================================== */
+
+.author-detail {
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    gap: 2.5rem;
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 2rem;
+    box-shadow: var(--shadow-sm);
+    align-items: start;
+}
+
+.author-no-img {
+    aspect-ratio: 2/3;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    border: 2px dashed #ddd;
+    border-radius: 12px;
+    color: #999;
+}
+
+.author-no-img i {
+    font-size: 60px;
+    margin-bottom: 10px;
+}
+
+.author-info h1 {
+    margin: 0;
+    font-size: 2.2rem;
+    font-weight: 800;
+    color: var(--text);
+}
+
+.author-biography {
+    line-height: 1.9;
+    color: var(--text);
+    font-size: .95rem;
+    text-align: justify;
+}
+
+
+/* ==========================
+   Responsive
+========================== */
+
+@media (max-width:768px) {
+
+    .author-detail {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+    }
+
+    .author-img {
+        max-width: 260px;
+        margin: auto;
+    }
+
+    .author-info h1 {
+        font-size: 1.8rem;
+    }
+
+}
+
+
+
+
+.author-books {
+    margin-top:50px;
+}
+
+.author-books h2 {
+    font-size:26px;
+    margin-bottom:25px;
+}
+
+.book-grid {
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:25px;
+}
+
+.book-card {
+    background:white;
+    border-radius:12px;
+    padding:15px;
+}
+
+.book-card img {
+    width:100%;
+    height:260px;
+    object-fit:cover;
+}

@@ -1,0 +1,632 @@
+/* ================================================================
+   BOOKTIFY — STOCK MANAGEMENT
+   Extends admin-dashboard.css
+   ================================================================ */
+
+/* ================================================================
+   PAGE HEADER
+   ================================================================ */
+
+.stock-page-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 20px;
+}
+
+.stock-page-header p:not(.admin-kicker) {
+    margin: 7px 0 0;
+    color: var(--text-muted);
+    font-size: 0.86rem;
+}
+
+/* ================================================================
+   ALERTS
+   ================================================================ */
+
+.admin-alert {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+}
+
+.admin-alert--success {
+    background: var(--success-lt);
+    border-color: var(--success-bd);
+    color: var(--success);
+}
+
+.admin-alert--error {
+    background: var(--danger-lt);
+    border-color: var(--danger-bd);
+    color: var(--danger);
+}
+
+/* ================================================================
+   SUMMARY CARDS
+   ================================================================ */
+
+.stock-stat-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 16px;
+}
+
+.stock-stat-card {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    min-height: 112px;
+    padding: 20px;
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+    transition: var(--ease);
+}
+
+.stock-stat-card:hover {
+    border-color: var(--border-md);
+    box-shadow: var(--shadow-md);
+    transform: translateY(-2px);
+}
+
+.stock-stat-icon {
+    width: 52px;
+    height: 52px;
+    display: grid;
+    place-items: center;
+    flex-shrink: 0;
+    border-radius: 14px;
+    font-size: 1.15rem;
+}
+
+.stock-stat-icon--products {
+    background: #E3F4F1;
+    border: 1px solid #B7DED7;
+    color: #006B5E;
+}
+
+.stock-stat-icon--units {
+    background: #EAF4FF;
+    border: 1px solid #BFDBFE;
+    color: #0F6CBD;
+}
+
+.stock-stat-icon--low {
+    background: #FFF7ED;
+    border: 1px solid #FED7AA;
+    color: #F57C00;
+}
+
+.stock-stat-icon--out {
+    background: #FEF2F2;
+    border: 1px solid #FECACA;
+    color: #DC2626;
+}
+
+.stock-stat-copy {
+    min-width: 0;
+}
+
+.stock-stat-copy span {
+    display: block;
+    color: var(--text-muted);
+    font-size: 0.74rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.stock-stat-copy strong {
+    display: block;
+    margin-top: 6px;
+    color: var(--text);
+    font-size: 1.8rem;
+    font-weight: 800;
+    line-height: 1;
+}
+
+/* ================================================================
+   FILTER BAR
+   ================================================================ */
+
+.stock-filter-panel {
+    padding: 14px 18px;
+}
+
+.stock-filter-form {
+    display: grid;
+    grid-template-columns:
+        repeat(4, minmax(135px, 1fr))
+        auto;
+    align-items: end;
+    gap: 12px;
+    margin: 0;
+}
+
+.stock-filter-field {
+    min-width: 0;
+    margin: 0;
+}
+
+.stock-filter-field label {
+    display: block;
+    margin: 0 0 6px;
+    color: var(--text-muted);
+    font-size: 0.72rem;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.stock-filter-field .admin-input {
+    width: 100%;
+    min-width: 0;
+}
+
+.stock-filter-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0;
+    white-space: nowrap;
+}
+
+.stock-filter-actions .admin-button {
+    flex-shrink: 0;
+    white-space: nowrap;
+}
+
+/* ================================================================
+   INVENTORY PANEL
+   ================================================================ */
+
+.stock-inventory-panel {
+    min-width: 0;
+}
+
+.stock-panel-title {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 14px;
+}
+
+.stock-panel-title h3 {
+    margin: 0;
+    color: var(--text);
+    font-size: 1rem;
+    font-weight: 800;
+    text-transform: none;
+    letter-spacing: 0;
+}
+
+.stock-panel-title h3 i {
+    color: var(--primary);
+}
+
+.stock-threshold-note {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: #2563EB;
+    font-size: 0.75rem;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.stock-table-wrap {
+    width: 100%;
+    overflow-x: auto;
+}
+
+.stock-table-wrap .admin-table {
+    min-width: 1080px;
+}
+
+/* ================================================================
+   PRODUCT CELL
+   ================================================================ */
+
+.stock-row-number {
+    color: var(--text-faint) !important;
+    font-weight: 700;
+}
+
+.stock-product-cell {
+    display: flex;
+    align-items: center;
+    gap: 11px;
+    min-width: 230px;
+}
+
+.stock-product-image,
+.stock-product-placeholder {
+    width: 42px;
+    height: 52px;
+    flex-shrink: 0;
+    border: 1px solid var(--border);
+    border-radius: 7px;
+    background: #F9FAFB;
+}
+
+.stock-product-image {
+    display: block;
+    object-fit: contain;
+}
+
+.stock-product-placeholder {
+    display: grid;
+    place-items: center;
+    color: var(--text-faint);
+}
+
+.stock-product-name {
+    max-width: 220px;
+    overflow: hidden;
+    color: var(--text);
+    font-weight: 700;
+    line-height: 1.35;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.stock-product-code {
+    max-width: 220px;
+    margin-top: 3px;
+    overflow: hidden;
+    color: var(--text-muted);
+    font-size: 0.72rem;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* ================================================================
+   TYPE AND STOCK STATUS
+   ================================================================ */
+
+.stock-type-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 9px;
+    border: 1px solid var(--border-md);
+    border-radius: 999px;
+    background: #F9FAFB;
+    color: var(--text-soft);
+    font-size: 0.72rem;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.stock-quantity {
+    color: var(--text);
+    font-size: 1rem;
+    font-weight: 800;
+}
+
+.stock-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 10px;
+    border-radius: 999px;
+    font-size: 0.72rem;
+    font-weight: 800;
+    white-space: nowrap;
+}
+
+.stock-status--in {
+    background: #F0FDF4;
+    border: 1px solid #BBF7D0;
+    color: #15803D;
+}
+
+.stock-status--low {
+    background: #FFF7ED;
+    border: 1px solid #FED7AA;
+    color: #EA580C;
+}
+
+.stock-status--out {
+    background: #FEF2F2;
+    border: 1px solid #FECACA;
+    color: #DC2626;
+}
+
+.stock-updated-cell {
+    color: var(--text-muted) !important;
+    font-size: 0.78rem;
+    white-space: nowrap;
+}
+
+/* ================================================================
+   INCREASE AND DECREASE BUTTONS
+   ================================================================ */
+
+.stock-actions {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    white-space: nowrap;
+}
+
+.icon-link--stock-in {
+    color: #15803D;
+}
+
+.icon-link--stock-in:hover {
+    background: #F0FDF4;
+    border-color: #86EFAC;
+    color: #15803D;
+}
+
+.icon-link--stock-out {
+    color: #DC2626;
+}
+
+.icon-link--stock-out:hover {
+    background: #FEF2F2;
+    border-color: #FCA5A5;
+    color: #DC2626;
+}
+
+.icon-link:disabled {
+    background: #F9FAFB;
+    border-color: var(--border);
+    color: #D1D5DB;
+    cursor: not-allowed;
+    opacity: 0.65;
+}
+
+.icon-link:disabled:hover {
+    background: #F9FAFB;
+    border-color: var(--border);
+    color: #D1D5DB;
+}
+
+/* ================================================================
+   EMPTY STATE
+   ================================================================ */
+
+.stock-empty-state {
+    padding: 48px 20px !important;
+    color: var(--text-muted) !important;
+    text-align: center;
+}
+
+.stock-empty-state i {
+    display: block;
+    margin-bottom: 12px;
+    color: var(--text-faint);
+    font-size: 2.3rem;
+}
+
+/* ================================================================
+   PAGINATION
+   ================================================================ */
+
+.stock-pagination {
+    padding-top: 18px;
+}
+
+.stock-pagination .admin-pagination__nav {
+    box-shadow: var(--shadow-xs);
+}
+
+/* ================================================================
+   MODAL BACKDROP
+   ================================================================ */
+
+.stock-modal-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 2000;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    overflow-y: auto;
+    background: rgba(17, 24, 39, 0.55);
+    backdrop-filter: blur(2px);
+}
+
+.stock-modal-backdrop.open {
+    display: flex;
+}
+
+/* ================================================================
+   MODAL
+   ================================================================ */
+
+.stock-modal {
+    width: min(560px, 100%);
+    max-height: calc(100vh - 40px);
+    overflow-y: auto;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    background: var(--white);
+    box-shadow: 0 24px 70px rgba(0, 0, 0, 0.22);
+    animation: stockModalOpen 160ms ease;
+}
+
+@keyframes stockModalOpen {
+    from {
+        opacity: 0;
+        transform: translateY(8px) scale(0.985);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+.stock-modal-header {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 18px 22px;
+    border-bottom: 1px solid var(--border);
+    background: #F9FAFB;
+}
+
+.stock-modal-header h3 {
+    margin: 0;
+    color: var(--text);
+    font-size: 1rem;
+    font-weight: 800;
+}
+
+.stock-modal-close {
+    width: 34px;
+    height: 34px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    border: 1px solid var(--border);
+    border-radius: 7px;
+    background: var(--white);
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: var(--ease);
+}
+
+.stock-modal-close:hover {
+    background: var(--danger-lt);
+    border-color: var(--danger-bd);
+    color: var(--danger);
+}
+
+.stock-modal-body {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    padding: 22px;
+}
+
+.stock-field-full {
+    grid-column: 1 / -1;
+}
+
+.stock-readonly {
+    background: #F9FAFB;
+    color: var(--text-muted);
+    cursor: default;
+}
+
+textarea.admin-input {
+    min-height: 96px;
+    line-height: 1.5;
+    resize: vertical;
+}
+
+.stock-modal-footer {
+    position: sticky;
+    bottom: 0;
+    z-index: 2;
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    padding: 16px 22px;
+    border-top: 1px solid var(--border);
+    background: #F9FAFB;
+}
+
+/* ================================================================
+   RESPONSIVE
+   ================================================================ */
+
+@media (max-width: 1250px) {
+    .stock-filter-form {
+        grid-template-columns:
+            repeat(2, minmax(180px, 1fr));
+    }
+
+    .stock-filter-actions {
+        grid-column: 1 / -1;
+        justify-content: flex-end;
+    }
+}
+
+@media (max-width: 1150px) {
+    .stock-stat-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 850px) {
+    .stock-page-header {
+        flex-direction: column;
+    }
+
+    .stock-stat-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .stock-panel-title {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .stock-modal-body {
+        grid-template-columns: 1fr;
+    }
+
+    .stock-field-full {
+        grid-column: auto;
+    }
+}
+
+@media (max-width: 700px) {
+    .stock-filter-form {
+        grid-template-columns: 1fr;
+    }
+
+    .stock-filter-actions {
+        grid-column: auto;
+        justify-content: flex-start;
+        flex-wrap: wrap;
+    }
+}
+
+@media (max-width: 560px) {
+    .stock-stat-card {
+        min-height: 96px;
+        padding: 16px;
+    }
+
+    .stock-stat-copy strong {
+        font-size: 1.55rem;
+    }
+
+    .stock-filter-actions {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .stock-filter-actions .admin-button,
+    .stock-modal-footer .admin-button {
+        width: 100%;
+    }
+
+    .stock-modal-footer {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .stock-modal-backdrop {
+        align-items: flex-start;
+        padding: 10px;
+    }
+
+    .stock-modal {
+        max-height: calc(100vh - 20px);
+    }
+}

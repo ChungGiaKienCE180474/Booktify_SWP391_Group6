@@ -24,13 +24,22 @@ public class CustomSuccessHandler implements AuthenticationSuccessHandler {
     }
 
     protected String determineTargetUrl(final Authentication authentication) {
-        User user = this.userService.getUserByEmail(authentication.getName());
-        if (user != null && user.getRole() != null && "ADMIN".equalsIgnoreCase(user.getRole().getName())) {
+    User user = this.userService.getUserByEmail(authentication.getName());
+
+    if (user != null && user.getRole() != null) {
+        String roleName = user.getRole().getName();
+
+        if ("ADMIN".equalsIgnoreCase(roleName)) {
             return "/admin";
         }
 
-        return "/";
+        if ("STAFF".equalsIgnoreCase(roleName)) {
+            return "/staff";
+        }
     }
+
+    return "/";
+}
 
     protected void clearAuthenticationAttributes(HttpServletRequest request, Authentication authentication) {
         HttpSession session = request.getSession(false);
