@@ -968,13 +968,22 @@ public class OrderService {
     }
 
     /**
-     * Admin được bấm "Hoàn thành" khi: đơn COD và khách đã báo đã thanh toán
-     * (AWAITING_CONFIRMATION).
+     * Admin được bấm "Hoàn thành" khi: đơn COD, khách đã báo đã thanh toán
+     * (AWAITING_CONFIRMATION), VÀ đơn đang giao/đã giao (SHIPPING/DELIVERED).
+     * 
+     * Chặn trường hợp đơn đã CANCELLED (kho đã hoàn) mà vẫn còn cờ AWAITING —
+     * nếu không kiểm sẽ ép DELIVERED từ CANCELLED, gây lệch tồn kho.
      */
     public boolean canAdminCompletePayment(Order order) {
-        return PaymentMethod.COD.name().equals(order.getPaymentMethod())
-                && PaymentStatus.fromValue(order.getPaymentStatus())
-                        == PaymentStatus.AWAITING_CONFIRMATION;
+        if (!PaymentMethod.COD.name().equals(order.getPaymentMethod())) {
+            return false;
+        }
+        if (PaymentStatus.fromValue(order.getPaymentStatus())
+                != PaymentStatus.AWAITING_CONFIRMATION) {
+            return false;
+        }
+        OrderStatus status = OrderStatus.fromValue(order.getStatus());
+        return status == OrderStatus.SHIPPING || status == OrderStatus.DELIVERED;
     }
 
     /** Khách xác nhận đã thanh toán COD — UNPAID → AWAITING_CONFIRMATION. */
