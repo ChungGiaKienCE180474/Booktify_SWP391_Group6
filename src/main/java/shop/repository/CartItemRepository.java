@@ -20,4 +20,7 @@ public interface CartItemRepository extends JpaRepository<CartItem, Long> {
 
     // Used to block deleting/deactivating a book that's sitting in someone's cart.
     boolean existsByBook_Id(Long bookId);
+
+    // Used to block deleting a book set that's sitting in someone's cart.
+    boolean existsByBookSet_Id(Long bookSetId);
 }

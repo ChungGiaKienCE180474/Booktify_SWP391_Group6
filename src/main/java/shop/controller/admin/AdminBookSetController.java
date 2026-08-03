@@ -38,9 +38,14 @@ public class AdminBookSetController {
     }
 
     @GetMapping
-    public String list(Model model) {
-        List<BookSet> sets = bookSetService.findAllForAdmin();
+    public String list(
+            @RequestParam(required = false) String q,
+            @RequestParam(required = false) String status,
+            Model model) {
+        List<BookSet> sets = bookSetService.filterForAdmin(q, status);
         model.addAttribute("bookSets", sets);
+        model.addAttribute("q", q);
+        model.addAttribute("status", status);
         model.addAttribute("availableQtyMap", sets.stream().collect(
                 java.util.stream.Collectors.toMap(
                         BookSet::getId,
@@ -132,6 +137,12 @@ public class AdminBookSetController {
             }
             prepareFormModel(model, form, form.getId() == null ? "create" : "edit");
             return "admin/book-set/form";
+        } catch (Exception ex) {
+            // Chặn mọi lỗi runtime khác (vd DataIntegrityViolation) → tránh Whitelabel 500
+            bindingResult.rejectValue("items", "invalid",
+                    "An unexpected error occurred while saving the book set.");
+            prepareFormModel(model, form, form.getId() == null ? "create" : "edit");
+            return "admin/book-set/form";
         }
     }
 
@@ -148,6 +159,46 @@ public class AdminBookSetController {
             );
         } catch (IllegalArgumentException ex) {
             redirectAttributes.addFlashAttribute("errorMessage", ex.getMessage());
+        } catch (Exception ex) {
+            redirectAttributes.addFlashAttribute("errorMessage",
+                    "An unexpected error occurred while updating the status.");
+        }
+        return "redirect:/admin/book-sets";
+    }
+
+    // Soft-delete (ẩn) book set — giống Book. Chặn nếu đang trong giỏ khách.
+    @PostMapping("/{id}/delete")
+    public String remove(
+            @PathVariable long id,
+            RedirectAttributes redirectAttributes) {
+        try {
+            bookSetService.removeBookSet(id);
+            redirectAttributes.addFlashAttribute("successMessage", "Book set deleted successfully.");
+        } catch (IllegalStateException ex) {
+            // Đang nằm trong giỏ — báo lý do cụ thể
+            redirectAttributes.addFlashAttribute("errorMessage", ex.getMessage());
+        } catch (IllegalArgumentException ex) {
+            redirectAttributes.addFlashAttribute("errorMessage", ex.getMessage());
+        } catch (Exception ex) {
+            redirectAttributes.addFlashAttribute("errorMessage",
+                    "An unexpected error occurred while deleting the book set.");
+        }
+        return "redirect:/admin/book-sets";
+    }
+
+    // Khôi phục book set đã ẩn — giống Book.
+    @PostMapping("/{id}/restore")
+    public String restore(
+            @PathVariable long id,
+            RedirectAttributes redirectAttributes) {
+        try {
+            bookSetService.restoreBookSet(id);
+            redirectAttributes.addFlashAttribute("successMessage", "Book set restored successfully.");
+        } catch (IllegalArgumentException ex) {
+            redirectAttributes.addFlashAttribute("errorMessage", ex.getMessage());
+        } catch (Exception ex) {
+            redirectAttributes.addFlashAttribute("errorMessage",
+                    "An unexpected error occurred while restoring the book set.");
         }
         return "redirect:/admin/book-sets";
     }

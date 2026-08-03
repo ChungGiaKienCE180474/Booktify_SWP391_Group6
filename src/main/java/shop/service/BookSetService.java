@@ -20,6 +20,7 @@ import shop.domain.dto.BookSetForm;
 import shop.domain.dto.BookSetItemForm;
 import shop.repository.BookRepository;
 import shop.repository.BookSetRepository;
+import shop.repository.CartItemRepository;
 
 @Service
 public class BookSetService {
@@ -27,19 +28,82 @@ public class BookSetService {
     private final BookSetRepository bookSetRepository;
     private final BookRepository bookRepository;
     private final StockService stockService;
+    private final CartItemRepository cartItemRepository;
 
     public BookSetService(
             BookSetRepository bookSetRepository,
             BookRepository bookRepository,
-            StockService stockService) {
+            StockService stockService,
+            CartItemRepository cartItemRepository) {
         this.bookSetRepository = bookSetRepository;
         this.bookRepository = bookRepository;
         this.stockService = stockService;
+        this.cartItemRepository = cartItemRepository;
     }
 
     @Transactional(readOnly = true)
     public List<BookSet> findAllForAdmin() {
         return bookSetRepository.findAllWithItems();
+    }
+
+    /**
+     * Tìm kiếm + lọc trạng thái cho trang admin (giống filterBooks bên Book).
+     * status: "active" | "inactive" | khác/null = tất cả.
+     */
+    @Transactional(readOnly = true)
+    public List<BookSet> filterForAdmin(String keyword, String status) {
+        String kw = blankToNull(keyword);
+        String lowerKw = kw == null ? null : kw.toLowerCase(Locale.ROOT);
+
+        return bookSetRepository.findAllWithItems().stream()
+                .filter(s -> matchesKeyword(s, lowerKw))
+                .filter(s -> matchesStatus(s, status))
+                .toList();
+    }
+
+    private boolean matchesKeyword(BookSet set, String lowerKw) {
+        if (lowerKw == null) {
+            return true;
+        }
+        String name = set.getName() == null ? "" : set.getName().toLowerCase(Locale.ROOT);
+        String tag = set.getGradeLevel() == null ? "" : set.getGradeLevel().toLowerCase(Locale.ROOT);
+        String desc = set.getDescription() == null ? "" : set.getDescription().toLowerCase(Locale.ROOT);
+        return name.contains(lowerKw) || tag.contains(lowerKw) || desc.contains(lowerKw);
+    }
+
+    private boolean matchesStatus(BookSet set, String status) {
+        if ("active".equalsIgnoreCase(status)) {
+            return set.isActive();
+        }
+        if ("inactive".equalsIgnoreCase(status)) {
+            return !set.isActive();
+        }
+        return true;
+    }
+
+    /** Soft-delete: ẩn book set (active=false). Chặn nếu đang nằm trong giỏ khách. */
+    @Transactional
+    public void removeBookSet(long id) {
+        BookSet bookSet = bookSetRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Book set not found."));
+
+        if (cartItemRepository.existsByBookSet_Id(id)) {
+            throw new IllegalStateException(
+                    "Cannot delete this book set: it is currently in a customer's cart."
+            );
+        }
+
+        bookSet.setActive(false);
+        bookSetRepository.save(bookSet);
+    }
+
+    /** Khôi phục book set đã ẩn (active=true). */
+    @Transactional
+    public void restoreBookSet(long id) {
+        BookSet bookSet = bookSetRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Book set not found."));
+        bookSet.setActive(true);
+        bookSetRepository.save(bookSet);
     }
 
     @Transactional(readOnly = true)
