@@ -22,6 +22,13 @@ import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
 
+/**
+ * Entity đơn hàng — bảng {@code orders}.
+ * <p>
+ * Một Order gồm thông tin giao hàng, thanh toán, trạng thái và danh sách
+ * {@link OrderItem}. Được tạo bởi {@link shop.service.OrderService#createOrderFromCart}.
+ * Trạng thái tuân theo state machine {@link OrderStatus}.
+ */
 @Entity
 @Table(name = "orders")
 public class Order {
@@ -30,58 +37,84 @@ public class Order {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    /** Mã đơn hiển thị cho user, dạng ORD-yyyyMMdd-xxxxxx, unique trên DB. */
     @Column(name = "order_code", nullable = false, unique = true, length = 32)
     private String orderCode;
 
+    /** Customer đặt đơn — FK users.id */
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
+    /** Tên người nhận hàng (snapshot từ CheckoutForm, có thể khác fullName user). */
     @Column(name = "recipient_name", nullable = false, length = 150)
     private String recipientName;
 
+    /** SĐT người nhận — dùng liên hệ giao hàng. */
     @Column(name = "recipient_phone", nullable = false, length = 20)
     private String recipientPhone;
 
+    /** Địa chỉ giao hàng đầy đủ. */
     @Column(name = "shipping_address", nullable = false, length = 500)
     private String shippingAddress;
 
+    /** Phương thức thanh toán — hiện chỉ lưu {@code COD}. */
     @Column(name = "payment_method", nullable = false, length = 30)
     private String paymentMethod;
 
+    /** Phương thức vận chuyển — hiện mặc định {@code STANDARD}. */
     @Column(name = "shipping_method", nullable = false, length = 30)
     private String shippingMethod;
 
+    /** Trạng thái đơn — giá trị enum {@link OrderStatus#name()}. */
     @Column(nullable = false, length = 30)
     private String status;
 
+    /** Trạng thái thanh toán — giá trị enum {@link PaymentStatus#name()}. */
+    @Column(name = "payment_status", nullable = false, length = 30)
+    private String paymentStatus = PaymentStatus.UNPAID.name();
+
+    /** Thời điểm xác nhận đã thu tiền (admin/VNPay); null khi chưa thanh toán. */
+    @Column(name = "paid_at")
+    private LocalDateTime paidAt;
+
+    /** Mã voucher đã áp dụng (nullable nếu không dùng voucher). */
     @Column(name = "voucher_code", length = 50)
     private String voucherCode;
 
+    /** Tổng tiền hàng sau khuyến mãi từng sách, trước voucher. */
     @Column(nullable = false, precision = 12, scale = 2)
     private BigDecimal subtotal = BigDecimal.ZERO;
 
+    /** Số tiền giảm từ voucher — lưu riêng để hiển thị trên hóa đơn. */
     @Column(name = "discount_amount", nullable = false, precision = 12, scale = 2)
     private BigDecimal discountAmount = BigDecimal.ZERO;
 
+    /** Phí vận chuyển — hiện luôn 0. */
     @Column(name = "shipping_fee", nullable = false, precision = 12, scale = 2)
     private BigDecimal shippingFee = BigDecimal.ZERO;
 
+    /** Tổng thanh toán = subtotal - discount_amount (+ shipping_fee). */
     @Column(name = "total_amount", nullable = false, precision = 12, scale = 2)
     private BigDecimal totalAmount = BigDecimal.ZERO;
 
+    /** Ghi chú tùy chọn từ customer khi checkout. */
     @Column(length = 500)
     private String note;
 
+    /** Thời điểm tạo đơn — set tự động bởi {@link #onCreate()}. */
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
+    /** Thời điểm cập nhật gần nhất — set bởi {@link #onUpdate()}. */
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
 
+    /** Các dòng sản phẩm trong đơn — cascade ALL: lưu/xóa cùng Order. */
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<OrderItem> items = new ArrayList<>();
 
+    /** JPA callback: gán createdAt và updatedAt khi INSERT lần đầu. */
     @PrePersist
     void onCreate() {
         LocalDateTime now = LocalDateTime.now();
@@ -89,6 +122,7 @@ public class Order {
         this.updatedAt = now;
     }
 
+    /** JPA callback: cập nhật updatedAt mỗi lần UPDATE (vd: đổi status). */
     @PreUpdate
     void onUpdate() {
         this.updatedAt = LocalDateTime.now();
@@ -164,6 +198,22 @@ public class Order {
 
     public void setStatus(String status) {
         this.status = status;
+    }
+
+    public String getPaymentStatus() {
+        return paymentStatus;
+    }
+
+    public void setPaymentStatus(String paymentStatus) {
+        this.paymentStatus = paymentStatus;
+    }
+
+    public LocalDateTime getPaidAt() {
+        return paidAt;
+    }
+
+    public void setPaidAt(LocalDateTime paidAt) {
+        this.paidAt = paidAt;
     }
 
     public String getVoucherCode() {
@@ -259,6 +309,7 @@ public class Order {
         return formatMoney(shippingFee);
     }
 
+    /** Nhãn trạng thái — OrderDTO.statusLabel */
     public String getStatusLabel() {
         try {
             return OrderStatus.valueOf(status).getLabel();
@@ -273,6 +324,11 @@ public class Order {
         } catch (Exception ex) {
             return paymentMethod;
         }
+    }
+
+    /** Nhãn trạng thái thanh toán — OrderDTO.paymentStatusLabel */
+    public String getPaymentStatusLabel() {
+        return PaymentStatus.fromValue(paymentStatus).getLabel();
     }
 
     public String getShippingMethodLabel() {

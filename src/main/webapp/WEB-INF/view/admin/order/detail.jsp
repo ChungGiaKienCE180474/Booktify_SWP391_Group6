@@ -184,6 +184,28 @@
                                     </c:choose>
                                 </form>
                             </div>
+
+                            <div class="admin-panel">
+                                <h3><i class="fa-solid fa-money-bill-wave"></i> Payment</h3>
+                                <p class="admin-order-status-note" style="margin-bottom:.5rem;">
+                                    Status:
+                                    <span class="order-status-badge order-status-badge--${order.paymentStatus}">
+                                        ${order.paymentStatusLabel}
+                                    </span>
+                                </p>
+                                <c:if test="${order.canAdminCompletePayment}">
+                                    <p class="admin-order-status-note" style="margin-bottom:.5rem;">
+                                        The customer has confirmed payment. Complete the order to mark it
+                                        paid and delivered.
+                                    </p>
+                                    <form method="post" action="/admin/orders/${order.id}/complete-payment">
+                                        <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}" />
+                                        <button type="submit" class="admin-button">
+                                            <i class="fa-solid fa-check-double"></i> Complete (mark paid + delivered)
+                                        </button>
+                                    </form>
+                                </c:if>
+                            </div>
                         </div>
                     </div>
                 </div>

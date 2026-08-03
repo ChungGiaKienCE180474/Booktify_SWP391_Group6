@@ -1,3 +1,4 @@
+// Package controller staff — quản lý đơn hàng (quyền STAFF)
 package shop.controller.staff;
 
 import java.util.List;
@@ -16,12 +17,16 @@ import shop.domain.OrderStatus;
 import shop.domain.dto.OrderDTO;
 import shop.service.OrderService;
 
+/**
+ * Quản lý đơn hàng phía Staff — prefix {@code /staff/orders}.
+ * Logic giống AdminOrderController, khác view JSP và role STAFF.
+ */
 @Controller
 @RequestMapping("/staff/orders")
-@PreAuthorize("hasRole('STAFF')")
+@PreAuthorize("hasRole('STAFF')") // Chỉ user có ROLE_STAFF mới truy cập
 public class StaffOrderController {
 
-    private static final int PAGE_SIZE = 10;
+    private static final int PAGE_SIZE = 10; // 10 đơn / trang
 
     private final OrderService orderService;
 
@@ -29,6 +34,7 @@ public class StaffOrderController {
         this.orderService = orderService;
     }
 
+    /** GET /staff/orders — danh sách đơn + search + phân trang */
     @GetMapping
     public String listOrders(
             @RequestParam(required = false) String keyword,
@@ -37,16 +43,16 @@ public class StaffOrderController {
             @RequestParam(defaultValue = "0") int page,
             Model model) {
 
-        List<OrderDTO> all = orderService.searchOrders(keyword, status, sort);
-        int totalItems = all.size();
+        List<OrderDTO> all = orderService.searchOrders(keyword, status, sort); // Lấy + lọc + sort
+        int totalItems = all.size(); // Số đơn sau filter
         int totalPages = totalItems == 0 ? 0 : (int) Math.ceil((double) totalItems / PAGE_SIZE);
         if (totalPages > 0) {
-            page = Math.max(0, Math.min(page, totalPages - 1));
+            page = Math.max(0, Math.min(page, totalPages - 1)); // Clamp page hợp lệ
         } else {
             page = 0;
         }
-        int from = page * PAGE_SIZE;
-        int to = Math.min(from + PAGE_SIZE, totalItems);
+        int from = page * PAGE_SIZE; // Index đầu trang
+        int to = Math.min(from + PAGE_SIZE, totalItems); // Index cuối (exclusive)
 
         model.addAttribute("orders", totalItems == 0 ? List.of() : all.subList(from, to));
         model.addAttribute("keyword", keyword);
@@ -58,17 +64,27 @@ public class StaffOrderController {
         model.addAttribute("fromItem", totalItems == 0 ? 0 : from + 1);
         model.addAttribute("toItem", to);
         model.addAttribute("orderStatuses", OrderStatus.values());
-        return "layout/staff/order/list";
+        return "layout/staff/order/list"; // JSP staff (khác admin/order/list)
     }
 
+    /** GET /staff/orders/{id} — chi tiết đơn */
     @GetMapping("/{id}")
-    public String orderDetail(@PathVariable Long id, Model model, RedirectAttributes redirectAttributes) {
+    public String orderDetail(
+            @PathVariable Long id,
+            Model model,
+            RedirectAttributes redirectAttributes) {
+
         return orderService.getOrderById(id)
                 .map(order -> {
                     model.addAttribute("order", order);
                     model.addAttribute("orderStatuses", OrderStatus.values());
-                    OrderStatus currentStatus = OrderStatus.fromValue(order.getStatus());
-                    model.addAttribute("allowedNextStatuses", currentStatus.allowedTransitions());
+                    model.addAttribute(
+                            "allowedNextStatuses",
+                            orderService.getAllowedNextStatuses(
+                                    order.getStatus(),
+                                    order.getPaymentMethod()
+                            )
+                    );
                     return "layout/staff/order/detail";
                 })
                 .orElseGet(() -> {
@@ -77,13 +93,15 @@ public class StaffOrderController {
                 });
     }
 
+    /** POST /staff/orders/{id}/status — cập nhật trạng thái đơn */
     @PostMapping("/{id}/status")
     public String updateStatus(
             @PathVariable Long id,
             @RequestParam String status,
             RedirectAttributes redirectAttributes) {
+
         try {
-            orderService.updateOrderStatus(id, status);
+            orderService.updateOrderStatus(id, status); // State machine + hoàn kho nếu hủy
             redirectAttributes.addFlashAttribute("successMessage", "Order status updated.");
         } catch (IllegalArgumentException ex) {
             redirectAttributes.addFlashAttribute("errorMessage", ex.getMessage());

@@ -18,7 +18,8 @@ import jakarta.persistence.UniqueConstraint;
 @Entity
 @Table(name = "cart_items", uniqueConstraints = {
         @UniqueConstraint(name = "uk_cart_book", columnNames = { "cart_id", "book_id" }),
-        @UniqueConstraint(name = "uk_cart_vpp", columnNames = { "cart_id", "vpp_item_id" })
+        @UniqueConstraint(name = "uk_cart_vpp", columnNames = { "cart_id", "vpp_item_id" }),
+        @UniqueConstraint(name = "uk_cart_book_set", columnNames = { "cart_id", "book_set_id" })
 })
 public class CartItem {
 
@@ -33,10 +34,14 @@ public class CartItem {
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "book_id")
     private Book book;
-    
+
     @ManyToOne
     @JoinColumn(name = "vpp_item_id")
     private VppItem vppItem;
+
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "book_set_id")
+    private BookSet bookSet;
 
     @Column(nullable = false)
     private int quantity;
@@ -72,18 +77,32 @@ public class CartItem {
     public void setQuantity(int quantity) {
         this.quantity = quantity;
     }
-    
+
     public VppItem getVppItem() {
         return vppItem;
     }
-    public void setVppItem(VppItem vppItem) {
-    this.vppItem = vppItem;
-}
 
-    /** Subtotal formatted as xxx.xxx (German locale, no decimals) */
+    public void setVppItem(VppItem vppItem) {
+        this.vppItem = vppItem;
+    }
+
+    public BookSet getBookSet() {
+        return bookSet;
+    }
+
+    public void setBookSet(BookSet bookSet) {
+        this.bookSet = bookSet;
+    }
+
+    public boolean isBookSetItem() {
+        return bookSet != null;
+    }
+
     public String getSubtotalFormatted() {
         BigDecimal unitPrice = null;
-        if (book != null) {
+        if (bookSet != null) {
+            unitPrice = bookSet.getSetPrice();
+        } else if (book != null) {
             unitPrice = book.getPrice();
         } else if (vppItem != null) {
             unitPrice = vppItem.getPrice();

@@ -3,26 +3,50 @@ package shop.domain.dto;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * DTO truyền dữ liệu đơn hàng sang JSP — không chứa entity JPA.
+ * <p>
+ * OrderService map từ {@link shop.domain.Order} qua {@code toSummaryDTO} (danh sách)
+ * hoặc {@code toDetailDTO} (trang chi tiết, kèm {@link OrderItemDTO}).
+ * Các trường *Formatted đã format tiền VND để hiển thị trực tiếp trên view.
+ */
 public class OrderDTO {
 
     private Long id;
+    /** Mã đơn ORD-yyyyMMdd-xxxxxx */
     private String orderCode;
+    /** Giá trị enum OrderStatus.name() — vd: PENDING */
     private String status;
+    /** Nhãn hiển thị — vd: Pending confirmation */
     private String statusLabel;
     private String recipientName;
     private String recipientPhone;
     private String shippingAddress;
+    private String paymentMethod;
     private String paymentMethodLabel;
+    /** Giá trị enum PaymentStatus.name() — vd: UNPAID */
+    private String paymentStatus;
+    /** Nhãn hiển thị — vd: Awaiting confirmation */
+    private String paymentStatusLabel;
+    /** Khách được phép bấm "Tôi đã thanh toán" (COD, đang giao/đã giao, chưa thanh toán). */
+    private boolean canCustomerConfirmPayment;
+    /** Admin được phép bấm "Hoàn thành" (COD, khách đã báo thanh toán). */
+    private boolean canAdminCompletePayment;
     private String shippingMethodLabel;
     private String voucherCode;
+    /** Tổng hàng sau KM từng sách (đã format) */
     private String subtotalFormatted;
+    /** Giảm giá voucher (đã format) */
     private String discountAmountFormatted;
     private String shippingFeeFormatted;
+    /** Tổng thanh toán cuối (đã format) */
     private String totalAmountFormatted;
     private String createdAtFormatted;
+    /** Chỉ có trên view Admin/Staff */
     private String customerEmail;
     private String customerName;
     private String note;
+    /** Danh sách sản phẩm — chỉ có trong toDetailDTO */
     private List<OrderItemDTO> items = new ArrayList<>();
 
     public Long getId() {
@@ -81,12 +105,52 @@ public class OrderDTO {
         this.shippingAddress = shippingAddress;
     }
 
+    public String getPaymentMethod() {
+        return paymentMethod;
+    }
+
+    public void setPaymentMethod(String paymentMethod) {
+        this.paymentMethod = paymentMethod;
+    }
+
     public String getPaymentMethodLabel() {
         return paymentMethodLabel;
     }
 
     public void setPaymentMethodLabel(String paymentMethodLabel) {
         this.paymentMethodLabel = paymentMethodLabel;
+    }
+
+    public String getPaymentStatus() {
+        return paymentStatus;
+    }
+
+    public void setPaymentStatus(String paymentStatus) {
+        this.paymentStatus = paymentStatus;
+    }
+
+    public String getPaymentStatusLabel() {
+        return paymentStatusLabel;
+    }
+
+    public void setPaymentStatusLabel(String paymentStatusLabel) {
+        this.paymentStatusLabel = paymentStatusLabel;
+    }
+
+    public boolean isCanCustomerConfirmPayment() {
+        return canCustomerConfirmPayment;
+    }
+
+    public void setCanCustomerConfirmPayment(boolean canCustomerConfirmPayment) {
+        this.canCustomerConfirmPayment = canCustomerConfirmPayment;
+    }
+
+    public boolean isCanAdminCompletePayment() {
+        return canAdminCompletePayment;
+    }
+
+    public void setCanAdminCompletePayment(boolean canAdminCompletePayment) {
+        this.canAdminCompletePayment = canAdminCompletePayment;
     }
 
     public String getShippingMethodLabel() {

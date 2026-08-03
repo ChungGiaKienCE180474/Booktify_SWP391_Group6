@@ -33,7 +33,7 @@ public class UserDataInitializer implements CommandLineRunner {
         List<UserSeed> seeds = List.of(
                 new UserSeed("admin@booktify.local", "123456", "Booktify Admin", RoleName.ADMIN),
                 new UserSeed("staff@booktify.local", "123456", "Booktify Staff", RoleName.STAFF),
-                new UserSeed("customer@booktify.local", "123456", "Booktify Customer", RoleName.CUSTOMER));
+                new UserSeed("customer123@booktify.local", "12345678", "Booktify Customer", RoleName.CUSTOMER));
 
         for (UserSeed seed : seeds) {
             if (userRepository.existsByEmail(seed.email())) {

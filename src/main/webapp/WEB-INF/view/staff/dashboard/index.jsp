@@ -90,16 +90,6 @@
                     </div>
                 </a>
 
-                <a href="${ctx}/staff/vpp" class="admin-card" style="text-decoration:none;">
-                    <div class="admin-card__icon">
-                        <i class="fa-solid fa-pen-ruler"></i>
-                    </div>
-                    <div class="admin-card__body">
-                        <span>Stationery Items</span>
-                        <strong><c:out value="${totalVppItems}" default="0" /></strong>
-                    </div>
-                </a>
-
                 <a href="${ctx}/staff/suppliers" class="admin-card" style="text-decoration:none;">
                     <div class="admin-card__icon">
                         <i class="fa-solid fa-truck"></i>

@@ -162,11 +162,13 @@
                                                                         value="${book.id}" />
                                                                     <input type="hidden" name="redirect"
                                                                         value="/books/${book.id}" />
-                                                                    <label class="detail-qty-label"
-                                                                        for="cartQty">Quantity</label>
-                                                                    <input type="number" id="cartQty" name="quantity"
-                                                                        value="1" min="1" max="${book.stockQuantity}"
-                                                                        step="1" class="detail-qty-input" required />
+                                                                    <div class="detail-qty-group">
+                                                                        <label class="detail-qty-label"
+                                                                            for="cartQty">Quantity</label>
+                                                                        <input type="number" id="cartQty" name="quantity"
+                                                                            value="1" min="1" max="${book.stockQuantity}"
+                                                                            step="1" class="detail-qty-input" required />
+                                                                    </div>
                                                                     <button type="submit" class="btn-detail-primary">
                                                                         <i class="fa-solid fa-cart-shopping"></i> Add to
                                                                         cart

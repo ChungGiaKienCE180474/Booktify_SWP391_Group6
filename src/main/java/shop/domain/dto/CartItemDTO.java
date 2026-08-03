@@ -23,6 +23,12 @@ public class CartItemDTO {
     private int bookStockQuantity;
     private boolean bookActive;
 
+    /** BOOK hoặc BOOK_SET */
+    private String itemType = "BOOK";
+    private Long bookSetId;
+    private String bookSetName;
+    private boolean setItem;
+
     public Long getId() {
         return id;
     }
@@ -152,6 +158,38 @@ public class CartItemDTO {
 
     public void setBookActive(boolean bookActive) {
         this.bookActive = bookActive;
+    }
+
+    public String getItemType() {
+        return itemType;
+    }
+
+    public void setItemType(String itemType) {
+        this.itemType = itemType;
+    }
+
+    public Long getBookSetId() {
+        return bookSetId;
+    }
+
+    public void setBookSetId(Long bookSetId) {
+        this.bookSetId = bookSetId;
+    }
+
+    public String getBookSetName() {
+        return bookSetName;
+    }
+
+    public void setBookSetName(String bookSetName) {
+        this.bookSetName = bookSetName;
+    }
+
+    public boolean isSetItem() {
+        return setItem;
+    }
+
+    public void setSetItem(boolean setItem) {
+        this.setItem = setItem;
     }
 }
 

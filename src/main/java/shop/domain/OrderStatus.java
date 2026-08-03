@@ -1,14 +1,27 @@
 package shop.domain;
 
-import java.util.Collections;
 import java.util.EnumSet;
 import java.util.Set;
 
+/**
+ * Trạng thái vòng đời đơn hàng — lưu dạng String trong bảng {@code orders.status}.
+ * <p>
+ * Luồng chính: PENDING → CONFIRMED → SHIPPING → DELIVERED.
+ * Có thể chuyển sang CANCELLED từ PENDING, CONFIRMED hoặc SHIPPING.
+ * <p>
+ * Customer chỉ được hủy khi {@link #canBeCancelled()} (status = PENDING).
+ * Admin/Staff cập nhật status qua {@link shop.service.OrderService#updateOrderStatus}.
+ */
 public enum OrderStatus {
+    /** Đơn mới tạo sau checkout — chờ shop xác nhận. */
     PENDING("Pending confirmation"),
+    /** Shop đã xác nhận, chuẩn bị giao. */
     CONFIRMED("Confirmed"),
+    /** Đang vận chuyển. */
     SHIPPING("Shipping"),
+    /** Đã giao thành công — trạng thái cuối, không chuyển tiếp. */
     DELIVERED("Delivered"),
+    /** Đã hủy — trạng thái cuối; kho được hoàn lại khi chuyển sang đây. */
     CANCELLED("Cancelled");
 
     private final String label;
@@ -17,14 +30,20 @@ public enum OrderStatus {
         this.label = label;
     }
 
+    /** Nhãn hiển thị trên JSP (tiếng Anh). */
     public String getLabel() {
         return label;
     }
 
+    /** DELIVERED và CANCELLED không thể chuyển sang trạng thái khác. */
     public boolean isTerminal() {
         return this == DELIVERED || this == CANCELLED;
     }
 
+    /**
+     * Kiểm tra chuyển trạng thái hợp lệ — dùng trong updateOrderStatus().
+     * Cùng trạng thái (this == target) luôn được phép (no-op).
+     */
     public boolean canTransitionTo(OrderStatus target) {
         if (target == null) {
             return false;
@@ -43,22 +62,25 @@ public enum OrderStatus {
         };
     }
 
+    /** Các trạng thái tiếp theo hợp lệ — dùng cho dropdown Admin/Staff. */
     public Set<OrderStatus> allowedTransitions() {
         if (isTerminal()) {
-            return Collections.emptySet();
+            return EnumSet.noneOf(OrderStatus.class);
         }
         return switch (this) {
             case PENDING -> EnumSet.of(CONFIRMED, CANCELLED);
             case CONFIRMED -> EnumSet.of(SHIPPING, CANCELLED);
             case SHIPPING -> EnumSet.of(DELIVERED, CANCELLED);
-            default -> Collections.emptySet();
+            default -> EnumSet.noneOf(OrderStatus.class);
         };
     }
 
+    /** Customer chỉ hủy được đơn PENDING — OrderController.canCancelOrder(). */
     public boolean canBeCancelled() {
         return this == PENDING;
     }
 
+    /** Parse String từ DB/form; ném IllegalArgumentException nếu không hợp lệ. */
     public static OrderStatus fromValue(String value) {
         if (value == null || value.isBlank()) {
             throw new IllegalArgumentException("Invalid order status.");

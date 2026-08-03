@@ -84,17 +84,21 @@ public class SecurityConfiguration {
                         .requestMatchers("/", "/login", "/register", "/css/**",
                                 "/js/**", "/images/**", "/uploads/**", "/forgotpassword",
                                 "/authentication/**", "/books", "/books/**", "/client/**",
-                                "/customer/vpp", "/customer/vpp/**",
+                                "/book-sets", "/book-sets/**",
                                 "/authors", "/authors/**", "/logout", "/logout/**")
                         .permitAll()
                         .requestMatchers("/admin/**").hasRole("ADMIN")
                         .requestMatchers("/staff", "/staff/**").hasRole("STAFF")
                         .requestMatchers("/changepass", "/profile", "/profile/**", "/cart", "/cart/**",
                                 "/orders", "/orders/**").authenticated()
-                        .requestMatchers("/stationery/**").authenticated()
+                        .requestMatchers("/payment/vnpay/return", "/payment/vnpay/ipn").permitAll()
                         .anyRequest().authenticated())
                 .csrf(csrf -> csrf
-                        .ignoringRequestMatchers("/authentication/**", "/register"))
+                        .ignoringRequestMatchers(
+                                "/authentication/**",
+                                "/register",
+                                "/payment/vnpay/ipn",
+                                "/payment/vnpay/return"))
                 .sessionManagement(sessionManagement -> sessionManagement
                         .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
                         .invalidSessionUrl("/login?expired")

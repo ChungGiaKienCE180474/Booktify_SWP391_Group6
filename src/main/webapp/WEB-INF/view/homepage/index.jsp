@@ -1,4 +1,4 @@
-﻿<%@page contentType="text/html" pageEncoding="UTF-8" %>
+﻿﻿<%@page contentType="text/html" pageEncoding="UTF-8" %>
     <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
         <!DOCTYPE html>
         <html lang="en">
@@ -11,50 +11,6 @@
             <link rel="stylesheet" href="/css/header.css" />
             <link rel="stylesheet" href="/css/footer.css" />
             <link rel="stylesheet" href="/css/homepage.css" />
-            <style>
-                .book-card__footer {
-                    align-items: flex-end;
-                }
-
-                .book-card__price-box {
-                    display: flex;
-                    min-width: 0;
-                    flex: 1;
-                    flex-direction: column;
-                    gap: 4px;
-                }
-
-                .book-card__discount-line {
-                    display: flex;
-                    align-items: center;
-                    gap: 6px;
-                    flex-wrap: wrap;
-                }
-
-                .book-card__old-price {
-                    color: #94a3b8;
-                    font-size: .72rem;
-                    font-weight: 700;
-                    text-decoration: line-through;
-                }
-
-                .book-card__discount-badge {
-                    display: inline-flex;
-                    align-items: center;
-                    padding: 3px 7px;
-                    border-radius: 999px;
-                    background: #fee2e2;
-                    color: #dc2626;
-                    font-size: .68rem;
-                    font-weight: 800;
-                    white-space: nowrap;
-                }
-
-                .book-card__price--sale {
-                    color: #dc2626;
-                    font-size: 1rem;
-                }
-            </style>
             <title>Booktify — Online Bookstore</title>
         </head>
 

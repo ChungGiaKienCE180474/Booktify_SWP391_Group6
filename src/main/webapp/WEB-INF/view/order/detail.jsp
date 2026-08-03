@@ -61,6 +61,12 @@
                                             </div>
                                             <div class="cart-book__info">
                                                 <a href="/books/${item.bookId}" class="cart-book__title">${item.bookTitle}</a>
+                                                <c:if test="${not empty item.bookSetName}">
+                                                    <div class="cart-book__author" style="color:#0f766e;">
+                                                        <i class="fa-solid fa-layer-group"></i>
+                                                        From set: <c:out value="${item.bookSetName}"/>
+                                                    </div>
+                                                </c:if>
                                             </div>
                                         </div>
                                     </td>
@@ -80,6 +86,13 @@
                         <div><dt>Phone</dt><dd>${order.recipientPhone}</dd></div>
                         <div><dt>Address</dt><dd>${order.shippingAddress}</dd></div>
                         <div><dt>Payment</dt><dd>${order.paymentMethodLabel}</dd></div>
+                        <div><dt>Payment status</dt>
+                            <dd>
+                                <span class="order-pay-badge order-pay-badge--${order.paymentStatus}">
+                                    ${order.paymentStatusLabel}
+                                </span>
+                            </dd>
+                        </div>
                     </dl>
 
                     <h2>Payment summary</h2>
@@ -102,6 +115,17 @@
                                 style="width:100%;margin-top:.75rem;">
                             <i class="fa-solid fa-ban"></i> Cancel order
                         </button>
+                    </c:if>
+
+                    <c:if test="${order.canCustomerConfirmPayment}">
+                        <form action="/orders/${order.id}/confirm-payment" method="post"
+                              style="margin:.75rem 0 0;">
+                            <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}" />
+                            <button type="submit" class="cart-btn"
+                                    style="width:100%;background:#006B5E;color:#fff;">
+                                <i class="fa-solid fa-money-bill-wave"></i> I have paid
+                            </button>
+                        </form>
                     </c:if>
                 </aside>
             </div>

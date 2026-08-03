@@ -14,6 +14,13 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 
+/**
+ * Một dòng sản phẩm trong đơn hàng — bảng {@code order_items}.
+ * <p>
+ * Mỗi OrderItem thuộc về một {@link Order} và đại diện cho sách HOẶC văn phòng phẩm
+ * (một trong hai FK book / vppItem được set, còn lại null).
+ * Giá và tên được snapshot tại thời điểm đặt hàng.
+ */
 @Entity
 @Table(name = "order_items")
 public class OrderItem {
@@ -22,29 +29,42 @@ public class OrderItem {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    /** Đơn hàng cha — FK orders.id */
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "order_id", nullable = false)
     private Order order;
 
+    /** FK sách — null nếu dòng này là VPP. */
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "book_id")
     private Book book;
 
+    /** FK văn phòng phẩm — null nếu dòng này là sách. */
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "vpp_item_id")
     private VppItem vppItem;
 
+    /** Tên sản phẩm tại thời điểm mua (snapshot, không đổi khi sách đổi tên). */
     @Column(name = "book_title", nullable = false, length = 200)
     private String bookTitle;
 
+    /** Giá đơn vị sau KM (sách) hoặc giá gốc (VPP) tại thời điểm mua. */
     @Column(name = "unit_price", nullable = false, precision = 12, scale = 2)
     private BigDecimal unitPrice;
 
     @Column(nullable = false)
     private int quantity;
 
+    /** Thành tiền dòng = unit_price × quantity. */
     @Column(name = "line_total", nullable = false, precision = 12, scale = 2)
     private BigDecimal lineTotal;
+
+    /** Snapshot: dòng này thuộc bộ sách nào (nullable nếu mua lẻ). */
+    @Column(name = "book_set_id")
+    private Long bookSetId;
+
+    @Column(name = "book_set_name", length = 200)
+    private String bookSetName;
 
     public Long getId() {
         return id;
@@ -110,6 +130,23 @@ public class OrderItem {
         this.lineTotal = lineTotal;
     }
 
+    public Long getBookSetId() {
+        return bookSetId;
+    }
+
+    public void setBookSetId(Long bookSetId) {
+        this.bookSetId = bookSetId;
+    }
+
+    public String getBookSetName() {
+        return bookSetName;
+    }
+
+    public void setBookSetName(String bookSetName) {
+        this.bookSetName = bookSetName;
+    }
+
+    /** Format giá đơn vị VND kiểu 1.234.567 — dùng khi map sang OrderItemDTO. */
     public String getUnitPriceFormatted() {
         return formatMoney(unitPrice);
     }
