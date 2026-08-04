@@ -1,5 +1,6 @@
 package shop.controller.admin;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -13,6 +14,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import jakarta.validation.Valid;
@@ -21,29 +23,35 @@ import shop.domain.dto.BookSetForm;
 import shop.domain.dto.BookSetItemForm;
 import shop.service.BookService;
 import shop.service.BookSetService;
+import shop.service.FileStorageService;
 
 @Controller
 @RequestMapping("/admin/book-sets")
 @PreAuthorize("hasRole('ADMIN')")
 public class AdminBookSetController {
 
+    private static final String BOOK_SET_IMAGE_FOLDER = "book-set-images";
+
     private final BookSetService bookSetService;
     private final BookService bookService;
+    private final FileStorageService fileStorageService;
 
     public AdminBookSetController(
             BookSetService bookSetService,
-            BookService bookService) {
+            BookService bookService,
+            FileStorageService fileStorageService) {
         this.bookSetService = bookSetService;
         this.bookService = bookService;
+        this.fileStorageService = fileStorageService;
     }
 
-    @GetMapping
+    @GetMapping // khai báo hàm
     public String list(
             @RequestParam(required = false) String q,
             @RequestParam(required = false) String status,
             Model model) {
-        List<BookSet> sets = bookSetService.filterForAdmin(q, status);
-        model.addAttribute("bookSets", sets);
+        List<BookSet> sets = bookSetService.filterForAdmin(q, status); // Gọi service để lấy danh sách book set dựa trên từ khóa và trạng thái
+        model.addAttribute("bookSets", sets); 
         model.addAttribute("q", q);
         model.addAttribute("status", status);
         model.addAttribute("availableQtyMap", sets.stream().collect(
@@ -54,10 +62,22 @@ public class AdminBookSetController {
                         java.util.LinkedHashMap::new
                 )
         ));
+
+        // tạo availableQtyMap bằng Stream => biến List<BookSet> thành một Map<idSet, sốLượngCòn>, để JSP tra nhanh
         model.addAttribute("retailTotalMap", sets.stream().collect(
                 java.util.stream.Collectors.toMap(
                         BookSet::getId,
                         s -> bookSetService.formatMoney(bookSetService.getRetailTotal(s)),
+                        (a, b) -> a, // trường hợp trùng key, giữ giá trị đầu tiên
+                        java.util.LinkedHashMap::new
+                )
+        ));
+
+        // Form lại giá tiền ( dùng lambda để format tiền ) để hiển thị ra JSP
+        model.addAttribute("setPriceMap", sets.stream().collect(
+                java.util.stream.Collectors.toMap(
+                        BookSet::getId,
+                        s -> bookSetService.formatMoney(s.getSetPrice()),
                         (a, b) -> a,
                         java.util.LinkedHashMap::new
                 )
@@ -76,8 +96,10 @@ public class AdminBookSetController {
     @GetMapping("/create")
     public String createForm(Model model) {
         BookSetForm form = new BookSetForm();
+        // Thêm 2 item trống để hiển thị 2 dòng input trong form
         form.getItems().add(new BookSetItemForm());
         form.getItems().add(new BookSetItemForm());
+        // Chuẩn bị model cho form, bao gồm danh sách sách có sẵn để chọn
         prepareFormModel(model, form, "create");
         return "admin/book-set/form";
     }
@@ -106,16 +128,33 @@ public class AdminBookSetController {
     public String save(
             @Valid @ModelAttribute("bookSetForm") BookSetForm form,
             BindingResult bindingResult,
+            @RequestParam(name = "imageFile", required = false) MultipartFile imageFile,
             Model model,
             RedirectAttributes redirectAttributes) {
-
+        // Nếu form.getItems() là null, khởi tạo nó thành một danh sách rỗng để tránh lỗi NullPointerException
         if (form.getItems() == null) {
             form.setItems(new ArrayList<>());
         }
-
+        // Nếu có lỗi validate, trả về form với thông báo lỗi
         if (bindingResult.hasErrors()) {
             prepareFormModel(model, form, form.getId() == null ? "create" : "edit");
             return "admin/book-set/form";
+        }
+
+        // Ảnh lấy từ máy: nếu có file mới → lưu ra thư mục upload ngoài source
+        // (thay ảnh cũ nếu đang sửa), trả URL /uploads/... để không bị DevTools restart.
+        if (imageFile != null && !imageFile.isEmpty()) {
+            try {
+                form.setImageUrl(
+                        fileStorageService.replace(
+                                imageFile, form.getImageUrl(), BOOK_SET_IMAGE_FOLDER));
+            } catch (IOException ex) {
+                // Nếu lưu ảnh thất bại, rejectValue để hiển thị lỗi trên form
+                // bindingResult là nơi lưu kq form 
+                bindingResult.rejectValue("imageUrl", "invalid", "Image upload failed. Please try again.");
+                prepareFormModel(model, form, form.getId() == null ? "create" : "edit");
+                return "admin/book-set/form";
+            }
         }
 
         try {
@@ -128,6 +167,7 @@ public class AdminBookSetController {
         } catch (IllegalArgumentException ex) {
             String msg = ex.getMessage() == null ? "Invalid book set." : ex.getMessage();
             String lower = msg.toLowerCase();
+            // Nếu thông báo lỗi chứa từ khóa "name", "price" hoặc "items", rejectValue tương ứng để hiển thị lỗi trên form
             if (lower.contains("name")) {
                 bindingResult.rejectValue("name", "invalid", msg);
             } else if (lower.contains("price")) {
@@ -146,6 +186,7 @@ public class AdminBookSetController {
         }
     }
 
+    // Chuyển trạng thái active/inactive của book set
     @PostMapping("/{id}/status")
     public String toggleStatus(
             @PathVariable long id,

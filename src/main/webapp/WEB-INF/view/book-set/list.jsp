@@ -127,14 +127,28 @@
                                             <c:out value="${tagLabelMap[set.id]}" />
                                         </span>
                                     </c:if>
+                                    <c:if test="${availableMap[set.id] <= 0}">
+                                        <span style="position:absolute;top:8px;right:8px;background:#dc2626;color:#fff;font-size:.7rem;font-weight:700;padding:.2rem .55rem;border-radius:999px;">
+                                            Out of stock
+                                        </span>
+                                    </c:if>
                                 </div>
                                 <div class="product-card__body">
                                     <div class="product-card__title">
                                         <c:out value="${set.name}" />
                                     </div>
-                                    <div class="product-card__author">
-                                        ${set.items.size()} books in set
-                                    </div>
+                                    <c:choose>
+                                        <c:when test="${availableMap[set.id] <= 0}">
+                                            <div class="product-card__author" style="color:#dc2626;font-weight:600;">
+                                                Out of stock
+                                            </div>
+                                        </c:when>
+                                        <c:otherwise>
+                                            <div class="product-card__author">
+                                                ${set.items.size()} books in set
+                                            </div>
+                                        </c:otherwise>
+                                    </c:choose>
                                     <div class="product-card__footer">
                                         <div class="product-card__price-box">
                                             <c:choose>

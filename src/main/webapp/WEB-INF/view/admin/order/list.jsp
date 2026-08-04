@@ -70,6 +70,7 @@
                             <th>Recipient</th>
                             <th class="col-money">Total</th>
                             <th>Status</th>
+                            <th>Payment</th>
                             <th>Date</th>
                             <th style="width:72px;text-align:center;">Action</th>
                         </tr>
@@ -78,7 +79,7 @@
                         <c:choose>
                             <c:when test="${empty orders}">
                                 <tr>
-                                    <td colspan="7" style="text-align:center;padding:56px 20px;color:#9CA3AF;">
+                                    <td colspan="8" style="text-align:center;padding:56px 20px;color:#9CA3AF;">
                                         <i class="fa-solid fa-box-open" style="font-size:2.2rem;display:block;margin-bottom:10px;opacity:.3;"></i>
                                         No orders found.
                                     </td>
@@ -97,6 +98,11 @@
                                         <td>
                                             <span class="order-status-badge order-status-badge--${order.status}">
                                                 ${order.statusLabel}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <span class="order-status-badge order-status-badge--${order.paymentStatus}">
+                                                ${order.paymentStatusLabel}
                                             </span>
                                         </td>
                                         <td>${order.createdAtFormatted}</td>

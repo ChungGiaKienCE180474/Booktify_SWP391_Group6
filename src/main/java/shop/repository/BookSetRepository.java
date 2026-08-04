@@ -13,6 +13,10 @@ import shop.domain.BookSet;
 @Repository
 public interface BookSetRepository extends JpaRepository<BookSet, Long> {
 
+    /** Sách này có đang là thành phần của bất kỳ book set nào không. */
+    boolean existsByItems_Book_Id(Long bookId); // kiếm sách có trong set
+        
+    // Lấy book set theo id, kèm theo danh sách các item và thông tin sách của từng item
     @Query("""
             SELECT DISTINCT s FROM BookSet s
             LEFT JOIN FETCH s.items i
@@ -21,6 +25,7 @@ public interface BookSetRepository extends JpaRepository<BookSet, Long> {
             """)
     Optional<BookSet> findByIdWithItems(@Param("id") Long id);
 
+    // Lấy tất cả book set đang active, kèm theo danh sách các item và thông tin sách của từng item
     @Query("""
             SELECT DISTINCT s FROM BookSet s
             LEFT JOIN FETCH s.items i
@@ -30,6 +35,7 @@ public interface BookSetRepository extends JpaRepository<BookSet, Long> {
             """)
     List<BookSet> findAllActiveWithItems();
 
+    // Lấy tất cả book set, kèm theo danh sách các item và thông tin sách của từng item
     @Query("""
             SELECT DISTINCT s FROM BookSet s
             LEFT JOIN FETCH s.items i
@@ -37,7 +43,7 @@ public interface BookSetRepository extends JpaRepository<BookSet, Long> {
             ORDER BY s.updatedAt DESC
             """)
     List<BookSet> findAllWithItems();
-
+// Tìm kiếm book set đang active theo từ khóa và tag, kèm theo danh sách các item và thông tin sách của từng item
     @Query("""
             SELECT DISTINCT s FROM BookSet s
             LEFT JOIN FETCH s.items i
@@ -56,7 +62,7 @@ public interface BookSetRepository extends JpaRepository<BookSet, Long> {
             @Param("keyword") String keyword,
             @Param("tag") String tag
     );
-
+    // Tìm kiếm tất cả book set theo từ khóa và tag, kèm theo danh sách các item và thông tin sách của từng item
     @Query("""
             SELECT DISTINCT s.gradeLevel FROM BookSet s
             WHERE s.active = true

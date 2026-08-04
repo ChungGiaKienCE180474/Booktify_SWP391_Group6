@@ -22,7 +22,7 @@ public class BookSetForm {
     private String imageUrl;
 
     @NotNull(message = "Set price is required.")
-    @DecimalMin(value = "0.0", inclusive = true, message = "Set price must be >= 0.")
+    @DecimalMin(value = "0.0", inclusive = false, message = "Set price must be greater than 0.")
     private BigDecimal setPrice;
 
     /**

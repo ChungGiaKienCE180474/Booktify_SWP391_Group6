@@ -61,8 +61,8 @@
                         <th>Name</th>
                         <th>Tag / Series</th>
                         <th>Books</th>
-                        <th>Set price</th>
-                        <th>Retail total</th>
+                        <th>Set price (&#8363;)</th>
+                        <th>Retail total (&#8363;)</th>
                         <th>Available</th>
                         <th>Status</th>
                         <th style="width:120px;">Actions</th>
@@ -81,8 +81,8 @@
                             <td><strong><c:out value="${set.name}"/></strong></td>
                             <td><c:out value="${tagLabelMap[set.id]}" default="General"/></td>
                             <td>${set.items.size()}</td>
-                            <td>${set.setPrice} &#8363;</td>
-                            <td>${retailTotalMap[set.id]} &#8363;</td>
+                            <td>${setPriceMap[set.id]}</td>
+                            <td>${retailTotalMap[set.id]}</td>
                             <td>${availableQtyMap[set.id]}</td>
                             <td>
                                 <span class="status-pill ${set.active ? 'status-pill--on' : 'status-pill--off'}">
@@ -93,7 +93,7 @@
                                 <button type="button" class="icon-link js-view-set" title="View details"
                                         data-name="<c:out value='${set.name}'/>"
                                         data-tag="<c:out value='${tagLabelMap[set.id]}'/>"
-                                        data-setprice="<c:out value='${set.setPrice}'/>"
+                                        data-setprice="<c:out value='${setPriceMap[set.id]}'/>"
                                         data-retail="<c:out value='${retailTotalMap[set.id]}'/>"
                                         data-available="<c:out value='${availableQtyMap[set.id]}'/>"
                                         data-active="${set.active}"

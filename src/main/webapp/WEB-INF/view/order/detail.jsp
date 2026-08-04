@@ -144,6 +144,13 @@
                 </div>
                 <div class="order-modal__body">
                     <p>Are you sure you want to cancel order <strong>${order.orderCode}</strong>?</p>
+                    <c:if test="${not empty order.voucherCode}">
+                        <p style="color:#b45309;background:#fef3c7;border:1px solid #fde68a;border-radius:8px;padding:.6rem .8rem;margin-top:.5rem;font-size:.85rem;">
+                            <i class="fa-solid fa-triangle-exclamation"></i>
+                            Note: the voucher <strong><c:out value="${order.voucherCode}"/></strong> used on this order
+                            will not be refunded if you cancel.
+                        </p>
+                    </c:if>
                     <p class="order-modal__hint">This action cannot be undone. Product stock will be restored.</p>
                 </div>
                 <div class="order-modal__actions">

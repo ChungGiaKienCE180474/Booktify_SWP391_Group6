@@ -193,6 +193,13 @@
                                         ${order.paymentStatusLabel}
                                     </span>
                                 </p>
+                                <%-- Cảnh báo: đơn đã giao nhưng chưa được đánh dấu thanh toán --%>
+                                <c:if test="${order.status == 'DELIVERED' and order.paymentStatus == 'UNPAID'}">
+                                    <div style="margin:.25rem 0 .5rem;padding:.6rem .8rem;background:#fef2f2;border:1px solid #fecaca;border-radius:8px;color:#b91c1c;font-size:.85rem;line-height:1.5;">
+                                        <i class="fa-solid fa-triangle-exclamation"></i>
+                                        <strong>Warning:</strong> this order is <strong>Delivered</strong> but still unpaid
+                                    </div>
+                                </c:if>
                                 <c:if test="${order.canAdminCompletePayment}">
                                     <p class="admin-order-status-note" style="margin-bottom:.5rem;">
                                         The customer has confirmed payment. Complete the order to mark it
@@ -201,7 +208,7 @@
                                     <form method="post" action="/admin/orders/${order.id}/complete-payment">
                                         <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}" />
                                         <button type="submit" class="admin-button">
-                                            <i class="fa-solid fa-check-double"></i> Complete (mark paid + delivered)
+                                            <i class="fa-solid fa-check"></i> Complete (paid + delivered)
                                         </button>
                                     </form>
                                 </c:if>

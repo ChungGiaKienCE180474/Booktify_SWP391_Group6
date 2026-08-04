@@ -83,7 +83,8 @@
             </div>
 
             <div class="admin-panel" style="padding:22px;">
-                <form:form modelAttribute="bookSetForm" method="post" action="/admin/book-sets/save" id="bookSetForm">
+                <form:form modelAttribute="bookSetForm" method="post" action="/admin/book-sets/save" id="bookSetForm"
+                           enctype="multipart/form-data">
                     <form:hidden path="id" />
                     <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}" />
 
@@ -115,9 +116,21 @@
                         </div>
 
                         <div>
-                            <label style="display:block;margin-bottom:.35rem;font-weight:600;">Image URL</label>
-                            <form:input path="imageUrl" cssClass="admin-input" cssErrorClass="admin-input is-invalid"
-                                        maxlength="500" />
+                            <label style="display:block;margin-bottom:.35rem;font-weight:600;">Cover image</label>
+                            <%-- Giữ URL ảnh hiện tại để không bị mất khi sửa mà không chọn ảnh mới --%>
+                            <form:hidden path="imageUrl" />
+                            <c:if test="${formMode=='edit' and not empty bookSetForm.imageUrl}">
+                                <div style="margin-bottom:.5rem;">
+                                    <img src="<c:out value='${bookSetForm.imageUrl}'/>" alt="Current cover"
+                                         style="height:120px;width:90px;object-fit:cover;border-radius:6px;border:1px solid #E5E7EB;" />
+                                </div>
+                            </c:if>
+                            <input type="file" name="imageFile" id="imageFile"
+                                   accept="image/jpeg,image/png,image/webp,image/gif"
+                                   class="admin-input" style="padding:6px 10px;cursor:pointer;" />
+                            <span style="font-size:.75rem;color:#6B7280;margin-top:4px;display:block;">
+                                Chọn ảnh từ máy — JPG, PNG, WEBP, GIF (tối đa 5MB). Để trống nếu giữ ảnh cũ.
+                            </span>
                             <form:errors path="imageUrl" cssClass="admin-error" />
                         </div>
 

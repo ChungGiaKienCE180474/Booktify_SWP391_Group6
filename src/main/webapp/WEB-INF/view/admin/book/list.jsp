@@ -119,7 +119,7 @@
                                     <tbody>
                                         <c:forEach items="${books}" var="book" varStatus="vs">
                                             <tr>
-                                                <td style="color:#9CA3AF;font-weight:600;">${vs.index + 1}</td>
+                                                <td style="color:#9CA3AF;font-weight:600;">${fromItem + vs.index}</td>
                                                 <td>
                                                     <c:choose>
                                                         <c:when test="${not empty book.imageUrl}">

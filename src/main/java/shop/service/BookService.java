@@ -18,15 +18,18 @@ public class BookService {
     private final BookRepository bookRepository;
     private final CartItemRepository cartItemRepository;
     private final StockService stockService;
+    private final shop.repository.BookSetRepository bookSetRepository;
 
     public BookService(
             BookRepository bookRepository,
             CartItemRepository cartItemRepository,
-            StockService stockService
+            StockService stockService,
+            shop.repository.BookSetRepository bookSetRepository
     ) {
         this.bookRepository = bookRepository;
         this.cartItemRepository = cartItemRepository;
         this.stockService = stockService;
+        this.bookSetRepository = bookSetRepository;
     }
 
     /*
@@ -267,6 +270,19 @@ public class BookService {
             throw new IllegalStateException(
                     "Cannot delete this book: "
                             + "it is currently in a customer's cart."
+            );
+        }
+
+        /*
+         * Không cho ẩn Book nếu nó đang là thành phần của một book set —
+         * nếu không, book set sẽ âm thầm hết hàng và không sửa được nữa
+         * (sách inactive biến mất khỏi dropdown chọn sách).
+         */
+        if (bookSetRepository.existsByItems_Book_Id(id)) {
+            throw new IllegalStateException(
+                    "Cannot delete this book: "
+                            + "it belongs to one or more book sets. "
+                            + "Remove it from those sets first."
             );
         }
 

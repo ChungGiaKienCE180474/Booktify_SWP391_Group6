@@ -10,6 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import shop.domain.Book;
 import shop.domain.BookSet;
+import shop.domain.BookSetItem;
 import shop.domain.Cart;
 import shop.domain.CartItem;
 import shop.domain.User;
@@ -38,6 +39,10 @@ public class CartService {
 
     public static final String MSG_EXCEED_STOCK =
             "The requested quantity exceeds available stock. Only %d item(s) remain.";
+
+    public static final String MSG_EXCEED_STOCK_COMBINED =
+            "\"%s\" — total quantity in your cart (bought alone + inside book sets) "
+                    + "exceeds available stock. Only %d in stock.";
 
     public static final String MSG_STATIONERY_REMOVED =
             "Stationery items are no longer sold and were removed from your cart.";
@@ -108,18 +113,21 @@ public class CartService {
                 .findByCartIdAndBookId(cart.getId(), bookId)
                 .orElse(null);
 
+        int standaloneQty = (existing != null ? existing.getQuantity() : 0) + quantity;
+
+        // Tổng nhu cầu cuốn này = mua lẻ + số nằm trong các book set khác đang ở giỏ.
+        int otherDemand = combinedBookDemand(
+                cart, bookId, existing != null ? existing.getId() : null);
+
+        if (standaloneQty + otherDemand > book.getStockQuantity()) {
+            throw new IllegalArgumentException(
+                    String.format(MSG_EXCEED_STOCK_COMBINED,
+                            book.getTitle(), book.getStockQuantity())
+            );
+        }
+
         if (existing != null) {
-
-            int newQuantity = existing.getQuantity() + quantity;
-
-            if (newQuantity > book.getStockQuantity()) {
-                throw new IllegalArgumentException(
-                        String.format(MSG_EXCEED_STOCK, book.getStockQuantity())
-                );
-            }
-
-            existing.setQuantity(newQuantity);
-
+            existing.setQuantity(standaloneQty);
         } else {
 
             CartItem item = new CartItem();
@@ -136,6 +144,33 @@ public class CartService {
         recalculateTotal(cart);
 
         return cartRepository.save(cart);
+    }
+
+    /**
+     * Tổng nhu cầu của một cuốn sách trong giỏ = số lượng mua lẻ + số lượng nằm
+     * trong các book set, bỏ qua một cart item (khi đang cập nhật chính nó).
+     */
+    private int combinedBookDemand(Cart cart, long bookId, Long excludeItemId) {
+        if (cart == null || cart.getItems() == null) {
+            return 0;
+        }
+        int demand = 0;
+        for (CartItem it : cart.getItems()) {
+            if (excludeItemId != null && excludeItemId.equals(it.getId())) {
+                continue;
+            }
+            if (it.getBook() != null && it.getBook().getId() == bookId) {
+                demand += it.getQuantity();
+            } else if (it.getBookSet() != null) {
+                BookSet set = bookSetService.getByIdWithItems(it.getBookSet().getId());
+                for (BookSetItem si : set.getItems()) {
+                    if (si.getBook() != null && si.getBook().getId() == bookId) {
+                        demand += it.getQuantity() * si.getQuantity();
+                    }
+                }
+            }
+        }
+        return demand;
     }
 
     @Transactional
@@ -162,8 +197,28 @@ public class CartService {
                 .findByCartIdAndBookSetId(cart.getId(), bookSetId)
                 .orElse(null);
 
+        int newSetQuantity = (existing != null ? existing.getQuantity() : 0) + quantity;
+
+        // Với mỗi cuốn trong bộ: nhu cầu từ bộ này + nhu cầu cuốn đó ở nơi khác
+        // (mua lẻ hoặc trong bộ khác) không được vượt tồn kho.
+        for (BookSetItem si : bookSet.getItems()) {
+            Book component = si.getBook();
+            if (component == null) {
+                continue;
+            }
+            int otherDemand = combinedBookDemand(
+                    cart, component.getId(), existing != null ? existing.getId() : null);
+            int thisSetDemand = newSetQuantity * si.getQuantity();
+            if (otherDemand + thisSetDemand > component.getStockQuantity()) {
+                throw new IllegalArgumentException(
+                        String.format(MSG_EXCEED_STOCK_COMBINED,
+                                component.getTitle(), component.getStockQuantity())
+                );
+            }
+        }
+
         if (existing != null) {
-            int newQuantity = existing.getQuantity() + quantity;
+            int newQuantity = newSetQuantity;
             if (newQuantity > available) {
                 throw new IllegalArgumentException(
                         String.format(MSG_EXCEED_STOCK, available)

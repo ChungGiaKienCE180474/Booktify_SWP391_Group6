@@ -251,7 +251,7 @@
             <script>
                 function openDeleteModal(action, msg) {
                     document.getElementById("deleteForm").action = action;
-                    document.getElementById("deleteModalMsg").textContent = msg;
+                    document.getElementById("confirmModalMsg").textContent = msg;
                     document.getElementById("deleteModal").style.display = "flex";
                 }
 
